@@ -62,3 +62,28 @@ The builder is laid out like a survey editor: pick a question to edit its settin
 
 
 Admin login, the dashboard, the form builder with live preview and theming (three colors and a font), pretty share links, response collection with automatic location and device capture, per form responses and analytics, CSV export, open and close, edit, delete, and AI summaries on both the dashboard and every form. Question types in this phase are Multiple Choice, Text Entry, Text and Graphic, Slider, and NPS. The roadmap for what comes next is in `docs/HANDOFF.md`.
+
+
+## Google sign in setup
+
+The "Continue with Google" button uses the OAuth 2.0 code flow. Until you set two secrets it stays inactive and shows "Google sign in is not set up yet." To turn it on:
+
+1. In Google Cloud Console, create an OAuth client: APIs and Services, Credentials, Create credentials, OAuth client ID, Application type Web application.
+2. Under Authorized redirect URIs, add one entry per domain you use, each ending in /api/auth/google/callback:
+   - https://zetetic.pages.dev/api/auth/google/callback
+   - https://zetetic.katr.es/api/auth/google/callback
+   - https://forms.katr.es/api/auth/google/callback
+3. Configure the OAuth consent screen (External). While it is in Testing, add yourself and any early users under Test users, or publish the app.
+4. Copy the Client ID and Client secret.
+5. In the Cloudflare Pages project, Settings, Variables and secrets, add two secrets for Production: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET. Add them to Preview too if you use preview deploys.
+6. Redeploy. New people who sign in with Google get their own account and their own forms. Admin login with the password still works alongside it.
+
+The users table already has a google_id column (see schema.sql). If your live D1 predates it, run: ALTER TABLE users ADD COLUMN google_id TEXT;
+
+## Export report
+
+On the Responses tab, next to Download CSV, Export report builds a themed one-page PDF: a header in the form's primary color, total responses, an aggregate per question (most and least selected, ranked-choice final order, averages, distributions), and a short audience section. It loads a small PDF library from a CDN the first time it runs.
+
+## Logo and favicon
+
+A recolorable inline-SVG Logo component stands in for the wordmark everywhere it appears (top nav, builder, the splash, the loading screen, and the public form footer), and a placeholder SVG favicon is set in the document head. The Logo uses currentColor, so it takes the color of wherever it sits. To drop in the real artwork, replace the body of the Logo component in the source with the provided SVG and swap the favicon href in the head. Keep currentColor on the paths you want to recolor.

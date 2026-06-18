@@ -10,6 +10,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>zetetiq</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%235b4fe0%27%2F%3E%3Cpath%20d%3D%27M9.5%2011h13l-13%2010h13%27%20fill%3D%27none%27%20stroke%3D%27%23fff%27%20stroke-width%3D%272.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@400;500;600;700&family=Mozilla+Text:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -859,7 +860,7 @@ function Toggle({ checked, onChange, label }){
 }
 function QLabel({ q }){ return (<div className="qlabel">{q.label}{q.required && <span className="req">*</span>}</div>); }
 
-/* ----------------------------- AI summary card ----------------------------- */
+/* ----------------------------- overview card ----------------------------- */
 function AiSummary({ fetcher }){
   const [state, setState] = useState({ loading:true, summary:"", meta:null, error:null });
   const load = useCallback((refresh)=>{
@@ -877,11 +878,10 @@ function AiSummary({ fetcher }){
     else if (m.cached) metaText = "cached";
     else if (m.generated) metaText = "generated just now";
     else metaText = "";
-    if (m.ai_error) metaText += " · Workers AI offline";
   }
   return (
     <div className="ai" style={{marginBottom:22}}>
-      <div className="ai-head"><Spark/><span className="ai-title">AI summary</span></div>
+      <div className="ai-head"><Spark/><span className="ai-title">Overview</span></div>
       {state.loading
         ? (<div><div className="shimmer" style={{width:"94%"}}/><div className="shimmer" style={{width:"88%"}}/><div className="shimmer" style={{width:"55%"}}/></div>)
         : (<div className="ai-body">{state.summary || state.error || "No summary available."}</div>)}
@@ -1008,7 +1008,7 @@ function PublicForm({ username, slug }){
   return (
     <div className="form-page"><div className="form-page-inner">
       <FormRenderer form={form} onSubmit={submit} submitting={submitting} />
-      <div style={{textAlign:"center",marginTop:18}}><span className="mono" style={{fontSize:11,color:"var(--ink-soft)"}}>powered by zetetiq</span></div>
+      <div style={{textAlign:"center",marginTop:18}}><span className="mono" style={{fontSize:11,color:"var(--ink-soft)",display:"inline-flex",alignItems:"center",gap:5}}>powered by <Logo size={12} mark={false} /></span></div>
     </div></div>
   );
 }
@@ -1021,6 +1021,7 @@ function Landing({ showLogin }){
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  useEffect(()=>{ const q = new URLSearchParams(window.location.search); const ge = q.get("google_error"); if (ge){ toast(ge === "setup" ? "Google sign in is not set up yet." : "Google sign in did not complete. Please try again."); window.history.replaceState({}, "", "/login"); } }, []);
   const doLogin = () => {
     setBusy(true); setErr("");
     api.loginAdmin(pw).then(({ok,data})=>{
@@ -1031,8 +1032,8 @@ function Landing({ showLogin }){
   };
   return (
     <div className="landing">
-      <div className="lo">zetetiq<span className="dot">.</span></div>
-      <p className="tag">Build a form, theme it your way, and share a clean link. Responses, analytics, and AI summaries included.</p>
+      <div className="lo"><Logo size={52} /></div>
+      <p className="tag">Build a query, theme it your way, and share a clean link. Experience management via zetetiq is 100% free for early users.</p>
       {user ? (
         <div style={{width:300}}>
           <p className="muted" style={{marginBottom:12}}>Signed in as {user.name}.</p>
@@ -1040,7 +1041,7 @@ function Landing({ showLogin }){
         </div>
       ) : (
         <div style={{width:300,display:"flex",flexDirection:"column",gap:10}}>
-          <button className="gbtn" onClick={()=>toast("Google sign in is being wired up. Use admin login for now.")}><GoogleG/> Continue with Google</button>
+          <button className="gbtn" onClick={()=>{ window.location.href = "/api/auth/google/start"; }}><GoogleG/> Continue with Google</button>
           <button className="btn" style={{width:"100%"}} onClick={()=>setOpen(true)}>Admin login</button>
         </div>
       )}
@@ -1064,7 +1065,7 @@ function TopNav(){
   const { user, setUser, navigate } = useApp();
   return (
     <div className="nav"><div className="wrap">
-      <button className="brand" onClick={()=>navigate("/dashboard")}>zetetiq<span className="dot">.</span></button>
+      <button className="brand" onClick={()=>navigate("/dashboard")}><Logo size={19} /></button>
       <div className="row">
         {user && <span className="greet">hey {user.name}</span>}
         <button className="btn sm" onClick={()=>{ api.logout().then(()=>{ setUser(null); navigate("/"); }); }}>Log out</button>
@@ -1664,7 +1665,7 @@ function Builder({ formId }){
     <div className="builder">
       <div className="b-top">
         <div className="row" style={{gap:12}}>
-          <button className="brand" onClick={()=>navigate("/dashboard")}>zetetiq<span className="dot">.</span></button>
+          <button className="brand" onClick={()=>navigate("/dashboard")}><Logo size={19} /></button>
           <div className="b-tools">
             <button className="btn sm" onClick={()=>setTools((o)=>!o)}>Tools ▾</button>
             {tools && (
@@ -1795,9 +1796,140 @@ function FormDashboard({ id }){
     </div>
   );
 }
+/* ----------------------------- brand logo ----------------------------- */
+/* Recolorable via currentColor. Single swap point: when the real full-logo
+   SVG is provided, replace the body of this component with that <svg>. */
+function Logo({ size = 20, mark = true, dot = true, style, className }){
+  const s = typeof size === "number" ? size : 20;
+  return (
+    <span className={"logo" + (className ? " " + className : "")} role="img" aria-label="zetetiq" style={{display:"inline-flex",alignItems:"center",gap:Math.round(s * 0.34),lineHeight:1,color:"inherit",...style}}>
+      {mark && (
+        <svg width={Math.round(s * 1.12)} height={Math.round(s * 1.12)} viewBox="0 0 32 32" fill="none" aria-hidden="true" style={{flex:"none"}}>
+          <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="currentColor" opacity="0.16" />
+          <path d="M9.5 11h13l-13 10h13" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      <span style={{fontFamily:"var(--display)",fontWeight:700,fontSize:s,letterSpacing:"-0.02em"}}>zetetiq{dot && <span style={{color:"var(--ink)"}}>.</span>}</span>
+    </span>
+  );
+}
+
+/* ----------------------------- pdf report ----------------------------- */
+function hexRgb(h){ h = String(h || "#5b4fe0").replace("#",""); if (h.length === 3) h = h.split("").map((c)=>c + c).join(""); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function ensureJsPDF(){ return new Promise((res, rej)=>{ if (window.jspdf && window.jspdf.jsPDF) return res(); const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"; sc.onload = ()=>res(); sc.onerror = ()=>rej(new Error("pdf_load")); document.head.appendChild(sc); }); }
+
+function statLines(q, rows){
+  const vals = rows.map((r)=>r.data[q.id]).filter((v)=> v !== undefined && v !== null && v !== "");
+  const title = q.label || q.id;
+  const type = QTYPES[q.type].label + " · " + vals.length + " answered";
+  if (q.type === "multiple_choice"){
+    const c = {}; q.options.forEach((o)=>c[o] = 0);
+    rows.forEach((r)=>{ const v = r.data[q.id]; if (Array.isArray(v)) v.forEach((o)=>c[o] = (c[o] || 0) + 1); else if (v) c[v] = (c[v] || 0) + 1; });
+    const e = Object.entries(c).sort((a,b)=>b[1] - a[1]);
+    return { title, type, bars: e.map(([k,v])=>({ k, v })), lines: e.length ? ["Most selected: " + e[0][0] + " (" + e[0][1] + ")", "Least selected: " + e[e.length-1][0] + " (" + e[e.length-1][1] + ")"] : [] };
+  }
+  if (q.type === "rank_order"){
+    const s = {}, n = {}; q.items.forEach((it)=>{ s[it] = 0; n[it] = 0; });
+    rows.forEach((r)=>{ const a = r.data[q.id]; if (Array.isArray(a)) a.forEach((it,i)=>{ if (s[it] !== undefined){ s[it] += i + 1; n[it]++; } }); });
+    const rank = q.items.map((it)=>({ it, avg: n[it] ? s[it] / n[it] : null })).filter((x)=>x.avg != null).sort((a,b)=>a.avg - b.avg);
+    return { title, type, bars: [], lines: rank.length ? rank.map((x,i)=>(i + 1) + ". " + x.it + " (avg " + x.avg.toFixed(2) + ")") : ["No data"] };
+  }
+  if (q.type === "constant_sum"){
+    const s = {}, n = {}; q.items.forEach((it)=>{ s[it] = 0; n[it] = 0; });
+    rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object") q.items.forEach((it)=>{ const v = parseFloat(o[it]); if (!isNaN(v)){ s[it] += v; n[it]++; } }); });
+    return { title, type, bars: q.items.map((it)=>({ k: it, v: n[it] ? Math.round(s[it] / n[it] * 10) / 10 : 0 })), lines: ["Average allocation, total " + q.total + (q.unit ? (" " + q.unit) : "")] };
+  }
+  if (q.type === "matrix"){
+    return { title, type, bars: [], lines: q.rows.map((row)=>{ const c = {}; rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object"){ const a = o[row]; (Array.isArray(a) ? a : [a]).forEach((x)=>{ if (x) c[x] = (c[x] || 0) + 1; }); } }); const top = Object.entries(c).sort((a,b)=>b[1] - a[1])[0]; return row + ": " + (top ? top[0] + " (" + top[1] + ")" : "no data"); }) };
+  }
+  if (q.type === "star_rating"){
+    const nums = vals.map(Number).filter((n)=>!isNaN(n)); const avg = nums.length ? nums.reduce((a,b)=>a + b, 0) / nums.length : 0;
+    const bars = []; for (let k = 1; k <= q.max; k++) bars.push({ k: k + " star", v: nums.filter((n)=>n === k).length });
+    return { title, type, bars, lines: ["Average: " + avg.toFixed(2) + " / " + q.max] };
+  }
+  if (q.type === "slider"){
+    const nums = vals.map(Number).filter((n)=>!isNaN(n)); const avg = nums.length ? nums.reduce((a,b)=>a + b, 0) / nums.length : 0;
+    return { title, type, bars: [], lines: nums.length ? ["Average: " + avg.toFixed(1), "Min " + Math.min(...nums) + ", Max " + Math.max(...nums)] : ["No data"] };
+  }
+  if (q.type === "nps"){
+    const nums = vals.map(Number).filter((n)=>!isNaN(n)); const N = nums.length || 1; const p = nums.filter((x)=>x >= 9).length, d = nums.filter((x)=>x <= 6).length, ps = nums.filter((x)=>x === 7 || x === 8).length;
+    return { title, type, bars: [], lines: ["NPS: " + (nums.length ? Math.round((p / N - d / N) * 100) : "-"), "Promoters " + p + ", Passives " + ps + ", Detractors " + d] };
+  }
+  if (q.type === "date"){
+    const ds = vals.map(String).filter(Boolean).sort();
+    return { title, type, bars: [], lines: ds.length ? ["Earliest " + ds[0] + ", latest " + ds[ds.length-1]] : ["No data"] };
+  }
+  return { title, type, bars: [], lines: [vals.length + " text response" + (vals.length === 1 ? "" : "s")] };
+}
+
+async function exportReport(form, rows){
+  await ensureJsPDF();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:"pt", format:"a4" });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const M = 42;
+  const [pr,pg,pb] = hexRgb((form.theme && form.theme.primary) || "#5b4fe0");
+  const ink = [27,24,48], soft = [120,116,140], track = [231,228,243];
+  const ensure = (y, need)=>{ if (y + need > H - 40){ doc.addPage(); return 56; } return y; };
+  // header band
+  doc.setFillColor(pr,pg,pb); doc.rect(0,0,W,74,"F");
+  doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(20);
+  doc.text((form.title || "Form").slice(0,60), M, 36);
+  doc.setFont("helvetica","normal"); doc.setFontSize(11); doc.text("Response report", M, 55);
+  doc.setFontSize(10); doc.text(new Date().toLocaleDateString(), W - M, 55, { align:"right" });
+  let y = 104;
+  doc.setTextColor.apply(doc, ink); doc.setFont("helvetica","bold"); doc.setFontSize(13);
+  doc.text("Total responses: " + rows.length, M, y); y += 24;
+
+  const inputQs = (form.schema.questions || []).filter((q)=> QTYPES[q.type] && QTYPES[q.type].isInput);
+  inputQs.forEach((q)=>{
+    const st = statLines(q, rows);
+    y = ensure(y, 44);
+    doc.setFont("helvetica","bold"); doc.setFontSize(11.5); doc.setTextColor.apply(doc, ink);
+    doc.text(st.title.slice(0,70), M, y); y += 13;
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor.apply(doc, soft);
+    doc.text(st.type, M, y); y += 14;
+    doc.setFontSize(9.5);
+    if (st.bars && st.bars.length){
+      const maxv = Math.max(1, ...st.bars.map((b)=>b.v));
+      st.bars.slice(0,10).forEach((b)=>{
+        y = ensure(y, 16);
+        doc.setTextColor.apply(doc, ink); doc.text(String(b.k).slice(0,34), M, y + 8);
+        const bx = 250, bw = W - M - bx - 36;
+        doc.setFillColor.apply(doc, track); doc.rect(bx, y, bw, 9, "F");
+        doc.setFillColor(pr,pg,pb); doc.rect(bx, y, Math.max(0, bw * (b.v / maxv)), 9, "F");
+        doc.setTextColor.apply(doc, ink); doc.text(String(b.v), W - M, y + 8, { align:"right" });
+        y += 16;
+      });
+    }
+    (st.lines || []).forEach((ln)=>{ y = ensure(y, 14); doc.setTextColor.apply(doc, soft); doc.text("- " + ln, M, y + 8); y += 14; });
+    y += 12;
+  });
+
+  // audience
+  const tally = (key)=>{ const c = {}; rows.forEach((r)=>{ const v = (r.meta && r.meta[key]) || "Unknown"; c[v] = (c[v] || 0) + 1; }); return Object.entries(c).sort((a,b)=>b[1] - a[1]).slice(0,6); };
+  const audience = [["Top countries", tally("country")], ["Browsers", tally("browser")]];
+  audience.forEach(([label, list])=>{
+    if (!list.length) return;
+    y = ensure(y, 30);
+    doc.setFont("helvetica","bold"); doc.setFontSize(11.5); doc.setTextColor.apply(doc, ink); doc.text(label, M, y); y += 14;
+    doc.setFont("helvetica","normal"); doc.setFontSize(9.5);
+    list.forEach(([k,v])=>{ y = ensure(y, 14); doc.setTextColor.apply(doc, soft); doc.text("- " + k + ": " + v, M, y + 8); y += 14; });
+    y += 8;
+  });
+
+  doc.setFontSize(9); doc.setTextColor.apply(doc, soft);
+  doc.text("zetetiq", M, H - 24);
+  const name = (form.title || "form").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  doc.save(name + "-report.pdf");
+}
+
 function ResponsesTab({ id, form }){
+  const { toast } = useApp();
   const [rows, setRows] = useState(null);
   const [open, setOpen] = useState(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
   useEffect(()=>{ api.responses(id).then(({data})=> setRows((data && data.responses) || [])); },[id]);
   const labels = useMemo(()=>{ const m={}; (form.schema.questions||[]).forEach(q=>{ if (QTYPES[q.type] && QTYPES[q.type].isInput) m[q.id]=q.label||q.id; }); return m; },[form]);
   const previewCols = useMemo(()=> Object.keys(labels).slice(0,2), [labels]);
@@ -1806,7 +1938,7 @@ function ResponsesTab({ id, form }){
   if (rows.length === 0) return <div className="card empty"><p>No responses yet.</p></div>;
   return (
     <div>
-      <div className="between" style={{marginBottom:12}}><span className="muted">{rows.length} response{rows.length===1?"":"s"}</span><a className="btn sm" href={"/api/forms/"+id+"/export"}>Download CSV</a></div>
+      <div className="between" style={{marginBottom:12}}><span className="muted">{rows.length} response{rows.length===1?"":"s"}</span><div className="row" style={{gap:8}}><a className="btn sm" href={"/api/forms/"+id+"/export"}>Download CSV</a><button className="btn sm" disabled={pdfBusy} onClick={async()=>{ setPdfBusy(true); try { await exportReport(form, rows); } catch (e) { toast("Could not build the report."); } setPdfBusy(false); }}>{pdfBusy ? "Preparing..." : "Export report"}</button></div></div>
       <div className="card" style={{overflowX:"auto"}}>
         <table className="table">
           <thead><tr><th>Submitted</th><th className="hide-sm">Location</th><th className="hide-sm">Device</th>{previewCols.map(c=>(<th key={c}>{labels[c]}</th>))}<th></th></tr></thead>
@@ -1972,7 +2104,7 @@ function App(){
 
   let view;
   if (user === undefined){
-    view = <div className="center-screen"><div style={{fontFamily:"var(--mono)",color:"var(--bo)",fontWeight:700,fontSize:28}}>zetetiq<span style={{color:"var(--ink)"}}>.</span></div></div>;
+    view = <div className="center-screen"><div style={{color:"var(--bo)"}}><Logo size={34} /></div></div>;
   } else {
     const seg = path.split("/").filter(Boolean);
     const reserved = new Set(["dashboard","builder","login","api","assets","favicon.ico","robots.txt"]);

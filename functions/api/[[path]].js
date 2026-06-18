@@ -24,7 +24,8 @@ async function route(seg, method, request, env, context) {
   // ---- auth ----
   if (p === "auth/admin" && method === "POST") return authAdmin(request, env);
   if (p === "auth/logout" && method === "POST") return authLogout();
-  if (p === "auth/google/start" && method === "GET") return json({ error: "not_implemented", message: "Google sign in is wired in a later step." }, 501);
+  if (p === "auth/google/start" && method === "GET") return googleStart(request, env);
+  if (p === "auth/google/callback" && method === "GET") return googleCallback(request, env);
   if (p === "me" && method === "GET") return me(request, env);
   if (p === "summary" && method === "GET") return dashSummary(request, env);
 
@@ -108,6 +109,100 @@ async function currentUser(request, env) {
 function publicUser(p) {
   return { uid: p.uid, username: p.username, name: p.name, role: p.role };
 }
+
+/* ------------------------------------------------------------------ */
+/* Google sign in (OAuth 2.0 authorization code flow)                  */
+/* ------------------------------------------------------------------ */
+
+function redirectTo(location, cookies) {
+  const res = new Response(null, { status: 302, headers: { Location: location } });
+  (cookies || []).forEach((c) => res.headers.append("Set-Cookie", c));
+  return res;
+}
+
+function decodeJwtPayload(token) {
+  try {
+    const parts = String(token).split(".");
+    if (parts.length < 2) return null;
+    return JSON.parse(new TextDecoder().decode(b64urlDecode(parts[1])));
+  } catch {
+    return null;
+  }
+}
+
+async function googleStart(request, env) {
+  const clientId = env.GOOGLE_CLIENT_ID;
+  if (!clientId) return redirectTo("/login?google_error=setup");
+  const origin = new URL(request.url).origin;
+  const redirectUri = origin + "/api/auth/google/callback";
+  const state = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()).replace(/-/g, "");
+  const auth = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "openid email profile",
+    state,
+    access_type: "online",
+    prompt: "select_account",
+  }).toString();
+  const stateCookie = `g_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
+  return redirectTo(auth, [stateCookie]);
+}
+
+async function googleCallback(request, env) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+  const denied = url.searchParams.get("error");
+  if (denied) return redirectTo("/login?google_error=denied");
+  const cookieState = readCookie(request, "g_state");
+  if (!code || !state || !cookieState || state !== cookieState) return redirectTo("/login?google_error=state");
+
+  const clientId = env.GOOGLE_CLIENT_ID;
+  const clientSecret = env.GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return redirectTo("/login?google_error=setup");
+  const redirectUri = url.origin + "/api/auth/google/callback";
+
+  let claims = null;
+  try {
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, grant_type: "authorization_code" }).toString(),
+    });
+    const tok = await tokenRes.json();
+    if (!tok || !tok.id_token) return redirectTo("/login?google_error=token");
+    claims = decodeJwtPayload(tok.id_token);
+  } catch {
+    return redirectTo("/login?google_error=token");
+  }
+  if (!claims || !claims.sub) return redirectTo("/login?google_error=token");
+
+  const sub = String(claims.sub);
+  const email = claims.email ? String(claims.email) : null;
+  const name = claims.name ? String(claims.name) : (email || "User");
+
+  let row = await env.DB.prepare("SELECT id, username, name FROM users WHERE google_id = ?").bind(sub).first();
+  if (!row) {
+    const newId = "g_" + sub;
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO users (id, username, name, email, google_id, is_admin) VALUES (?, ?, ?, ?, ?, 0)"
+    ).bind(newId, email || newId, name, email, sub).run();
+    row = { id: newId, username: email || newId, name };
+  }
+
+  const payload = {
+    uid: row.id,
+    username: row.username,
+    name: row.name,
+    role: "user",
+    exp: Date.now() + 1000 * 60 * 60 * 24 * 30,
+  };
+  const token = await makeToken(secret(env), payload);
+  const clearState = "g_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0";
+  return redirectTo("/dashboard", [sessionCookie(token), clearState]);
+}
+
 
 /* ------------------------------------------------------------------ */
 /* forms CRUD                                                          */

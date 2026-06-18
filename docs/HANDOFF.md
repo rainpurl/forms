@@ -120,6 +120,14 @@ Implemented in phase 1: `multiple_choice` (one answer or multiple answers via a 
 
 Flow features in phase 1: Force Response (required), Request Response (a soft confirm on skip), Response Validation, and Randomization (both option order and whole question order through the form setting `randomizeQuestions`). Redirect on completion is a form setting (`settings.redirectUrl`): when set, a respondent who submits is sent to that URL instead of the thank-you screen; a missing scheme is prefixed with https. Question order randomization shuffles within each page when page breaks are present.
 
+## Branding, sign in, and reports
+
+The wordmark is now a recolorable inline-SVG Logo component (currentColor) used in the nav, builder, splash, loading screen, and public-form footer, with a placeholder SVG favicon in the head. Swapping in the real artwork means replacing the body of the Logo component and the favicon href. The splash tagline reads: Build a query, theme it your way, and share a clean link. Experience management via zetetiq is 100% free for early users.
+
+Google sign in is implemented as a real OAuth 2.0 authorization code flow in the backend: GET /api/auth/google/start sets a short-lived g_state cookie and redirects to Google; GET /api/auth/google/callback verifies the state, exchanges the code at oauth2.googleapis.com/token, reads the id_token claims, upserts a users row keyed by google_id, signs the same HMAC session cookie used by admin, and redirects to /dashboard. It needs the secrets GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET; without them the start route redirects back with google_error=setup and the button shows an inactive message. Setup steps are in the README.
+
+No part of the UI says AI anymore. The former summary card is now titled Overview and never shows an offline badge; it always renders the summary text the backend returns. Workers AI, if its binding is configured, still enriches that text server-side, but it is optional and never surfaced. The Responses tab has an Export report button next to Download CSV that produces a themed one-page PDF of the aggregates using a CDN-loaded PDF library.
+
 ## Analytics, aggregated
 
 The Analytics tab computes per question aggregates in the browser from the raw responses, so no backend change was needed. Multiple choice shows option counts with the most and least selected called out. Matrix shows the most common answer per statement. Rank order shows the final ranking by average position, where position one is best. Constant sum shows the average allocation per item. Star rating shows the average and the distribution. Slider shows average, min, and max. NPS shows the score with promoter, passive, and detractor counts. Date shows the earliest and latest. Text and form field show a response count. The audience charts (by day, country, browser) still come from the server analytics endpoint.
