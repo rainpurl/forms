@@ -283,7 +283,7 @@ async function exportCsv(user, id, env) {
   if (!form || form.owner_id !== user.uid) return json({ error: "not_found" }, 404);
 
   const schema = safeParse(form.schema, { questions: [] });
-  const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic");
+  const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic" && q.type !== "page_break");
 
   const { results } = await env.DB.prepare(
     "SELECT id, data, meta, created_at FROM responses WHERE form_id = ? ORDER BY created_at ASC"

@@ -290,19 +290,80 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .stars.prev{display:flex;gap:5px}
 .stars.prev .star{font-size:24px;color:var(--line-strong);line-height:1}
 
+
+/* ---- round 4: animations, drag-drop, trash, pages, analytics ---- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+.qccard,.pbreak{animation:fadeUp .25s ease both}
+.overlay{animation:fadeIn .18s ease both}
+.modal{animation:pop .22s cubic-bezier(.2,.8,.2,1) both}
+.toast{animation:toastIn .28s ease both}
+.menu{animation:pop .15s ease both}
+.tab{transition:color .15s,border-color .15s}
+.form-scope .opt,.form-scope .nps button,.form-scope .stars .star,.form-scope .submit,.form-scope .rankrow{transition:all .14s ease}
+.qccard{transition:border-color .12s,box-shadow .12s,opacity .12s,transform .12s}
+/* drag and drop */
+.drag-handle{cursor:grab;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 5px;border-radius:6px;user-select:none}
+.drag-handle:hover{background:var(--paper);color:var(--ink)}
+.drag-handle:active{cursor:grabbing}
+.qccard.dragging,.pbreak.dragging{opacity:.45}
+.qccard.over{box-shadow:0 -3px 0 0 var(--bo);border-color:var(--bo)}
+.pbreak.over{box-shadow:0 -3px 0 0 var(--bo)}
+.form-scope .rankrow .rgrip{cursor:grab;color:var(--ink-soft);user-select:none;font-size:14px}
+.form-scope .rankrow .rgrip:active{cursor:grabbing}
+.form-scope .rankrow.dragging{opacity:.5}
+.form-scope .rankrow.over{box-shadow:0 -3px 0 0 var(--fa)}
+/* page break divider (builder) */
+.pbreak{display:flex;align-items:center;gap:10px;margin:10px 2px;padding:6px 8px;border-radius:9px;cursor:pointer}
+.pbreak.sel{background:#eceaff}
+.pbreak-line{flex:1;height:1px;background:var(--line-strong)}
+.pbreak-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--bo);font-weight:700}
+/* paginated form */
+.form-scope .fprogress{height:6px;background:color-mix(in srgb,var(--fp) 12%,#fff);border-radius:999px;overflow:hidden;margin-top:14px}
+.form-scope .fprogress-bar{height:100%;background:var(--fa);border-radius:999px;transition:width .35s ease}
+.form-scope .fnav{display:flex;align-items:center;gap:12px}
+.form-scope .fpage-count{font-size:13px;color:var(--ink-soft)}
+.form-scope .fbtn-ghost{border:1px solid var(--line-strong);background:#fff;color:var(--fs);padding:11px 18px;border-radius:10px;font-weight:600;cursor:pointer;transition:background .14s}
+.form-scope .fbtn-ghost:hover{background:#f6f5ff}
+.form-scope .fpage{animation:fadeUp .28s ease both}
+/* add-question modal */
+.addq-modal{max-width:560px}
+.addq-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.addq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 18px;max-height:62vh;overflow:auto}
+.addq-item{text-align:left;border:1px solid var(--line-strong);background:#fff;border-radius:10px;padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s}
+.addq-item:hover{border-color:var(--bo);background:#f6f5ff}
+.addq-item .t{font-weight:600;font-size:14px}
+.addq-item .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
+@media(max-width:560px){.addq-grid{grid-template-columns:1fr}}
+/* trash */
+.trashbox{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.trashbox-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:#faf7ff;border-bottom:1px solid var(--line)}
+.trashbox-head .t{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
+.trash-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);animation:fadeUp .2s ease both}
+.trash-item:last-child{border-bottom:0}
+.trash-item .ti-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trash-item .ti-type{font-size:11px;color:var(--ink-soft);font-family:var(--mono);text-transform:uppercase}
+/* analytics aggregates */
+.statgrid{display:flex;gap:26px;flex-wrap:wrap}
+.bignum{font-family:var(--display);font-size:30px;font-weight:600;line-height:1}
+.rankresult{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.rankresult li{display:flex;align-items:center;gap:12px}
+.rankresult .rr-pos{width:24px;height:24px;flex:none;border-radius:50%;background:var(--bo);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;font-family:var(--mono)}
+.rankresult .rr-name{flex:1}
+.rankresult .rr-avg{font-size:12px;color:var(--ink-soft);font-family:var(--mono)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
 </style>
 </head>
 <body>
 <div id="root"></div>
 
-<script>
-window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||r.childNodes.length)return;var msg=(e&&e.message)?e.message:'Unknown error';r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not start:\n'+msg+'</pre>';},true);
-</script>
+<script>window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||r.childNodes.length)return;r.innerHTML='<pre style="padding:24px;color:#b23b3b">zetetiq could not start:\n'+((e&&e.message)||'Unknown')+'</pre>';},true);</script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
-<script>
-function boot(){
-const {
+<script>function boot(){const {
   useState,
   useEffect,
   useRef,
@@ -1089,7 +1150,7 @@ const QTYPES = {
   },
   rank_order: {
     label: "Rank order",
-    hint: "Order items with up and down",
+    hint: "Order items by dragging or arrows",
     isInput: true,
     make: () => ({
       type: "rank_order",
@@ -1111,6 +1172,8 @@ const QTYPES = {
       useEffect(() => {
         if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice());
       }, [q.id]);
+      const [drag, setDrag] = useState(null);
+      const [over, setOver] = useState(null);
       const move = (i, dir) => {
         const a = ordered.slice();
         const j = i + dir;
@@ -1120,6 +1183,13 @@ const QTYPES = {
         a[j] = t;
         onChange(a);
       };
+      const reorder = (from, to) => {
+        if (from === null || from === to) return;
+        const a = ordered.slice();
+        const m = a.splice(from, 1)[0];
+        a.splice(to, 0, m);
+        onChange(a);
+      };
       return /*#__PURE__*/React.createElement("div", {
         className: "q"
       }, /*#__PURE__*/React.createElement(QLabel, {
@@ -1127,9 +1197,34 @@ const QTYPES = {
       }), /*#__PURE__*/React.createElement("div", {
         className: "ranklist"
       }, ordered.map((it, i) => /*#__PURE__*/React.createElement("div", {
-        className: "rankrow",
-        key: it + "-" + i
+        className: "rankrow" + (drag === i ? " dragging" : "") + (over === i ? " over" : ""),
+        key: it + "-" + i,
+        onDragOver: e => {
+          e.preventDefault();
+          if (over !== i) setOver(i);
+        },
+        onDrop: e => {
+          e.preventDefault();
+          reorder(drag, i);
+          setDrag(null);
+          setOver(null);
+        }
       }, /*#__PURE__*/React.createElement("span", {
+        className: "rgrip",
+        draggable: true,
+        onDragStart: e => {
+          setDrag(i);
+          try {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", String(i));
+          } catch (_) {}
+        },
+        onDragEnd: () => {
+          setDrag(null);
+          setOver(null);
+        },
+        title: "Drag to reorder"
+      }, "⠿"), /*#__PURE__*/React.createElement("span", {
         className: "rnum"
       }, i + 1), /*#__PURE__*/React.createElement("span", {
         className: "rlabel"
@@ -1143,7 +1238,12 @@ const QTYPES = {
         type: "button",
         onClick: () => move(i, 1),
         disabled: i === ordered.length - 1
-      }, "↓"))))), error && /*#__PURE__*/React.createElement("div", {
+      }, "↓"))))), /*#__PURE__*/React.createElement("div", {
+        className: "hint",
+        style: {
+          marginTop: 6
+        }
+      }, "Drag the handle or use the arrows to reorder."), error && /*#__PURE__*/React.createElement("div", {
         className: "ferr"
       }, error));
     }
@@ -1332,9 +1432,21 @@ const QTYPES = {
         className: "ferr"
       }, error));
     }
+  },
+  page_break: {
+    label: "Page break",
+    hint: "Start a new page in the form",
+    isInput: false,
+    make: () => ({
+      type: "page_break",
+      id: uid()
+    }),
+    summary: () => "page break",
+    validate: () => null,
+    Renderer: () => null
   }
 };
-const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "text_graphic"];
+const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "text_graphic", "page_break"];
 
 /* small shared bits */
 function Field({
@@ -1467,7 +1579,16 @@ function FormRenderer({
 }) {
   const questions = form.schema.questions || [];
   const settings = form.schema.settings || {};
-  const order = useMemo(() => settings.randomizeQuestions ? shuffle(questions) : questions, [form.id, questions.length]);
+  const pages = useMemo(() => {
+    const ps = [[]];
+    for (const q of questions) {
+      if (q.type === "page_break") ps.push([]);else ps[ps.length - 1].push(q);
+    }
+    let out = ps.filter(p => p.length);
+    if (!out.length) out = [[]];
+    return settings.randomizeQuestions ? out.map(p => shuffle(p)) : out;
+  }, [form.id, questions.length, settings.randomizeQuestions]);
+  const [page, setPage] = useState(0);
   const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
   const setA = (qid, v) => setAnswers(a => ({
@@ -1481,17 +1602,43 @@ function FormRenderer({
     "--fa": theme.accent || theme.primary || "#5b4fe0",
     fontFamily: FORM_FONTS[theme.font] || FORM_FONTS.sans
   };
-  const handleSubmit = () => {
-    if (preview) return;
+  const cur = Math.min(page, pages.length - 1);
+  const multi = pages.length > 1;
+  const isLast = cur === pages.length - 1;
+  const validateList = list => {
     const errs = {};
-    for (const q of questions) {
+    for (const q of list) {
       const def = QTYPES[q.type];
       if (!def || !def.isInput) continue;
-      const err = def.validate(q, answers[q.id]);
-      if (err) errs[q.id] = err;
+      const e = def.validate(q, answers[q.id]);
+      if (e) errs[q.id] = e;
     }
-    if (Object.keys(errs).length) {
-      setErrors(errs);
+    return errs;
+  };
+  const goNext = () => {
+    if (!preview) {
+      const errs = validateList(pages[cur]);
+      if (Object.keys(errs).length) {
+        setErrors(errs);
+        return;
+      }
+    }
+    setErrors({});
+    setPage(p => Math.min(p + 1, pages.length - 1));
+    window.scrollTo(0, 0);
+  };
+  const goBack = () => {
+    setErrors({});
+    setPage(p => Math.max(p - 1, 0));
+    window.scrollTo(0, 0);
+  };
+  const handleSubmit = () => {
+    if (preview) return;
+    const allErrs = validateList(questions);
+    if (Object.keys(allErrs).length) {
+      setErrors(allErrs);
+      const idx = pages.findIndex(p => p.some(q => allErrs[q.id]));
+      if (idx >= 0) setPage(idx);
       return;
     }
     const skipped = questions.filter(q => QTYPES[q.type] && QTYPES[q.type].isInput && q.request && isEmpty(answers[q.id]));
@@ -1511,11 +1658,20 @@ function FormRenderer({
     className: "ftitle"
   }, form.title), form.description && /*#__PURE__*/React.createElement("div", {
     className: "fdesc"
-  }, form.description), /*#__PURE__*/React.createElement("div", {
+  }, form.description), multi && /*#__PURE__*/React.createElement("div", {
+    className: "fprogress"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fprogress-bar",
     style: {
-      marginTop: 10
+      width: (cur + 1) / pages.length * 100 + "%"
     }
-  }, order.map(q => {
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fpage",
+    key: cur,
+    style: {
+      marginTop: 12
+    }
+  }, pages[cur].map(q => {
     const def = QTYPES[q.type];
     if (!def) return null;
     const R = def.Renderer;
@@ -1527,23 +1683,33 @@ function FormRenderer({
       error: errors[q.id]
     });
   })), /*#__PURE__*/React.createElement("div", {
+    className: "fnav",
     style: {
       marginTop: 18
-    },
-    className: "row"
-  }, /*#__PURE__*/React.createElement("button", {
+    }
+  }, multi && cur > 0 && /*#__PURE__*/React.createElement("button", {
+    className: "fbtn-ghost",
+    onClick: goBack,
+    disabled: submitting
+  }, "Back"), multi && /*#__PURE__*/React.createElement("span", {
+    className: "fpage-count"
+  }, "Page ", cur + 1, " of ", pages.length), /*#__PURE__*/React.createElement("span", {
+    className: "grow"
+  }), !isLast ? /*#__PURE__*/React.createElement("button", {
+    className: "submit",
+    onClick: goNext
+  }, "Next") : /*#__PURE__*/React.createElement("button", {
     className: "submit",
     onClick: handleSubmit,
     disabled: preview || submitting
-  }, submitting ? "Submitting..." : "Submit"), preview && /*#__PURE__*/React.createElement("span", {
+  }, submitting ? "Submitting..." : "Submit")), preview && /*#__PURE__*/React.createElement("div", {
     className: "muted",
     style: {
-      fontSize: 13
+      fontSize: 13,
+      marginTop: 8
     }
-  }, "Preview mode, submit disabled"))));
+  }, "Preview mode, submit disabled")));
 }
-
-/* ----------------------------- public form ----------------------------- */
 function PublicForm({
   username,
   slug
@@ -1644,7 +1810,14 @@ function PublicForm({
       data
     }) => {
       setSubmitting(false);
-      if (ok && data && data.ok) setDone(true);else window.alert(data && data.error === "form_closed" ? "This form just closed." : "Something went wrong. Please try again.");
+      if (ok && data && data.ok) {
+        const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
+        if (r) {
+          window.location.href = /^https?:\/\//i.test(r) ? r : "https://" + r;
+          return;
+        }
+        setDone(true);
+      } else window.alert(data && data.error === "form_closed" ? "This form just closed." : "Something went wrong. Please try again.");
     });
   };
   return /*#__PURE__*/React.createElement("div", {
@@ -2212,15 +2385,67 @@ function CanvasCard({
   onDup,
   onDel,
   onUp,
-  onDown
+  onDown,
+  dnd
 }) {
   const [menu, setMenu] = useState(false);
+  const handle = {
+    draggable: true,
+    onDragStart: e => {
+      e.stopPropagation();
+      dnd.start(index);
+      try {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(index));
+      } catch (_) {}
+    },
+    onDragEnd: () => dnd.end()
+  };
+  const dropProps = {
+    onDragOver: e => {
+      e.preventDefault();
+      if (dnd.over !== index) dnd.over_(index);
+    },
+    onDrop: e => {
+      e.preventDefault();
+      dnd.drop(index);
+    }
+  };
+  if (q.type === "page_break") {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "pbreak" + (selected ? " sel" : "") + (dnd.over === index ? " over" : ""),
+      onClick: onSelect,
+      ...dropProps
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "drag-handle",
+      ...handle,
+      title: "Drag to reorder"
+    }, "⠿"), /*#__PURE__*/React.createElement("span", {
+      className: "pbreak-line"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "pbreak-label"
+    }, "Page break"), /*#__PURE__*/React.createElement("span", {
+      className: "pbreak-line"
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "iconbtn",
+      title: "Remove",
+      onClick: e => {
+        e.stopPropagation();
+        onDel();
+      }
+    }, "×"));
+  }
   return /*#__PURE__*/React.createElement("div", {
-    className: "qccard" + (selected ? " sel" : ""),
-    onClick: onSelect
+    className: "qccard" + (selected ? " sel" : "") + (dnd.over === index ? " over" : "") + (dnd.dragging === index ? " dragging" : ""),
+    onClick: onSelect,
+    ...dropProps
   }, /*#__PURE__*/React.createElement("div", {
     className: "qcc-head"
   }, /*#__PURE__*/React.createElement("span", {
+    className: "drag-handle",
+    ...handle,
+    title: "Drag to reorder"
+  }, "⠿"), /*#__PURE__*/React.createElement("span", {
     className: "qcc-num"
   }, "Q", index + 1), /*#__PURE__*/React.createElement("span", {
     className: "qcc-type mono"
@@ -2260,7 +2485,7 @@ function CanvasCard({
       onDel();
       setMenu(false);
     }
-  }, "Delete")))), q.type === "text_graphic" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+  }, "Move to trash")))), q.type === "text_graphic" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     className: "wq-title",
     placeholder: "Heading",
     value: q.heading || "",
@@ -3152,7 +3377,20 @@ function SettingsPanel({
       randomizeQuestions: c
     }),
     label: "Randomize question order"
-  }), id && /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "On completion"), /*#__PURE__*/React.createElement(Field, {
+    label: "Redirect URL (optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "https://example.com/thanks",
+    value: form.schema.settings.redirectUrl || "",
+    onChange: e => setSettings({
+      redirectUrl: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "After submitting, respondents go to this URL instead of the thank-you screen."), id && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 18
     }
@@ -3172,11 +3410,29 @@ function AddQuestionMenu({
     onClick: e => e.stopPropagation()
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
-    onClick: () => setOpen(o => !o)
+    onClick: () => setOpen(true)
   }, "+ Add new question"), open && /*#__PURE__*/React.createElement("div", {
-    className: "addq-menu"
+    className: "overlay",
+    onClick: () => setOpen(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal addq-modal",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "addq-modal-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title",
+    style: {
+      margin: 0
+    }
+  }, "Add a question"), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    onClick: () => setOpen(false),
+    title: "Close"
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    className: "addq-grid"
   }, QTYPE_ORDER.map(t => /*#__PURE__*/React.createElement("button", {
     key: t,
+    className: "addq-item",
     onClick: () => {
       onAdd(t);
       setOpen(false);
@@ -3185,7 +3441,7 @@ function AddQuestionMenu({
     className: "t"
   }, QTYPES[t].label), /*#__PURE__*/React.createElement("div", {
     className: "h"
-  }, QTYPES[t].hint)))));
+  }, QTYPES[t].hint)))))));
 }
 function Builder({
   formId
@@ -3204,6 +3460,9 @@ function Builder({
   const [savedAt, setSavedAt] = useState(null);
   const [tools, setTools] = useState(false);
   const [loadErr, setLoadErr] = useState(false);
+  const [trash, setTrash] = useState([]); // session only, never saved
+  const [dragIdx, setDragIdx] = useState(null);
+  const [overIdx, setOverIdx] = useState(null);
   useEffect(() => {
     if (isNew) return;
     api.getForm(formId).then(({
@@ -3261,8 +3520,18 @@ function Builder({
     ...patch
   } : q));
   const removeQ = qid => {
-    setQuestions(questions.filter(q => q.id !== qid));
+    const q = questions.find(x => x.id === qid);
+    if (q) setTrash(t => [q, ...t]);
+    setQuestions(questions.filter(x => x.id !== qid));
     if (sel === qid) setSel(null);
+  };
+  const restoreQ = tid => {
+    const q = trash.find(x => x.id === tid);
+    if (!q) return;
+    setTrash(t => t.filter(x => x.id !== tid));
+    setQuestions(questions.concat([q]));
+    setSel(q.id);
+    setMode("edit");
   };
   const moveQ = (i, dir) => {
     const qs = questions.slice();
@@ -3283,6 +3552,28 @@ function Builder({
     qs.splice(idx + 1, 0, copy);
     setQuestions(qs);
     setSel(copy.id);
+  };
+  const reorder = (from, to) => {
+    if (from === null || from === to) return;
+    const qs = questions.slice();
+    const [m] = qs.splice(from, 1);
+    qs.splice(to, 0, m);
+    setQuestions(qs);
+  };
+  const dnd = {
+    dragging: dragIdx,
+    over: overIdx,
+    start: i => setDragIdx(i),
+    over_: i => setOverIdx(i),
+    drop: i => {
+      reorder(dragIdx, i);
+      setDragIdx(null);
+      setOverIdx(null);
+    },
+    end: () => {
+      setDragIdx(null);
+      setOverIdx(null);
+    }
   };
   const del = () => {
     if (!id) return;
@@ -3474,6 +3765,7 @@ function Builder({
     q: q,
     index: i,
     selected: sel === q.id,
+    dnd: dnd,
     onSelect: () => {
       setSel(q.id);
       setMode("edit");
@@ -3504,7 +3796,32 @@ function Builder({
       textAlign: "center",
       color: "var(--ink-soft)"
     }
-  }, "Thanks. Your response has been recorded."))))));
+  }, "Thanks. Your response has been recorded.")), /*#__PURE__*/React.createElement("div", {
+    className: "trashbox"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trashbox-head"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "t"
+  }, "Trash · ", trash.length, " question", trash.length === 1 ? "" : "s"), trash.length > 0 && /*#__PURE__*/React.createElement("button", {
+    className: "btn ghost sm",
+    onClick: () => setTrash([])
+  }, "Empty trash")), trash.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      padding: "14px 16px",
+      fontSize: 13
+    }
+  }, "Deleted questions land here for this session. They are cleared if you leave or refresh.") : trash.map(q => /*#__PURE__*/React.createElement("div", {
+    className: "trash-item",
+    key: q.id
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ti-label"
+  }, q.type === "page_break" ? "Page break" : q.label || q.heading || "Untitled question"), /*#__PURE__*/React.createElement("span", {
+    className: "ti-type"
+  }, QTYPES[q.type] ? QTYPES[q.type].label : q.type), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: () => restoreQ(q.id)
+  }, "Restore"))))))));
 }
 function FormDashboard({
   id
@@ -3613,7 +3930,8 @@ function FormDashboard({
     id: id,
     form: form
   }), tab === "analytics" && /*#__PURE__*/React.createElement(AnalyticsTab, {
-    id: id
+    id: id,
+    form: form
   }), tab === "settings" && /*#__PURE__*/React.createElement("div", {
     className: "card pad-lg",
     style: {
@@ -3669,7 +3987,12 @@ function ResponsesTab({
     return m;
   }, [form]);
   const previewCols = useMemo(() => Object.keys(labels).slice(0, 2), [labels]);
-  const cell = v => Array.isArray(v) ? v.join(", ") : v === null || v === undefined ? "" : String(v);
+  const cell = v => {
+    if (v === null || v === undefined) return "";
+    if (Array.isArray(v)) return v.join(", ");
+    if (typeof v === "object") return Object.keys(v).map(k => k + ": " + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(" | ");
+    return String(v);
+  };
   if (rows === null) return /*#__PURE__*/React.createElement("div", {
     className: "muted"
   }, "Loading...");
@@ -3761,7 +4084,8 @@ function ResponsesTab({
 }
 function BarCard({
   title,
-  rows
+  rows,
+  note
 }) {
   const max = Math.max(1, ...rows.map(r => r.c));
   return /*#__PURE__*/React.createElement("div", {
@@ -3790,26 +4114,321 @@ function BarCard({
     }
   })), /*#__PURE__*/React.createElement("span", {
     className: "v"
-  }, r.c))));
+  }, r.v !== undefined ? r.v : r.c))), note && /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 10
+    }
+  }, note));
+}
+function QuestionStat({
+  q,
+  rows
+}) {
+  const vals = rows.map(r => r.data[q.id]).filter(v => v !== undefined && v !== null && v !== "");
+  const answered = vals.length;
+  const head = extra => /*#__PURE__*/React.createElement("div", {
+    className: "between",
+    style: {
+      marginBottom: 10,
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label",
+    style: {
+      margin: 0
+    }
+  }, q.label || q.id), /*#__PURE__*/React.createElement("span", {
+    className: "mono",
+    style: {
+      fontSize: 11,
+      color: "var(--ink-soft)",
+      whiteSpace: "nowrap"
+    }
+  }, QTYPES[q.type].label, " · ", answered, " answered", extra ? " · " + extra : ""));
+  if (q.type === "multiple_choice") {
+    const counts = {};
+    q.options.forEach(o => counts[o] = 0);
+    rows.forEach(r => {
+      const v = r.data[q.id];
+      if (Array.isArray(v)) v.forEach(o => {
+        counts[o] = (counts[o] || 0) + 1;
+      });else if (v) counts[v] = (counts[v] || 0) + 1;
+    });
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const mx = Math.max(1, ...entries.map(e => e[1]));
+    const most = entries[0],
+      least = entries[entries.length - 1];
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), entries.length ? entries.map(([k, c], i) => /*#__PURE__*/React.createElement("div", {
+      className: "bar-row",
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "k"
+    }, k), /*#__PURE__*/React.createElement("span", {
+      className: "track2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "fill",
+      style: {
+        width: c / mx * 100 + "%"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "v"
+    }, c))) : /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13
+      }
+    }, "No data yet."), entries.length > 0 && most[1] > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "hint",
+      style: {
+        marginTop: 10
+      }
+    }, "Most selected: ", most[0], " (", most[1], "). Least: ", least[0], " (", least[1], ")."));
+  }
+  if (q.type === "matrix") {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), /*#__PURE__*/React.createElement("table", {
+      className: "table",
+      style: {
+        fontSize: 13
+      }
+    }, /*#__PURE__*/React.createElement("tbody", null, q.rows.map((row, ri) => {
+      const c = {};
+      rows.forEach(r => {
+        const o = r.data[q.id];
+        if (o && typeof o === "object") {
+          const a = o[row];
+          (Array.isArray(a) ? a : [a]).forEach(x => {
+            if (x) c[x] = (c[x] || 0) + 1;
+          });
+        }
+      });
+      const top = Object.entries(c).sort((a, b) => b[1] - a[1])[0];
+      return /*#__PURE__*/React.createElement("tr", {
+        key: ri
+      }, /*#__PURE__*/React.createElement("td", {
+        style: {
+          fontWeight: 500
+        }
+      }, row), /*#__PURE__*/React.createElement("td", null, top ? top[0] + " (" + top[1] + ")" : /*#__PURE__*/React.createElement("span", {
+        className: "muted"
+      }, "No data")));
+    }))), /*#__PURE__*/React.createElement("div", {
+      className: "hint",
+      style: {
+        marginTop: 8
+      }
+    }, "Most common answer per statement."));
+  }
+  if (q.type === "rank_order") {
+    const sums = {},
+      cnt = {};
+    q.items.forEach(it => {
+      sums[it] = 0;
+      cnt[it] = 0;
+    });
+    rows.forEach(r => {
+      const arr = r.data[q.id];
+      if (Array.isArray(arr)) arr.forEach((it, idx) => {
+        if (sums[it] !== undefined) {
+          sums[it] += idx + 1;
+          cnt[it]++;
+        }
+      });
+    });
+    const ranking = q.items.map(it => ({
+      it,
+      avg: cnt[it] ? sums[it] / cnt[it] : null
+    })).filter(x => x.avg !== null).sort((a, b) => a.avg - b.avg);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), ranking.length ? /*#__PURE__*/React.createElement("ol", {
+      className: "rankresult"
+    }, ranking.map((x, i) => /*#__PURE__*/React.createElement("li", {
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "rr-pos"
+    }, i + 1), /*#__PURE__*/React.createElement("span", {
+      className: "rr-name"
+    }, x.it), /*#__PURE__*/React.createElement("span", {
+      className: "rr-avg"
+    }, "avg ", x.avg.toFixed(2))))) : /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13
+      }
+    }, "No data yet."), /*#__PURE__*/React.createElement("div", {
+      className: "hint",
+      style: {
+        marginTop: 8
+      }
+    }, "Final ranking by average position (1 is best)."));
+  }
+  if (q.type === "constant_sum") {
+    const sums = {},
+      cnt = {};
+    q.items.forEach(it => {
+      sums[it] = 0;
+      cnt[it] = 0;
+    });
+    rows.forEach(r => {
+      const o = r.data[q.id];
+      if (o && typeof o === "object") q.items.forEach(it => {
+        const n = parseFloat(o[it]);
+        if (!isNaN(n)) {
+          sums[it] += n;
+          cnt[it]++;
+        }
+      });
+    });
+    const barRows = q.items.map(it => ({
+      k: it,
+      c: cnt[it] ? Math.round(sums[it] / cnt[it] * 10) / 10 : 0
+    }));
+    const mx = Math.max(1, ...barRows.map(x => x.c));
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), barRows.map((r, i) => /*#__PURE__*/React.createElement("div", {
+      className: "bar-row",
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "k"
+    }, r.k), /*#__PURE__*/React.createElement("span", {
+      className: "track2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "fill",
+      style: {
+        width: r.c / mx * 100 + "%"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "v"
+    }, r.c))), /*#__PURE__*/React.createElement("div", {
+      className: "hint",
+      style: {
+        marginTop: 8
+      }
+    }, "Average allocation per item (total ", q.total, q.unit ? " " + q.unit : "", ")."));
+  }
+  if (q.type === "star_rating") {
+    const nums = vals.map(Number).filter(n => !isNaN(n));
+    const avg = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+    const dist = [];
+    for (let k = 1; k <= q.max; k++) dist.push({
+      k: k + "\u2605",
+      c: nums.filter(n => n === k).length
+    });
+    const mx = Math.max(1, ...dist.map(d => d.c));
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(nums.length ? "avg " + avg.toFixed(2) + " / " + q.max : ""), dist.map((d, i) => /*#__PURE__*/React.createElement("div", {
+      className: "bar-row",
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "k"
+    }, d.k), /*#__PURE__*/React.createElement("span", {
+      className: "track2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "fill",
+      style: {
+        width: d.c / mx * 100 + "%"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "v"
+    }, d.c))));
+  }
+  if (q.type === "slider") {
+    const nums = vals.map(Number).filter(n => !isNaN(n));
+    const avg = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), /*#__PURE__*/React.createElement("div", {
+      className: "statgrid"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, nums.length ? avg.toFixed(1) : "-"), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Average")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, nums.length ? Math.min(...nums) : "-"), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Min")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, nums.length ? Math.max(...nums) : "-"), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Max"))));
+  }
+  if (q.type === "nps") {
+    const nums = vals.map(Number).filter(n => !isNaN(n));
+    const n = nums.length || 1;
+    const prom = nums.filter(x => x >= 9).length,
+      det = nums.filter(x => x <= 6).length,
+      pass = nums.filter(x => x === 7 || x === 8).length;
+    const nps = Math.round((prom / n - det / n) * 100);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), /*#__PURE__*/React.createElement("div", {
+      className: "statgrid"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, nums.length ? nps : "-"), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "NPS")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, prom), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Promoters")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, pass), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Passives")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, det), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Detractors"))));
+  }
+  if (q.type === "date") {
+    const ds = vals.map(String).filter(Boolean).sort();
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, ds.length ? "Earliest " + ds[0] + ", latest " + ds[ds.length - 1] : "No data yet."));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card pad-lg"
+  }, head(), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, answered ? answered + " text response" + (answered === 1 ? "" : "s") + ". See the Responses tab for details." : "No data yet."));
 }
 function AnalyticsTab({
-  id
+  id,
+  form
 }) {
   const [a, setA] = useState(null);
+  const [rows, setRows] = useState(null);
   useEffect(() => {
     api.analytics(id).then(({
       data
     }) => setA(data || {}));
   }, [id]);
-  if (!a) return /*#__PURE__*/React.createElement("div", {
+  useEffect(() => {
+    api.responses(id).then(({
+      data
+    }) => setRows(data && data.responses || []));
+  }, [id]);
+  if (!a || rows === null) return /*#__PURE__*/React.createElement("div", {
     className: "muted"
   }, "Loading...");
+  const inputQs = (form.schema.questions || []).filter(q => QTYPES[q.type] && QTYPES[q.type].isInput);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr",
       gap: 18,
-      maxWidth: 640
+      maxWidth: 680
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "card pad-lg"
@@ -3822,7 +4441,21 @@ function AnalyticsTab({
       fontWeight: 600,
       lineHeight: 1
     }
-  }, a.total || 0)), /*#__PURE__*/React.createElement(BarCard, {
+  }, a.total || 0)), inputQs.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "label",
+    style: {
+      marginTop: 4
+    }
+  }, "Question breakdown"), inputQs.map(q => /*#__PURE__*/React.createElement(QuestionStat, {
+    key: q.id,
+    q: q,
+    rows: rows
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "label",
+    style: {
+      marginTop: 4
+    }
+  }, "Audience"), /*#__PURE__*/React.createElement(BarCard, {
     title: "Responses by day",
     rows: (a.byDay || []).map(d => ({
       k: d.date,
@@ -3842,8 +4475,6 @@ function AnalyticsTab({
     }))
   }));
 }
-
-/* ----------------------------- app shell + router ----------------------------- */
 function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [user, setUser] = useState(undefined);
@@ -3921,13 +4552,10 @@ function App() {
     className: "toast"
   }, toastMsg));
 }
-ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
-}
-(function(){
-  function fail(msg){var r=document.getElementById('root');if(r&&!r.childNodes.length){r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not load:\n'+msg+'</pre>';}}
-  function inj(src,next){var s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=next;s.onerror=function(){fail('Could not load '+src);};document.head.appendChild(s);}
-  try{ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot){boot();} else { inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){ inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot(); else fail('React did not initialize.'); }); }); } }catch(e){ fail(e&&e.message?e.message:String(e)); }
-})();
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));}
+(function(){function fail(m){var r=document.getElementById('root');if(r&&!r.childNodes.length)r.innerHTML='<pre style="padding:24px;color:#b23b3b">zetetiq could not load:\n'+m+'</pre>';}
+function inj(src,next){var s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=next;s.onerror=function(){fail('Could not load '+src);};document.head.appendChild(s);}
+try{if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else fail('React did not initialize.');});});}catch(e){fail(e&&e.message?e.message:String(e));}})();
 </script>
 </body>
 </html>

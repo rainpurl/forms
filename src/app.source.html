@@ -296,6 +296,71 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .stars.prev{display:flex;gap:5px}
 .stars.prev .star{font-size:24px;color:var(--line-strong);line-height:1}
 
+
+/* ---- round 4: animations, drag-drop, trash, pages, analytics ---- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+.qccard,.pbreak{animation:fadeUp .25s ease both}
+.overlay{animation:fadeIn .18s ease both}
+.modal{animation:pop .22s cubic-bezier(.2,.8,.2,1) both}
+.toast{animation:toastIn .28s ease both}
+.menu{animation:pop .15s ease both}
+.tab{transition:color .15s,border-color .15s}
+.form-scope .opt,.form-scope .nps button,.form-scope .stars .star,.form-scope .submit,.form-scope .rankrow{transition:all .14s ease}
+.qccard{transition:border-color .12s,box-shadow .12s,opacity .12s,transform .12s}
+/* drag and drop */
+.drag-handle{cursor:grab;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 5px;border-radius:6px;user-select:none}
+.drag-handle:hover{background:var(--paper);color:var(--ink)}
+.drag-handle:active{cursor:grabbing}
+.qccard.dragging,.pbreak.dragging{opacity:.45}
+.qccard.over{box-shadow:0 -3px 0 0 var(--bo);border-color:var(--bo)}
+.pbreak.over{box-shadow:0 -3px 0 0 var(--bo)}
+.form-scope .rankrow .rgrip{cursor:grab;color:var(--ink-soft);user-select:none;font-size:14px}
+.form-scope .rankrow .rgrip:active{cursor:grabbing}
+.form-scope .rankrow.dragging{opacity:.5}
+.form-scope .rankrow.over{box-shadow:0 -3px 0 0 var(--fa)}
+/* page break divider (builder) */
+.pbreak{display:flex;align-items:center;gap:10px;margin:10px 2px;padding:6px 8px;border-radius:9px;cursor:pointer}
+.pbreak.sel{background:#eceaff}
+.pbreak-line{flex:1;height:1px;background:var(--line-strong)}
+.pbreak-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--bo);font-weight:700}
+/* paginated form */
+.form-scope .fprogress{height:6px;background:color-mix(in srgb,var(--fp) 12%,#fff);border-radius:999px;overflow:hidden;margin-top:14px}
+.form-scope .fprogress-bar{height:100%;background:var(--fa);border-radius:999px;transition:width .35s ease}
+.form-scope .fnav{display:flex;align-items:center;gap:12px}
+.form-scope .fpage-count{font-size:13px;color:var(--ink-soft)}
+.form-scope .fbtn-ghost{border:1px solid var(--line-strong);background:#fff;color:var(--fs);padding:11px 18px;border-radius:10px;font-weight:600;cursor:pointer;transition:background .14s}
+.form-scope .fbtn-ghost:hover{background:#f6f5ff}
+.form-scope .fpage{animation:fadeUp .28s ease both}
+/* add-question modal */
+.addq-modal{max-width:560px}
+.addq-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.addq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 18px;max-height:62vh;overflow:auto}
+.addq-item{text-align:left;border:1px solid var(--line-strong);background:#fff;border-radius:10px;padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s}
+.addq-item:hover{border-color:var(--bo);background:#f6f5ff}
+.addq-item .t{font-weight:600;font-size:14px}
+.addq-item .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
+@media(max-width:560px){.addq-grid{grid-template-columns:1fr}}
+/* trash */
+.trashbox{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.trashbox-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:#faf7ff;border-bottom:1px solid var(--line)}
+.trashbox-head .t{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
+.trash-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);animation:fadeUp .2s ease both}
+.trash-item:last-child{border-bottom:0}
+.trash-item .ti-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trash-item .ti-type{font-size:11px;color:var(--ink-soft);font-family:var(--mono);text-transform:uppercase}
+/* analytics aggregates */
+.statgrid{display:flex;gap:26px;flex-wrap:wrap}
+.bignum{font-family:var(--display);font-size:30px;font-weight:600;line-height:1}
+.rankresult{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.rankresult li{display:flex;align-items:center;gap:12px}
+.rankresult .rr-pos{width:24px;height:24px;flex:none;border-radius:50%;background:var(--bo);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;font-family:var(--mono)}
+.rankresult .rr-name{flex:1}
+.rankresult .rr-avg{font-size:12px;color:var(--ink-soft);font-family:var(--mono)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
 </style>
 </head>
 <body>
@@ -638,7 +703,7 @@ const QTYPES = {
 
   rank_order: {
     label: "Rank order",
-    hint: "Order items with up and down",
+    hint: "Order items by dragging or arrows",
     isInput: true,
     make: () => ({ type:"rank_order", id: uid(), label:"Rank these in order of preference", required:false, request:false, items:["Item 1","Item 2","Item 3"] }),
     summary: (q) => q.items.length + " items to rank",
@@ -646,13 +711,19 @@ const QTYPES = {
     Renderer: ({ q, value, onChange, error }) => {
       const ordered = (Array.isArray(value) && value.length === q.items.length) ? value : q.items;
       useEffect(()=>{ if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice()); }, [q.id]);
+      const [drag, setDrag] = useState(null);
+      const [over, setOver] = useState(null);
       const move = (i, dir) => { const a = ordered.slice(); const j = i + dir; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; onChange(a); };
+      const reorder = (from, to) => { if (from === null || from === to) return; const a = ordered.slice(); const m = a.splice(from, 1)[0]; a.splice(to, 0, m); onChange(a); };
       return (
         <div className="q">
           <QLabel q={q} />
           <div className="ranklist">
             {ordered.map((it,i)=>(
-              <div className="rankrow" key={it + "-" + i}>
+              <div className={"rankrow" + (drag === i ? " dragging" : "") + (over === i ? " over" : "")} key={it + "-" + i}
+                   onDragOver={(e)=>{ e.preventDefault(); if (over !== i) setOver(i); }}
+                   onDrop={(e)=>{ e.preventDefault(); reorder(drag, i); setDrag(null); setOver(null); }}>
+                <span className="rgrip" draggable onDragStart={(e)=>{ setDrag(i); try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(i)); } catch (_) {} }} onDragEnd={()=>{ setDrag(null); setOver(null); }} title="Drag to reorder">⠿</span>
                 <span className="rnum">{i + 1}</span>
                 <span className="rlabel">{it}</span>
                 <span className="rbtns">
@@ -662,6 +733,7 @@ const QTYPES = {
               </div>
             ))}
           </div>
+          <div className="hint" style={{marginTop:6}}>Drag the handle or use the arrows to reorder.</div>
           {error && <div className="ferr">{error}</div>}
         </div>
       );
@@ -768,8 +840,17 @@ const QTYPES = {
       );
     },
   },
+  page_break: {
+    label: "Page break",
+    hint: "Start a new page in the form",
+    isInput: false,
+    make: () => ({ type:"page_break", id: uid() }),
+    summary: () => "page break",
+    validate: () => null,
+    Renderer: () => null,
+  },
 };
-const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","text_graphic"];
+const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","text_graphic","page_break"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -816,10 +897,17 @@ function AiSummary({ fetcher }){
 function FormRenderer({ form, preview, onSubmit, submitting }){
   const questions = form.schema.questions || [];
   const settings = form.schema.settings || {};
-  const order = useMemo(()=> settings.randomizeQuestions ? shuffle(questions) : questions, [form.id, questions.length]);
+  const pages = useMemo(()=>{
+    const ps = [[]];
+    for (const q of questions){ if (q.type === "page_break") ps.push([]); else ps[ps.length - 1].push(q); }
+    let out = ps.filter((p)=>p.length);
+    if (!out.length) out = [[]];
+    return settings.randomizeQuestions ? out.map((p)=>shuffle(p)) : out;
+  }, [form.id, questions.length, settings.randomizeQuestions]);
+  const [page, setPage] = useState(0);
   const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
-  const setA = (qid, v) => setAnswers(a=>({ ...a, [qid]: v }));
+  const setA = (qid, v) => setAnswers((a)=>({ ...a, [qid]: v }));
   const theme = form.theme || {};
   const scopeStyle = {
     "--fp": theme.primary || "#5b4fe0",
@@ -827,19 +915,31 @@ function FormRenderer({ form, preview, onSubmit, submitting }){
     "--fa": theme.accent || theme.primary || "#5b4fe0",
     fontFamily: FORM_FONTS[theme.font] || FORM_FONTS.sans,
   };
+  const cur = Math.min(page, pages.length - 1);
+  const multi = pages.length > 1;
+  const isLast = cur === pages.length - 1;
+  const validateList = (list) => {
+    const errs = {};
+    for (const q of list){ const def = QTYPES[q.type]; if (!def || !def.isInput) continue; const e = def.validate(q, answers[q.id]); if (e) errs[q.id] = e; }
+    return errs;
+  };
+  const goNext = () => {
+    if (!preview){ const errs = validateList(pages[cur]); if (Object.keys(errs).length){ setErrors(errs); return; } }
+    setErrors({}); setPage((p)=>Math.min(p + 1, pages.length - 1)); window.scrollTo(0, 0);
+  };
+  const goBack = () => { setErrors({}); setPage((p)=>Math.max(p - 1, 0)); window.scrollTo(0, 0); };
   const handleSubmit = () => {
     if (preview) return;
-    const errs = {};
-    for (const q of questions){
-      const def = QTYPES[q.type];
-      if (!def || !def.isInput) continue;
-      const err = def.validate(q, answers[q.id]);
-      if (err) errs[q.id] = err;
+    const allErrs = validateList(questions);
+    if (Object.keys(allErrs).length){
+      setErrors(allErrs);
+      const idx = pages.findIndex((p)=>p.some((q)=>allErrs[q.id]));
+      if (idx >= 0) setPage(idx);
+      return;
     }
-    if (Object.keys(errs).length){ setErrors(errs); return; }
-    const skipped = questions.filter(q => QTYPES[q.type] && QTYPES[q.type].isInput && q.request && isEmpty(answers[q.id]));
+    const skipped = questions.filter((q)=> QTYPES[q.type] && QTYPES[q.type].isInput && q.request && isEmpty(answers[q.id]));
     if (skipped.length){
-      const names = skipped.map(q=>q.label||"a question").join(", ");
+      const names = skipped.map((q)=>q.label || "a question").join(", ");
       if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return;
     }
     setErrors({});
@@ -850,24 +950,24 @@ function FormRenderer({ form, preview, onSubmit, submitting }){
       <div className="fcard">
         <div className="ftitle">{form.title}</div>
         {form.description && <div className="fdesc">{form.description}</div>}
-        <div style={{marginTop:10}}>
-          {order.map((q)=>{
-            const def = QTYPES[q.type];
-            if (!def) return null;
-            const R = def.Renderer;
-            return <R key={q.id} q={q} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} />;
-          })}
+        {multi && <div className="fprogress"><div className="fprogress-bar" style={{width:(((cur + 1) / pages.length) * 100) + "%"}}></div></div>}
+        <div className="fpage" key={cur} style={{marginTop:12}}>
+          {pages[cur].map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; return <R key={q.id} q={q} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} />; })}
         </div>
-        <div style={{marginTop:18}} className="row">
-          <button className="submit" onClick={handleSubmit} disabled={preview || submitting}>{submitting ? "Submitting..." : "Submit"}</button>
-          {preview && <span className="muted" style={{fontSize:13}}>Preview mode, submit disabled</span>}
+        <div className="fnav" style={{marginTop:18}}>
+          {multi && cur > 0 && <button className="fbtn-ghost" onClick={goBack} disabled={submitting}>Back</button>}
+          {multi && <span className="fpage-count">Page {cur + 1} of {pages.length}</span>}
+          <span className="grow"></span>
+          {!isLast
+            ? <button className="submit" onClick={goNext}>Next</button>
+            : <button className="submit" onClick={handleSubmit} disabled={preview || submitting}>{submitting ? "Submitting..." : "Submit"}</button>}
         </div>
+        {preview && <div className="muted" style={{fontSize:13,marginTop:8}}>Preview mode, submit disabled</div>}
       </div>
     </div>
   );
 }
 
-/* ----------------------------- public form ----------------------------- */
 function PublicForm({ username, slug }){
   const [st, setSt] = useState({ loading:true });
   const [submitting, setSubmitting] = useState(false);
@@ -897,7 +997,11 @@ function PublicForm({ username, slug }){
     setSubmitting(true);
     api.submit(form.id, { data: answers, viewport: { w: window.innerWidth, h: window.innerHeight }, referrer: document.referrer }).then(({ok,data})=>{
       setSubmitting(false);
-      if (ok && data && data.ok) setDone(true);
+      if (ok && data && data.ok){
+        const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
+        if (r){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
+        setDone(true);
+      }
       else window.alert((data && data.error === "form_closed") ? "This form just closed." : "Something went wrong. Please try again.");
     });
   };
@@ -1075,11 +1179,32 @@ function NpsPrev({ q }){
   );
 }
 
-function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, onDown }){
+function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, onDown, dnd }){
   const [menu, setMenu] = useState(false);
+  const handle = {
+    draggable: true,
+    onDragStart: (e)=>{ e.stopPropagation(); dnd.start(index); try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(index)); } catch (_) {} },
+    onDragEnd: ()=>dnd.end(),
+  };
+  const dropProps = {
+    onDragOver: (e)=>{ e.preventDefault(); if (dnd.over !== index) dnd.over_(index); },
+    onDrop: (e)=>{ e.preventDefault(); dnd.drop(index); },
+  };
+  if (q.type === "page_break"){
+    return (
+      <div className={"pbreak" + (selected ? " sel" : "") + (dnd.over === index ? " over" : "")} onClick={onSelect} {...dropProps}>
+        <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
+        <span className="pbreak-line"></span>
+        <span className="pbreak-label">Page break</span>
+        <span className="pbreak-line"></span>
+        <button className="iconbtn" title="Remove" onClick={(e)=>{ e.stopPropagation(); onDel(); }}>×</button>
+      </div>
+    );
+  }
   return (
-    <div className={"qccard" + (selected ? " sel" : "")} onClick={onSelect}>
+    <div className={"qccard" + (selected ? " sel" : "") + (dnd.over === index ? " over" : "") + (dnd.dragging === index ? " dragging" : "")} onClick={onSelect} {...dropProps}>
       <div className="qcc-head">
+        <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
         <span className="qcc-num">Q{index + 1}</span>
         <span className="qcc-type mono">{QTYPES[q.type].label}</span>
         <span className="grow"></span>
@@ -1090,7 +1215,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
               <button onClick={()=>{ onUp(); setMenu(false); }}>Move up</button>
               <button onClick={()=>{ onDown(); setMenu(false); }}>Move down</button>
               <button onClick={()=>{ onDup(); setMenu(false); }}>Duplicate</button>
-              <button className="danger-text" onClick={()=>{ onDel(); setMenu(false); }}>Delete</button>
+              <button className="danger-text" onClick={()=>{ onDel(); setMenu(false); }}>Move to trash</button>
             </div>
           )}
         </div>
@@ -1438,6 +1563,9 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Field label="Description"><textarea className="textarea" value={form.description} onChange={(e)=>setForm((f)=>({ ...f, description:e.target.value }))} /></Field>
       <div className="panel-section">Behavior</div>
       <Toggle checked={!!form.schema.settings.randomizeQuestions} onChange={(c)=>setSettings({randomizeQuestions:c})} label="Randomize question order" />
+      <div className="panel-section">On completion</div>
+      <Field label="Redirect URL (optional)"><input className="input" placeholder="https://example.com/thanks" value={form.schema.settings.redirectUrl || ""} onChange={(e)=>setSettings({redirectUrl:e.target.value})} /></Field>
+      <div className="hint">After submitting, respondents go to this URL instead of the thank-you screen.</div>
       {id && (
         <div style={{marginTop:18}}>
           <div className="panel-section">Danger zone</div>
@@ -1452,15 +1580,23 @@ function AddQuestionMenu({ onAdd }){
   const [open, setOpen] = useState(false);
   return (
     <div className="addq" onClick={(e)=>e.stopPropagation()}>
-      <button className="btn primary" onClick={()=>setOpen((o)=>!o)}>+ Add new question</button>
+      <button className="btn primary" onClick={()=>setOpen(true)}>+ Add new question</button>
       {open && (
-        <div className="addq-menu">
-          {QTYPE_ORDER.map((t)=>(
-            <button key={t} onClick={()=>{ onAdd(t); setOpen(false); }}>
-              <div className="t">{QTYPES[t].label}</div>
-              <div className="h">{QTYPES[t].hint}</div>
-            </button>
-          ))}
+        <div className="overlay" onClick={()=>setOpen(false)}>
+          <div className="modal addq-modal" onClick={(e)=>e.stopPropagation()}>
+            <div className="addq-modal-head">
+              <div className="panel-title" style={{margin:0}}>Add a question</div>
+              <button className="iconbtn" onClick={()=>setOpen(false)} title="Close">×</button>
+            </div>
+            <div className="addq-grid">
+              {QTYPE_ORDER.map((t)=>(
+                <button key={t} className="addq-item" onClick={()=>{ onAdd(t); setOpen(false); }}>
+                  <div className="t">{QTYPES[t].label}</div>
+                  <div className="h">{QTYPES[t].hint}</div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -1479,6 +1615,9 @@ function Builder({ formId }){
   const [savedAt, setSavedAt] = useState(null);
   const [tools, setTools] = useState(false);
   const [loadErr, setLoadErr] = useState(false);
+  const [trash, setTrash] = useState([]);            // session only, never saved
+  const [dragIdx, setDragIdx] = useState(null);
+  const [overIdx, setOverIdx] = useState(null);
 
   useEffect(()=>{
     if (isNew) return;
@@ -1499,9 +1638,12 @@ function Builder({ formId }){
   const setQuestions = (qs)=> setForm((f)=>({ ...f, schema:{ ...f.schema, questions: qs } }));
   const addQ = (type)=>{ const q = QTYPES[type].make(); setQuestions(questions.concat([q])); setSel(q.id); setMode("edit"); };
   const updateQ = (qid, patch)=> setQuestions(questions.map((q)=> q.id === qid ? { ...q, ...patch } : q));
-  const removeQ = (qid)=>{ setQuestions(questions.filter((q)=>q.id !== qid)); if (sel === qid) setSel(null); };
+  const removeQ = (qid)=>{ const q = questions.find((x)=>x.id === qid); if (q) setTrash((t)=>[q, ...t]); setQuestions(questions.filter((x)=>x.id !== qid)); if (sel === qid) setSel(null); };
+  const restoreQ = (tid)=>{ const q = trash.find((x)=>x.id === tid); if (!q) return; setTrash((t)=>t.filter((x)=>x.id !== tid)); setQuestions(questions.concat([q])); setSel(q.id); setMode("edit"); };
   const moveQ = (i, dir)=>{ const qs = questions.slice(); const j = i + dir; if (j < 0 || j >= qs.length) return; const t = qs[i]; qs[i] = qs[j]; qs[j] = t; setQuestions(qs); };
   const dupQ = (qid)=>{ const qs = questions.slice(); const idx = qs.findIndex((q)=>q.id === qid); const copy = { ...qs[idx], id: uid() }; qs.splice(idx + 1, 0, copy); setQuestions(qs); setSel(copy.id); };
+  const reorder = (from, to)=>{ if (from === null || from === to) return; const qs = questions.slice(); const [m] = qs.splice(from, 1); qs.splice(to, 0, m); setQuestions(qs); };
+  const dnd = { dragging: dragIdx, over: overIdx, start: (i)=>setDragIdx(i), over_: (i)=>setOverIdx(i), drop: (i)=>{ reorder(dragIdx, i); setDragIdx(null); setOverIdx(null); }, end: ()=>{ setDragIdx(null); setOverIdx(null); } };
 
   const del = ()=>{ if (!id) return; if (!window.confirm("Delete this form and all its responses? This cannot be undone.")) return; api.deleteForm(id).then(()=>{ toast("Form deleted"); navigate("/dashboard"); }); };
 
@@ -1569,7 +1711,7 @@ function Builder({ formId }){
                 <div className="qblock-body">
                   {questions.length === 0 && <div className="muted" style={{padding:"18px 4px"}}>No questions yet. Use Add new question below.</div>}
                   {questions.map((q, i)=>(
-                    <CanvasCard key={q.id} q={q} index={i} selected={sel === q.id}
+                    <CanvasCard key={q.id} q={q} index={i} selected={sel === q.id} dnd={dnd}
                       onSelect={()=>{ setSel(q.id); setMode("edit"); }}
                       update={(p)=>updateQ(q.id, p)}
                       onDup={()=>dupQ(q.id)} onDel={()=>removeQ(q.id)} onUp={()=>moveQ(i, -1)} onDown={()=>moveQ(i, 1)} />
@@ -1577,9 +1719,26 @@ function Builder({ formId }){
                 </div>
                 <div className="qblock-foot"><AddQuestionMenu onAdd={addQ} /></div>
               </div>
+
               <div className="endcard">
                 <div className="mono" style={{fontSize:11,textTransform:"uppercase",letterSpacing:".05em",color:"var(--ink-soft)",fontWeight:700,marginBottom:8}}>End of form</div>
                 <div style={{textAlign:"center",color:"var(--ink-soft)"}}>Thanks. Your response has been recorded.</div>
+              </div>
+
+              <div className="trashbox">
+                <div className="trashbox-head">
+                  <span className="t">Trash · {trash.length} question{trash.length === 1 ? "" : "s"}</span>
+                  {trash.length > 0 && <button className="btn ghost sm" onClick={()=>setTrash([])}>Empty trash</button>}
+                </div>
+                {trash.length === 0
+                  ? <div className="muted" style={{padding:"14px 16px",fontSize:13}}>Deleted questions land here for this session. They are cleared if you leave or refresh.</div>
+                  : trash.map((q)=>(
+                      <div className="trash-item" key={q.id}>
+                        <span className="ti-label">{q.type === "page_break" ? "Page break" : (q.label || q.heading || "Untitled question")}</span>
+                        <span className="ti-type">{QTYPES[q.type] ? QTYPES[q.type].label : q.type}</span>
+                        <button className="btn sm" onClick={()=>restoreQ(q.id)}>Restore</button>
+                      </div>
+                    ))}
               </div>
             </div>
           </div>
@@ -1620,7 +1779,7 @@ function FormDashboard({ id }){
         <div className="tabs">{["responses","analytics","settings"].map(t=>(<button key={t} className={"tab"+(tab===t?" active":"")} onClick={()=>setTab(t)}>{t[0].toUpperCase()+t.slice(1)}</button>))}</div>
 
         {tab==="responses" && <ResponsesTab id={id} form={form} />}
-        {tab==="analytics" && <AnalyticsTab id={id} />}
+        {tab==="analytics" && <AnalyticsTab id={id} form={form} />}
         {tab==="settings" && (
           <div className="card pad-lg" style={{maxWidth:560}}>
             <div className="between" style={{marginBottom:8}}>
@@ -1642,7 +1801,7 @@ function ResponsesTab({ id, form }){
   useEffect(()=>{ api.responses(id).then(({data})=> setRows((data && data.responses) || [])); },[id]);
   const labels = useMemo(()=>{ const m={}; (form.schema.questions||[]).forEach(q=>{ if (QTYPES[q.type] && QTYPES[q.type].isInput) m[q.id]=q.label||q.id; }); return m; },[form]);
   const previewCols = useMemo(()=> Object.keys(labels).slice(0,2), [labels]);
-  const cell = (v)=> Array.isArray(v) ? v.join(", ") : (v===null||v===undefined ? "" : String(v));
+  const cell = (v)=>{ if (v===null||v===undefined) return ""; if (Array.isArray(v)) return v.join(", "); if (typeof v==="object") return Object.keys(v).map(k=>k+": "+(Array.isArray(v[k])?v[k].join("/"):v[k])).join(" | "); return String(v); };
   if (rows === null) return <div className="muted">Loading...</div>;
   if (rows.length === 0) return <div className="card empty"><p>No responses yet.</p></div>;
   return (
@@ -1678,28 +1837,128 @@ function ResponsesTab({ id, form }){
     </div>
   );
 }
-function BarCard({ title, rows }){
-  const max = Math.max(1, ...rows.map(r=>r.c));
+function BarCard({ title, rows, note }){
+  const max = Math.max(1, ...rows.map((r)=>r.c));
   return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>{title}</div>
-    {rows.length===0 ? <div className="muted" style={{fontSize:13}}>No data yet.</div> :
-      rows.map((r,i)=>(<div className="bar-row" key={i}><span className="k">{r.k||"Unknown"}</span><span className="track2"><span className="fill" style={{width:(r.c/max*100)+"%"}}></span></span><span className="v">{r.c}</span></div>))}
+    {rows.length === 0 ? <div className="muted" style={{fontSize:13}}>No data yet.</div> :
+      rows.map((r,i)=>(<div className="bar-row" key={i}><span className="k">{r.k || "Unknown"}</span><span className="track2"><span className="fill" style={{width:(r.c / max * 100) + "%"}}></span></span><span className="v">{r.v !== undefined ? r.v : r.c}</span></div>))}
+    {note && <div className="hint" style={{marginTop:10}}>{note}</div>}
   </div>);
 }
-function AnalyticsTab({ id }){
+
+function QuestionStat({ q, rows }){
+  const vals = rows.map((r)=>r.data[q.id]).filter((v)=> v !== undefined && v !== null && v !== "");
+  const answered = vals.length;
+  const head = (extra) => (
+    <div className="between" style={{marginBottom:10,gap:10}}>
+      <div className="label" style={{margin:0}}>{q.label || q.id}</div>
+      <span className="mono" style={{fontSize:11,color:"var(--ink-soft)",whiteSpace:"nowrap"}}>{QTYPES[q.type].label} · {answered} answered{extra ? (" · " + extra) : ""}</span>
+    </div>
+  );
+
+  if (q.type === "multiple_choice"){
+    const counts = {}; q.options.forEach((o)=>counts[o] = 0);
+    rows.forEach((r)=>{ const v = r.data[q.id]; if (Array.isArray(v)) v.forEach((o)=>{ counts[o] = (counts[o] || 0) + 1; }); else if (v) counts[v] = (counts[v] || 0) + 1; });
+    const entries = Object.entries(counts).sort((a,b)=>b[1] - a[1]);
+    const mx = Math.max(1, ...entries.map((e)=>e[1]));
+    const most = entries[0], least = entries[entries.length - 1];
+    return (<div className="card pad-lg">{head()}
+      {entries.length ? entries.map(([k,c],i)=>(<div className="bar-row" key={i}><span className="k">{k}</span><span className="track2"><span className="fill" style={{width:(c / mx * 100) + "%"}}></span></span><span className="v">{c}</span></div>)) : <div className="muted" style={{fontSize:13}}>No data yet.</div>}
+      {entries.length > 0 && most[1] > 0 && <div className="hint" style={{marginTop:10}}>Most selected: {most[0]} ({most[1]}). Least: {least[0]} ({least[1]}).</div>}
+    </div>);
+  }
+
+  if (q.type === "matrix"){
+    return (<div className="card pad-lg">{head()}
+      <table className="table" style={{fontSize:13}}><tbody>
+        {q.rows.map((row,ri)=>{ const c = {}; rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object"){ const a = o[row]; (Array.isArray(a) ? a : [a]).forEach((x)=>{ if (x) c[x] = (c[x] || 0) + 1; }); } }); const top = Object.entries(c).sort((a,b)=>b[1] - a[1])[0]; return (<tr key={ri}><td style={{fontWeight:500}}>{row}</td><td>{top ? (top[0] + " (" + top[1] + ")") : <span className="muted">No data</span>}</td></tr>); })}
+      </tbody></table>
+      <div className="hint" style={{marginTop:8}}>Most common answer per statement.</div>
+    </div>);
+  }
+
+  if (q.type === "rank_order"){
+    const sums = {}, cnt = {}; q.items.forEach((it)=>{ sums[it] = 0; cnt[it] = 0; });
+    rows.forEach((r)=>{ const arr = r.data[q.id]; if (Array.isArray(arr)) arr.forEach((it,idx)=>{ if (sums[it] !== undefined){ sums[it] += idx + 1; cnt[it]++; } }); });
+    const ranking = q.items.map((it)=>({ it, avg: cnt[it] ? sums[it] / cnt[it] : null })).filter((x)=>x.avg !== null).sort((a,b)=>a.avg - b.avg);
+    return (<div className="card pad-lg">{head()}
+      {ranking.length ? <ol className="rankresult">{ranking.map((x,i)=>(<li key={i}><span className="rr-pos">{i + 1}</span><span className="rr-name">{x.it}</span><span className="rr-avg">avg {x.avg.toFixed(2)}</span></li>))}</ol> : <div className="muted" style={{fontSize:13}}>No data yet.</div>}
+      <div className="hint" style={{marginTop:8}}>Final ranking by average position (1 is best).</div>
+    </div>);
+  }
+
+  if (q.type === "constant_sum"){
+    const sums = {}, cnt = {}; q.items.forEach((it)=>{ sums[it] = 0; cnt[it] = 0; });
+    rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object") q.items.forEach((it)=>{ const n = parseFloat(o[it]); if (!isNaN(n)){ sums[it] += n; cnt[it]++; } }); });
+    const barRows = q.items.map((it)=>({ k: it, c: cnt[it] ? Math.round(sums[it] / cnt[it] * 10) / 10 : 0 }));
+    const mx = Math.max(1, ...barRows.map((x)=>x.c));
+    return (<div className="card pad-lg">{head()}
+      {barRows.map((r,i)=>(<div className="bar-row" key={i}><span className="k">{r.k}</span><span className="track2"><span className="fill" style={{width:(r.c / mx * 100) + "%"}}></span></span><span className="v">{r.c}</span></div>))}
+      <div className="hint" style={{marginTop:8}}>Average allocation per item (total {q.total}{q.unit ? (" " + q.unit) : ""}).</div>
+    </div>);
+  }
+
+  if (q.type === "star_rating"){
+    const nums = vals.map(Number).filter((n)=>!isNaN(n));
+    const avg = nums.length ? nums.reduce((a,b)=>a + b, 0) / nums.length : 0;
+    const dist = []; for (let k = 1; k <= q.max; k++) dist.push({ k: k + "\u2605", c: nums.filter((n)=>n === k).length });
+    const mx = Math.max(1, ...dist.map((d)=>d.c));
+    return (<div className="card pad-lg">{head(nums.length ? ("avg " + avg.toFixed(2) + " / " + q.max) : "")}
+      {dist.map((d,i)=>(<div className="bar-row" key={i}><span className="k">{d.k}</span><span className="track2"><span className="fill" style={{width:(d.c / mx * 100) + "%"}}></span></span><span className="v">{d.c}</span></div>))}
+    </div>);
+  }
+
+  if (q.type === "slider"){
+    const nums = vals.map(Number).filter((n)=>!isNaN(n));
+    const avg = nums.length ? nums.reduce((a,b)=>a + b, 0) / nums.length : 0;
+    return (<div className="card pad-lg">{head()}<div className="statgrid">
+      <div><div className="bignum">{nums.length ? avg.toFixed(1) : "-"}</div><div className="hint">Average</div></div>
+      <div><div className="bignum">{nums.length ? Math.min(...nums) : "-"}</div><div className="hint">Min</div></div>
+      <div><div className="bignum">{nums.length ? Math.max(...nums) : "-"}</div><div className="hint">Max</div></div>
+    </div></div>);
+  }
+
+  if (q.type === "nps"){
+    const nums = vals.map(Number).filter((n)=>!isNaN(n));
+    const n = nums.length || 1;
+    const prom = nums.filter((x)=>x >= 9).length, det = nums.filter((x)=>x <= 6).length, pass = nums.filter((x)=>x === 7 || x === 8).length;
+    const nps = Math.round((prom / n - det / n) * 100);
+    return (<div className="card pad-lg">{head()}<div className="statgrid">
+      <div><div className="bignum">{nums.length ? nps : "-"}</div><div className="hint">NPS</div></div>
+      <div><div className="bignum">{prom}</div><div className="hint">Promoters</div></div>
+      <div><div className="bignum">{pass}</div><div className="hint">Passives</div></div>
+      <div><div className="bignum">{det}</div><div className="hint">Detractors</div></div>
+    </div></div>);
+  }
+
+  if (q.type === "date"){
+    const ds = vals.map(String).filter(Boolean).sort();
+    return (<div className="card pad-lg">{head()}<div className="hint">{ds.length ? ("Earliest " + ds[0] + ", latest " + ds[ds.length - 1]) : "No data yet."}</div></div>);
+  }
+
+  return (<div className="card pad-lg">{head()}<div className="hint">{answered ? (answered + " text response" + (answered === 1 ? "" : "s") + ". See the Responses tab for details.") : "No data yet."}</div></div>);
+}
+
+function AnalyticsTab({ id, form }){
   const [a, setA] = useState(null);
+  const [rows, setRows] = useState(null);
   useEffect(()=>{ api.analytics(id).then(({data})=> setA(data || {})); },[id]);
-  if (!a) return <div className="muted">Loading...</div>;
+  useEffect(()=>{ api.responses(id).then(({data})=> setRows((data && data.responses) || [])); },[id]);
+  if (!a || rows === null) return <div className="muted">Loading...</div>;
+  const inputQs = (form.schema.questions || []).filter((q)=> QTYPES[q.type] && QTYPES[q.type].isInput);
   return (
-    <div style={{display:"grid",gridTemplateColumns:"1fr",gap:18,maxWidth:640}}>
-      <div className="card pad-lg"><div className="label">Total responses</div><div style={{fontFamily:"var(--display)",fontSize:46,fontWeight:600,lineHeight:1}}>{a.total||0}</div></div>
-      <BarCard title="Responses by day" rows={(a.byDay||[]).map(d=>({k:d.date,c:d.count}))} />
-      <BarCard title="By country" rows={(a.byCountry||[]).map(d=>({k:d.name,c:d.count}))} />
-      <BarCard title="By browser" rows={(a.byBrowser||[]).map(d=>({k:d.name,c:d.count}))} />
+    <div style={{display:"grid",gridTemplateColumns:"1fr",gap:18,maxWidth:680}}>
+      <div className="card pad-lg"><div className="label">Total responses</div><div style={{fontFamily:"var(--display)",fontSize:46,fontWeight:600,lineHeight:1}}>{a.total || 0}</div></div>
+      {inputQs.length > 0 && <div className="label" style={{marginTop:4}}>Question breakdown</div>}
+      {inputQs.map((q)=><QuestionStat key={q.id} q={q} rows={rows} />)}
+      <div className="label" style={{marginTop:4}}>Audience</div>
+      <BarCard title="Responses by day" rows={(a.byDay || []).map((d)=>({ k:d.date, c:d.count }))} />
+      <BarCard title="By country" rows={(a.byCountry || []).map((d)=>({ k:d.name, c:d.count }))} />
+      <BarCard title="By browser" rows={(a.byBrowser || []).map((d)=>({ k:d.name, c:d.count }))} />
     </div>
   );
 }
 
-/* ----------------------------- app shell + router ----------------------------- */
 function App(){
   const [path, setPath] = useState(window.location.pathname);
   const [user, setUser] = useState(undefined);
