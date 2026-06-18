@@ -6,23 +6,23 @@
 <title>zetetiq</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Roboto+Slab:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@400;500;600;700&family=Mozilla+Text:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
 :root{
-  --bo:#BF5700;            /* burnt orange */
-  --bo-dark:#9c4700;
-  --ink:#1a1a1a;
-  --ink-soft:#5b554e;
-  --line:#ece7e1;
-  --line-strong:#ddd5cb;
-  --paper:#faf8f5;
+  --bo:#5b4fe0;            /* primary blue-purple */
+  --bo-dark:#4536c9;
+  --ink:#1b1830;
+  --ink-soft:#6a6580;
+  --line:#e7e4f3;
+  --line-strong:#d6d1ea;
+  --paper:#f6f5fc;
   --card:#ffffff;
   --good:#2f7d52;
   --bad:#b23b3b;
   --radius:14px;
-  --sans:'Figtree',system-ui,-apple-system,sans-serif;
-  --display:'Fraunces',Georgia,serif;
-  --mono:'Space Mono',ui-monospace,monospace;
+  --sans:'Mozilla Text',system-ui,-apple-system,sans-serif;
+  --display:'Mozilla Headline','Mozilla Text',system-ui,sans-serif;
+  --mono:'Mozilla Text',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -43,26 +43,26 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .grow{flex:1}
 
 /* nav */
-.nav{border-bottom:1px solid var(--line);background:rgba(250,248,245,.85);backdrop-filter:saturate(1.4) blur(8px);position:sticky;top:0;z-index:40}
+.nav{border-bottom:1px solid var(--line);background:rgba(246,245,252,.88);backdrop-filter:saturate(1.4) blur(8px);position:sticky;top:0;z-index:40}
 .nav .wrap{height:58px;display:flex;align-items:center;justify-content:space-between}
-.brand{font-family:var(--mono);font-weight:700;font-size:18px;letter-spacing:-0.02em;color:var(--bo);cursor:pointer;border:0;background:none;padding:0}
+.brand{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-0.02em;color:var(--bo);cursor:pointer;border:0;background:none;padding:0}
 .brand .dot{color:var(--ink)}
 .greet{font-family:var(--mono);font-size:13px;color:var(--ink-soft)}
 
 /* buttons */
 .btn{appearance:none;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;transition:.12s ease;line-height:1}
-.btn:hover{border-color:#c9c0b5;background:#fcfbf9}
+.btn:hover{border-color:#cfcae2;background:#faf9ff}
 .btn:active{transform:translateY(1px)}
 .btn.primary{background:var(--bo);border-color:var(--bo);color:#fff}
 .btn.primary:hover{background:var(--bo-dark);border-color:var(--bo-dark)}
 .btn.ghost{border-color:transparent;background:transparent}
-.btn.ghost:hover{background:#f1ece5}
+.btn.ghost:hover{background:#edebf8}
 .btn.danger{color:#fff;background:var(--bad);border-color:var(--bad)}
 .btn.danger:hover{filter:brightness(.95)}
 .btn.sm{padding:6px 11px;font-size:13px;border-radius:8px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .iconbtn{border:1px solid var(--line-strong);background:var(--card);width:32px;height:32px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
-.iconbtn:hover{background:#f6f2ec}
+.iconbtn:hover{background:#f0eefb}
 
 /* cards */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
@@ -72,21 +72,21 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 /* badges */
 .badge{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
 .badge.open{background:#e8f3ec;color:var(--good)}
-.badge.closed{background:#f1ece5;color:var(--ink-soft)}
+.badge.closed{background:#edebf8;color:var(--ink-soft)}
 
 /* tables */
 .table{width:100%;border-collapse:collapse}
 .table th{text-align:left;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;padding:10px 14px;border-bottom:1px solid var(--line)}
 .table td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
 .table tr.clickable{cursor:pointer}
-.table tr.clickable:hover td{background:#fbf8f4}
+.table tr.clickable:hover td{background:#f4f3fe}
 .table tr:last-child td{border-bottom:0}
 
 /* inputs */
 .field{display:block;margin-bottom:14px}
 .label{display:block;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin-bottom:6px}
 .input,.textarea,.select{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink);outline:none;transition:.12s}
-.input:focus,.textarea:focus,.select:focus{border-color:var(--bo);box-shadow:0 0 0 3px rgba(191,87,0,.12)}
+.input:focus,.textarea:focus,.select:focus{border-color:var(--bo);box-shadow:0 0 0 3px rgba(91,79,224,.16)}
 .textarea{min-height:84px;resize:vertical}
 .hint{font-size:12.5px;color:var(--ink-soft);margin-top:5px}
 .err{font-size:12.5px;color:var(--bad);margin-top:5px;font-weight:600}
@@ -98,20 +98,20 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .switch input:checked + .track .knob{left:18px}
 
 /* ai summary card */
-.ai{background:linear-gradient(180deg,#fff,#fdfaf6);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative}
+.ai{background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative}
 .ai .ai-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .ai .spark{width:16px;height:16px;color:var(--bo)}
 .ai .ai-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--bo);font-weight:700}
 .ai .ai-body{font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap}
 .ai .ai-foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line-strong)}
 .ai .ai-meta{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
-.shimmer{height:13px;border-radius:6px;background:linear-gradient(90deg,#f0ebe4 25%,#f7f3ed 37%,#f0ebe4 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;margin:7px 0}
+.shimmer{height:13px;border-radius:6px;background:linear-gradient(90deg,#eae7f6 25%,#f3f1fb 37%,#eae7f6 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;margin:7px 0}
 @keyframes sh{0%{background-position:100% 0}100%{background-position:-100% 0}}
 
 /* bars (analytics) */
 .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13.5px}
 .bar-row .k{width:130px;flex:none;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-row .track2{flex:1;background:#f1ece5;border-radius:6px;height:20px;overflow:hidden}
+.bar-row .track2{flex:1;background:#edebf8;border-radius:6px;height:20px;overflow:hidden}
 .bar-row .fill{height:100%;background:var(--bo);border-radius:6px}
 .bar-row .v{width:42px;flex:none;text-align:right;font-family:var(--mono);font-size:12px}
 
@@ -121,7 +121,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .tab.active{color:var(--bo);border-bottom-color:var(--bo)}
 
 /* modal */
-.overlay{position:fixed;inset:0;background:rgba(26,26,26,.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60}
+.overlay{position:fixed;inset:0;background:rgba(24,21,46,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60}
 .modal{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.25)}
 
 /* toast */
@@ -129,26 +129,26 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 /* question card (builder) */
 .qcard{border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:12px;overflow:hidden}
-.qcard .qhead{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fcfbf9;border-bottom:1px solid var(--line)}
+.qcard .qhead{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#faf9ff;border-bottom:1px solid var(--line)}
 .qcard .qtype{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--bo);font-weight:700}
 .qcard .qsummary{font-size:14px;color:var(--ink)}
 .qbody{padding:14px}
 .addmenu{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .addmenu button{text-align:left;border:1px solid var(--line-strong);background:#fff;border-radius:10px;padding:11px 12px;cursor:pointer}
-.addmenu button:hover{border-color:var(--bo);background:#fffaf4}
+.addmenu button:hover{border-color:var(--bo);background:#f3f1ff}
 .addmenu .t{font-weight:600;font-size:14px}
 .addmenu .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
 
 /* landing */
 .landing{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
-.landing .lo{font-family:var(--mono);font-weight:700;font-size:42px;color:var(--bo);letter-spacing:-0.03em}
+.landing .lo{font-family:var(--display);font-weight:700;font-size:42px;color:var(--bo);letter-spacing:-0.03em}
 .landing .lo .dot{color:var(--ink)}
 .landing .tag{max-width:430px;color:var(--ink-soft);font-size:16px;margin:14px 0 28px}
 .gbtn{display:inline-flex;align-items:center;gap:10px;justify-content:center;width:100%;padding:12px 16px;border-radius:11px;border:1px solid var(--line-strong);background:#fff;font-weight:600;cursor:pointer}
-.gbtn:hover{background:#fbf8f4}
+.gbtn:hover{background:#f4f3fe}
 
 /* form scope (respondent + preview): themed */
-.form-scope{--fp:#BF5700;--fs:#1a1a1a;--fa:#BF5700;font-family:var(--sans)}
+.form-scope{--fp:#5b4fe0;--fs:#1b1830;--fa:#5b4fe0;font-family:var(--sans)}
 .form-scope .fcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
 .form-scope .ftitle{font-family:var(--display);font-size:27px;color:var(--fs);font-weight:600;line-height:1.2}
 .form-scope .fdesc{color:var(--ink-soft);margin-top:8px;font-size:15px}
@@ -176,24 +176,24 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .center-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;gap:14px}
 
 .empty{text-align:center;padding:52px 20px;color:var(--ink-soft)}
-.copyfield{display:flex;align-items:center;gap:8px;border:1px solid var(--line-strong);border-radius:10px;padding:7px 7px 7px 12px;background:#fcfbf9}
+.copyfield{display:flex;align-items:center;gap:8px;border:1px solid var(--line-strong);border-radius:10px;padding:7px 7px 7px 12px;background:#faf9ff}
 .copyfield code{font-family:var(--mono);font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
 @media(max-width:620px){.addmenu{grid-template-columns:1fr}.bar-row .k{width:92px}.hide-sm{display:none}}
 
 /* ---- builder: properties panel + canvas layout ---- */
-.builder{display:flex;flex-direction:column;height:100vh;background:#f3efe9}
+.builder{display:flex;flex-direction:column;height:100vh;background:#f3f2fb}
 .b-top{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#fff;border-bottom:1px solid var(--line)}
 .b-top .saved-note{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
 .b-tools{position:relative}
 .menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.14);padding:6px;min-width:170px;z-index:50}
 .menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:14px;color:var(--ink)}
-.menu button:hover{background:#f4efe8}
+.menu button:hover{background:#f0eefb}
 .menu button.danger-text{color:var(--bad)}
 .b-main{flex:1;display:flex;min-height:0}
 .b-rail{width:54px;flex:none;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:6px}
 .b-rail button{width:38px;height:38px;border:0;background:none;border-radius:9px;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center}
-.b-rail button:hover{background:#f4efe8;color:var(--ink)}
-.b-rail button.active{background:#fbe9da;color:var(--bo)}
+.b-rail button:hover{background:#f0eefb;color:var(--ink)}
+.b-rail button.active{background:#eceaff;color:var(--bo)}
 .b-panel{width:320px;flex:none;background:#fff;border-right:1px solid var(--line);overflow:auto;padding:18px}
 .panel-title{font-family:var(--display);font-size:18px;margin-bottom:14px}
 .panel-section{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin:16px 0 9px;padding-top:13px;border-top:1px solid var(--line)}
@@ -203,7 +203,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .opt-radio input{accent-color:var(--bo)}
 .stepper{display:inline-flex;align-items:center;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden}
 .stepper button{width:36px;height:34px;border:0;background:#fff;cursor:pointer;font-size:17px;color:var(--ink)}
-.stepper button:hover{background:#f4efe8}
+.stepper button:hover{background:#f0eefb}
 .stepper button:disabled{opacity:.4;cursor:not-allowed}
 .stepper span{min-width:42px;text-align:center;font-family:var(--mono);font-size:14px;border-left:1px solid var(--line);border-right:1px solid var(--line);height:34px;display:inline-flex;align-items:center;justify-content:center}
 .b-canvas{flex:1;overflow:auto;padding:26px 22px 90px}
@@ -211,20 +211,20 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .canvas-title{width:100%;border:0;background:none;font-family:var(--display);font-size:26px;font-weight:600;color:var(--ink);padding:6px 4px;margin-bottom:14px;outline:none;border-bottom:1px solid transparent}
 .canvas-title:focus{border-bottom-color:var(--line-strong)}
 .qblock{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:18px}
-.qblock-head{padding:11px 16px;background:#faf7f2;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
+.qblock-head{padding:11px 16px;background:#f6f5ff;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
 .qblock-body{padding:14px}
-.qblock-foot{padding:12px 14px;border-top:1px solid var(--line);background:#fcfbf9}
+.qblock-foot{padding:12px 14px;border-top:1px solid var(--line);background:#faf9ff}
 .qccard{border:1px solid var(--line);border-radius:11px;background:#fff;padding:14px;margin-bottom:12px;cursor:pointer;transition:border-color .1s, box-shadow .1s}
 .qccard:last-child{margin-bottom:0}
 .qccard:hover{border-color:var(--line-strong)}
-.qccard.sel{border-color:var(--bo);box-shadow:0 0 0 2px rgba(191,87,0,.15)}
+.qccard.sel{border-color:var(--bo);box-shadow:0 0 0 2px rgba(91,79,224,.2)}
 .qcc-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
 .qcc-num{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--bo)}
 .qcc-type{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
 .qcc-menu{position:relative}
 .wq-title{width:100%;border:0;background:none;font-size:16px;font-weight:600;color:var(--ink);outline:none;padding:3px 2px;border-radius:6px}
-.wq-title:focus{background:#faf6f0}
-.wq-title::placeholder{color:#b3a89c;font-weight:500}
+.wq-title:focus{background:#f4f3ff}
+.wq-title::placeholder{color:#a39ec2;font-weight:500}
 .wq-textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:8px;min-height:64px;outline:none;resize:vertical;font-family:inherit}
 .wq-body{margin-top:10px}
 .wq-choice{display:flex;align-items:center;gap:9px;margin:6px 0}
@@ -232,26 +232,63 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .wq-mark.rd{border-radius:50%}
 .wq-mark.sq{border-radius:4px}
 .wq-choice-input{flex:1;border:0;border-bottom:1px solid transparent;background:none;padding:5px 2px;outline:none;font-size:14px}
-.wq-choice-input:focus{border-bottom-color:var(--line-strong);background:#faf6f0}
-.wq-choice-input::placeholder{color:#b3a89c}
+.wq-choice-input:focus{border-bottom-color:var(--line-strong);background:#f4f3ff}
+.wq-choice-input::placeholder{color:#a39ec2}
 .wq-addchoice{border:0;background:none;color:var(--bo);font-weight:600;font-size:13px;cursor:pointer;padding:6px 2px;margin-top:2px}
 .wq-addchoice:hover{text-decoration:underline}
 .wq-prev{margin-top:4px}
-.wq-prev-input{border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;color:#b3a89c;font-size:14px;background:#fcfbf9}
+.wq-prev-input{border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;color:#a39ec2;font-size:14px;background:#faf9ff}
 .wq-prev-input.tall{min-height:64px}
 .addq{position:relative;display:inline-block}
 .addq-menu{position:absolute;bottom:calc(100% + 8px);left:0;background:#fff;border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 14px 36px rgba(0,0,0,.16);padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:420px;z-index:50}
 .addq-menu button{text-align:left;border:1px solid var(--line-strong);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer}
-.addq-menu button:hover{border-color:var(--bo);background:#fffaf4}
+.addq-menu button:hover{border-color:var(--bo);background:#f3f1ff}
 .addq-menu .t{font-weight:600;font-size:14px}
 .addq-menu .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
 .endcard{background:#fff;border:1px dashed var(--line-strong);border-radius:14px;padding:16px}
-.b-preview{flex:1;overflow:auto;background:#f3efe9}
+.b-preview{flex:1;overflow:auto;background:#f3f2fb}
 @media(max-width:860px){
   .b-rail{display:none}
   .b-panel{width:250px;padding:14px}
   .addq-menu{grid-template-columns:1fr;width:240px}
 }
+
+
+/* ---- new question types: respondent ---- */
+.form-scope .matrix-wrap{overflow-x:auto}
+.form-scope table.matrix{border-collapse:collapse;width:100%;font-size:14px}
+.form-scope table.matrix th{font-weight:600;color:var(--fs);padding:8px 10px;text-align:center;border-bottom:1px solid var(--line-strong)}
+.form-scope table.matrix th.mrow{text-align:left;font-weight:500}
+.form-scope table.matrix td{text-align:center;padding:8px 10px;border-bottom:1px solid var(--line)}
+.form-scope table.matrix tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--fp) 4%,#fff)}
+.form-scope .mcell input{accent-color:var(--fa);width:18px;height:18px;cursor:pointer}
+.form-scope .ranklist{display:flex;flex-direction:column;gap:8px}
+.form-scope .rankrow{display:flex;align-items:center;gap:12px;border:1px solid var(--line-strong);border-radius:10px;padding:9px 12px;background:#fff}
+.form-scope .rnum{width:26px;height:26px;flex:none;border-radius:50%;background:var(--fa);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.form-scope .rlabel{flex:1}
+.form-scope .rbtns button{width:30px;height:30px;border:1px solid var(--line-strong);background:#fff;border-radius:7px;cursor:pointer;margin-left:4px;font-size:14px}
+.form-scope .rbtns button:disabled{opacity:.35;cursor:not-allowed}
+.form-scope .csrow{display:flex;align-items:center;gap:10px;margin:8px 0}
+.form-scope .cslabel{flex:1}
+.form-scope .csinput{width:110px;flex:none}
+.form-scope .csunit{color:var(--ink-soft);font-size:13px}
+.form-scope .cstotal{margin-top:10px;font-weight:600;color:var(--ink-soft)}
+.form-scope .cstotal.ok{color:var(--good)}
+.form-scope .fformrow{margin:10px 0}
+.form-scope .fflabel{display:block;font-weight:500;margin-bottom:5px;color:var(--fs)}
+.form-scope .stars{display:flex;gap:6px}
+.form-scope .stars .star{font-size:30px;line-height:1;background:none;border:0;cursor:pointer;color:var(--line-strong);padding:0}
+.form-scope .stars .star.on{color:var(--fa)}
+/* ---- new question types: builder canvas ---- */
+.mxcanvas{overflow-x:auto}
+.mxgrid{display:grid;gap:4px 6px;align-items:center;min-width:340px}
+.mxcol{display:flex;flex-direction:column;align-items:center;gap:2px}
+.mxdot{display:flex;align-items:center;justify-content:center}
+.rnum.sm{width:22px;height:22px;flex:none;border-radius:50%;background:var(--bo);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.csbox{min-width:60px;text-align:center;border:1px solid var(--line-strong);border-radius:7px;padding:5px 8px;color:var(--ink-soft);font-size:13px}
+.fformedit{margin:8px 0}
+.stars.prev{display:flex;gap:5px}
+.stars.prev .star{font-size:24px;color:var(--line-strong);line-height:1}
 
 </style>
 </head>
@@ -259,7 +296,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 <div id="root"></div>
 
 <script>
-window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||r.childNodes.length)return;var msg=(e&&e.message)?e.message:((e&&e.target&&e.target.src)?('Failed to load '+e.target.src):'Unknown error');r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not start:\n'+msg+'</pre>';},true);
+window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||r.childNodes.length)return;var msg=(e&&e.message)?e.message:'Unknown error';r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not start:\n'+msg+'</pre>';},true);
 </script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
@@ -343,9 +380,9 @@ const api = {
 const uid = () => Math.random().toString(36).slice(2, 9);
 const isEmpty = v => v === null || v === undefined || v === "" || Array.isArray(v) && v.length === 0;
 const FORM_FONTS = {
-  sans: "'Figtree',system-ui,sans-serif",
+  sans: "'Mozilla Text',system-ui,sans-serif",
   serif: "'Georgia Pro',Georgia,'Times New Roman',serif",
-  mono: "'Space Mono',ui-monospace,monospace",
+  mono: "ui-monospace,'SF Mono',Menlo,monospace",
   slab: "'Roboto Slab',Georgia,serif"
 };
 function shuffle(arr) {
@@ -977,9 +1014,327 @@ const QTYPES = {
     }, /*#__PURE__*/React.createElement("span", null, q.leftLabel), /*#__PURE__*/React.createElement("span", null, q.rightLabel)), error && /*#__PURE__*/React.createElement("div", {
       className: "ferr"
     }, error))
+  },
+  matrix: {
+    label: "Matrix table",
+    hint: "Grid of statements rated on one scale",
+    isInput: true,
+    make: () => ({
+      type: "matrix",
+      id: uid(),
+      label: "Untitled question",
+      required: false,
+      request: false,
+      rows: ["Statement 1", "Statement 2", "Statement 3"],
+      cols: ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"],
+      multi: false
+    }),
+    summary: q => q.rows.length + " statements x " + q.cols.length + " points",
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const ans = v || {};
+      for (const r of q.rows) {
+        const a = ans[r];
+        if (q.multi ? !(Array.isArray(a) && a.length) : !a) return "Please answer every row.";
+      }
+      return null;
+    },
+    Renderer: ({
+      q,
+      value,
+      onChange,
+      error
+    }) => {
+      const ans = value || {};
+      const on = (row, col) => q.multi ? Array.isArray(ans[row]) && ans[row].includes(col) : ans[row] === col;
+      const pick = (row, col) => {
+        if (q.multi) {
+          const cur = Array.isArray(ans[row]) ? ans[row] : [];
+          onChange({
+            ...ans,
+            [row]: cur.includes(col) ? cur.filter(x => x !== col) : cur.concat([col])
+          });
+        } else onChange({
+          ...ans,
+          [row]: col
+        });
+      };
+      return /*#__PURE__*/React.createElement("div", {
+        className: "q"
+      }, /*#__PURE__*/React.createElement(QLabel, {
+        q: q
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "matrix-wrap"
+      }, /*#__PURE__*/React.createElement("table", {
+        className: "matrix"
+      }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null), q.cols.map((c, i) => /*#__PURE__*/React.createElement("th", {
+        key: i
+      }, c)))), /*#__PURE__*/React.createElement("tbody", null, q.rows.map((r, ri) => /*#__PURE__*/React.createElement("tr", {
+        key: ri
+      }, /*#__PURE__*/React.createElement("th", {
+        className: "mrow"
+      }, r), q.cols.map((c, ci) => /*#__PURE__*/React.createElement("td", {
+        key: ci
+      }, /*#__PURE__*/React.createElement("label", {
+        className: "mcell"
+      }, /*#__PURE__*/React.createElement("input", {
+        type: q.multi ? "checkbox" : "radio",
+        name: q.id + "-" + ri,
+        checked: on(r, c),
+        onChange: () => pick(r, c)
+      }))))))))), error && /*#__PURE__*/React.createElement("div", {
+        className: "ferr"
+      }, error));
+    }
+  },
+  rank_order: {
+    label: "Rank order",
+    hint: "Order items with up and down",
+    isInput: true,
+    make: () => ({
+      type: "rank_order",
+      id: uid(),
+      label: "Rank these in order of preference",
+      required: false,
+      request: false,
+      items: ["Item 1", "Item 2", "Item 3"]
+    }),
+    summary: q => q.items.length + " items to rank",
+    validate: (q, v) => q.required && !(Array.isArray(v) && v.length === q.items.length) ? "Please rank the items." : null,
+    Renderer: ({
+      q,
+      value,
+      onChange,
+      error
+    }) => {
+      const ordered = Array.isArray(value) && value.length === q.items.length ? value : q.items;
+      useEffect(() => {
+        if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice());
+      }, [q.id]);
+      const move = (i, dir) => {
+        const a = ordered.slice();
+        const j = i + dir;
+        if (j < 0 || j >= a.length) return;
+        const t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+        onChange(a);
+      };
+      return /*#__PURE__*/React.createElement("div", {
+        className: "q"
+      }, /*#__PURE__*/React.createElement(QLabel, {
+        q: q
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "ranklist"
+      }, ordered.map((it, i) => /*#__PURE__*/React.createElement("div", {
+        className: "rankrow",
+        key: it + "-" + i
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "rnum"
+      }, i + 1), /*#__PURE__*/React.createElement("span", {
+        className: "rlabel"
+      }, it), /*#__PURE__*/React.createElement("span", {
+        className: "rbtns"
+      }, /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        onClick: () => move(i, -1),
+        disabled: i === 0
+      }, "↑"), /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        onClick: () => move(i, 1),
+        disabled: i === ordered.length - 1
+      }, "↓"))))), error && /*#__PURE__*/React.createElement("div", {
+        className: "ferr"
+      }, error));
+    }
+  },
+  constant_sum: {
+    label: "Constant sum",
+    hint: "Numbers that must add to a total",
+    isInput: true,
+    make: () => ({
+      type: "constant_sum",
+      id: uid(),
+      label: "Distribute points across the options",
+      required: false,
+      request: false,
+      items: ["Item 1", "Item 2", "Item 3"],
+      total: 100,
+      unit: ""
+    }),
+    summary: q => q.items.length + " items, total " + q.total,
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const ans = v || {};
+      const sum = q.items.reduce((s, it) => s + (parseFloat(ans[it]) || 0), 0);
+      return sum === q.total ? null : "Values must add up to " + q.total + ".";
+    },
+    Renderer: ({
+      q,
+      value,
+      onChange,
+      error
+    }) => {
+      const ans = value || {};
+      const set = (it, val) => onChange({
+        ...ans,
+        [it]: val
+      });
+      const sum = q.items.reduce((s, it) => s + (parseFloat(ans[it]) || 0), 0);
+      const ok = sum === q.total;
+      return /*#__PURE__*/React.createElement("div", {
+        className: "q"
+      }, /*#__PURE__*/React.createElement(QLabel, {
+        q: q
+      }), q.items.map((it, i) => /*#__PURE__*/React.createElement("div", {
+        className: "csrow",
+        key: i
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "cslabel"
+      }, it), /*#__PURE__*/React.createElement("input", {
+        className: "finput csinput",
+        type: "number",
+        inputMode: "numeric",
+        value: ans[it] === undefined ? "" : ans[it],
+        onChange: ev => set(it, ev.target.value)
+      }), q.unit && /*#__PURE__*/React.createElement("span", {
+        className: "csunit"
+      }, q.unit))), /*#__PURE__*/React.createElement("div", {
+        className: "cstotal" + (ok ? " ok" : "")
+      }, "Total: ", sum, " / ", q.total, q.unit ? " " + q.unit : ""), error && /*#__PURE__*/React.createElement("div", {
+        className: "ferr"
+      }, error));
+    }
+  },
+  form_field: {
+    label: "Form field",
+    hint: "Several labeled text fields together",
+    isInput: true,
+    make: () => ({
+      type: "form_field",
+      id: uid(),
+      label: "Your details",
+      required: false,
+      request: false,
+      fields: ["Name", "Email"]
+    }),
+    summary: q => q.fields.length + " fields",
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const ans = v || {};
+      for (const f of q.fields) {
+        if (!String(ans[f] || "").trim()) return "Please complete every field.";
+      }
+      return null;
+    },
+    Renderer: ({
+      q,
+      value,
+      onChange,
+      error
+    }) => {
+      const ans = value || {};
+      const set = (f, val) => onChange({
+        ...ans,
+        [f]: val
+      });
+      return /*#__PURE__*/React.createElement("div", {
+        className: "q"
+      }, /*#__PURE__*/React.createElement(QLabel, {
+        q: q
+      }), q.fields.map((f, i) => /*#__PURE__*/React.createElement("div", {
+        className: "fformrow",
+        key: i
+      }, /*#__PURE__*/React.createElement("label", {
+        className: "fflabel"
+      }, f), /*#__PURE__*/React.createElement("input", {
+        className: "finput",
+        value: ans[f] || "",
+        onChange: ev => set(f, ev.target.value)
+      }))), error && /*#__PURE__*/React.createElement("div", {
+        className: "ferr"
+      }, error));
+    }
+  },
+  date: {
+    label: "Date",
+    hint: "Calendar date picker",
+    isInput: true,
+    make: () => ({
+      type: "date",
+      id: uid(),
+      label: "Pick a date",
+      required: false,
+      request: false
+    }),
+    summary: () => "date picker",
+    validate: (q, v) => q.required && !v ? "Please choose a date." : null,
+    Renderer: ({
+      q,
+      value,
+      onChange,
+      error
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "q"
+    }, /*#__PURE__*/React.createElement(QLabel, {
+      q: q
+    }), /*#__PURE__*/React.createElement("input", {
+      className: "finput",
+      type: "date",
+      value: value || "",
+      onChange: ev => onChange(ev.target.value),
+      style: {
+        maxWidth: 220
+      }
+    }), error && /*#__PURE__*/React.createElement("div", {
+      className: "ferr"
+    }, error))
+  },
+  star_rating: {
+    label: "Star rating",
+    hint: "1 to N clickable stars",
+    isInput: true,
+    make: () => ({
+      type: "star_rating",
+      id: uid(),
+      label: "How would you rate us?",
+      required: false,
+      request: false,
+      max: 5
+    }),
+    summary: q => q.max + "-star rating",
+    validate: (q, v) => q.required && !(v > 0) ? "Please choose a rating." : null,
+    Renderer: ({
+      q,
+      value,
+      onChange,
+      error
+    }) => {
+      const n = value || 0;
+      return /*#__PURE__*/React.createElement("div", {
+        className: "q"
+      }, /*#__PURE__*/React.createElement(QLabel, {
+        q: q
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "stars"
+      }, Array.from({
+        length: q.max
+      }).map((_, i) => {
+        const k = i + 1;
+        return /*#__PURE__*/React.createElement("button", {
+          key: k,
+          type: "button",
+          className: "star" + (k <= n ? " on" : ""),
+          onClick: () => onChange(k),
+          "aria-label": k + " star"
+        }, "★");
+      })), error && /*#__PURE__*/React.createElement("div", {
+        className: "ferr"
+      }, error));
+    }
   }
 };
-const QTYPE_ORDER = ["multiple_choice", "text_entry", "text_graphic", "slider", "nps"];
+const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "text_graphic"];
 
 /* small shared bits */
 function Field({
@@ -1121,9 +1476,9 @@ function FormRenderer({
   }));
   const theme = form.theme || {};
   const scopeStyle = {
-    "--fp": theme.primary || "#BF5700",
-    "--fs": theme.secondary || "#1a1a1a",
-    "--fa": theme.accent || theme.primary || "#BF5700",
+    "--fp": theme.primary || "#5b4fe0",
+    "--fs": theme.secondary || "#1b1830",
+    "--fa": theme.accent || theme.primary || "#5b4fe0",
     fontFamily: FORM_FONTS[theme.font] || FORM_FONTS.sans
   };
   const handleSubmit = () => {
@@ -1229,7 +1584,7 @@ function PublicForm({
   }, "This link may be wrong, or the form was removed."));
   const form = st.form;
   const scope = {
-    "--fa": form.theme && form.theme.accent || "#BF5700",
+    "--fa": form.theme && form.theme.accent || "#5b4fe0",
     fontFamily: FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans
   };
   if (!form.is_open) {
@@ -1570,9 +1925,9 @@ function blankForm() {
     title: "Untitled form",
     description: "",
     theme: {
-      primary: "#BF5700",
-      secondary: "#1a1a1a",
-      accent: "#BF5700",
+      primary: "#5b4fe0",
+      secondary: "#1b1830",
+      accent: "#5b4fe0",
       font: "sans"
     },
     schema: {
@@ -1610,7 +1965,7 @@ function ColorPick({
     }
   }, /*#__PURE__*/React.createElement("input", {
     type: "color",
-    value: value || "#BF5700",
+    value: value || "#5b4fe0",
     onChange: e => onChange(e.target.value),
     style: {
       width: 40,
@@ -1939,7 +2294,31 @@ function CanvasCard({
     q: q
   }), q.type === "nps" && /*#__PURE__*/React.createElement(NpsPrev, {
     q: q
-  })));
+  }), q.type === "matrix" && /*#__PURE__*/React.createElement(MatrixCanvas, {
+    q: q,
+    update: update
+  }), q.type === "rank_order" && /*#__PURE__*/React.createElement(RankCanvas, {
+    q: q,
+    update: update
+  }), q.type === "constant_sum" && /*#__PURE__*/React.createElement(ConstantSumCanvas, {
+    q: q,
+    update: update
+  }), q.type === "form_field" && /*#__PURE__*/React.createElement(FormFieldCanvas, {
+    q: q,
+    update: update
+  }), q.type === "date" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input",
+    style: {
+      maxWidth: 220
+    }
+  }, "yyyy-mm-dd"), q.type === "star_rating" && /*#__PURE__*/React.createElement("div", {
+    className: "stars prev"
+  }, Array.from({
+    length: q.max
+  }).map((_, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: "star"
+  }, "★")))));
 }
 function MCControls({
   q,
@@ -2242,6 +2621,391 @@ function NpsControls({
     label: "Request response"
   }));
 }
+function ReqToggles({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function MatrixControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Answer type"), /*#__PURE__*/React.createElement("label", {
+    className: "opt-radio"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "mx-" + q.id,
+    checked: !q.multi,
+    onChange: () => update({
+      multi: false
+    })
+  }), /*#__PURE__*/React.createElement("span", null, "One answer per row")), /*#__PURE__*/React.createElement("label", {
+    className: "opt-radio"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "mx-" + q.id,
+    checked: !!q.multi,
+    onChange: () => update({
+      multi: true
+    })
+  }), /*#__PURE__*/React.createElement("span", null, "Multiple answers per row")), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 10
+    }
+  }, "Edit the statements and scale points directly on the question."), /*#__PURE__*/React.createElement(ReqToggles, {
+    q: q,
+    update: update
+  }));
+}
+function RankControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Edit and add items directly on the question. Respondents order them with the up and down buttons."), /*#__PURE__*/React.createElement(ReqToggles, {
+    q: q,
+    update: update
+  }));
+}
+function FormFieldControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Edit and add field labels directly on the question."), /*#__PURE__*/React.createElement(ReqToggles, {
+    q: q,
+    update: update
+  }));
+}
+function DateControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Respondents pick a date from a calendar."), /*#__PURE__*/React.createElement(ReqToggles, {
+    q: q,
+    update: update
+  }));
+}
+function ConstantSumControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Total"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Must add up to",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: q.total,
+    onChange: e => update({
+      total: parseFloat(e.target.value) || 0
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Unit (optional)",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.unit || "",
+    placeholder: "%, pts",
+    onChange: e => update({
+      unit: e.target.value
+    })
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Edit and add items directly on the question."), /*#__PURE__*/React.createElement(ReqToggles, {
+    q: q,
+    update: update
+  }));
+}
+function StarControls({
+  q,
+  update
+}) {
+  const setMax = n => update({
+    max: Math.max(3, Math.min(10, n))
+  });
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Scale"), /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Number of stars"), /*#__PURE__*/React.createElement("div", {
+    className: "stepper"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setMax(q.max - 1),
+    disabled: q.max <= 3
+  }, "−"), /*#__PURE__*/React.createElement("span", null, q.max), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setMax(q.max + 1),
+    disabled: q.max >= 10
+  }, "+")), /*#__PURE__*/React.createElement(ReqToggles, {
+    q: q,
+    update: update
+  }));
+}
+function MatrixCanvas({
+  q,
+  update
+}) {
+  const setRow = (i, v) => {
+    const a = q.rows.slice();
+    a[i] = v;
+    update({
+      rows: a
+    });
+  };
+  const setCol = (i, v) => {
+    const a = q.cols.slice();
+    a[i] = v;
+    update({
+      cols: a
+    });
+  };
+  const addRow = () => update({
+    rows: q.rows.concat(["Statement " + (q.rows.length + 1)])
+  });
+  const rmRow = i => update({
+    rows: q.rows.filter((_, k) => k !== i)
+  });
+  const addCol = () => update({
+    cols: q.cols.concat(["Point " + (q.cols.length + 1)])
+  });
+  const rmCol = i => update({
+    cols: q.cols.filter((_, k) => k !== i)
+  });
+  const mark = q.multi ? "sq" : "rd";
+  return /*#__PURE__*/React.createElement("div", {
+    className: "mxcanvas"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mxgrid",
+    style: {
+      gridTemplateColumns: "minmax(110px,1.4fr) repeat(" + q.cols.length + ",1fr) 26px"
+    }
+  }, /*#__PURE__*/React.createElement("div", null), q.cols.map((c, i) => /*#__PURE__*/React.createElement("div", {
+    className: "mxcol",
+    key: "c" + i
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "wq-choice-input",
+    style: {
+      textAlign: "center",
+      fontSize: 12
+    },
+    value: c,
+    onChange: e => setCol(i, e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    style: {
+      width: 20,
+      height: 20,
+      fontSize: 11
+    },
+    title: "Remove point",
+    disabled: q.cols.length <= 2,
+    onClick: () => rmCol(i)
+  }, "×"))), /*#__PURE__*/React.createElement("div", null), q.rows.map((r, ri) => /*#__PURE__*/React.createElement(React.Fragment, {
+    key: "r" + ri
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mxrow"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "wq-choice-input",
+    value: r,
+    onChange: e => setRow(ri, e.target.value)
+  })), q.cols.map((c, ci) => /*#__PURE__*/React.createElement("div", {
+    className: "mxdot",
+    key: ci
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "wq-mark " + mark
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "mxdot"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    style: {
+      width: 20,
+      height: 20,
+      fontSize: 11
+    },
+    title: "Remove statement",
+    disabled: q.rows.length <= 1,
+    onClick: () => rmRow(ri)
+  }, "×"))))), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 14,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "wq-addchoice",
+    onClick: addRow
+  }, "+ Add statement"), /*#__PURE__*/React.createElement("button", {
+    className: "wq-addchoice",
+    onClick: addCol
+  }, "+ Add point")));
+}
+function RankCanvas({
+  q,
+  update
+}) {
+  const setItem = (i, v) => {
+    const a = q.items.slice();
+    a[i] = v;
+    update({
+      items: a
+    });
+  };
+  const add = () => update({
+    items: q.items.concat(["Item " + (q.items.length + 1)])
+  });
+  const rm = i => update({
+    items: q.items.filter((_, k) => k !== i)
+  });
+  return /*#__PURE__*/React.createElement("div", null, q.items.map((it, i) => /*#__PURE__*/React.createElement("div", {
+    className: "wq-choice",
+    key: i
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "rnum sm"
+  }, i + 1), /*#__PURE__*/React.createElement("input", {
+    className: "wq-choice-input",
+    value: it,
+    onChange: e => setItem(i, e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    style: {
+      width: 26,
+      height: 26
+    },
+    title: "Remove",
+    disabled: q.items.length <= 1,
+    onClick: () => rm(i)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "wq-addchoice",
+    onClick: add
+  }, "+ Add item"));
+}
+function ConstantSumCanvas({
+  q,
+  update
+}) {
+  const setItem = (i, v) => {
+    const a = q.items.slice();
+    a[i] = v;
+    update({
+      items: a
+    });
+  };
+  const add = () => update({
+    items: q.items.concat(["Item " + (q.items.length + 1)])
+  });
+  const rm = i => update({
+    items: q.items.filter((_, k) => k !== i)
+  });
+  return /*#__PURE__*/React.createElement("div", null, q.items.map((it, i) => /*#__PURE__*/React.createElement("div", {
+    className: "wq-choice",
+    key: i
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "wq-choice-input",
+    value: it,
+    onChange: e => setItem(i, e.target.value)
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "csbox"
+  }, "0", q.unit ? " " + q.unit : ""), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    style: {
+      width: 26,
+      height: 26
+    },
+    title: "Remove",
+    disabled: q.items.length <= 1,
+    onClick: () => rm(i)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "wq-addchoice",
+    onClick: add
+  }, "+ Add item"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "Answers must total ", q.total, q.unit ? " " + q.unit : "", "."));
+}
+function FormFieldCanvas({
+  q,
+  update
+}) {
+  const setF = (i, v) => {
+    const a = q.fields.slice();
+    a[i] = v;
+    update({
+      fields: a
+    });
+  };
+  const add = () => update({
+    fields: q.fields.concat(["Field " + (q.fields.length + 1)])
+  });
+  const rm = i => update({
+    fields: q.fields.filter((_, k) => k !== i)
+  });
+  return /*#__PURE__*/React.createElement("div", null, q.fields.map((f, i) => /*#__PURE__*/React.createElement("div", {
+    className: "fformedit",
+    key: i
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "wq-choice"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "wq-choice-input",
+    style: {
+      fontWeight: 600
+    },
+    value: f,
+    onChange: e => setF(i, e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    style: {
+      width: 26,
+      height: 26
+    },
+    title: "Remove field",
+    disabled: q.fields.length <= 1,
+    onClick: () => rm(i)
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, "Text answer"))), /*#__PURE__*/React.createElement("button", {
+    className: "wq-addchoice",
+    onClick: add
+  }, "+ Add field"));
+}
 function LeftEditor({
   q,
   update,
@@ -2278,6 +3042,24 @@ function LeftEditor({
     q: q,
     update: update
   }), q.type === "nps" && /*#__PURE__*/React.createElement(NpsControls, {
+    q: q,
+    update: update
+  }), q.type === "matrix" && /*#__PURE__*/React.createElement(MatrixControls, {
+    q: q,
+    update: update
+  }), q.type === "rank_order" && /*#__PURE__*/React.createElement(RankControls, {
+    q: q,
+    update: update
+  }), q.type === "constant_sum" && /*#__PURE__*/React.createElement(ConstantSumControls, {
+    q: q,
+    update: update
+  }), q.type === "form_field" && /*#__PURE__*/React.createElement(FormFieldControls, {
+    q: q,
+    update: update
+  }), q.type === "date" && /*#__PURE__*/React.createElement(DateControls, {
+    q: q,
+    update: update
+  }), q.type === "star_rating" && /*#__PURE__*/React.createElement(StarControls, {
     q: q,
     update: update
   }), q.type === "text_graphic" && /*#__PURE__*/React.createElement("div", {
@@ -2327,11 +3109,11 @@ function ThemePanel({
     })
   }, /*#__PURE__*/React.createElement("option", {
     value: "sans"
-  }, "Sans (Figtree)"), /*#__PURE__*/React.createElement("option", {
+  }, "Sans (Mozilla Text)"), /*#__PURE__*/React.createElement("option", {
     value: "serif"
   }, "Serif (Georgia Pro)"), /*#__PURE__*/React.createElement("option", {
     value: "mono"
-  }, "Mono (Space Mono)"), /*#__PURE__*/React.createElement("option", {
+  }, "Mono (monospace)"), /*#__PURE__*/React.createElement("option", {
     value: "slab"
   }, "Slab (Roboto Slab)")))));
 }
@@ -3144,7 +3926,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.c
 (function(){
   function fail(msg){var r=document.getElementById('root');if(r&&!r.childNodes.length){r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not load:\n'+msg+'</pre>';}}
   function inj(src,next){var s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=next;s.onerror=function(){fail('Could not load '+src);};document.head.appendChild(s);}
-  try{ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot){boot();} else { inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){ inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot(); else fail('React did not initialize after fallback.'); }); }); } }catch(e){ fail(e&&e.message?e.message:String(e)); }
+  try{ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot){boot();} else { inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){ inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot(); else fail('React did not initialize.'); }); }); } }catch(e){ fail(e&&e.message?e.message:String(e)); }
 })();
 </script>
 </body>
