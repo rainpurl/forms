@@ -179,18 +179,87 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .copyfield{display:flex;align-items:center;gap:8px;border:1px solid var(--line-strong);border-radius:10px;padding:7px 7px 7px 12px;background:#fcfbf9}
 .copyfield code{font-family:var(--mono);font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
 @media(max-width:620px){.addmenu{grid-template-columns:1fr}.bar-row .k{width:92px}.hide-sm{display:none}}
+
+/* ---- builder: properties panel + canvas layout ---- */
+.builder{display:flex;flex-direction:column;height:100vh;background:#f3efe9}
+.b-top{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#fff;border-bottom:1px solid var(--line)}
+.b-top .saved-note{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+.b-tools{position:relative}
+.menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.14);padding:6px;min-width:170px;z-index:50}
+.menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:14px;color:var(--ink)}
+.menu button:hover{background:#f4efe8}
+.menu button.danger-text{color:var(--bad)}
+.b-main{flex:1;display:flex;min-height:0}
+.b-rail{width:54px;flex:none;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:6px}
+.b-rail button{width:38px;height:38px;border:0;background:none;border-radius:9px;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center}
+.b-rail button:hover{background:#f4efe8;color:var(--ink)}
+.b-rail button.active{background:#fbe9da;color:var(--bo)}
+.b-panel{width:320px;flex:none;background:#fff;border-right:1px solid var(--line);overflow:auto;padding:18px}
+.panel-title{font-family:var(--display);font-size:18px;margin-bottom:14px}
+.panel-section{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin:16px 0 9px;padding-top:13px;border-top:1px solid var(--line)}
+.panel-section:first-of-type{border-top:0;padding-top:0;margin-top:4px}
+.opt-radio{display:flex;align-items:center;gap:9px;padding:7px 0;cursor:pointer;font-size:14px}
+.opt-radio.disabled{opacity:.5;cursor:not-allowed}
+.opt-radio input{accent-color:var(--bo)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden}
+.stepper button{width:36px;height:34px;border:0;background:#fff;cursor:pointer;font-size:17px;color:var(--ink)}
+.stepper button:hover{background:#f4efe8}
+.stepper button:disabled{opacity:.4;cursor:not-allowed}
+.stepper span{min-width:42px;text-align:center;font-family:var(--mono);font-size:14px;border-left:1px solid var(--line);border-right:1px solid var(--line);height:34px;display:inline-flex;align-items:center;justify-content:center}
+.b-canvas{flex:1;overflow:auto;padding:26px 22px 90px}
+.b-canvas-inner{max-width:840px;margin:0 auto}
+.canvas-title{width:100%;border:0;background:none;font-family:var(--display);font-size:26px;font-weight:600;color:var(--ink);padding:6px 4px;margin-bottom:14px;outline:none;border-bottom:1px solid transparent}
+.canvas-title:focus{border-bottom-color:var(--line-strong)}
+.qblock{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.qblock-head{padding:11px 16px;background:#faf7f2;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
+.qblock-body{padding:14px}
+.qblock-foot{padding:12px 14px;border-top:1px solid var(--line);background:#fcfbf9}
+.qccard{border:1px solid var(--line);border-radius:11px;background:#fff;padding:14px;margin-bottom:12px;cursor:pointer;transition:border-color .1s, box-shadow .1s}
+.qccard:last-child{margin-bottom:0}
+.qccard:hover{border-color:var(--line-strong)}
+.qccard.sel{border-color:var(--bo);box-shadow:0 0 0 2px rgba(191,87,0,.15)}
+.qcc-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.qcc-num{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--bo)}
+.qcc-type{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+.qcc-menu{position:relative}
+.wq-title{width:100%;border:0;background:none;font-size:16px;font-weight:600;color:var(--ink);outline:none;padding:3px 2px;border-radius:6px}
+.wq-title:focus{background:#faf6f0}
+.wq-title::placeholder{color:#b3a89c;font-weight:500}
+.wq-textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:8px;min-height:64px;outline:none;resize:vertical;font-family:inherit}
+.wq-body{margin-top:10px}
+.wq-choice{display:flex;align-items:center;gap:9px;margin:6px 0}
+.wq-mark{width:16px;height:16px;flex:none;border:1.5px solid var(--line-strong);background:#fff}
+.wq-mark.rd{border-radius:50%}
+.wq-mark.sq{border-radius:4px}
+.wq-choice-input{flex:1;border:0;border-bottom:1px solid transparent;background:none;padding:5px 2px;outline:none;font-size:14px}
+.wq-choice-input:focus{border-bottom-color:var(--line-strong);background:#faf6f0}
+.wq-choice-input::placeholder{color:#b3a89c}
+.wq-addchoice{border:0;background:none;color:var(--bo);font-weight:600;font-size:13px;cursor:pointer;padding:6px 2px;margin-top:2px}
+.wq-addchoice:hover{text-decoration:underline}
+.wq-prev{margin-top:4px}
+.wq-prev-input{border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;color:#b3a89c;font-size:14px;background:#fcfbf9}
+.wq-prev-input.tall{min-height:64px}
+.addq{position:relative;display:inline-block}
+.addq-menu{position:absolute;bottom:calc(100% + 8px);left:0;background:#fff;border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 14px 36px rgba(0,0,0,.16);padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:420px;z-index:50}
+.addq-menu button{text-align:left;border:1px solid var(--line-strong);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer}
+.addq-menu button:hover{border-color:var(--bo);background:#fffaf4}
+.addq-menu .t{font-weight:600;font-size:14px}
+.addq-menu .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.endcard{background:#fff;border:1px dashed var(--line-strong);border-radius:14px;padding:16px}
+.b-preview{flex:1;overflow:auto;background:#f3efe9}
+@media(max-width:860px){
+  .b-rail{display:none}
+  .b-panel{width:250px;padding:14px}
+  .addq-menu{grid-template-columns:1fr;width:240px}
+}
+
 </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script>
-window.addEventListener('error', function(e){
-  var r = document.getElementById('root');
-  if (!r || r.childNodes.length) return;
-  var msg = (e && e.message) ? e.message : ((e && e.target && e.target.src) ? ('Failed to load ' + e.target.src) : 'Unknown error');
-  r.innerHTML = '<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not start:\n' + msg + '</pre>';
-}, true);
+window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||r.childNodes.length)return;var msg=(e&&e.message)?e.message:((e&&e.target&&e.target.src)?('Failed to load '+e.target.src):'Unknown error');r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not start:\n'+msg+'</pre>';},true);
 </script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
@@ -326,14 +395,15 @@ const QTYPES = {
       label: "Untitled question",
       required: false,
       request: false,
-      mode: "single",
+      multi: false,
+      display: "list",
       options: ["Option 1", "Option 2"],
       randomize: false
     }),
-    summary: q => q.options.length + " options, " + (q.mode === "single" ? "single select" : q.mode === "multi" ? "multi select" : "dropdown"),
+    summary: q => q.options.length + " options, " + (q.display === "dropdown" ? "dropdown" : q.multi ? "multiple answers" : "one answer"),
     validate: (q, v) => {
       if (!q.required) return null;
-      if (q.mode === "multi") return Array.isArray(v) && v.length ? null : "Please select at least one option.";
+      if (q.multi) return Array.isArray(v) && v.length ? null : "Please select at least one option.";
       return v ? null : "Please select an option.";
     },
     Editor: ({
@@ -425,7 +495,7 @@ const QTYPES = {
       error
     }) => {
       const opts = useMemo(() => q.randomize ? shuffle(q.options) : q.options, [q.id]);
-      if (q.mode === "dropdown") {
+      if (q.display === "dropdown") {
         return /*#__PURE__*/React.createElement("div", {
           className: "q"
         }, /*#__PURE__*/React.createElement(QLabel, {
@@ -443,7 +513,7 @@ const QTYPES = {
           className: "ferr"
         }, error));
       }
-      const multi = q.mode === "multi";
+      const multi = !!q.multi;
       const arr = Array.isArray(value) ? value : [];
       const toggle = o => {
         if (multi) onChange(arr.includes(o) ? arr.filter(x => x !== o) : arr.concat([o]));else onChange(o);
@@ -1561,183 +1631,673 @@ function ColorPick({
     onChange: e => onChange(e.target.value)
   })));
 }
-function Builder({
-  formId
+function IconList() {
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "9",
+    y1: "6",
+    x2: "20",
+    y2: "6"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "9",
+    y1: "12",
+    x2: "20",
+    y2: "12"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "9",
+    y1: "18",
+    x2: "20",
+    y2: "18"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "4.5",
+    cy: "6",
+    r: "1.3",
+    fill: "currentColor",
+    stroke: "none"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "4.5",
+    cy: "12",
+    r: "1.3",
+    fill: "currentColor",
+    stroke: "none"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "4.5",
+    cy: "18",
+    r: "1.3",
+    fill: "currentColor",
+    stroke: "none"
+  }));
+}
+function IconTheme() {
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 3c4 4.8 6 7.2 6 10a6 6 0 0 1-12 0c0-2.8 2-5.2 6-10z"
+  }));
+}
+function IconCog() {
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "4",
+    y1: "8",
+    x2: "20",
+    y2: "8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "4",
+    y1: "16",
+    x2: "20",
+    y2: "16"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "15",
+    cy: "8",
+    r: "2.4",
+    fill: "#fff"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "9",
+    cy: "16",
+    r: "2.4",
+    fill: "#fff"
+  }));
+}
+function FullMsg({
+  text,
+  onBack
 }) {
-  const {
-    navigate,
-    toast
-  } = useApp();
-  const isNew = formId === "new";
-  const [form, setForm] = useState(isNew ? blankForm() : null);
-  const [id, setId] = useState(isNew ? null : formId);
-  const [preview, setPreview] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [openQ, setOpenQ] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [loadErr, setLoadErr] = useState(false);
-  useEffect(() => {
-    if (isNew) return;
-    api.getForm(formId).then(({
-      ok,
-      data
-    }) => {
-      if (ok && data && data.form) setForm(normalizeForm(data.form));else setLoadErr(true);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "center-screen"
+  }, /*#__PURE__*/React.createElement("div", null, text), onBack && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: onBack
+  }, "Back to dashboard"));
+}
+function MCCanvas({
+  q,
+  update
+}) {
+  const marker = q.multi ? "sq" : "rd";
+  const setOpt = (i, v) => {
+    const o = q.options.slice();
+    o[i] = v;
+    update({
+      options: o
     });
-  }, [formId, isNew]);
-  if (loadErr) return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
-    className: "wrap page"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "empty card"
-  }, /*#__PURE__*/React.createElement("p", null, "Form not found."))));
-  if (!form) return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
-    className: "wrap page"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "muted"
-  }, "Loading...")));
-  const setTheme = patch => setForm(f => ({
-    ...f,
-    theme: {
-      ...f.theme,
-      ...patch
-    }
-  }));
-  const setSettings = patch => setForm(f => ({
-    ...f,
-    schema: {
-      ...f.schema,
-      settings: {
-        ...f.schema.settings,
-        ...patch
-      }
-    }
-  }));
-  const setQuestions = qs => setForm(f => ({
-    ...f,
-    schema: {
-      ...f.schema,
-      questions: qs
-    }
-  }));
-  const addQ = type => {
-    const q = QTYPES[type].make();
-    setQuestions((form.schema.questions || []).concat([q]));
-    setAdding(false);
-    setOpenQ(q.id);
   };
-  const updateQ = (qid, patch) => setQuestions(form.schema.questions.map(q => q.id === qid ? {
-    ...q,
-    ...patch
-  } : q));
-  const removeQ = qid => setQuestions(form.schema.questions.filter(q => q.id !== qid));
-  const moveQ = (i, dir) => {
-    const qs = form.schema.questions.slice();
-    const j = i + dir;
-    if (j < 0 || j >= qs.length) return;
-    const t = qs[i];
-    qs[i] = qs[j];
-    qs[j] = t;
-    setQuestions(qs);
-  };
-  const dupQ = qid => {
-    const qs = form.schema.questions.slice();
-    const idx = qs.findIndex(q => q.id === qid);
-    const copy = {
-      ...qs[idx],
-      id: uid()
-    };
-    qs.splice(idx + 1, 0, copy);
-    setQuestions(qs);
-  };
-  const save = () => {
-    setSaving(true);
-    const payload = {
-      title: form.title,
-      description: form.description,
-      theme: form.theme,
-      schema: form.schema
-    };
-    if (!id) {
-      api.createForm(payload).then(({
-        ok,
-        data
-      }) => {
-        setSaving(false);
-        if (ok && data && data.id) {
-          setId(data.id);
-          window.history.replaceState({}, "", "/builder/" + data.id);
-          toast("Saved");
-        } else toast("Save failed");
-      });
-    } else {
-      api.updateForm(id, payload).then(({
-        ok
-      }) => {
-        setSaving(false);
-        toast(ok ? "Saved" : "Save failed");
-      });
-    }
-  };
-  const questions = form.schema.questions || [];
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
-    className: "wrap page"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "between",
+  const add = () => update({
+    options: q.options.concat(["Option " + (q.options.length + 1)])
+  });
+  const rm = i => update({
+    options: q.options.filter((_, k) => k !== i)
+  });
+  return /*#__PURE__*/React.createElement("div", null, q.display === "dropdown" && /*#__PURE__*/React.createElement("div", {
+    className: "mono",
     style: {
-      marginBottom: 16
+      fontSize: 11,
+      color: "var(--ink-soft)",
+      marginBottom: 6
     }
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn ghost sm",
-    onClick: () => id ? navigate("/dashboard/" + id) : navigate("/dashboard")
-  }, "← Back"), /*#__PURE__*/React.createElement("div", {
-    className: "row"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    onClick: () => setPreview(p => !p)
-  }, preview ? "Edit" : "Preview"), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary sm",
-    disabled: saving,
-    onClick: save
-  }, saving ? "Saving..." : "Save"))), preview ? /*#__PURE__*/React.createElement(FormRenderer, {
-    form: form,
-    preview: true
-  }) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
-    className: "input",
+  }, "Shown as a dropdown"), q.options.map((o, i) => /*#__PURE__*/React.createElement("div", {
+    className: "wq-choice",
+    key: i
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "wq-mark " + marker
+  }), /*#__PURE__*/React.createElement("input", {
+    className: "wq-choice-input",
+    placeholder: "Click to write Choice " + (i + 1),
+    value: o,
+    onChange: e => setOpt(i, e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
     style: {
-      fontSize: 20,
-      fontWeight: 600,
-      fontFamily: "var(--display)",
-      marginBottom: 14
+      width: 26,
+      height: 26
     },
-    value: form.title,
-    onChange: e => setForm(f => ({
-      ...f,
-      title: e.target.value
-    }))
-  }), /*#__PURE__*/React.createElement(Field, {
-    label: "Description"
-  }, /*#__PURE__*/React.createElement("textarea", {
-    className: "textarea",
-    value: form.description,
-    onChange: e => setForm(f => ({
-      ...f,
-      description: e.target.value
-    }))
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "card pad",
-    style: {
-      marginBottom: 18
-    }
+    title: "Remove choice",
+    disabled: q.options.length <= 1,
+    onClick: () => rm(i)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "wq-addchoice",
+    onClick: add
+  }, "+ Add choice"));
+}
+function SliderPrev({
+  q
+}) {
+  const mid = q.min + (q.max - q.min) / 2;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "label",
-    style: {
-      marginBottom: 10
-    }
-  }, "Theme"), /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      flexWrap: "wrap",
-      gap: 18
+      justifyContent: "space-between",
+      fontSize: 12,
+      color: "var(--ink-soft)"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, q.leftLabel), /*#__PURE__*/React.createElement("span", null, q.rightLabel)), /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    min: q.min,
+    max: q.max,
+    step: q.step,
+    defaultValue: mid,
+    disabled: true,
+    style: {
+      width: "100%",
+      accentColor: "var(--bo)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "space-between",
+      fontSize: 12,
+      color: "var(--ink-soft)"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, q.min), /*#__PURE__*/React.createElement("span", null, q.max)));
+}
+function NpsPrev({
+  q
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 5,
+      flexWrap: "wrap"
+    }
+  }, Array.from({
+    length: 11
+  }).map((_, n) => /*#__PURE__*/React.createElement("span", {
+    key: n,
+    style: {
+      width: 34,
+      height: 34,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      border: "1px solid var(--line-strong)",
+      borderRadius: 7,
+      fontSize: 13,
+      color: "var(--ink-soft)"
+    }
+  }, n))), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "space-between",
+      fontSize: 12,
+      color: "var(--ink-soft)",
+      marginTop: 5
+    }
+  }, /*#__PURE__*/React.createElement("span", null, q.leftLabel), /*#__PURE__*/React.createElement("span", null, q.rightLabel)));
+}
+function CanvasCard({
+  q,
+  index,
+  selected,
+  onSelect,
+  update,
+  onDup,
+  onDel,
+  onUp,
+  onDown
+}) {
+  const [menu, setMenu] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "qccard" + (selected ? " sel" : ""),
+    onClick: onSelect
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "qcc-head"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "qcc-num"
+  }, "Q", index + 1), /*#__PURE__*/React.createElement("span", {
+    className: "qcc-type mono"
+  }, QTYPES[q.type].label), /*#__PURE__*/React.createElement("span", {
+    className: "grow"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "qcc-menu",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "More",
+    onClick: () => setMenu(m => !m)
+  }, "···"), menu && /*#__PURE__*/React.createElement("div", {
+    className: "menu",
+    style: {
+      right: 0,
+      left: "auto"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      onUp();
+      setMenu(false);
+    }
+  }, "Move up"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      onDown();
+      setMenu(false);
+    }
+  }, "Move down"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      onDup();
+      setMenu(false);
+    }
+  }, "Duplicate"), /*#__PURE__*/React.createElement("button", {
+    className: "danger-text",
+    onClick: () => {
+      onDel();
+      setMenu(false);
+    }
+  }, "Delete")))), q.type === "text_graphic" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+    className: "wq-title",
+    placeholder: "Heading",
+    value: q.heading || "",
+    onChange: e => update({
+      heading: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("textarea", {
+    className: "wq-textarea",
+    placeholder: "Add text or instructions",
+    value: q.content || "",
+    onChange: e => update({
+      content: e.target.value
+    })
+  })) : /*#__PURE__*/React.createElement("input", {
+    className: "wq-title",
+    placeholder: "Click to write the question text",
+    value: q.label || "",
+    onChange: e => update({
+      label: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "wq-body"
+  }, q.type === "multiple_choice" && /*#__PURE__*/React.createElement(MCCanvas, {
+    q: q,
+    update: update
+  }), q.type === "text_entry" && (q.mode === "long" ? /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input tall"
+  }, q.placeholder || "Long answer text") : /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, q.placeholder || "Short answer text")), q.type === "slider" && /*#__PURE__*/React.createElement(SliderPrev, {
+    q: q
+  }), q.type === "nps" && /*#__PURE__*/React.createElement(NpsPrev, {
+    q: q
+  })));
+}
+function MCControls({
+  q,
+  update
+}) {
+  const setCount = n => {
+    n = Math.max(1, Math.min(20, n));
+    let o = q.options.slice();
+    while (o.length < n) o.push("Option " + (o.length + 1));
+    if (o.length > n) o = o.slice(0, n);
+    update({
+      options: o
+    });
+  };
+  const dropdown = q.display === "dropdown";
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Answer type"), /*#__PURE__*/React.createElement("label", {
+    className: "opt-radio"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "at-" + q.id,
+    checked: !q.multi,
+    onChange: () => update({
+      multi: false
+    })
+  }), /*#__PURE__*/React.createElement("span", null, "Allow one answer")), /*#__PURE__*/React.createElement("label", {
+    className: "opt-radio" + (dropdown ? " disabled" : "")
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "at-" + q.id,
+    checked: !!q.multi,
+    disabled: dropdown,
+    onChange: () => update({
+      multi: true,
+      display: "list"
+    })
+  }), /*#__PURE__*/React.createElement("span", null, "Allow multiple answers")), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Choices"), /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Number of choices"), /*#__PURE__*/React.createElement("div", {
+    className: "stepper"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setCount(q.options.length - 1),
+    disabled: q.options.length <= 1
+  }, "−"), /*#__PURE__*/React.createElement("span", null, q.options.length), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setCount(q.options.length + 1),
+    disabled: q.options.length >= 20
+  }, "+")), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Format"), /*#__PURE__*/React.createElement(Field, {
+    label: "Display"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: q.display,
+    onChange: e => {
+      const d = e.target.value;
+      update(d === "dropdown" ? {
+        display: "dropdown",
+        multi: false
+      } : {
+        display: "list"
+      });
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "list"
+  }, "List"), /*#__PURE__*/React.createElement("option", {
+    value: "dropdown"
+  }, "Dropdown"))), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.randomize,
+    onChange: c => update({
+      randomize: c
+    }),
+    label: "Randomize choice order"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function TextControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Format"), /*#__PURE__*/React.createElement(Field, {
+    label: "Text type"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: q.mode,
+    onChange: e => update({
+      mode: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "short"
+  }, "Single line"), /*#__PURE__*/React.createElement("option", {
+    value: "long"
+  }, "Paragraph"))), /*#__PURE__*/React.createElement(Field, {
+    label: "Placeholder"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.placeholder || "",
+    onChange: e => update({
+      placeholder: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Validation"), /*#__PURE__*/React.createElement(Field, {
+    label: "Validate as"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: q.validation,
+    onChange: e => update({
+      validation: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "none"
+  }, "None"), /*#__PURE__*/React.createElement("option", {
+    value: "email"
+  }, "Email"), /*#__PURE__*/React.createElement("option", {
+    value: "phone"
+  }, "Phone"), /*#__PURE__*/React.createElement("option", {
+    value: "number"
+  }, "Number"))), /*#__PURE__*/React.createElement(Field, {
+    label: "Minimum length (0 for none)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "0",
+    value: q.minLength || 0,
+    onChange: e => update({
+      minLength: parseInt(e.target.value || "0", 10)
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function SliderControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Scale"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Min",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: q.min,
+    onChange: e => update({
+      min: parseFloat(e.target.value)
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Max",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: q.max,
+    onChange: e => update({
+      max: parseFloat(e.target.value)
+    })
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Step"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: q.step,
+    onChange: e => update({
+      step: parseFloat(e.target.value) || 1
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Left label",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.leftLabel || "",
+    onChange: e => update({
+      leftLabel: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Right label",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.rightLabel || "",
+    onChange: e => update({
+      rightLabel: e.target.value
+    })
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function NpsControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Labels"), /*#__PURE__*/React.createElement(Field, {
+    label: "Left label"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.leftLabel || "",
+    onChange: e => update({
+      leftLabel: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Right label"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.rightLabel || "",
+    onChange: e => update({
+      rightLabel: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function LeftEditor({
+  q,
+  update,
+  questions,
+  setQuestions
+}) {
+  const changeType = type => {
+    if (type === q.type) return;
+    const made = QTYPES[type].make();
+    made.id = q.id;
+    if ("label" in made && q.label !== undefined) made.label = q.label;
+    made.required = !!q.required;
+    made.request = !!q.request;
+    setQuestions(questions.map(x => x.id === q.id ? made : x));
+  };
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title"
+  }, "Edit question"), /*#__PURE__*/React.createElement(Field, {
+    label: "Question type"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: q.type,
+    onChange: e => changeType(e.target.value)
+  }, QTYPE_ORDER.map(t => /*#__PURE__*/React.createElement("option", {
+    key: t,
+    value: t
+  }, QTYPES[t].label)))), q.type === "multiple_choice" && /*#__PURE__*/React.createElement(MCControls, {
+    q: q,
+    update: update
+  }), q.type === "text_entry" && /*#__PURE__*/React.createElement(TextControls, {
+    q: q,
+    update: update
+  }), q.type === "slider" && /*#__PURE__*/React.createElement(SliderControls, {
+    q: q,
+    update: update
+  }), q.type === "nps" && /*#__PURE__*/React.createElement(NpsControls, {
+    q: q,
+    update: update
+  }), q.type === "text_graphic" && /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "Edit the heading, text, and image directly on the question in the canvas."));
+}
+function ThemePanel({
+  form,
+  setTheme
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title"
+  }, "Theme"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 14
     }
   }, /*#__PURE__*/React.createElement(ColorPick, {
     label: "Primary",
@@ -1773,95 +2333,397 @@ function Builder({
     value: "mono"
   }, "Mono (Space Mono)"), /*#__PURE__*/React.createElement("option", {
     value: "slab"
-  }, "Slab (Roboto Slab)")))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 14
-    }
-  }, /*#__PURE__*/React.createElement(Toggle, {
+  }, "Slab (Roboto Slab)")))));
+}
+function SettingsPanel({
+  form,
+  setForm,
+  setSettings,
+  id,
+  del
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title"
+  }, "Form settings"), /*#__PURE__*/React.createElement(Field, {
+    label: "Form title"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: form.title,
+    onChange: e => setForm(f => ({
+      ...f,
+      title: e.target.value
+    }))
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Description"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    className: "textarea",
+    value: form.description,
+    onChange: e => setForm(f => ({
+      ...f,
+      description: e.target.value
+    }))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Behavior"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!form.schema.settings.randomizeQuestions,
     onChange: c => setSettings({
       randomizeQuestions: c
     }),
     label: "Randomize question order"
-  }))), questions.map((q, i) => {
-    const def = QTYPES[q.type];
-    const open = openQ === q.id;
-    const Editor = def.Editor;
-    return /*#__PURE__*/React.createElement("div", {
-      className: "qcard",
-      key: q.id
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "qhead"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "qtype"
-    }, def.label), /*#__PURE__*/React.createElement("span", {
-      className: "qsummary grow",
-      style: {
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap"
-      }
-    }, q.label || q.heading, " ", /*#__PURE__*/React.createElement("span", {
-      className: "muted"
-    }, "· ", def.summary(q))), /*#__PURE__*/React.createElement("button", {
-      className: "iconbtn",
-      title: "Move up",
-      onClick: () => moveQ(i, -1)
-    }, "↑"), /*#__PURE__*/React.createElement("button", {
-      className: "iconbtn",
-      title: "Move down",
-      onClick: () => moveQ(i, 1)
-    }, "↓"), /*#__PURE__*/React.createElement("button", {
-      className: "iconbtn",
-      title: "Duplicate",
-      onClick: () => dupQ(q.id)
-    }, "⧉"), /*#__PURE__*/React.createElement("button", {
-      className: "iconbtn",
-      title: "Delete",
-      onClick: () => removeQ(q.id)
-    }, "×"), /*#__PURE__*/React.createElement("button", {
-      className: "btn sm",
-      onClick: () => setOpenQ(open ? null : q.id)
-    }, open ? "Done" : "Edit")), open && /*#__PURE__*/React.createElement("div", {
-      className: "qbody"
-    }, /*#__PURE__*/React.createElement(Editor, {
-      q: q,
-      update: patch => updateQ(q.id, patch)
-    })));
-  }), adding ? /*#__PURE__*/React.createElement("div", {
-    className: "card pad",
+  }), id && /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 6
+      marginTop: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "between",
-    style: {
-      marginBottom: 10
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "label"
-  }, "Add a question"), /*#__PURE__*/React.createElement("button", {
-    className: "btn ghost sm",
-    onClick: () => setAdding(false)
-  }, "Cancel")), /*#__PURE__*/React.createElement("div", {
-    className: "addmenu"
+    className: "panel-section"
+  }, "Danger zone"), /*#__PURE__*/React.createElement("button", {
+    className: "btn danger sm",
+    onClick: del
+  }, "Delete form")));
+}
+function AddQuestionMenu({
+  onAdd
+}) {
+  const [open, setOpen] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "addq",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => setOpen(o => !o)
+  }, "+ Add new question"), open && /*#__PURE__*/React.createElement("div", {
+    className: "addq-menu"
   }, QTYPE_ORDER.map(t => /*#__PURE__*/React.createElement("button", {
     key: t,
-    onClick: () => addQ(t)
+    onClick: () => {
+      onAdd(t);
+      setOpen(false);
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "t"
   }, QTYPES[t].label), /*#__PURE__*/React.createElement("div", {
     className: "h"
-  }, QTYPES[t].hint))))) : /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    style: {
-      marginTop: 6
-    },
-    onClick: () => setAdding(true)
-  }, "+ Add question"))));
+  }, QTYPES[t].hint)))));
 }
-
-/* ----------------------------- form dashboard ----------------------------- */
+function Builder({
+  formId
+}) {
+  const {
+    navigate,
+    toast
+  } = useApp();
+  const isNew = formId === "new";
+  const [form, setForm] = useState(isNew ? blankForm() : null);
+  const [id, setId] = useState(isNew ? null : formId);
+  const [sel, setSel] = useState(null);
+  const [mode, setMode] = useState("edit");
+  const [preview, setPreview] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState(null);
+  const [tools, setTools] = useState(false);
+  const [loadErr, setLoadErr] = useState(false);
+  useEffect(() => {
+    if (isNew) return;
+    api.getForm(formId).then(({
+      ok,
+      data
+    }) => {
+      if (ok && data && data.form) {
+        const f = normalizeForm(data.form);
+        setForm(f);
+        if (f.schema.questions[0]) setSel(f.schema.questions[0].id);
+      } else setLoadErr(true);
+    });
+  }, [formId, isNew]);
+  if (loadErr) return /*#__PURE__*/React.createElement(FullMsg, {
+    text: "Form not found.",
+    onBack: () => navigate("/dashboard")
+  });
+  if (!form) return /*#__PURE__*/React.createElement(FullMsg, {
+    text: "Loading..."
+  });
+  const questions = form.schema.questions || [];
+  const selQ = questions.find(q => q.id === sel) || null;
+  const setTheme = patch => setForm(f => ({
+    ...f,
+    theme: {
+      ...f.theme,
+      ...patch
+    }
+  }));
+  const setSettings = patch => setForm(f => ({
+    ...f,
+    schema: {
+      ...f.schema,
+      settings: {
+        ...f.schema.settings,
+        ...patch
+      }
+    }
+  }));
+  const setQuestions = qs => setForm(f => ({
+    ...f,
+    schema: {
+      ...f.schema,
+      questions: qs
+    }
+  }));
+  const addQ = type => {
+    const q = QTYPES[type].make();
+    setQuestions(questions.concat([q]));
+    setSel(q.id);
+    setMode("edit");
+  };
+  const updateQ = (qid, patch) => setQuestions(questions.map(q => q.id === qid ? {
+    ...q,
+    ...patch
+  } : q));
+  const removeQ = qid => {
+    setQuestions(questions.filter(q => q.id !== qid));
+    if (sel === qid) setSel(null);
+  };
+  const moveQ = (i, dir) => {
+    const qs = questions.slice();
+    const j = i + dir;
+    if (j < 0 || j >= qs.length) return;
+    const t = qs[i];
+    qs[i] = qs[j];
+    qs[j] = t;
+    setQuestions(qs);
+  };
+  const dupQ = qid => {
+    const qs = questions.slice();
+    const idx = qs.findIndex(q => q.id === qid);
+    const copy = {
+      ...qs[idx],
+      id: uid()
+    };
+    qs.splice(idx + 1, 0, copy);
+    setQuestions(qs);
+    setSel(copy.id);
+  };
+  const del = () => {
+    if (!id) return;
+    if (!window.confirm("Delete this form and all its responses? This cannot be undone.")) return;
+    api.deleteForm(id).then(() => {
+      toast("Form deleted");
+      navigate("/dashboard");
+    });
+  };
+  const save = () => {
+    setSaving(true);
+    const payload = {
+      title: form.title,
+      description: form.description,
+      theme: form.theme,
+      schema: form.schema
+    };
+    const stamp = () => setSavedAt(new Date().toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit"
+    }));
+    if (!id) {
+      api.createForm(payload).then(({
+        ok,
+        data
+      }) => {
+        setSaving(false);
+        if (ok && data && data.id) {
+          setId(data.id);
+          window.history.replaceState({}, "", "/builder/" + data.id);
+          stamp();
+          toast("Published");
+        } else toast("Save failed");
+      });
+    } else {
+      api.updateForm(id, payload).then(({
+        ok
+      }) => {
+        setSaving(false);
+        if (ok) {
+          stamp();
+          toast("Saved");
+        } else toast("Save failed");
+      });
+    }
+  };
+  const statusBadge = !id ? {
+    cls: "closed",
+    text: "Draft"
+  } : form.is_open ? {
+    cls: "open",
+    text: "Live"
+  } : {
+    cls: "closed",
+    text: "Closed"
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "builder"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "b-top"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "brand",
+    onClick: () => navigate("/dashboard")
+  }, "zetetiq", /*#__PURE__*/React.createElement("span", {
+    className: "dot"
+  }, ".")), /*#__PURE__*/React.createElement("div", {
+    className: "b-tools"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: () => setTools(o => !o)
+  }, "Tools ▾"), tools && /*#__PURE__*/React.createElement("div", {
+    className: "menu"
+  }, id && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      navigate("/dashboard/" + id);
+    }
+  }, "View responses"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setMode("theme");
+      setTools(false);
+    }
+  }, "Theme"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setMode("settings");
+      setTools(false);
+    }
+  }, "Form settings"), id && /*#__PURE__*/React.createElement("button", {
+    className: "danger-text",
+    onClick: () => {
+      setTools(false);
+      del();
+    }
+  }, "Delete form"))), /*#__PURE__*/React.createElement("span", {
+    className: "saved-note"
+  }, savedAt ? "Saved at " + savedAt : id ? "Saved" : "Not saved yet"), /*#__PURE__*/React.createElement("span", {
+    className: "badge " + statusBadge.cls
+  }, statusBadge.text)), /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => setPreview(p => !p)
+  }, preview ? "Edit" : "Preview"), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: saving,
+    onClick: save
+  }, saving ? "Saving..." : "Publish"))), preview ? /*#__PURE__*/React.createElement("div", {
+    className: "b-preview"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 680,
+      margin: "26px auto",
+      padding: "0 18px"
+    }
+  }, /*#__PURE__*/React.createElement(FormRenderer, {
+    form: form,
+    preview: true
+  }))) : /*#__PURE__*/React.createElement("div", {
+    className: "b-main",
+    onClick: () => {
+      if (tools) setTools(false);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "b-rail"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: mode === "edit" ? "active" : "",
+    title: "Questions",
+    onClick: () => setMode("edit")
+  }, /*#__PURE__*/React.createElement(IconList, null)), /*#__PURE__*/React.createElement("button", {
+    className: mode === "theme" ? "active" : "",
+    title: "Theme",
+    onClick: () => setMode("theme")
+  }, /*#__PURE__*/React.createElement(IconTheme, null)), /*#__PURE__*/React.createElement("button", {
+    className: mode === "settings" ? "active" : "",
+    title: "Form settings",
+    onClick: () => setMode("settings")
+  }, /*#__PURE__*/React.createElement(IconCog, null))), /*#__PURE__*/React.createElement("div", {
+    className: "b-panel"
+  }, mode === "edit" && (selQ ? /*#__PURE__*/React.createElement(LeftEditor, {
+    q: selQ,
+    update: p => updateQ(selQ.id, p),
+    questions: questions,
+    setQuestions: setQuestions
+  }) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title"
+  }, "Edit question"), /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 14
+    }
+  }, "Select a question in the canvas to edit it here, or add a new question."))), mode === "theme" && /*#__PURE__*/React.createElement(ThemePanel, {
+    form: form,
+    setTheme: setTheme
+  }), mode === "settings" && /*#__PURE__*/React.createElement(SettingsPanel, {
+    form: form,
+    setForm: setForm,
+    setSettings: setSettings,
+    id: id,
+    del: del
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "b-canvas"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "b-canvas-inner"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "canvas-title",
+    value: form.title,
+    placeholder: "Untitled form",
+    onChange: e => setForm(f => ({
+      ...f,
+      title: e.target.value
+    }))
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "qblock"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "qblock-head"
+  }, "Default question block"), /*#__PURE__*/React.createElement("div", {
+    className: "qblock-body"
+  }, questions.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      padding: "18px 4px"
+    }
+  }, "No questions yet. Use Add new question below."), questions.map((q, i) => /*#__PURE__*/React.createElement(CanvasCard, {
+    key: q.id,
+    q: q,
+    index: i,
+    selected: sel === q.id,
+    onSelect: () => {
+      setSel(q.id);
+      setMode("edit");
+    },
+    update: p => updateQ(q.id, p),
+    onDup: () => dupQ(q.id),
+    onDel: () => removeQ(q.id),
+    onUp: () => moveQ(i, -1),
+    onDown: () => moveQ(i, 1)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "qblock-foot"
+  }, /*#__PURE__*/React.createElement(AddQuestionMenu, {
+    onAdd: addQ
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "endcard"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mono",
+    style: {
+      fontSize: 11,
+      textTransform: "uppercase",
+      letterSpacing: ".05em",
+      color: "var(--ink-soft)",
+      fontWeight: 700,
+      marginBottom: 8
+    }
+  }, "End of form"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      color: "var(--ink-soft)"
+    }
+  }, "Thanks. Your response has been recorded."))))));
+}
 function FormDashboard({
   id
 }) {
@@ -2280,18 +3142,9 @@ function App() {
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
 }
 (function(){
-  function fail(msg){ var r=document.getElementById('root'); if(r && !r.childNodes.length){ r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not load:\n'+msg+'</pre>'; } }
-  function inj(src, next){ var s=document.createElement('script'); s.src=src; s.crossOrigin='anonymous'; s.onload=next; s.onerror=function(){ fail('Could not load '+src); }; document.head.appendChild(s); }
-  try {
-    if (window.React && window.ReactDOM && window.ReactDOM.createRoot) { boot(); }
-    else {
-      inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js', function(){
-        inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js', function(){
-          if (window.React && window.ReactDOM && window.ReactDOM.createRoot) boot(); else fail('React did not initialize after fallback.');
-        });
-      });
-    }
-  } catch (e) { fail(e && e.message ? e.message : String(e)); }
+  function fail(msg){var r=document.getElementById('root');if(r&&!r.childNodes.length){r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not load:\n'+msg+'</pre>';}}
+  function inj(src,next){var s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=next;s.onerror=function(){fail('Could not load '+src);};document.head.appendChild(s);}
+  try{ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot){boot();} else { inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){ inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){ if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot(); else fail('React did not initialize after fallback.'); }); }); } }catch(e){ fail(e&&e.message?e.message:String(e)); }
 })();
 </script>
 </body>

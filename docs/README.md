@@ -58,4 +58,7 @@ Workers AI gives 10,000 neurons per day at no cost. Summaries are cached and onl
 
 ## What works now
 
+The builder is laid out like a survey editor: pick a question to edit its settings in the left panel, and type the question and its choices directly on the page in the center. Preview shows the live form, and Publish saves it.
+
+
 Admin login, the dashboard, the form builder with live preview and theming (three colors and a font), pretty share links, response collection with automatic location and device capture, per form responses and analytics, CSV export, open and close, edit, delete, and AI summaries on both the dashboard and every form. Question types in this phase are Multiple Choice, Text Entry, Text and Graphic, Slider, and NPS. The roadmap for what comes next is in `docs/HANDOFF.md`.
