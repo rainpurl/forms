@@ -1,8 +1,10 @@
-# Zetetic
+# zetetiq
 
 A self-hosted forms builder on Cloudflare. Build a form, theme it, share a clean link, and read back responses, analytics, and an AI written summary. It runs entirely on Cloudflare free tiers.
 
-Live at zetetic.pages.dev, zetetic.katr.es, and forms.katr.es.
+The product is named zetetiq, all lowercase. It is live at zetetic.pages.dev, zetetic.katr.es, and forms.katr.es. The Pages project and those domains keep the older zetetic spelling with a c, which is fine and separate from the app name.
+
+The page loads React from a primary CDN with an automatic fallback to a second one, and if startup ever fails it shows a readable message in the page instead of a blank screen.
 
 ## What is in this package
 

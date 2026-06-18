@@ -1,10 +1,10 @@
-# Zetetic, project handoff
+# zetetiq, project handoff
 
 Hand this document, plus the zip it came in, to a new chat to continue work without re-explaining anything. Read this file first, then `src/app.source.html` (the editable app) and `deploy/functions/api/[[path]].js` (the backend).
 
 Standing instruction for any assistant working on this project: keep this handoff document current and include an updated copy with every response.
 
-## What Zetetic is
+## What zetetiq is
 
 A self-hosted, Qualtrics style forms builder. Build a form, theme it, share a clean link, collect responses, view analytics, and read an AI written summary. Everything runs on Cloudflare free tiers.
 
@@ -16,7 +16,7 @@ Owner: Rain, handle Katresai. Live at zetetic.pages.dev, zetetic.katr.es, and fo
 - Admin login works. The password is the Cloudflare env var `ADMIN_PASSWORD`, which falls back to `rain` if unset.
 - Google sign in is a stub. The button is present and the backend returns 501. Admin is the only account.
 - Phase 1 feature set is complete. Phases 2 and 3 are not started.
-- Cosmetic gap: the browser tab title and the on screen wordmark still read "forms", not "Zetetic". This is pending Rain's preferred casing and styling.
+- Branding is set to zetetiq, all lowercase. The browser tab title, the landing wordmark, the nav wordmark, and the public form footer all read zetetiq. The wordmark keeps a trailing period dot as a style touch.
 
 ## Architecture
 
@@ -48,6 +48,8 @@ Build recipe, Node only, no browser build tool:
    - `<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>`
    - a plain `<script>` containing the compiled JS, then `</script></body></html>`.
 5. Verify the output contains `React.createElement`, contains no `import` and no `jsx-runtime`, and passes `node --check` on the extracted script.
+
+The emitted script section also wraps the app in a `boot()` function and adds two resilience pieces: a capturing `window` error listener that prints any startup error into the page (so a failure shows a readable message instead of a blank screen), and a loader that uses unpkg as the primary CDN with an automatic jsDelivr fallback. Keep both. Copy the exact template from the current `deploy/index.html`.
 
 The build script is a dozen lines and is fully reproducible from this recipe.
 
@@ -132,7 +134,7 @@ Workers AI gives 10,000 neurons per day free, and an 8B summary costs roughly 40
 - The D1 Console rejects comments and trailing blank lines. Paste clean SQL only.
 - The public form currently loads the whole app bundle, so a respondent's browser also downloads the admin code. This is acceptable for now. Split the public renderer into its own smaller bundle if respondent load size becomes a concern.
 - Georgia Pro is licensed, so the serif option renders as system Georgia for anyone without the font.
-- Branding. The title tag and the wordmark still say "forms". Rename to Zetetic once Rain picks the casing.
+- Note on names: the product is zetetiq with a q, but the Cloudflare Pages project and existing domains use zetetic with a c (zetetic.pages.dev, zetetic.katr.es), plus forms.katr.es. Renaming the project or adding a zetetiq.katr.es domain is optional and separate from the app.
 - No real user accounts yet, since Google is stubbed. Admin is the only account.
 
 ## Roadmap, all 23 question types and 11 logic features mapped

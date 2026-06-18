@@ -1,9 +1,15 @@
 <!doctype html>
+<!--
+  ZETETIC APP SOURCE (editable JSX).
+  Do NOT deploy this file. The live file is deploy/index.html, which is COMPILED from this one.
+  After editing, recompile to deploy/index.html using the classic-runtime build recipe in docs/HANDOFF.md.
+  The automatic JSX runtime emits an unresolvable "react/jsx-runtime" import and blanks the page; always force runtime:classic.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>forms</title>
+<title>zetetiq</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Roboto+Slab:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -184,10 +190,18 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 <body>
 <div id="root"></div>
 
+<script>
+window.addEventListener('error', function(e){
+  var r = document.getElementById('root');
+  if (!r || r.childNodes.length) return;
+  var msg = (e && e.message) ? e.message : ((e && e.target && e.target.src) ? ('Failed to load ' + e.target.src) : 'Unknown error');
+  r.innerHTML = '<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not start:\n' + msg + '</pre>';
+}, true);
+</script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
-
 <script>
+function boot(){
 const {
   useState,
   useEffect,
@@ -1233,7 +1247,7 @@ function PublicForm({
       fontSize: 11,
       color: "var(--ink-soft)"
     }
-  }, "powered by forms.katr.es"))));
+  }, "powered by zetetiq"))));
 }
 
 /* ----------------------------- landing ----------------------------- */
@@ -1288,7 +1302,7 @@ function Landing({
     className: "landing"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lo"
-  }, "forms", /*#__PURE__*/React.createElement("span", {
+  }, "zetetiq", /*#__PURE__*/React.createElement("span", {
     className: "dot"
   }, ".")), /*#__PURE__*/React.createElement("p", {
     className: "tag"
@@ -1370,7 +1384,7 @@ function TopNav() {
   }, /*#__PURE__*/React.createElement("button", {
     className: "brand",
     onClick: () => navigate("/dashboard")
-  }, "forms", /*#__PURE__*/React.createElement("span", {
+  }, "zetetiq", /*#__PURE__*/React.createElement("span", {
     className: "dot"
   }, ".")), /*#__PURE__*/React.createElement("div", {
     className: "row"
@@ -2234,7 +2248,7 @@ function App() {
         fontWeight: 700,
         fontSize: 28
       }
-    }, "forms", /*#__PURE__*/React.createElement("span", {
+    }, "zetetiq", /*#__PURE__*/React.createElement("span", {
       style: {
         color: "var(--ink)"
       }
@@ -2270,6 +2284,21 @@ function App() {
   }, toastMsg));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
+}
+(function(){
+  function fail(msg){ var r=document.getElementById('root'); if(r && !r.childNodes.length){ r.innerHTML='<pre style="white-space:pre-wrap;padding:24px;font:14px ui-monospace,monospace;color:#b23b3b">zetetiq could not load:\n'+msg+'</pre>'; } }
+  function inj(src, next){ var s=document.createElement('script'); s.src=src; s.crossOrigin='anonymous'; s.onload=next; s.onerror=function(){ fail('Could not load '+src); }; document.head.appendChild(s); }
+  try {
+    if (window.React && window.ReactDOM && window.ReactDOM.createRoot) { boot(); }
+    else {
+      inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js', function(){
+        inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js', function(){
+          if (window.React && window.ReactDOM && window.ReactDOM.createRoot) boot(); else fail('React did not initialize after fallback.');
+        });
+      });
+    }
+  } catch (e) { fail(e && e.message ? e.message : String(e)); }
+})();
 </script>
 </body>
 </html>
