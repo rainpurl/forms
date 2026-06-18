@@ -120,6 +120,16 @@ Implemented in phase 1: `multiple_choice` (one answer or multiple answers via a 
 
 Flow features in phase 1: Force Response (required), Request Response (a soft confirm on skip), Response Validation, and Randomization (both option order and whole question order through the form setting `randomizeQuestions`). Redirect on completion is a form setting (`settings.redirectUrl`): when set, a respondent who submits is sent to that URL instead of the thank-you screen; a missing scheme is prefixed with https. Question order randomization shuffles within each page when page breaks are present.
 
+## Logo, fonts, header image, end of form
+
+The real artwork is now in. The full logo SVG lives in a single LOGO_SVG constant just above the Logo component, with all its fills set to currentColor, and the Logo component injects it so it recolors to whatever color it sits on (nav, builder, splash, loading screen, and the public-form footer). The size prop sets the lockup height. To replace it later, swap the LOGO_SVG string. The favicon in the head is the provided mark, recolored to the brand purple for visibility.
+
+Form font options are now labelled without naming the font: Sans (default), Serif, Monospace, Slab, and zetetiq. The mappings: Sans is Figtree (now loaded from Google Fonts), Serif and Monospace and Slab are unchanged, and zetetiq is the Mozilla font. The form default stays Sans.
+
+A header image can be uploaded per form (Theme panel). The file is downscaled in the browser to about 1000px wide, flattened onto white, and stored as a JPEG data URL in settings.headerImage; uploads over roughly 900KB are rejected with a message. It renders full width at the top of the form, the builder canvas, and the thank-you page. There is a Remove control.
+
+The post-submission page is customizable beyond the redirect URL. New form settings: endTitle, endMessage, endButtonLabel, and endButtonUrl. If a redirect URL is set it still wins; otherwise the respondent sees the themed thank-you page with the custom heading, message, and an optional button that links out. The public-form footer now reads built by zetetiq and links to https://zetetiq.pages.dev (note: the current live deploy is zetetic.pages.dev, so point this at whatever domain is actually live).
+
 ## Branding, sign in, and reports
 
 The wordmark is now a recolorable inline-SVG Logo component (currentColor) used in the nav, builder, splash, loading screen, and public-form footer, with a placeholder SVG favicon in the head. Swapping in the real artwork means replacing the body of the Logo component and the favicon href. The splash tagline reads: Build a query, theme it your way, and share a clean link. Experience management via zetetiq is 100% free for early users.

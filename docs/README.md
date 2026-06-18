@@ -87,3 +87,7 @@ On the Responses tab, next to Download CSV, Export report builds a themed one-pa
 ## Logo and favicon
 
 A recolorable inline-SVG Logo component stands in for the wordmark everywhere it appears (top nav, builder, the splash, the loading screen, and the public form footer), and a placeholder SVG favicon is set in the document head. The Logo uses currentColor, so it takes the color of wherever it sits. To drop in the real artwork, replace the body of the Logo component in the source with the provided SVG and swap the favicon href in the head. Keep currentColor on the paths you want to recolor.
+
+## Logo, favicon, fonts, and after-submission options
+
+The provided logo and favicon are built in. The logo recolors via currentColor and is stored in one place (the LOGO_SVG constant in the source); the favicon is set in the page head. Form font choices read Sans (default, Figtree), Serif, Monospace, Slab, and zetetiq (the Mozilla font) without showing the underlying font names. In the builder Theme panel you can upload a header image (shown at the top of the form, downscaled and stored with the form). In Form settings, After submission lets you set the thank-you heading, message, and an optional button, in addition to the redirect URL. The public footer reads built by zetetiq and links to zetetiq.pages.dev; change that link if your live domain differs.
