@@ -11,15 +11,15 @@
 <style>
 :root{
   color-scheme: light;
-  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,92,60,.1),0 1px 1.5px rgba(55,45,28,.09);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);
-  --ease:cubic-bezier(.4,0,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--t-fast:.14s;--t:.2s;--ring:0 0 0 3px rgba(92,136,205,.32);
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);
+  --ease:cubic-bezier(.4,0,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--t-fast:.14s;--t:.2s;--ring:0 0 0 3px rgba(92,136,205,.32);--raise-sheen:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 72%);
   --bo:#5C88CD;            /* primary blue */
   --bo-dark:#4A73B5;
   --ink:#2A2620;
   --ink-soft:#736B5E;
   --line:#CFC6B4;
   --line-strong:#BEB39C;
-  --paper:#DDD4C4;
+  --paper:#F3EFE7;
   --card:#FBFAF6;
   --good:#4F8A5B;
   --bad:#C0563F;
@@ -28,11 +28,11 @@
   --display:'Mozilla Headline','Mozilla Text',system-ui,sans-serif;
   --mono:'Mozilla Text',system-ui,sans-serif;
   --hover:#E7DFD0;
-  --nav-bg:rgba(221,212,196,.82);
+  --nav-bg:rgba(243,239,231,.84);
 }
 html[data-theme="dark"]{
   color-scheme: dark;
-  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.5);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),0 1px 1px rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.42);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);--raise-sheen:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,0) 72%);
   --bo:#7AA0DC; --bo-dark:#6B92D0;
   --ink:#ECE7DB; --ink-soft:#A69E8C;
   --line:#332F24; --line-strong:#46402F;
@@ -171,11 +171,11 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 /* form scope (respondent + preview): themed */
 .form-scope{--fp:#5C88CD;--fs:#2A2620;--fa:#5C88CD;--ftext:var(--fs);font-family:var(--sans)}
-.form-page,.form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--good:#4F8A5B;--bad:#C0563F;--hover:#E7DFD0;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,92,60,.1),0 1px 1.5px rgba(55,45,28,.09);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
-html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#151310;--card:#211E18;--ink:#ECE7DB;--ink-soft:#A69E8C;--line:#332F24;--line-strong:#46402F;--hover:#2A2620;--ftext:#ECE7DB;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.5);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);}
+.form-page,.form-scope{--raise-sheen:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 72%);--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--good:#4F8A5B;--bad:#C0563F;--hover:#E7DFD0;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
+html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--raise-sheen:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,0) 72%);--paper:#151310;--card:#211E18;--ink:#ECE7DB;--ink-soft:#A69E8C;--line:#332F24;--line-strong:#46402F;--hover:#2A2620;--ftext:#ECE7DB;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),0 1px 1px rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.42);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);}
 html[data-theme="dark"] .form-scope .finput,html[data-theme="dark"] .form-scope textarea,html[data-theme="dark"] .form-scope select{background:var(--card);color:var(--ink)}
 html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
-.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--hover:#E7DFD0;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,92,60,.1),0 1px 1.5px rgba(55,45,28,.09);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
+.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--raise-sheen:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 72%);--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--hover:#E7DFD0;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
 .form-embed.form-page{min-height:auto;padding:14px 14px 22px;background:transparent}
 .form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
 .form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--ftext);font-weight:600;line-height:1.2}
@@ -209,7 +209,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 @media(max-width:620px){.addmenu{grid-template-columns:1fr}.bar-row .k{width:92px}.hide-sm{display:none}}
 
 /* ---- builder: properties panel + canvas layout ---- */
-.builder{display:flex;flex-direction:column;height:100vh;background:#f3f2fb}
+.builder{display:flex;flex-direction:column;height:100vh;background:var(--paper)}
 .b-top{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--card);border-bottom:1px solid var(--line)}
 .b-top .saved-note{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
 .b-tools{position:relative}
@@ -218,11 +218,11 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .menu button:hover{background:var(--hover)}
 .menu button.danger-text{color:var(--bad)}
 .b-main{flex:1;display:flex;min-height:0}
-.b-rail{width:54px;flex:none;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:6px}
+.b-rail{width:54px;flex:none;background:var(--card);border-right:0;box-shadow:1px 0 0 var(--line-strong);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:6px}
 .b-rail button{width:38px;height:38px;border:0;background:none;border-radius:9px;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center}
 .b-rail button:hover{background:var(--hover);color:var(--ink)}
-.b-rail button.active{background:rgba(124,114,242,.16);color:var(--bo)}
-.b-panel{width:320px;flex:none;background:var(--card);border-right:1px solid var(--line);overflow:auto;padding:18px}
+.b-rail button.active{background:rgba(92,136,205,.16);color:var(--bo)}
+.b-panel{width:320px;flex:none;background:var(--card);border-right:0;box-shadow:1px 0 0 var(--line-strong);overflow:auto;padding:18px}
 .panel-title{font-family:var(--display);font-size:18px;margin-bottom:14px}
 .panel-section{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin:16px 0 9px;padding-top:13px;border-top:1px solid var(--line)}
 .panel-section:first-of-type{border-top:0;padding-top:0;margin-top:4px}
@@ -274,7 +274,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .addq-menu .t{font-weight:600;font-size:14px}
 .addq-menu .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
 .endcard{background:var(--card);border:1px dashed var(--line-strong);border-radius:14px;padding:16px}
-.b-preview{flex:1;overflow:auto;background:#f3f2fb}
+.b-preview{flex:1;overflow:auto;background:var(--paper)}
 @media(max-width:860px){
   .b-rail{display:none}
   .b-panel{width:250px;padding:14px}
@@ -343,7 +343,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .form-scope .rankrow.over{box-shadow:0 -3px 0 0 var(--fa)}
 /* page break divider (builder) */
 .pbreak{display:flex;align-items:center;gap:10px;margin:10px 2px;padding:6px 8px;border-radius:9px;cursor:pointer}
-.pbreak.sel{background:rgba(124,114,242,.16)}
+.pbreak.sel{background:rgba(92,136,205,.16)}
 .pbreak-line{flex:1;height:1px;background:var(--line-strong)}
 .pbreak-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--bo);font-weight:700}
 /* paginated form */
@@ -748,8 +748,8 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 .btn.danger:hover{transform:translateY(-1px)}
 .btn.primary:active,.btn.danger:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
 .btn.ghost{box-shadow:none;border-color:transparent}
-.btn.ghost:hover{box-shadow:none;transform:none;background:var(--hover)}
-.btn.ghost:active{box-shadow:none;transform:none}
+.btn.ghost:hover{box-shadow:var(--bevel-inset);transform:none;background:var(--hover)}
+.btn.ghost:active{box-shadow:var(--bevel-press);transform:none}
 .btn:disabled{transform:none;box-shadow:var(--bevel-soft)}
 .iconbtn{border-color:transparent;box-shadow:var(--bevel-raise)}
 .iconbtn:hover{transform:translateY(-1px);background:var(--hover)}
@@ -849,6 +849,48 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 /* cursor tooltip card */
 .cursor-tip{position:fixed;z-index:9999;pointer-events:none;background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 9px;border-radius:7px;box-shadow:0 8px 22px rgba(0,0,0,.3);max-width:260px;animation:tipin .12s var(--ease) both}
 @keyframes tipin{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* ===== v4: natural pop (sheen on raised), stamped homepage cards ===== */
+.btn,.iconbtn,.gbtn,.cpick-trigger,.addq-item,.addmenu button,.addq-menu button,.nps button,.cal-chip,.slot-btn,.submit,.fcta,.fbtn-ghost{background-image:var(--raise-sheen)}
+.btn.primary,.btn.danger{background-image:var(--raise-sheen)}
+.form-scope .submit,.form-scope .fcta,.form-scope .fbtn-ghost,.form-scope .slot-btn,.form-scope .nps button{background-image:var(--raise-sheen)}
+.btn:hover,.btn.primary:hover,.iconbtn:hover,.gbtn:hover,.addq-item:hover,.addmenu button:hover,.addq-menu button:hover{background-image:var(--raise-sheen)}
+.btn:active,.btn.primary:active,.btn.danger:active,.iconbtn:active,.gbtn:active,.cpick-trigger:active,.addq-item:active,.addmenu button:active,.addq-menu button:active{background-image:none}
+.btn.ghost,.btn.ghost:hover,.seg-btn.on,.chip-tog.on,.nps button.on,.slot-btn.sel,.cal-chip.on{background-image:none}
+.form-scope .submit:active,.form-scope .fcta:active,.form-scope .nps button.on,.form-scope .slot-btn.sel{background-image:none}
+.form-card,.tpl-card{border-color:transparent;background:var(--paper);background-image:none;box-shadow:var(--bevel-inset);transform:none}
+.form-card:hover,.tpl-card:hover{border-color:transparent;background:var(--hover);box-shadow:var(--bevel-inset);transform:none}
+.tpl-card:disabled{opacity:.6}
+.lp-foot-copy{max-width:1080px;margin:0 auto;padding:0 24px 22px;color:var(--ink-soft);font-size:12.5px}
+
+/* ===== themed date / time pickers (v5) ===== */
+.zdate{justify-content:space-between}
+.zsel-ph .zsel-label{color:var(--ink-soft)}
+.zdate-ico{flex:none;color:var(--ink-soft);display:inline-flex;align-items:center}
+.cal-pop{position:absolute;top:calc(100% + 6px);left:0;z-index:60;background:var(--card);border-radius:12px;box-shadow:var(--bevel-raise),0 14px 34px rgba(40,30,15,.18);padding:12px;width:252px;transform-origin:top left;animation:menupop .14s var(--ease) both}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-title{font-weight:600;font-size:14px}
+.cal-nav{appearance:none;border:0;background:var(--card);cursor:pointer;width:28px;height:28px;border-radius:8px;color:var(--ink);font-size:18px;line-height:1;box-shadow:var(--bevel-raise);background-image:var(--raise-sheen);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.cal-nav:hover{transform:translateY(-1px)}
+.cal-nav:active{box-shadow:var(--bevel-press);background-image:none;transform:translateY(1px)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{margin-bottom:2px}
+.cal-dowc{text-align:center;font-size:10px;font-weight:700;color:var(--ink-soft);font-family:var(--mono);padding:2px 0}
+.cal-day{appearance:none;border:0;background:none;cursor:pointer;aspect-ratio:1/1;border-radius:8px;font-size:13px;color:var(--ink);display:flex;align-items:center;justify-content:center;transition:background-color var(--t-fast) var(--ease),color var(--t-fast),box-shadow var(--t-fast)}
+.cal-day:hover{background:var(--hover)}
+.cal-day.today{box-shadow:inset 0 0 0 1.5px var(--line-strong)}
+.cal-day.sel{background:var(--bo);color:#fff;box-shadow:var(--bevel-press)}
+.cal-day:disabled{opacity:.3;cursor:not-allowed}
+.form-scope .cal-day.sel{background:var(--fp)}
+.cal-clear{margin-top:8px;width:100%;appearance:none;border:0;background:none;color:var(--ink-soft);font-size:12.5px;font-weight:600;cursor:pointer;padding:5px;border-radius:7px;transition:background-color var(--t-fast) var(--ease),color var(--t-fast)}
+.cal-clear:hover{background:var(--hover);color:var(--ink)}
+.cal-timerow{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.cal-tlabel{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
+.ztime{display:inline-flex;align-items:center;gap:4px}
+.ztime .zsel-wrap{display:inline-block}
+.ztime .zsel{width:auto;min-width:44px;padding:6px 8px;font-size:13px}
+.ztime-ap .zsel,.ztime-ap.zsel{min-width:52px}
+.ztime-colon{font-weight:700;color:var(--ink-soft)}
 </style>
 </head>
 <body>
@@ -1965,9 +2007,8 @@ function PollConfig({
     style: {
       gap: 8
     }
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement(DateField, {
     className: "input",
-    type: "date",
     value: nd,
     onChange: e => setNd(e.target.value)
   }), /*#__PURE__*/React.createElement("button", {
@@ -2369,9 +2410,8 @@ function DocumentSignRenderer({
     value: data[f.id],
     onChange: v => setField(f.id, v),
     height: 64
-  })) : f.kind === "date" ? /*#__PURE__*/React.createElement("input", {
+  })) : f.kind === "date" ? /*#__PURE__*/React.createElement(DateField, {
     className: "finput",
-    type: "date",
     value: data[f.id] || "",
     onChange: e => setField(f.id, e.target.value),
     title: f.label
@@ -2462,9 +2502,8 @@ function DocumentSignRenderer({
     value: data[f.id],
     onChange: v => setField(f.id, v),
     height: 120
-  }) : f.kind === "date" ? /*#__PURE__*/React.createElement("input", {
+  }) : f.kind === "date" ? /*#__PURE__*/React.createElement(DateField, {
     className: "finput",
-    type: "date",
     value: data[f.id] || "",
     onChange: e => setField(f.id, e.target.value),
     style: {
@@ -2790,9 +2829,8 @@ function SchedulingControls({
     style: {
       gap: 8
     }
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement(DateTimeField, {
     className: "input",
-    type: "datetime-local",
     value: newSlot,
     onChange: e => setNewSlot(e.target.value)
   }), /*#__PURE__*/React.createElement("button", {
@@ -6083,9 +6121,8 @@ const QTYPES = {
       className: "q"
     }, /*#__PURE__*/React.createElement(QLabel, {
       q: q
-    }), /*#__PURE__*/React.createElement("input", {
+    }), /*#__PURE__*/React.createElement(DateField, {
       className: "finput",
-      type: "date",
       value: value || "",
       min: q.minDate || undefined,
       max: q.maxDate || undefined,
@@ -7850,12 +7887,14 @@ function Landing({
     size: 16
   }), /*#__PURE__*/React.createElement("span", {
     className: "lp-foot-tag"
-  }, "Experience management you host yourself."), /*#__PURE__*/React.createElement("a", {
+  }, "Human-centered Experience Management."), /*#__PURE__*/React.createElement("a", {
     className: "lp-foot-link",
     href: "https://zetetiq.pages.dev",
     target: "_blank",
     rel: "noopener"
-  }, "zetetiq.pages.dev"))), open && !user && /*#__PURE__*/React.createElement(Modal, {
+  }, "zetetiq.pages.dev")), /*#__PURE__*/React.createElement("div", {
+    className: "lp-foot-copy"
+  }, "© 2026 Zetetiq XM")), open && !user && /*#__PURE__*/React.createElement(Modal, {
     title: "Admin login",
     onClose: () => setOpen(false)
   }, /*#__PURE__*/React.createElement("div", {
@@ -8488,6 +8527,345 @@ function Select({
   }, o.label))));
 }
 const COLOR_SWATCHES = ["#5C88CD", "#4A73B5", "#2A6F97", "#4F8A5B", "#2F9E63", "#E0A23B", "#C0563F", "#B5446E", "#7A5CCD", "#736B5E", "#2A2620", "#FBFAF6"];
+function zpad(n) {
+  return String(n).padStart(2, "0");
+}
+function zYmd(d) {
+  return d.getFullYear() + "-" + zpad(d.getMonth() + 1) + "-" + zpad(d.getDate());
+}
+function zToday() {
+  return zYmd(new Date());
+}
+function zYmdParts(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || "");
+  return m ? {
+    y: +m[1],
+    mo: +m[2] - 1,
+    d: +m[3]
+  } : null;
+}
+function zFmtDate(s) {
+  const p = zYmdParts(s);
+  if (!p) return "";
+  return new Date(p.y, p.mo, p.d).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+function zFmtTime(s) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(s || "");
+  if (!m) return "";
+  let h = +m[1];
+  const mn = m[2];
+  const ap = h >= 12 ? "PM" : "AM";
+  let h12 = h % 12;
+  if (h12 === 0) h12 = 12;
+  return h12 + ":" + mn + " " + ap;
+}
+function ZCalIcon() {
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "15",
+    height: "15",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "4.5",
+    width: "18",
+    height: "16",
+    rx: "2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M3 9.5h18M8 2.5v4M16 2.5v4"
+  }));
+}
+function DateCalendar({
+  value,
+  min,
+  max,
+  onPick
+}) {
+  const t = zToday();
+  const init = zYmdParts(value) || zYmdParts(t);
+  const [view, setView] = useState({
+    y: init.y,
+    mo: init.mo
+  });
+  const dim = new Date(view.y, view.mo + 1, 0).getDate();
+  const fw = new Date(view.y, view.mo, 1).getDay();
+  const cells = [];
+  for (let i = 0; i < fw; i++) cells.push(null);
+  for (let d = 1; d <= dim; d++) cells.push(d);
+  const mk = d => view.y + "-" + zpad(view.mo + 1) + "-" + zpad(d);
+  const prev = () => setView(v => {
+    const mo = v.mo - 1;
+    return mo < 0 ? {
+      y: v.y - 1,
+      mo: 11
+    } : {
+      y: v.y,
+      mo
+    };
+  });
+  const next = () => setView(v => {
+    const mo = v.mo + 1;
+    return mo > 11 ? {
+      y: v.y + 1,
+      mo: 0
+    } : {
+      y: v.y,
+      mo
+    };
+  });
+  const ml = new Date(view.y, view.mo, 1).toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric"
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    className: "cal"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "cal-head"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "cal-nav",
+    onClick: prev,
+    title: "Previous month"
+  }, "‹"), /*#__PURE__*/React.createElement("span", {
+    className: "cal-title"
+  }, ml), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "cal-nav",
+    onClick: next,
+    title: "Next month"
+  }, "›")), /*#__PURE__*/React.createElement("div", {
+    className: "cal-grid cal-dow"
+  }, ["S", "M", "T", "W", "T", "F", "S"].map((d, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: "cal-dowc"
+  }, d))), /*#__PURE__*/React.createElement("div", {
+    className: "cal-grid"
+  }, cells.map((d, i) => {
+    if (d == null) return /*#__PURE__*/React.createElement("span", {
+      key: i
+    });
+    const ds = mk(d);
+    const dis = min && ds < min || max && ds > max;
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: i,
+      disabled: dis,
+      className: "cal-day" + (ds === value ? " sel" : "") + (ds === t ? " today" : ""),
+      onClick: () => !dis && onPick(ds)
+    }, d);
+  })));
+}
+function DateField({
+  value,
+  onChange,
+  min,
+  max,
+  className,
+  style,
+  title,
+  disabled,
+  placeholder
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const h = e => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const k = e => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", h);
+    document.addEventListener("keydown", k);
+    return () => {
+      document.removeEventListener("pointerdown", h);
+      document.removeEventListener("keydown", k);
+    };
+  }, [open]);
+  const lbl = value ? zFmtDate(value) : placeholder || "Pick a date";
+  return /*#__PURE__*/React.createElement("div", {
+    className: "zsel-wrap",
+    ref: ref,
+    style: style
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: (className || "") + " zsel zdate" + (value ? "" : " zsel-ph"),
+    disabled: disabled,
+    title: title,
+    "aria-haspopup": "dialog",
+    "aria-expanded": open,
+    onClick: () => !disabled && setOpen(o => !o)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "zsel-label"
+  }, lbl), /*#__PURE__*/React.createElement("span", {
+    className: "zdate-ico",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement(ZCalIcon, null))), open && /*#__PURE__*/React.createElement("div", {
+    className: "cal-pop"
+  }, /*#__PURE__*/React.createElement(DateCalendar, {
+    value: value || "",
+    min: min,
+    max: max,
+    onPick: ds => {
+      setOpen(false);
+      if (onChange) onChange({
+        target: {
+          value: ds
+        }
+      });
+    }
+  }), value && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "cal-clear",
+    onClick: () => {
+      setOpen(false);
+      if (onChange) onChange({
+        target: {
+          value: ""
+        }
+      });
+    }
+  }, "Clear")));
+}
+function TimeField({
+  value,
+  onChange
+}) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(value || "");
+  let h24 = m ? +m[1] : 9;
+  let mn = m ? +m[2] : 0;
+  const ap = h24 >= 12 ? "PM" : "AM";
+  let h12 = h24 % 12;
+  if (h12 === 0) h12 = 12;
+  const mins = Array.from(new Set([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, mn])).sort((a, b) => a - b);
+  const emit = (nh12, nmn, nap) => {
+    let H = nh12 % 12;
+    if (nap === "PM") H += 12;
+    if (onChange) onChange({
+      target: {
+        value: zpad(H) + ":" + zpad(nmn)
+      }
+    });
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "ztime"
+  }, /*#__PURE__*/React.createElement(Select, {
+    className: "select ztime-h",
+    value: String(h12),
+    onChange: e => emit(+e.target.value, mn, ap)
+  }, Array.from({
+    length: 12
+  }).map((_, i) => {
+    const v = i + 1;
+    return /*#__PURE__*/React.createElement("option", {
+      key: v,
+      value: v
+    }, v);
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "ztime-colon"
+  }, ":"), /*#__PURE__*/React.createElement(Select, {
+    className: "select ztime-m",
+    value: zpad(mn),
+    onChange: e => emit(h12, +e.target.value, ap)
+  }, mins.map(v => /*#__PURE__*/React.createElement("option", {
+    key: v,
+    value: zpad(v)
+  }, zpad(v)))), /*#__PURE__*/React.createElement(Select, {
+    className: "select ztime-ap",
+    value: ap,
+    onChange: e => emit(h12, mn, e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "AM"
+  }, "AM"), /*#__PURE__*/React.createElement("option", {
+    value: "PM"
+  }, "PM")));
+}
+function DateTimeField({
+  value,
+  onChange,
+  className,
+  style
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const h = e => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const k = e => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", h);
+    document.addEventListener("keydown", k);
+    return () => {
+      document.removeEventListener("pointerdown", h);
+      document.removeEventListener("keydown", k);
+    };
+  }, [open]);
+  const datePart = value ? value.slice(0, 10) : "";
+  const timePart = value && value.length >= 16 ? value.slice(11, 16) : "";
+  const emit = (dp, tp) => {
+    if (!dp) {
+      if (onChange) onChange({
+        target: {
+          value: ""
+        }
+      });
+      return;
+    }
+    if (onChange) onChange({
+      target: {
+        value: dp + "T" + (tp || "09:00")
+      }
+    });
+  };
+  const lbl = value ? zFmtDate(datePart) + (timePart ? ", " + zFmtTime(timePart) : "") : "Pick date and time";
+  return /*#__PURE__*/React.createElement("div", {
+    className: "zsel-wrap",
+    ref: ref,
+    style: style
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: (className || "") + " zsel zdate" + (value ? "" : " zsel-ph"),
+    "aria-haspopup": "dialog",
+    "aria-expanded": open,
+    onClick: () => setOpen(o => !o)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "zsel-label"
+  }, lbl), /*#__PURE__*/React.createElement("span", {
+    className: "zdate-ico",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement(ZCalIcon, null))), open && /*#__PURE__*/React.createElement("div", {
+    className: "cal-pop"
+  }, /*#__PURE__*/React.createElement(DateCalendar, {
+    value: datePart,
+    onPick: ds => emit(ds, timePart)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "cal-timerow"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cal-tlabel"
+  }, "Time"), /*#__PURE__*/React.createElement(TimeField, {
+    value: timePart || "09:00",
+    onChange: e => emit(datePart || zToday(), e.target.value)
+  })), value && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "cal-clear",
+    onClick: () => {
+      setOpen(false);
+      emit("", "");
+    }
+  }, "Clear")));
+}
 function ColorPick({
   label,
   value,
@@ -9693,25 +10071,25 @@ function DateControls({
     style: {
       flex: 1
     }
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement(DateField, {
     className: "input",
-    type: "date",
     value: q.minDate || "",
     onChange: e => update({
       minDate: e.target.value
-    })
+    }),
+    placeholder: "Any"
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Latest date",
     style: {
       flex: 1
     }
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement(DateField, {
     className: "input",
-    type: "date",
     value: q.maxDate || "",
     onChange: e => update({
       maxDate: e.target.value
-    })
+    }),
+    placeholder: "Any"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "hint"
   }, "Respondents pick a date from a calendar."), /*#__PURE__*/React.createElement(ReqToggles, {
@@ -10728,18 +11106,16 @@ function SettingsPanel({
     })
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Opens at (optional)"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement(DateTimeField, {
     className: "input",
-    type: "datetime-local",
     value: toLocalInput(form.schema.settings.opensAt),
     onChange: e => setSettings({
       opensAt: fromLocalInput(e.target.value)
     })
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Closes at (optional)"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement(DateTimeField, {
     className: "input",
-    type: "datetime-local",
     value: toLocalInput(form.schema.settings.closesAt),
     onChange: e => setSettings({
       closesAt: fromLocalInput(e.target.value)

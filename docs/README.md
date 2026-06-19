@@ -323,3 +323,11 @@ The brand moved to a warm sand background with a blue accent. Buttons, inputs, t
 ## Themed dropdowns, colour picker, and tooltips
 
 Dropdown menus and the colour picker now match the app's look instead of using the plain browser versions, in both light and dark. Hovering an icon button shows a small label that follows your cursor. Language and translation options now live as an expandable section inside Form settings rather than a separate panel. Buttons and cards were also refined to feel a touch crisper. Date and time pickers are next on the themed-control list.
+
+## Lighter background and more natural depth
+
+The background is now a warm off-white (including in the builder, which had been showing an old purple). Buttons look like they are lifting off the page with a soft sheen and shadow, while text boxes and pressed buttons stay recessed. The form and template cards on your home page are stamped into the page in the background colour. Ghost buttons press in only when you hover them. The tagline is now Human-centered Experience Management, and the footer shows a Zetetiq XM copyright.
+
+## Themed date and time selection
+
+Date and time fields now open an in-app calendar and time selector that match the rest of zetetiq, instead of the browser's date popup. The calendar supports month navigation, marks today and the chosen day, and greys out dates outside any allowed range. That was the last browser control, so dropdowns, colours, and dates and times are now all themed in both light and dark.

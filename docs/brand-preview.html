@@ -25,8 +25,8 @@
   .pane{border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(40,30,15,.16)}
   .light{
     --bo:#5C88CD;--bo-dark:#4A73B5;--ink:#2A2620;--ink-soft:#736B5E;
-    --line-strong:#BEB39C;--paper:#DDD4C4;--card:#FBFAF6;--good:#4F8A5B;--hover:#E7DFD0;
-    --bevel-raise:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,92,60,.1),0 1px 1.5px rgba(55,45,28,.09);
+    --line-strong:#BEB39C;--paper:#F3EFE7;--card:#FBFAF6;--good:#4F8A5B;--hover:#E7DFD0;
+    --bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--raise-sheen:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 72%);
     --bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);
     --bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);
     --bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);
@@ -36,7 +36,7 @@
   .dark{
     --bo:#7AA0DC;--bo-dark:#6B92D0;--ink:#ECE7DB;--ink-soft:#A69E8C;
     --line-strong:#46402F;--paper:#151310;--card:#211E18;--good:#6FBE83;--hover:#2A2620;
-    --bevel-raise:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.5);
+    --bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),0 1px 1px rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.42);--raise-sheen:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,0) 72%);
     --bevel-press:inset 0 2px 5px rgba(0,0,0,.65);
     --bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);
     --bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);
@@ -49,19 +49,20 @@
   .sw{width:74px;height:74px;border-radius:12px;box-shadow:var(--bevel-soft);display:flex;align-items:flex-end;padding:6px;font-size:10px;font-family:var(--display);color:#2A2620}
   .sw small{background:rgba(255,255,255,.7);border-radius:4px;padding:1px 4px}
 
-  .btn{font-family:var(--sans);appearance:none;border:1px solid transparent;background:var(--card);color:var(--ink);padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;line-height:1;box-shadow:var(--bevel-raise);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+  .btn{font-family:var(--sans);appearance:none;border:1px solid transparent;background:var(--card);color:var(--ink);padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;line-height:1;box-shadow:var(--bevel-raise);background-image:var(--raise-sheen);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
   .btn:hover{background:var(--hover);transform:translateY(-1px);box-shadow:var(--bevel-raise),0 5px 14px rgba(60,45,25,.13)}
   .btn:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
-  .btn.primary{background:var(--bo);color:#fff;box-shadow:var(--bevel-raise),0 1px 2px rgba(40,60,110,.25)}
+  .btn.primary{background:var(--bo);color:#fff;box-shadow:var(--bevel-raise),0 1px 2px rgba(40,60,110,.25);background-image:var(--raise-sheen)}
+  .btn:active{background-image:none}
   .btn.primary:hover{background:var(--bo-dark);box-shadow:var(--bevel-raise),0 6px 16px rgba(50,100,190,.34)}
   .btn.primary:active{box-shadow:var(--bevel-press)}
-  .btn.ghost{background:transparent;box-shadow:none}
-  .btn.ghost:hover{background:var(--hover);transform:none}
+  .btn.ghost{background:transparent;box-shadow:none;background-image:none}
+  .btn.ghost:hover{background:var(--hover);transform:none;box-shadow:var(--bevel-inset)}
 
   .input{font-family:var(--sans);width:100%;border:1px solid transparent;border-radius:10px;padding:10px 12px;background:var(--card);color:var(--ink);outline:none;box-shadow:var(--bevel-inset);transition:box-shadow var(--t-fast) var(--ease)}
   .input:focus{box-shadow:var(--ring),var(--bevel-inset)}
 
-  .card{background:var(--card);border-radius:14px;box-shadow:var(--bevel-soft);padding:16px;margin-bottom:16px}
+  .card{background:var(--paper);border-radius:14px;box-shadow:var(--bevel-inset);padding:16px;margin-bottom:16px}
   .card .t{font-weight:700;margin-bottom:4px}
   .card .d{color:var(--ink-soft);font-size:13.5px}
 
@@ -93,7 +94,7 @@
 <body>
   <div class="head">
     <div class="wm">zetetiq</div>
-    <div class="sub">New brand: sand #DDD4C4 + blue #5C88CD. Crisper bevel this pass (less puffy, closer to the segmented buttons). Dropdowns, the colour picker and icon tooltips are now themed too. Hover and press the elements below.</div>
+    <div class="sub">New brand: sand #DDD4C4 + blue #5C88CD. Off-white background now. Raised buttons get a top sheen + soft drop to pop naturally; ghost buttons press in on hover; homepage cards are stamped into the page. Hover and press below.</div>
   </div>
   <div class="grid">
     <div class="pane light" id="lp">
@@ -117,7 +118,7 @@
       </div>
       <div class="seg" style="margin-bottom:16px"><button class="on">Booking</button><button>Group poll</button></div>
       <input class="input" placeholder="Recessed input, focus me" style="margin-bottom:16px" />
-      <div class="card"><div class="t">A card, stamped onto the page</div><div class="d">No border. The edge is the bevel: a light top, a soft warm shadow below.</div></div>
+      <div class="card"><div class="t">Homepage card, stamped into the page</div><div class="d">Form and template cards now sit flush, same colour as the background, recessed by the bevel.</div></div>
       <div class="note">Buttons lift on hover, push in on click. The theme toggle reads as pressed into the surface.</div>
     </div>
 
@@ -142,7 +143,7 @@
       </div>
       <div class="seg" style="margin-bottom:16px"><button class="on">Booking</button><button>Group poll</button></div>
       <input class="input" placeholder="Recessed input, focus me" style="margin-bottom:16px" />
-      <div class="card"><div class="t">A card, stamped onto the page</div><div class="d">Warm charcoal surfaces with the same bevel language, carried into dark mode.</div></div>
+      <div class="card"><div class="t">Homepage card, stamped into the page</div><div class="d">Same recessed treatment carried into dark mode.</div></div>
       <div class="note">Same motion and bevel system, tuned for the dark palette.</div>
     </div>
   </div>

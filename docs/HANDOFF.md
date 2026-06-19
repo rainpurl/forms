@@ -657,3 +657,31 @@ Language and translation settings are no longer a separate panel. They are a col
 The bevel was also crisped this pass based on feedback that raised pieces felt a little heavy: a brighter top highlight and a lighter, less brown bottom edge and drop, so buttons and cards read closer to the segmented Booking / Group poll control. The brand-preview.html in this folder reflects the change. Bevel strength remains a small set of per-theme variables if further tuning is wanted.
 
 Still to come on the theming request: themed date and time pickers (a calendar popover and a time list), which are larger custom widgets and are next.
+
+## Off-white background, natural pop, stamped cards
+
+Visual tuning this round; no backend changes.
+
+The page background moved from the darker sand to a warm off-white. The builder background, which was still a leftover lavender, now uses the same off-white, and its rail and panel dividers were softened from hard borders into the bevel language. A stray purple highlight on the active builder rail icon is now the brand blue.
+
+Raised elements were reworked to pop more naturally. Instead of a dark bottom inset line, buttons now carry a top sheen (a soft light gradient over the top of the surface) plus a real, soft drop shadow beneath, so they read as lifted off the page rather than embossed into it. The sheen is a per-theme variable and is removed the moment a control is pressed or shows an active or recessed state, so pressing still reads as pushing in. Recessed things (text fields, pressed buttons, the segmented control) were already right and were left alone.
+
+Homepage cards (every form card and every template card) are now stamped into the page: no border, the same colour as the background, recessed by the inset bevel, with no hover lift. They read as wells in the surface rather than floating tiles.
+
+Ghost buttons are flat at rest and gain the stamped-in inset look only on hover (and a deeper press on click), so they feel pressable without competing with solid buttons.
+
+Copy changes: the landing tagline is now Human-centered Experience Management, and the footer carries a copyright line, (c) 2026 Zetetiq XM.
+
+The brand-preview.html in this folder was updated to show the off-white background, the new natural pop on buttons, the ghost-on-hover behaviour, and a stamped homepage card.
+
+## Themed date and time pickers
+
+The last native browser controls are gone. No backend changes.
+
+A DateField component now backs every date input across the app and the public form (the date question, the form-field date kind, the poll date adder, and the earliest/latest bounds in date settings). It shows a beveled field with the date formatted in words and a small calendar glyph, and opens a themed month calendar with weekday headers, previous and next month navigation, the selected day and today marked, a Clear action, and out-of-range days disabled when minimum or maximum bounds are set. In the public form the selected day uses the form's own accent colour. It reports changes in the same shape the native input did, so call sites only changed by name.
+
+A DateTimeField backs the date-and-time inputs (the scheduling slot adder and the form open and close times). It opens the same calendar with a time row beneath it. The time row is a TimeField built from three themed dropdowns (hour, minute in five-minute steps plus whatever exact minute is already stored, and AM or PM), so the whole picker is themed and consistent in both light and dark, with no operating-system date or time popups anywhere.
+
+The calendar and the time selects reuse the existing themed Select and bevel system, so they match the rest of the app, animate in like the other popovers, close on outside click or Escape, and respect reduced motion.
+
+This completes the themed-control request: dropdowns, the colour picker, and now date and time are all in-app rather than browser controls.
