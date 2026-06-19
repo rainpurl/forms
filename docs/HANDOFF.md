@@ -617,3 +617,27 @@ Save and resume: in progress answers are now saved to the visitor's own device (
 Quiz answer review: a new setting, shown with scoring, reveals correct answers and explanations on the thank you screen. Multiple choice questions gained an optional explanation field in the scoring section. After submitting, each scored question shows the respondent's answer, a correct or incorrect mark, the correct option(s), and the explanation. Correctness is computed by quizReview: the correct options are those carrying the maximum positive points; a single select answer is correct when it earns the max, and a multi select answer must match the full set of top options.
 
 No backend changes this round; all three are client side.
+
+## Character limits, matrix N/A, and date bounds
+
+Three input controls this round, all verified with unit and render tests. No backend changes.
+
+Text entry gained a maximum length alongside the existing minimum. When set above zero it caps the input with a maxLength attribute and shows a live character counter (current over limit) under the field; the validate function also rejects anything over the cap as a safety net for pasted or programmatic input. Set it in the question's Validation section.
+
+Matrix questions gained an optional N/A column. Turn on Add an N/A column in the matrix settings and a separated N/A choice appears at the end of every row. Picking it counts as an answer, so it satisfies a required matrix; the value is stored as N/A and flows through exports like any other selection.
+
+Date questions gained earliest and latest bounds. Set them in the date question controls and the picker enforces them with min and max attributes, with the validate function rejecting out of range dates and naming the bound in the message. Bounds are absolute calendar dates and string compared in ISO form.
+
+Note: number entry (min, max, step, decimals, prefix, suffix) and constant sum (total enforcement) were already complete and were left as is.
+
+## Brand refresh, full bevel pass, and motion
+
+A visual overhaul this round. No behaviour or backend changes; it is palette, depth, and animation.
+
+Brand colours moved to sand #DDD4C4 and blue #5C88CD. The blue is the primary accent (buttons, links, focus, active states); the sand is the warm page background, with warm off-white cards lifting off it. The light palette, the dark palette (now a warm charcoal rather than cool indigo), the form preview and embed neutrals, and the default new-form theme were all moved onto this. A standalone brand-preview.html in this folder shows the palette and the beveled components side by side in both themes.
+
+The bevel system was reworked so it replaces borders rather than sitting on top of them. Across the app and the form surfaces, chrome elements (buttons, icon buttons, the brand toggle, inputs, selects, text areas, toggles, cards, question cards, segmented controls, chips, add-question items, menus, and the form options, NPS buttons and inputs) drop their one pixel border and define their edge with the bevel instead: a light top highlight and a soft warm shadow below for raised pieces, and a recessed inset for wells. Data grids, table dividers and dashed separators keep their lines, since those are structural rather than control chrome. The light-mode/dark-mode toggle now reads as stamped into the page (a recessed inset) and the toggle switches have a clearly domed knob over a recessed track.
+
+A motion layer was added on top. Interactive elements transition smoothly; buttons lift on hover and push in on press; the toggle knob slides on a slight spring and squishes when pressed; the theme toggle icon turns a little on hover; stars scale on hover; menus and modals animate in (scale and fade from their origin); and each form step fades up as it appears. Everything is gated behind prefers-reduced-motion, which collapses transitions and animations for visitors who ask their system to reduce motion, so it stays practical and accessible.
+
+Motion and bevel are driven by CSS custom properties (the ease curves, durations, the focus ring, and the four bevel shadows) defined per theme, so future tuning is one place.

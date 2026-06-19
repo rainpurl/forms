@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zetetiq brand preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@400;700&family=Mozilla+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sans:'Mozilla Text',system-ui,-apple-system,sans-serif;
+    --display:'Mozilla Headline','Mozilla Text',system-ui,sans-serif;
+    --ease:cubic-bezier(.4,0,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--t-fast:.14s;--t:.2s;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);background:#cdc3b0;color:#2A2620;-webkit-font-smoothing:antialiased;padding:28px}
+  .head{max-width:980px;margin:0 auto 22px}
+  .wm{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.02em;color:#5C88CD}
+  .sub{color:#6E665A;margin-top:4px;font-size:14px}
+  .grid{max-width:980px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+
+  /* theme scopes */
+  .pane{border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(40,30,15,.16)}
+  .light{
+    --bo:#5C88CD;--bo-dark:#4A73B5;--ink:#2A2620;--ink-soft:#736B5E;
+    --line-strong:#BEB39C;--paper:#DDD4C4;--card:#FBFAF6;--good:#4F8A5B;--hover:#E7DFD0;
+    --bevel-raise:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1.5px 0 rgba(120,95,55,.16),0 1px 2px rgba(70,55,30,.12);
+    --bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);
+    --bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);
+    --bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(70,55,30,.1);
+    --ring:0 0 0 3px rgba(92,136,205,.32);
+    background:var(--paper);color:var(--ink);
+  }
+  .dark{
+    --bo:#7AA0DC;--bo-dark:#6B92D0;--ink:#ECE7DB;--ink-soft:#A69E8C;
+    --line-strong:#46402F;--paper:#151310;--card:#211E18;--good:#6FBE83;--hover:#2A2620;
+    --bevel-raise:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.5);
+    --bevel-press:inset 0 2px 5px rgba(0,0,0,.65);
+    --bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);
+    --bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);
+    --ring:0 0 0 3px rgba(122,160,220,.4);
+    background:var(--paper);color:var(--ink);
+  }
+  .pane h3{font-family:var(--display);font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .swatches{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+  .sw{width:74px;height:74px;border-radius:12px;box-shadow:var(--bevel-soft);display:flex;align-items:flex-end;padding:6px;font-size:10px;font-family:var(--display);color:#2A2620}
+  .sw small{background:rgba(255,255,255,.7);border-radius:4px;padding:1px 4px}
+
+  .btn{font-family:var(--sans);appearance:none;border:1px solid transparent;background:var(--card);color:var(--ink);padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;line-height:1;box-shadow:var(--bevel-raise);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+  .btn:hover{background:var(--hover);transform:translateY(-1px);box-shadow:var(--bevel-raise),0 5px 14px rgba(60,45,25,.13)}
+  .btn:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
+  .btn.primary{background:var(--bo);color:#fff;box-shadow:var(--bevel-raise),0 1px 2px rgba(40,60,110,.25)}
+  .btn.primary:hover{background:var(--bo-dark);box-shadow:var(--bevel-raise),0 6px 16px rgba(50,100,190,.34)}
+  .btn.primary:active{box-shadow:var(--bevel-press)}
+  .btn.ghost{background:transparent;box-shadow:none}
+  .btn.ghost:hover{background:var(--hover);transform:none}
+
+  .input{font-family:var(--sans);width:100%;border:1px solid transparent;border-radius:10px;padding:10px 12px;background:var(--card);color:var(--ink);outline:none;box-shadow:var(--bevel-inset);transition:box-shadow var(--t-fast) var(--ease)}
+  .input:focus{box-shadow:var(--ring),var(--bevel-inset)}
+
+  .card{background:var(--card);border-radius:14px;box-shadow:var(--bevel-soft);padding:16px;margin-bottom:16px}
+  .card .t{font-weight:700;margin-bottom:4px}
+  .card .d{color:var(--ink-soft);font-size:13.5px}
+
+  .badge{font-family:var(--display);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;box-shadow:var(--bevel-soft)}
+  .badge.open{background:rgba(79,138,91,.18);color:var(--good)}
+
+  /* toggle */
+  .switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none;font-size:14px}
+  .switch .track{width:40px;height:23px;border-radius:999px;background:var(--line-strong);position:relative;box-shadow:var(--bevel-inset);transition:background-color var(--t-fast) var(--ease)}
+  .switch .knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:linear-gradient(180deg,#fff,#e9e6df);box-shadow:var(--bevel-raise),0 2px 3px rgba(40,30,15,.28);transition:left var(--t) var(--ease-spring),transform var(--t-fast) var(--ease)}
+  .switch.on .track{background:var(--bo)}
+  .switch.on .knob{left:19px}
+  .switch:active .knob{transform:scale(.9)}
+
+  /* segmented */
+  .seg{display:inline-flex;border-radius:10px;overflow:hidden;box-shadow:var(--bevel-inset)}
+  .seg button{appearance:none;border:0;background:transparent;color:var(--ink-soft);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),color var(--t-fast)}
+  .seg button:hover{background:var(--hover)}
+  .seg button.on{background:var(--bo);color:#fff;box-shadow:var(--bevel-press)}
+
+  .themebtn{appearance:none;border:1px solid transparent;width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;background:var(--hover);color:var(--ink);box-shadow:var(--bevel-inset);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
+  .themebtn:hover{background:var(--card)}
+  .themebtn:active{box-shadow:var(--bevel-press)}
+  .themebtn svg{transition:transform var(--t) var(--ease-spring)}
+  .themebtn:hover svg{transform:rotate(20deg) scale(1.06)}
+  .note{font-size:12px;color:var(--ink-soft);margin-top:2px}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="wm">zetetiq</div>
+    <div class="sub">New brand: sand #DDD4C4 + blue #5C88CD. Everything beveled (borders replaced), every control reacts. Hover and press the elements below.</div>
+  </div>
+  <div class="grid">
+    <div class="pane light" id="lp">
+      <h3>Light</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#DDD4C4"><small>#DDD4C4 sand</small></div>
+        <div class="sw" style="background:#5C88CD;color:#fff"><small style="background:rgba(0,0,0,.25);color:#fff">#5C88CD blue</small></div>
+        <div class="sw" style="background:#FBFAF6"><small>card</small></div>
+        <div class="sw" style="background:#2A2620;color:#fff"><small style="background:rgba(255,255,255,.2);color:#fff">ink</small></div>
+      </div>
+      <div class="row">
+        <button class="btn primary">Primary</button>
+        <button class="btn">Secondary</button>
+        <button class="btn ghost">Ghost</button>
+        <span class="badge open">Open</span>
+      </div>
+      <div class="row">
+        <span class="switch on" onclick="this.classList.toggle('on')"><span class="track"><span class="knob"></span></span> On</span>
+        <span class="switch" onclick="this.classList.toggle('on')"><span class="track"><span class="knob"></span></span> Off</span>
+        <span class="themebtn" title="stamped in">🌙</span>
+      </div>
+      <div class="seg" style="margin-bottom:16px"><button class="on">Booking</button><button>Group poll</button></div>
+      <input class="input" placeholder="Recessed input, focus me" style="margin-bottom:16px" />
+      <div class="card"><div class="t">A card, stamped onto the page</div><div class="d">No border. The edge is the bevel: a light top, a soft warm shadow below.</div></div>
+      <div class="note">Buttons lift on hover, push in on click. The theme toggle reads as pressed into the surface.</div>
+    </div>
+
+    <div class="pane dark" id="dp">
+      <h3>Dark</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#211E18"><small style="background:rgba(255,255,255,.16);color:#ECE7DB">card</small></div>
+        <div class="sw" style="background:#7AA0DC"><small>#7AA0DC blue</small></div>
+        <div class="sw" style="background:#151310"><small style="background:rgba(255,255,255,.16);color:#ECE7DB">paper</small></div>
+        <div class="sw" style="background:#ECE7DB"><small>ink</small></div>
+      </div>
+      <div class="row">
+        <button class="btn primary">Primary</button>
+        <button class="btn">Secondary</button>
+        <button class="btn ghost">Ghost</button>
+        <span class="badge open">Open</span>
+      </div>
+      <div class="row">
+        <span class="switch on" onclick="this.classList.toggle('on')"><span class="track"><span class="knob"></span></span> On</span>
+        <span class="switch" onclick="this.classList.toggle('on')"><span class="track"><span class="knob"></span></span> Off</span>
+        <span class="themebtn" title="stamped in">☀</span>
+      </div>
+      <div class="seg" style="margin-bottom:16px"><button class="on">Booking</button><button>Group poll</button></div>
+      <input class="input" placeholder="Recessed input, focus me" style="margin-bottom:16px" />
+      <div class="card"><div class="t">A card, stamped onto the page</div><div class="d">Warm charcoal surfaces with the same bevel language, carried into dark mode.</div></div>
+      <div class="note">Same motion and bevel system, tuned for the dark palette.</div>
+    </div>
+  </div>
+</body>
+</html>

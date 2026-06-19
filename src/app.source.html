@@ -17,40 +17,41 @@
 <style>
 :root{
   color-scheme: light;
-  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);
-  --bo:#5b4fe0;            /* primary blue-purple */
-  --bo-dark:#4536c9;
-  --ink:#1b1830;
-  --ink-soft:#6a6580;
-  --line:#e7e4f3;
-  --line-strong:#d6d1ea;
-  --paper:#f6f5fc;
-  --card:#ffffff;
-  --good:#2f7d52;
-  --bad:#b23b3b;
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1.5px 0 rgba(120,95,55,.16),0 1px 2px rgba(70,55,30,.12);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(70,55,30,.1);
+  --ease:cubic-bezier(.4,0,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--t-fast:.14s;--t:.2s;--ring:0 0 0 3px rgba(92,136,205,.32);
+  --bo:#5C88CD;            /* primary blue */
+  --bo-dark:#4A73B5;
+  --ink:#2A2620;
+  --ink-soft:#736B5E;
+  --line:#CFC6B4;
+  --line-strong:#BEB39C;
+  --paper:#DDD4C4;
+  --card:#FBFAF6;
+  --good:#4F8A5B;
+  --bad:#C0563F;
   --radius:14px;
   --sans:'Mozilla Text',system-ui,-apple-system,sans-serif;
   --display:'Mozilla Headline','Mozilla Text',system-ui,sans-serif;
   --mono:'Mozilla Text',system-ui,sans-serif;
-  --hover:#f1eefc;
-  --nav-bg:rgba(246,245,252,.88);
+  --hover:#E7DFD0;
+  --nav-bg:rgba(221,212,196,.82);
 }
 html[data-theme="dark"]{
   color-scheme: dark;
-  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.45);--bevel-press:inset 0 2px 5px rgba(0,0,0,.6);--bevel-inset:inset 0 1px 3px rgba(0,0,0,.55);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.4);
-  --bo:#7c72f2; --bo-dark:#6b61e8;
-  --ink:#ece9f8; --ink-soft:#a9a4c6;
-  --line:#2a2740; --line-strong:#3a3660;
-  --paper:#121020; --card:#1d1a31;
-  --good:#54c98a; --bad:#e98a8a;
-  --hover:#272343;
-  --nav-bg:rgba(18,16,32,.86);
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.5);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);
+  --bo:#7AA0DC; --bo-dark:#6B92D0;
+  --ink:#ECE7DB; --ink-soft:#A69E8C;
+  --line:#332F24; --line-strong:#46402F;
+  --paper:#151310; --card:#211E18;
+  --good:#6FBE83; --bad:#E0917A;
+  --hover:#2A2620;
+  --nav-bg:rgba(21,19,16,.86);
 }
 html[data-theme="dark"] .badge.open{background:rgba(84,201,138,.18)}
-html[data-theme="dark"] .badge.closed{background:rgba(169,164,198,.16)}
-html[data-theme="dark"] .bar-row .track2{background:#272343}
-html[data-theme="dark"] .shimmer{background:linear-gradient(90deg,#272343 25%,#322d52 37%,#272343 63%);background-size:400% 100%}
-html[data-theme="dark"] .ai{background:#191730}
+html[data-theme="dark"] .badge.closed{background:rgba(166,158,140,.16)}
+html[data-theme="dark"] .bar-row .track2{background:#2A2620}
+html[data-theme="dark"] .shimmer{background:linear-gradient(90deg,#221F18 25%,#2E2A20 37%,#221F18 63%);background-size:400% 100%}
+html[data-theme="dark"] .ai{background:#1C1A14}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -99,7 +100,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 /* badges */
 .badge{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
 .badge.open{background:#e8f3ec;color:var(--good)}
-.badge.closed{background:#edebf8;color:var(--ink-soft)}
+.badge.closed{background:#E7DFD0;color:var(--ink-soft)}
 
 /* tables */
 .table{width:100%;border-collapse:collapse}
@@ -113,7 +114,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .field{display:block;margin-bottom:14px}
 .label{display:block;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin-bottom:6px}
 .input,.textarea,.select{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:10px 12px;background:var(--card);color:var(--ink);outline:none;transition:.12s}
-.input:focus,.textarea:focus,.select:focus{border-color:var(--bo);box-shadow:0 0 0 3px rgba(91,79,224,.16)}
+.input:focus,.textarea:focus,.select:focus{border-color:var(--bo);box-shadow:0 0 0 3px rgba(92,136,205,.16)}
 .textarea{min-height:84px;resize:vertical}
 .hint{font-size:12.5px;color:var(--ink-soft);margin-top:5px}
 .err{font-size:12.5px;color:var(--bad);margin-top:5px;font-weight:600}
@@ -132,13 +133,13 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .ai .ai-body{font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap}
 .ai .ai-foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line-strong)}
 .ai .ai-meta{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
-.shimmer{height:13px;border-radius:6px;background:linear-gradient(90deg,#eae7f6 25%,#f3f1fb 37%,#eae7f6 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;margin:7px 0}
+.shimmer{height:13px;border-radius:6px;background:linear-gradient(90deg,#E7DFD0 25%,#F2EEE6 37%,#E7DFD0 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;margin:7px 0}
 @keyframes sh{0%{background-position:100% 0}100%{background-position:-100% 0}}
 
 /* bars (analytics) */
 .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13.5px}
 .bar-row .k{width:130px;flex:none;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-row .track2{flex:1;background:#edebf8;border-radius:6px;height:20px;overflow:hidden}
+.bar-row .track2{flex:1;background:#E7DFD0;border-radius:6px;height:20px;overflow:hidden}
 .bar-row .fill{height:100%;background:var(--bo);border-radius:6px}
 .bar-row .v{width:42px;flex:none;text-align:right;font-family:var(--mono);font-size:12px}
 
@@ -175,12 +176,12 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .gbtn:hover{background:#f4f3fe}
 
 /* form scope (respondent + preview): themed */
-.form-scope{--fp:#5b4fe0;--fs:#1b1830;--fa:#5b4fe0;--ftext:var(--fs);font-family:var(--sans)}
-.form-page,.form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--good:#2f7d52;--bad:#b23b3b;--hover:#f1eefc;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);}
-html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#15132a;--card:#211e3a;--ink:#ece9f8;--ink-soft:#a39ec4;--line:#2f2b4e;--line-strong:#3d3866;--hover:#272343;--ftext:#ece9f8;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.45);--bevel-press:inset 0 2px 5px rgba(0,0,0,.6);--bevel-inset:inset 0 1px 3px rgba(0,0,0,.55);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.4);}
+.form-scope{--fp:#5C88CD;--fs:#2A2620;--fa:#5C88CD;--ftext:var(--fs);font-family:var(--sans)}
+.form-page,.form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--good:#4F8A5B;--bad:#C0563F;--hover:#E7DFD0;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1.5px 0 rgba(120,95,55,.16),0 1px 2px rgba(70,55,30,.12);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(70,55,30,.1);}
+html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#151310;--card:#211E18;--ink:#ECE7DB;--ink-soft:#A69E8C;--line:#332F24;--line-strong:#46402F;--hover:#2A2620;--ftext:#ECE7DB;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.5);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);}
 html[data-theme="dark"] .form-scope .finput,html[data-theme="dark"] .form-scope textarea,html[data-theme="dark"] .form-scope select{background:var(--card);color:var(--ink)}
 html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
-.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--hover:#f1eefc;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);}
+.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--hover:#E7DFD0;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1.5px 0 rgba(120,95,55,.16),0 1px 2px rgba(70,55,30,.12);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(70,55,30,.1);}
 .form-embed.form-page{min-height:auto;padding:14px 14px 22px;background:transparent}
 .form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
 .form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--ftext);font-weight:600;line-height:1.2}
@@ -250,7 +251,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .qccard{border:1px solid var(--line);border-radius:11px;background:var(--card);padding:14px;margin-bottom:12px;cursor:pointer;transition:border-color .1s, box-shadow .1s}
 .qccard:last-child{margin-bottom:0}
 .qccard:hover{border-color:var(--line-strong)}
-.qccard.sel{border-color:var(--bo);box-shadow:0 0 0 2px rgba(91,79,224,.2)}
+.qccard.sel{border-color:var(--bo);box-shadow:0 0 0 2px rgba(92,136,205,.2)}
 .qcc-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
 .qcc-num{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--bo)}
 .qcc-type{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
@@ -406,7 +407,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .drag-handle{cursor:grab;touch-action:none}
 .drag-handle:active{cursor:grabbing}
 
-.followup{margin-top:12px;padding:12px 14px;border-left:3px solid var(--fa);background:rgba(91,79,224,.05);border-radius:0 10px 10px 0;animation:fadeUp .25s ease both}
+.followup{margin-top:12px;padding:12px 14px;border-left:3px solid var(--fa);background:rgba(92,136,205,.05);border-radius:0 10px 10px 0;animation:fadeUp .25s ease both}
 .followup .qlabel{margin-bottom:8px}
 .followup.loading{color:var(--ink-soft);font-size:13px;border-left-color:var(--line-strong);background:transparent}
 .followup-note{margin-top:10px;font-size:12px;color:var(--ink-soft);border-left:3px dashed var(--line-strong);padding:8px 12px}
@@ -437,7 +438,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .tpl-section{margin-top:26px}
 .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
 .tpl-card{text-align:left;border:1px solid var(--line-strong);background:var(--card);border-radius:13px;padding:15px 16px;cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .08s;color:var(--ink)}
-.tpl-card:hover{border-color:var(--bo);box-shadow:0 8px 22px rgba(91,79,224,.14);transform:translateY(-1px)}
+.tpl-card:hover{border-color:var(--bo);box-shadow:0 8px 22px rgba(92,136,205,.14);transform:translateY(-1px)}
 .tpl-card:disabled{opacity:.6;cursor:default;transform:none}
 .tpl-card .tt{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
 .tpl-card .td{font-size:13px;color:var(--ink-soft);margin-top:5px;line-height:1.45}
@@ -446,7 +447,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 
 .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .form-card{text-align:left;border:1px solid var(--line-strong);background:var(--card);border-radius:15px;padding:16px 17px;cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .08s;color:var(--ink);display:flex;flex-direction:column;gap:8px;min-height:132px}
-.form-card:hover{border-color:var(--bo);box-shadow:0 10px 26px rgba(91,79,224,.13);transform:translateY(-2px)}
+.form-card:hover{border-color:var(--bo);box-shadow:0 10px 26px rgba(92,136,205,.13);transform:translateY(-2px)}
 .form-card .fc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .form-card .fc-count{font-size:12px;color:var(--ink-soft)}
 .form-card .fc-title{font-family:var(--display);font-size:19px;font-weight:600;line-height:1.25;flex:1;word-break:break-word}
@@ -498,7 +499,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .fileitem .filename{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .blockcard{display:flex;align-items:flex-start;gap:10px;background:linear-gradient(180deg,var(--hover),var(--card));border:1px solid var(--bo);border-left:3px solid var(--bo);border-radius:12px;padding:12px 14px;margin:20px 0 6px;cursor:pointer}
-.blockcard.sel{box-shadow:0 0 0 2px rgba(91,79,224,.2)}
+.blockcard.sel{box-shadow:0 0 0 2px rgba(92,136,205,.2)}
 .blockcard.dragging{opacity:.5}
 .blockcard-body{flex:1;min-width:0}
 .blockcard-tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--bo);font-weight:700;margin-bottom:4px}
@@ -529,7 +530,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .imgchoice-cap{padding:8px 10px;font-size:13px;font-weight:500;color:var(--ink)}
 .num-wrap{display:flex;align-items:center;gap:0;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;max-width:280px;background:var(--card)}
 .num-wrap.err{border-color:var(--bad)}
-.num-wrap:focus-within{border-color:var(--fa);box-shadow:0 0 0 3px rgba(91,79,224,.16)}
+.num-wrap:focus-within{border-color:var(--fa);box-shadow:0 0 0 3px rgba(92,136,205,.16)}
 .num-affix{padding:0 11px;color:var(--ink-soft);font-size:14px;background:var(--hover);align-self:stretch;display:flex;align-items:center}
 .num-input{border:0 !important;border-radius:0 !important;box-shadow:none !important;flex:1;min-width:0}
 .ic-edit{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -581,7 +582,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .lp-pip.on{background:var(--bo);border-color:var(--bo);color:#fff}
 .lp-mock-opts{display:flex;flex-direction:column;gap:7px;margin-top:4px}
 .lp-mock-opt{display:flex;align-items:center;gap:9px;border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:13px}
-.lp-mock-opt.on{border-color:var(--bo);background:rgba(91,79,224,.08)}
+.lp-mock-opt.on{border-color:var(--bo);background:rgba(92,136,205,.08)}
 .lp-rad{width:15px;height:15px;border-radius:50%;border:2px solid var(--line-strong);flex:none}
 .lp-mock-opt.on .lp-rad{border-color:var(--bo);background:radial-gradient(circle,var(--bo) 0 38%,transparent 44%)}
 .lp-mock-btn{margin-top:16px;background:var(--bo);color:#fff;text-align:center;padding:11px;border-radius:10px;font-weight:700;font-size:14px}
@@ -592,7 +593,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .lp-grid-4{grid-template-columns:repeat(4,1fr)}
 .lp-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
 .lp-card.plain{background:transparent;border-color:transparent;padding:12px}
-.lp-ico{width:40px;height:40px;border-radius:11px;background:rgba(91,79,224,.1);color:var(--bo);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.lp-ico{width:40px;height:40px;border-radius:11px;background:rgba(92,136,205,.1);color:var(--bo);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
 .lp-ct{font-weight:700;font-size:16px;margin-bottom:6px;color:var(--ink)}
 .lp-cd{color:var(--ink-soft);font-size:14px;line-height:1.55}
 .lp-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:800px;margin:0 auto}
@@ -636,12 +637,12 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .i18n-orig{font-size:12px;color:var(--ink-soft);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .doc-canvas{position:relative;display:inline-block;max-width:100%}
-.doc-place-field{position:absolute;transform:translate(-50%,-50%);background:#fff;border:1px solid var(--fa,#5b4fe0);border-radius:6px;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2;min-width:92px;color:#111}
+.doc-place-field{position:absolute;transform:translate(-50%,-50%);background:#fff;border:1px solid var(--fa,#5C88CD);border-radius:6px;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2;min-width:92px;color:#111}
 .doc-place-field .finput{padding:4px 7px;font-size:12px;min-height:0;background:#fff;color:#111}
 .doc-place-check{min-width:0;padding:4px 7px}
 .doc-sig-mini{width:180px}
 .doc-place{position:relative;display:inline-block;max-width:100%;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;line-height:0}
-.doc-pin{position:absolute;transform:translate(-50%,-50%);background:var(--brand,#5b4fe0);color:#fff;font-size:11px;line-height:1.2;padding:2px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.3);max-width:140px;overflow:hidden;text-overflow:ellipsis}
+.doc-pin{position:absolute;transform:translate(-50%,-50%);background:var(--brand,#5C88CD);color:#fff;font-size:11px;line-height:1.2;padding:2px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.3);max-width:140px;overflow:hidden;text-overflow:ellipsis}
 
 .cj-task{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
 .cj-tasktitle{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:8px}
@@ -730,6 +731,95 @@ table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
 .qr-q{font-weight:600;margin-bottom:4px}
 .qr-line{font-size:13.5px;color:var(--ink-soft)}
 .qr-exp{font-size:13px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+.char-count{font-size:12px;color:var(--ink-soft);text-align:right;margin-top:4px}
+.matrix th.mna,.matrix td.mna-cell{border-left:1px dashed var(--line-strong)}
+
+/* =========================================================
+   bevel + motion overhaul (v2): bevel replaces borders,
+   every interaction smooth + cinematic, reduced-motion safe
+   ========================================================= */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition-duration:.001ms !important;animation-duration:.001ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
+}
+button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .track,.switch .knob,.card,.qcard,.tab,.opt,.seg-btn,.chip-tog,.addq-item,.addq-adv-toggle,.addmenu button,.addq-menu button,.menu button,.nps button,.fbtn-ghost,.submit,.fcta,.slot-btn,.cal-chip,.booking-card,.mt-card,.finalize-row,.qr-item,.table tr.clickable td,.form-scope .opt,.form-scope .finput,.form-scope .submit{
+  transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),filter var(--t-fast) var(--ease);
+}
+/* buttons: bevel edges, lift on hover, push in on press */
+.btn{border-color:transparent;box-shadow:var(--bevel-raise)}
+.btn:hover{border-color:transparent;background:var(--hover);transform:translateY(-1px);box-shadow:var(--bevel-raise),0 5px 14px rgba(60,45,25,.13)}
+.btn:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
+.btn.primary{border-color:transparent;box-shadow:var(--bevel-raise),0 1px 2px rgba(40,60,110,.25)}
+.btn.primary:hover{background:var(--bo-dark);transform:translateY(-1px);box-shadow:var(--bevel-raise),0 6px 16px rgba(50,100,190,.34)}
+.btn.danger{border-color:transparent;box-shadow:var(--bevel-raise),0 1px 2px rgba(120,40,25,.22)}
+.btn.danger:hover{transform:translateY(-1px)}
+.btn.primary:active,.btn.danger:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
+.btn.ghost{box-shadow:none;border-color:transparent}
+.btn.ghost:hover{box-shadow:none;transform:none;background:var(--hover)}
+.btn.ghost:active{box-shadow:none;transform:none}
+.btn:disabled{transform:none;box-shadow:var(--bevel-soft)}
+.iconbtn{border-color:transparent;box-shadow:var(--bevel-raise)}
+.iconbtn:hover{transform:translateY(-1px);background:var(--hover)}
+.iconbtn:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
+.gbtn{border-color:transparent;box-shadow:var(--bevel-raise)}
+.gbtn:hover{transform:translateY(-1px);background:var(--hover)}
+.gbtn:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
+/* theme toggle: stamped (debossed) into the page */
+.themebtn{border-color:transparent;background:var(--hover);box-shadow:var(--bevel-inset)}
+.themebtn:hover{background:var(--card);box-shadow:var(--bevel-inset)}
+.themebtn:active{box-shadow:var(--bevel-press)}
+.themebtn svg{transition:transform var(--t) var(--ease-spring)}
+.themebtn:hover svg{transform:rotate(20deg) scale(1.06)}
+/* inputs: recessed wells; ring + inset on focus */
+.input,.textarea,.select{border-color:transparent;box-shadow:var(--bevel-inset)}
+.input:focus,.textarea:focus,.select:focus{border-color:transparent;box-shadow:var(--ring),var(--bevel-inset)}
+/* toggles: recessed track, domed knob, springy slide + squish */
+.switch .track{background:var(--line-strong);box-shadow:var(--bevel-inset)}
+.switch input:checked + .track{background:var(--bo);box-shadow:var(--bevel-inset)}
+.switch .knob{background:linear-gradient(180deg,#ffffff,#e9e6df);box-shadow:var(--bevel-raise),0 2px 3px rgba(40,30,15,.28);transition:left var(--t) var(--ease-spring),transform var(--t-fast) var(--ease),background var(--t-fast)}
+.switch:hover .knob{box-shadow:var(--bevel-raise),0 3px 5px rgba(40,30,15,.32)}
+.switch:active .knob{transform:scale(.9)}
+/* cards + chrome surfaces: bevel replaces border */
+.card{border-color:transparent;box-shadow:var(--bevel-soft)}
+.qcard{border-color:transparent;box-shadow:var(--bevel-soft)}
+.nav{border-bottom-color:transparent;box-shadow:0 1px 0 var(--line-strong),0 3px 10px rgba(60,45,25,.05)}
+.table tr.clickable:hover td{background:var(--hover)}
+/* menus + modal: borderless elevation + cinematic entrance */
+.menu,.addq-menu,.addmenu{border-color:transparent}
+.menu{transform-origin:top left;animation:menupop .16s var(--ease) both}
+.addq-menu{transform-origin:bottom left;animation:menupop .16s var(--ease) both}
+.modal{animation:modalpop .28s var(--ease-spring) both}
+@keyframes menupop{from{opacity:0;transform:translateY(-4px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes modalpop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+/* add-question items, segmented control, chips */
+.addq-item,.addmenu button{border-color:transparent;box-shadow:var(--bevel-raise)}
+.addq-item:hover,.addmenu button:hover{border-color:transparent;transform:translateY(-1px);background:var(--hover)}
+.addq-item:active,.addmenu button:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
+.addq-menu button{border-color:transparent;box-shadow:var(--bevel-raise)}
+.addq-menu button:hover{border-color:transparent;transform:translateY(-1px);background:var(--hover)}
+.addq-adv-toggle{border-color:transparent;box-shadow:var(--bevel-inset)}
+.addq-adv-toggle:hover{border-color:transparent;color:var(--ink)}
+.seg{border-color:transparent}
+.seg-btn:hover:not(.on){background:var(--hover)}
+.seg-btn.on{box-shadow:var(--bevel-press)}
+.chip-tog{border-color:transparent}
+.chip-tog:hover:not(.on){transform:translateY(-1px)}
+.finalize-row{border-color:transparent}
+/* form controls: lift + press, themed focus outline */
+.form-scope .opt{border-color:transparent;box-shadow:var(--bevel-soft)}
+.form-scope .opt:hover{transform:translateY(-1px);box-shadow:var(--bevel-raise)}
+.form-scope .opt.sel{transform:none;box-shadow:var(--bevel-press)}
+.form-scope .finput,.form-scope textarea,.form-scope select,.form-scope .input,.form-scope .select{border-color:transparent}
+.form-scope .finput:focus,.form-scope textarea:focus,.form-scope select:focus,.form-scope .input:focus,.form-scope .select:focus{outline:2px solid var(--fp);outline-offset:1px}
+.form-scope .submit:hover,.form-scope .fcta:hover{transform:translateY(-1px)}
+.form-scope .nps button{border-color:transparent;box-shadow:var(--bevel-raise)}
+.form-scope .nps button:hover{transform:translateY(-1px)}
+.form-scope .nps button.on{box-shadow:var(--bevel-press)}
+.form-scope .slot-btn:hover:not(.sel){transform:translateY(-1px)}
+.form-scope .fbtn-ghost:hover{transform:translateY(-1px)}
+.form-scope .star{transition:transform var(--t-fast) var(--ease-spring),color var(--t-fast)}
+.form-scope .star:hover{transform:scale(1.18)}
+/* cinematic page-in for each form step */
+.form-scope .fpage{animation:fadeUp .3s var(--ease) both}
 </style>
 </head>
 <body>
@@ -994,7 +1084,7 @@ function SigPad({ value, onChange, error, height }){
   const ctxOf = () => { try { const c = ref.current; return c && c.getContext ? c.getContext("2d") : null; } catch (e) { return null; } };
   const pos = (e) => { const c = ref.current; const r = c.getBoundingClientRect(); const t = (e.touches && e.touches[0]) ? e.touches[0] : e; const sx = r.width ? c.width / r.width : 1; const sy = r.height ? c.height / r.height : 1; return { x: (t.clientX - r.left) * sx, y: (t.clientY - r.top) * sy }; };
   const start = (e) => { const ctx = ctxOf(); if (!ctx) return; drawing.current = true; last.current = pos(e); };
-  const move = (e) => { if (!drawing.current) return; const ctx = ctxOf(); if (!ctx) return; if (e.cancelable && e.preventDefault) e.preventDefault(); const p = pos(e); ctx.strokeStyle = "#1b1830"; ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(last.current.x, last.current.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last.current = p; };
+  const move = (e) => { if (!drawing.current) return; const ctx = ctxOf(); if (!ctx) return; if (e.cancelable && e.preventDefault) e.preventDefault(); const p = pos(e); ctx.strokeStyle = "#2A2620"; ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(last.current.x, last.current.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last.current = p; };
   const end = () => { if (!drawing.current) return; drawing.current = false; const c = ref.current; if (c && c.toDataURL) onChange(c.toDataURL("image/png")); };
   const clear = () => { const c = ref.current; const ctx = ctxOf(); if (c && ctx) ctx.clearRect(0, 0, c.width, c.height); onChange(""); };
   useEffect(()=>{ const c = ref.current; const ctx = ctxOf(); if (!c || !ctx || !value || typeof value !== "string" || value.indexOf("data:") !== 0) return; const img = new window.Image(); img.onload = ()=>{ try { ctx.drawImage(img, 0, 0, c.width, c.height); } catch (e) {} }; img.src = value; }, []);
@@ -1822,7 +1912,7 @@ function SignatureRenderer({ q, value, onChange, error }){
   const ctxOf = () => { try { const c = ref.current; return c && c.getContext ? c.getContext("2d") : null; } catch (e) { return null; } };
   const pos = (e) => { const c = ref.current; const r = c.getBoundingClientRect(); const t = (e.touches && e.touches[0]) ? e.touches[0] : e; const sx = r.width ? c.width / r.width : 1; const sy = r.height ? c.height / r.height : 1; return { x: (t.clientX - r.left) * sx, y: (t.clientY - r.top) * sy }; };
   const start = (e) => { const ctx = ctxOf(); if (!ctx) return; drawing.current = true; last.current = pos(e); };
-  const move = (e) => { if (!drawing.current) return; const ctx = ctxOf(); if (!ctx) return; if (e.cancelable && e.preventDefault) e.preventDefault(); const p = pos(e); ctx.strokeStyle = "#1b1830"; ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(last.current.x, last.current.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last.current = p; };
+  const move = (e) => { if (!drawing.current) return; const ctx = ctxOf(); if (!ctx) return; if (e.cancelable && e.preventDefault) e.preventDefault(); const p = pos(e); ctx.strokeStyle = "#2A2620"; ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(last.current.x, last.current.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last.current = p; };
   const end = () => { if (!drawing.current) return; drawing.current = false; const c = ref.current; if (c && c.toDataURL) onChange(c.toDataURL("image/png")); };
   const clear = () => { const c = ref.current; const ctx = ctxOf(); if (c && ctx) ctx.clearRect(0, 0, c.width, c.height); onChange(""); };
   useEffect(()=>{ const c = ref.current; const ctx = ctxOf(); if (!c || !ctx || !value || typeof value !== "string" || value.indexOf("data:") !== 0) return; const img = new window.Image(); img.onload = ()=>{ try { ctx.drawImage(img, 0, 0, c.width, c.height); } catch (e) {} }; img.src = value; }, []);
@@ -1946,7 +2036,7 @@ const QTYPES = {
     label: "Text entry",
     hint: "Short line or long paragraph",
     isInput: true,
-    make: () => ({ type:"text_entry", id: uid(), label:"Untitled question", required:false, request:false, mode:"short", placeholder:"", validation:"none", minLength:0 }),
+    make: () => ({ type:"text_entry", id: uid(), label:"Untitled question", required:false, request:false, mode:"short", placeholder:"", validation:"none", minLength:0, maxLength:0 }),
     summary: (q) => (q.mode === "short" ? "short text" : "paragraph") + (q.validation !== "none" ? ", " + q.validation : ""),
     validate: (q, v) => {
       const s = v == null ? "" : String(v);
@@ -1957,6 +2047,7 @@ const QTYPES = {
       if (q.validation === "number" && !/^-?\d+(\.\d+)?$/.test(s.trim())) return "Enter a number.";
       if (q.validation === "pattern" && q.pattern){ try { if (!new RegExp(q.pattern).test(s)) return q.patternMessage || "Please match the requested format."; } catch (e) {} }
       if (q.minLength && s.trim().length < q.minLength) return "Please enter at least " + q.minLength + " characters.";
+      if (q.maxLength && s.length > q.maxLength) return "Please keep this under " + q.maxLength + " characters.";
       return null;
     },
     Editor: ({ q, update }) => (
@@ -1990,8 +2081,9 @@ const QTYPES = {
       <div className="q">
         <QLabel q={q} />
         {q.mode === "long"
-          ? <textarea className="finput" style={{minHeight:96,resize:"vertical"}} placeholder={q.placeholder} value={value||""} onChange={(ev)=>onChange(ev.target.value)} />
-          : <input className="finput" placeholder={q.placeholder} value={value||""} onChange={(ev)=>onChange(ev.target.value)} />}
+          ? <textarea className="finput" style={{minHeight:96,resize:"vertical"}} placeholder={q.placeholder} value={value||""} maxLength={q.maxLength > 0 ? q.maxLength : undefined} onChange={(ev)=>onChange(ev.target.value)} />
+          : <input className="finput" placeholder={q.placeholder} value={value||""} maxLength={q.maxLength > 0 ? q.maxLength : undefined} onChange={(ev)=>onChange(ev.target.value)} />}
+        {q.maxLength > 0 && <div className="char-count">{(value||"").length}/{q.maxLength}</div>}
         {error && <div className="ferr">{error}</div>}
       </div>
     ),
@@ -2203,7 +2295,7 @@ const QTYPES = {
     label: "Matrix table",
     hint: "Grid of statements rated on one scale",
     isInput: true,
-    make: () => ({ type:"matrix", id: uid(), label:"Untitled question", required:false, request:false, rows:["Statement 1","Statement 2","Statement 3"], cols:["Strongly disagree","Disagree","Neutral","Agree","Strongly agree"], multi:false }),
+    make: () => ({ type:"matrix", id: uid(), label:"Untitled question", required:false, request:false, rows:["Statement 1","Statement 2","Statement 3"], cols:["Strongly disagree","Disagree","Neutral","Agree","Strongly agree"], multi:false, naCol:false }),
     summary: (q) => q.rows.length + " statements x " + q.cols.length + " points",
     validate: (q, v) => {
       if (!q.required) return null;
@@ -2223,7 +2315,7 @@ const QTYPES = {
           <QLabel q={q} />
           <div className="matrix-wrap">
             <table className="matrix">
-              <thead><tr><th></th>{q.cols.map((c,i)=>(<th key={i}>{c}</th>))}</tr></thead>
+              <thead><tr><th></th>{q.cols.map((c,i)=>(<th key={i}>{c}</th>))}{q.naCol && <th className="mna">N/A</th>}</tr></thead>
               <tbody>
                 {q.rows.map((r,ri)=>(
                   <tr key={ri}>
@@ -2231,6 +2323,7 @@ const QTYPES = {
                     {q.cols.map((c,ci)=>(
                       <td key={ci}><label className="mcell"><input type={q.multi ? "checkbox" : "radio"} name={q.id + "-" + ri} checked={on(r,c)} onChange={()=>pick(r,c)} /></label></td>
                     ))}
+                    {q.naCol && <td className="mna-cell"><label className="mcell"><input type={q.multi ? "checkbox" : "radio"} name={q.id + "-" + ri} checked={on(r,"N/A")} onChange={()=>pick(r,"N/A")} /></label></td>}
                   </tr>
                 ))}
               </tbody>
@@ -2385,13 +2478,13 @@ const QTYPES = {
     label: "Date",
     hint: "Calendar date picker",
     isInput: true,
-    make: () => ({ type:"date", id: uid(), label:"Pick a date", required:false, request:false }),
+    make: () => ({ type:"date", id: uid(), label:"Pick a date", required:false, request:false, minDate:"", maxDate:"" }),
     summary: () => "date picker",
-    validate: (q, v) => (q.required && !v) ? "Please choose a date." : null,
+    validate: (q, v) => { if (q.required && !v) return "Please choose a date."; if (!v) return null; if (q.minDate && v < q.minDate) return "Please pick a date on or after " + q.minDate + "."; if (q.maxDate && v > q.maxDate) return "Please pick a date on or before " + q.maxDate + "."; return null; },
     Renderer: ({ q, value, onChange, error }) => (
       <div className="q">
         <QLabel q={q} />
-        <input className="finput" type="date" value={value || ""} onChange={(ev)=>onChange(ev.target.value)} style={{maxWidth:220}} />
+        <input className="finput" type="date" value={value || ""} min={q.minDate || undefined} max={q.maxDate || undefined} onChange={(ev)=>onChange(ev.target.value)} style={{maxWidth:220}} />
         {error && <div className="ferr">{error}</div>}
       </div>
     ),
@@ -2725,7 +2818,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
   useEffect(()=>{ if (preview || !form || !form.id) return; try { if (window.localStorage){ if (Object.keys(answers).length) window.localStorage.setItem("zq-draft-" + form.id, JSON.stringify(answers)); } } catch (e) {} }, [answers]);
 
   const theme = form.theme || {};
-  const scopeStyle = { "--fp": theme.primary || "#5b4fe0", "--fs": theme.secondary || "#1b1830", "--fa": theme.accent || theme.primary || "#5b4fe0", fontFamily: (theme.customFont ? ("'" + theme.customFont + "', ") : "") + (FORM_FONTS[theme.font] || FORM_FONTS.sans) };
+  const scopeStyle = { "--fp": theme.primary || "#5C88CD", "--fs": theme.secondary || "#2A2620", "--fa": theme.accent || theme.primary || "#5C88CD", fontFamily: (theme.customFont ? ("'" + theme.customFont + "', ") : "") + (FORM_FONTS[theme.font] || FORM_FONTS.sans) };
   useEffect(()=>{ loadGoogleFont(theme.customFont); },[theme.customFont]);
 
   const stepHasVisible = (i) => steps[i] && (steps[i].qs || []).some((q)=> vis(q));
@@ -2868,7 +2961,7 @@ function PublicForm({ username, slug }){
   if (st.loading) return <div className="center-screen"><div className="muted">Loading...</div></div>;
   if (st.notFound) return <div className="center-screen"><h2>Form not found</h2><p className="muted">This link may be wrong, or the form was removed.</p></div>;
   const form = st.form;
-  const scope = { "--fa": (form.theme && form.theme.accent) || "#5b4fe0", fontFamily: ((form.theme && form.theme.customFont) ? ("\u0027" + form.theme.customFont + "\u0027, ") : "") + (FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans) };
+  const scope = { "--fa": (form.theme && form.theme.accent) || "#5C88CD", fontFamily: ((form.theme && form.theme.customFont) ? ("\u0027" + form.theme.customFont + "\u0027, ") : "") + (FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans) };
   const embed = (()=>{ try { return new URLSearchParams(window.location.search).get("embed") === "1"; } catch (e) { return false; } })();
   const pageCls = "form-page" + (embed ? " form-embed" : "");
   const _set = (form.schema && form.schema.settings) || {};
@@ -3107,9 +3200,9 @@ function BrandStudio({ form, setTheme, setSettings }){
   const [logo, setLogo] = useState(null);
   const [font, setFont] = useState(form.theme.font || "sans");
   const [customFont, setCustomFont] = useState(form.theme.customFont || "");
-  const [primary, setPrimary] = useState(form.theme.primary || "#5b4fe0");
-  const [secondary, setSecondary] = useState(form.theme.secondary || "#1b1830");
-  const [accent, setAccent] = useState(form.theme.accent || "#5b4fe0");
+  const [primary, setPrimary] = useState(form.theme.primary || "#5C88CD");
+  const [secondary, setSecondary] = useState(form.theme.secondary || "#2A2620");
+  const [accent, setAccent] = useState(form.theme.accent || "#5C88CD");
   const [saving, setSaving] = useState(false);
   const load = ()=> api.listBrandKits().then(({ ok, data })=> setKits(ok && data && data.kits ? data.kits : []));
   useEffect(()=>{ load(); },[]);
@@ -3224,7 +3317,7 @@ function Dashboard(){
 
 /* ----------------------------- builder ----------------------------- */
 function blankForm(kind){
-  const base = { title:"Untitled form", description:"", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[], settings:{ randomizeQuestions:false } }, is_open:true };
+  const base = { title:"Untitled form", description:"", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[], settings:{ randomizeQuestions:false } }, is_open:true };
   if (kind === "schedule"){ base.title = "New scheduler"; base.description = "Pick a time that works for you."; const q = QTYPES.scheduling.make(); q.label = "Choose a time"; base.schema.questions = [q]; base.schema.settings.kind = "schedule"; }
   else if (kind === "esign"){ base.title = "New document to sign"; base.description = "Please review and sign below."; const q = QTYPES.document_sign.make(); q.label = "Review and sign"; base.schema.questions = [q]; base.schema.settings.kind = "esign"; }
   return base;
@@ -3232,7 +3325,7 @@ function blankForm(kind){
 function normalizeForm(f){ return { ...f, theme: f.theme || blankForm().theme, schema:{ questions: (f.schema && f.schema.questions) || [], settings: (f.schema && f.schema.settings) || { randomizeQuestions:false } } }; }
 function ColorPick({ label, value, onChange }){
   return (<div><div className="label">{label}</div><div className="row" style={{gap:8}}>
-    <input type="color" value={value || "#5b4fe0"} onChange={(e)=>onChange(e.target.value)} style={{width:40,height:34,border:"1px solid var(--line-strong)",borderRadius:8,padding:2,background:"var(--card)",cursor:"pointer"}} />
+    <input type="color" value={value || "#5C88CD"} onChange={(e)=>onChange(e.target.value)} style={{width:40,height:34,border:"1px solid var(--line-strong)",borderRadius:8,padding:2,background:"var(--card)",cursor:"pointer"}} />
     <input className="input mono" style={{width:96,fontSize:13}} value={value || ""} onChange={(e)=>onChange(e.target.value)} />
   </div></div>);
 }
@@ -3465,6 +3558,7 @@ function TextControls({ q, update }){
       </Field>
       {q.validation === "pattern" && (<><Field label="Pattern (regular expression)"><input className="input mono" value={q.pattern || ""} onChange={(e)=>update({pattern:e.target.value})} placeholder={"^[A-Z]{2}\\d{4}$"} /></Field><Field label="Message when it does not match"><input className="input" value={q.patternMessage || ""} onChange={(e)=>update({patternMessage:e.target.value})} placeholder="Please match the requested format." /></Field></>)}
       <Field label="Minimum length (0 for none)"><input className="input" type="number" min="0" value={q.minLength || 0} onChange={(e)=>update({minLength: parseInt(e.target.value || "0", 10)})} /></Field>
+      <Field label="Maximum length (0 for none)"><input className="input" type="number" min="0" value={q.maxLength || 0} onChange={(e)=>update({maxLength: parseInt(e.target.value || "0", 10)})} /></Field>
       <div className="panel-section">Conversation</div>
       <Toggle checked={!!q.followUp} onChange={(c)=>update({followUp:c})} label="Ask a follow-up based on the answer" />
       <div className="hint">When this is answered, a short clarifying question appears before moving on.</div>
@@ -3528,6 +3622,8 @@ function MatrixControls({ q, update }){
       <div className="panel-section">Answer type</div>
       <label className="opt-radio"><input type="radio" name={"mx-" + q.id} checked={!q.multi} onChange={()=>update({multi:false})} /><span>One answer per row</span></label>
       <label className="opt-radio"><input type="radio" name={"mx-" + q.id} checked={!!q.multi} onChange={()=>update({multi:true})} /><span>Multiple answers per row</span></label>
+      <div style={{height:10}}></div>
+      <Toggle checked={!!q.naCol} onChange={(c)=>update({naCol:c})} label="Add an N/A column" />
       <div className="hint" style={{marginTop:10}}>Edit the statements and scale points directly on the question.</div>
       <ReqToggles q={q} update={update} />
     </div>
@@ -3563,7 +3659,7 @@ function FormFieldControls({ q, update }){
 }
 
 function DateControls({ q, update }){
-  return (<div><div className="hint">Respondents pick a date from a calendar.</div><ReqToggles q={q} update={update} /></div>);
+  return (<div><div className="row" style={{gap:10}}><Field label="Earliest date" style={{flex:1}}><input className="input" type="date" value={q.minDate || ""} onChange={(e)=>update({minDate:e.target.value})} /></Field><Field label="Latest date" style={{flex:1}}><input className="input" type="date" value={q.maxDate || ""} onChange={(e)=>update({maxDate:e.target.value})} /></Field></div><div className="hint">Respondents pick a date from a calendar.</div><ReqToggles q={q} update={update} /></div>);
 }
 
 function ConstantSumControls({ q, update }){
@@ -3796,12 +3892,12 @@ function LeftEditor({ q, update, questions, setQuestions, scoring, experiment })
 }
 
 const THEME_PRESETS = [
-  { name:"Indigo", primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" },
+  { name:"Indigo", primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" },
   { name:"Forest", primary:"#2f7d52", secondary:"#16321f", accent:"#2f7d52", font:"sans" },
   { name:"Slate", primary:"#475569", secondary:"#1e293b", accent:"#64748b", font:"sans" },
   { name:"Sunset", primary:"#c2410c", secondary:"#5b2c0e", accent:"#ea7317", font:"slab" },
   { name:"Berry", primary:"#a4133c", secondary:"#3d0814", accent:"#c9184a", font:"serif" },
-  { name:"Editorial", primary:"#1b1830", secondary:"#1b1830", accent:"#5b4fe0", font:"zetetiq" },
+  { name:"Editorial", primary:"#2A2620", secondary:"#2A2620", accent:"#5C88CD", font:"zetetiq" },
 ];
 function ThemePanel({ form, setTheme, setSettings }){
   const { toast } = useApp();
@@ -3987,54 +4083,54 @@ const FORM_TEMPLATES = [
       const nps = QTYPES.nps.make(); nps.label = "How likely are you to recommend us to a friend?";
       const star = QTYPES.star_rating.make(); star.label = "Overall, how satisfied are you?";
       const txt = QTYPES.text_entry.make(); txt.label = "What could we do better?"; txt.mode = "long";
-      return { title:"Customer feedback", description:"We would love to hear how we are doing.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[nps, star, txt], settings:{} }, is_open:true };
+      return { title:"Customer feedback", description:"We would love to hear how we are doing.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[nps, star, txt], settings:{} }, is_open:true };
   }},
   { key:"contact", name:"Contact form", desc:"Name, email, and a message", build:()=>{
       const ff = QTYPES.form_field.make(); ff.label = "Get in touch"; ff.fields = ["Name","Email","Message"];
-      return { title:"Contact us", description:"Send us a note and we will get back to you.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[ff], settings:{} }, is_open:true };
+      return { title:"Contact us", description:"Send us a note and we will get back to you.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[ff], settings:{} }, is_open:true };
   }},
   { key:"rsvp", name:"Event RSVP", desc:"Attendance, guest details, and a date", build:()=>{
       const mc = QTYPES.multiple_choice.make(); mc.label = "Will you attend?"; mc.options = ["Yes, I will be there","No, I cannot make it"];
       const ff = QTYPES.form_field.make(); ff.label = "Your details"; ff.fields = ["Name","Email"];
       const d = QTYPES.date.make(); d.label = "Which date works best for you?";
-      return { title:"Event RSVP", description:"Let us know if you can join.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[mc, ff, d], settings:{} }, is_open:true };
+      return { title:"Event RSVP", description:"Let us know if you can join.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[mc, ff, d], settings:{} }, is_open:true };
   }},
   { key:"application", name:"Job application", desc:"Contact details, resume upload, and a cover note", build:()=>{
       const ff = QTYPES.form_field.make(); ff.label = "Your details"; ff.fields = ["Full name","Email","Phone"];
       const file = QTYPES.file_upload.make(); file.label = "Upload your resume"; file.accept = ".pdf,.doc,.docx";
       const txt = QTYPES.text_entry.make(); txt.label = "Why are you a good fit?"; txt.mode = "long";
-      return { title:"Job application", description:"Tell us about yourself and attach your resume.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[ff, file, txt], settings:{} }, is_open:true };
+      return { title:"Job application", description:"Tell us about yourself and attach your resume.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[ff, file, txt], settings:{} }, is_open:true };
   }},
   { key:"registration", name:"Event registration", desc:"Ticket type, guest count, and contact", build:()=>{
       const ff = QTYPES.form_field.make(); ff.label = "Attendee"; ff.fields = ["Name","Email"];
       const mc = QTYPES.multiple_choice.make(); mc.label = "Ticket type"; mc.options = ["General","VIP","Student"];
       const num = QTYPES.number_entry.make(); num.label = "Number of guests"; num.min = 1; num.max = 10;
-      return { title:"Event registration", description:"Reserve your spot.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[ff, mc, num], settings:{} }, is_open:true };
+      return { title:"Event registration", description:"Reserve your spot.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[ff, mc, num], settings:{} }, is_open:true };
   }},
   { key:"nps", name:"NPS survey", desc:"One recommendation score and a reason", build:()=>{
       const nps = QTYPES.nps.make(); nps.label = "How likely are you to recommend us?";
       const txt = QTYPES.text_entry.make(); txt.label = "What is the main reason for your score?"; txt.mode = "long";
-      return { title:"Net promoter score", description:"A quick two question survey.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[nps, txt], settings:{} }, is_open:true };
+      return { title:"Net promoter score", description:"A quick two question survey.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[nps, txt], settings:{} }, is_open:true };
   }},
   { key:"lead", name:"Lead capture", desc:"Name, work email, company, and interest", build:()=>{
       const ff = QTYPES.form_field.make(); ff.label = "Get in touch"; ff.fields = ["Name","Work email","Company"];
       const mc = QTYPES.multiple_choice.make(); mc.label = "What are you interested in?"; mc.options = ["A demo","Pricing","A partnership","Just browsing"];
-      return { title:"Talk to our team", description:"We will follow up shortly.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[ff, mc], settings:{} }, is_open:true };
+      return { title:"Talk to our team", description:"We will follow up shortly.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[ff, mc], settings:{} }, is_open:true };
   }},
   { key:"quiz", name:"Scored quiz", desc:"Multiple choice with points and a final score", build:()=>{
       const q1 = QTYPES.multiple_choice.make(); q1.label = "What is the capital of France?"; q1.options = ["Paris","London","Berlin"]; q1.points = { "Paris": 1 };
       const q2 = QTYPES.multiple_choice.make(); q2.label = "What is 2 + 2?"; q2.options = ["3","4","5"]; q2.points = { "4": 1 };
-      return { title:"Quick quiz", description:"Test your knowledge.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[q1, q2], settings:{ scoring:true, showScore:true } }, is_open:true };
+      return { title:"Quick quiz", description:"Test your knowledge.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[q1, q2], settings:{ scoring:true, showScore:true } }, is_open:true };
   }},
   { key:"csat", name:"Support satisfaction", desc:"Star rating, resolution, and a comment", build:()=>{
       const star = QTYPES.star_rating.make(); star.label = "How would you rate the support you received?";
       const mc = QTYPES.multiple_choice.make(); mc.label = "Was your issue resolved?"; mc.options = ["Yes","Partly","No"];
       const txt = QTYPES.text_entry.make(); txt.label = "Anything else you would like to share?"; txt.mode = "long";
-      return { title:"How did we do?", description:"Your feedback helps us improve.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[star, mc, txt], settings:{} }, is_open:true };
+      return { title:"How did we do?", description:"Your feedback helps us improve.", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[star, mc, txt], settings:{} }, is_open:true };
   }},
   { key:"poll", name:"Quick poll", desc:"A single multiple choice question", build:()=>{
       const mc = QTYPES.multiple_choice.make(); mc.label = "Which option do you prefer?"; mc.options = ["Option A","Option B","Option C"];
-      return { title:"Quick poll", description:"", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[mc], settings:{} }, is_open:true };
+      return { title:"Quick poll", description:"", theme:{ primary:"#5C88CD", secondary:"#2A2620", accent:"#5C88CD", font:"sans" }, schema:{ questions:[mc], settings:{} }, is_open:true };
   }},
 ];
 
@@ -4399,7 +4495,7 @@ function Logo({ size = 20, style, className }){
 }
 
 /* ----------------------------- pdf report ----------------------------- */
-function hexRgb(h){ h = String(h || "#5b4fe0").replace("#",""); if (h.length === 3) h = h.split("").map((c)=>c + c).join(""); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function hexRgb(h){ h = String(h || "#5C88CD").replace("#",""); if (h.length === 3) h = h.split("").map((c)=>c + c).join(""); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function ensureJsPDF(){ return new Promise((res, rej)=>{ if (window.jspdf && window.jspdf.jsPDF) return res(); const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"; sc.onload = ()=>res(); sc.onerror = ()=>rej(new Error("pdf_load")); document.head.appendChild(sc); }); }
 
 function statLines(q, rows){
@@ -4546,11 +4642,11 @@ async function exportReport(form, rows){
   const H = doc.internal.pageSize.getHeight();
   const M = 42;
   const theme = form.theme || {};
-  const [pr,pg,pb] = hexRgb(theme.primary || "#5b4fe0");
-  const [ar,ag,ab] = hexRgb(theme.accent || theme.primary || "#5b4fe0");
+  const [pr,pg,pb] = hexRgb(theme.primary || "#5C88CD");
+  const [ar,ag,ab] = hexRgb(theme.accent || theme.primary || "#5C88CD");
   const pf = await loadPdfFonts(doc, theme.font);
   const ff = pf.family;
-  const ink = hexRgb(theme.secondary || "#1b1830"), soft = [120,116,140], track = [231,228,243];
+  const ink = hexRgb(theme.secondary || "#2A2620"), soft = [120,116,140], track = [231,228,243];
   const ensure = (y, need)=>{ if (y + need > H - 40){ doc.addPage(); return 56; } return y; };
   doc.setFillColor(pr,pg,pb); doc.rect(0,0,W,82,"F");
   await drawExportLogo(doc, form, W, M);
@@ -4639,9 +4735,9 @@ async function exportResponsePdf(form, r){
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
   const M = 42;
   const theme = form.theme || {};
-  const [pr,pg,pb] = hexRgb(theme.primary || "#5b4fe0");
+  const [pr,pg,pb] = hexRgb(theme.primary || "#5C88CD");
   const pf = await loadPdfFonts(doc, theme.font); const ff = pf.family;
-  const ink = hexRgb(theme.secondary || "#1b1830"), soft = [120,116,140];
+  const ink = hexRgb(theme.secondary || "#2A2620"), soft = [120,116,140];
   const ensure = (y, need)=>{ if (y + need > H - 40){ doc.addPage(); return 56; } return y; };
   const wrap = (text, size)=>{ doc.setFontSize(size); return doc.splitTextToSize(String(text), W - 2 * M); };
   doc.setFillColor(pr,pg,pb); doc.rect(0,0,W,82,"F");

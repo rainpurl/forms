@@ -311,3 +311,11 @@ You can now delete a single response from the Responses tab, or clear all of the
 ## Ranking, drafts, and quizzes
 
 Ranking questions now drag smoothly on phones and tablets, not just with a mouse (the up and down arrows still work too). People filling out a form have their answers saved on their own device as they go, so if they close the tab and come back, their progress is restored with a Start over option. And for quizzes, you can now turn on a setting to show people which answers were right, along with an explanation you write for each question.
+
+## More control over answers
+
+Text boxes can now have a maximum length with a live character count, so people see how much room they have left. Matrix grids can include an N/A column for statements that do not apply. And date questions can set an earliest and latest date, so people can only pick within the window you allow.
+
+## A new look
+
+The brand moved to a warm sand background with a blue accent. Buttons, inputs, toggles and cards now look pressed into or raised off the page instead of outlined, and every control responds when you hover or click it, with smooth, restrained animation throughout. The light and dark modes both follow the new palette. Open brand-preview.html to see the colours and components. If your device is set to reduce motion, the animations quiet down automatically.
