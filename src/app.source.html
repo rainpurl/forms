@@ -1139,7 +1139,7 @@ function PublicForm({ username, slug }){
     api.publicForm(username, slug).then(({ok,data})=>{
       if (!m) return;
       if (!ok || !data || data.error || !data.form) setSt({ loading:false, notFound:true });
-      else setSt({ loading:false, form:data.form });
+      else setSt({ loading:false, form:data.form, availability:data.availability });
     });
     return ()=>{ m = false; };
   },[username, slug]);
@@ -1149,8 +1149,10 @@ function PublicForm({ username, slug }){
   const form = st.form;
   const scope = { "--fa": (form.theme && form.theme.accent) || "#5b4fe0", fontFamily: FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans };
 
-  if (!form.is_open){
-    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard"><div className="ftitle">{form.title}</div><p className="fdesc">This form is no longer accepting responses.</p></div></div></div></div>);
+  const avail = st.availability || { open: form.is_open, reason: form.is_open ? null : "closed" };
+  if (!avail.open){
+    const cmsg = avail.reason === "scheduled" ? ("This form is not open yet." + (avail.opensAt ? " It opens " + fmtDate(avail.opensAt) + "." : "")) : avail.reason === "ended" ? "This form has closed." : avail.reason === "full" ? "This form has reached its response limit." : "This form is no longer accepting responses.";
+    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard"><div className="ftitle">{form.title}</div><p className="fdesc">{cmsg}</p></div></div></div></div>);
   }
   if (done){
     const set = (form.schema && form.schema.settings) || {};
@@ -1805,6 +1807,8 @@ function ThemePanel({ form, setTheme, setSettings }){
 }
 
 function SettingsPanel({ form, setForm, setSettings, id, del }){
+  const toLocalInput = (iso) => { if (!iso) return ""; const d = new Date(iso); if (isNaN(d.getTime())) return ""; const p = (n)=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes()); };
+  const fromLocalInput = (v) => { if (!v) return ""; const d = new Date(v); return isNaN(d.getTime()) ? "" : d.toISOString(); };
   return (
     <div>
       <div className="panel-title">Form settings</div>
@@ -1814,6 +1818,11 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Toggle checked={!!form.schema.settings.randomizeQuestions} onChange={(c)=>setSettings({randomizeQuestions:c})} label="Randomize question order" />
       <div style={{height:8}}></div>
       <Toggle checked={!!form.schema.settings.conversational} onChange={(c)=>setSettings({conversational:c})} label="Conversational mode (one question at a time)" />
+      <div className="panel-section">Availability and limits</div>
+      <Field label="Response limit (0 for unlimited)"><input className="input" type="number" min="0" value={form.schema.settings.responseCap || 0} onChange={(e)=>setSettings({responseCap: parseInt(e.target.value || "0", 10)})} /></Field>
+      <Field label="Opens at (optional)"><input className="input" type="datetime-local" value={toLocalInput(form.schema.settings.opensAt)} onChange={(e)=>setSettings({opensAt: fromLocalInput(e.target.value)})} /></Field>
+      <Field label="Closes at (optional)"><input className="input" type="datetime-local" value={toLocalInput(form.schema.settings.closesAt)} onChange={(e)=>setSettings({closesAt: fromLocalInput(e.target.value)})} /></Field>
+      <div className="hint">The form stops accepting responses when the limit is reached or after the close time. Times use this browser's timezone.</div>
       <div className="panel-section">After submission</div>
       <Field label="Thank-you heading"><input className="input" placeholder="Thank you" value={form.schema.settings.endTitle || ""} onChange={(e)=>setSettings({endTitle:e.target.value})} /></Field>
       <Field label="Thank-you message"><textarea className="textarea" placeholder="Your response has been recorded." value={form.schema.settings.endMessage || ""} onChange={(e)=>setSettings({endMessage:e.target.value})} /></Field>

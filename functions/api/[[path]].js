@@ -279,6 +279,18 @@ async function deleteForm(user, id, env) {
 /* public form + responses                                             */
 /* ------------------------------------------------------------------ */
 
+function formAvailability(isOpen, settings, count) {
+  if (!isOpen) return { open: false, reason: "closed" };
+  const now = Date.now();
+  const opensAt = settings.opensAt ? Date.parse(settings.opensAt) : NaN;
+  const closesAt = settings.closesAt ? Date.parse(settings.closesAt) : NaN;
+  if (!isNaN(opensAt) && now < opensAt) return { open: false, reason: "scheduled", opensAt: settings.opensAt };
+  if (!isNaN(closesAt) && now > closesAt) return { open: false, reason: "ended" };
+  const cap = parseInt(settings.responseCap, 10);
+  if (cap > 0 && typeof count === "number" && count >= cap) return { open: false, reason: "full" };
+  return { open: true, reason: null };
+}
+
 async function publicForm(username, slug, env) {
   const row = await env.DB.prepare(
     `SELECT f.id, f.title, f.description, f.theme, f.schema, f.is_open, u.username, u.name
@@ -287,23 +299,38 @@ async function publicForm(username, slug, env) {
   ).bind(username, slug).first();
   if (!row) return json({ error: "not_found" }, 404);
 
+  const schema = safeParse(row.schema, { questions: [], settings: {} });
+  const settings = schema.settings || {};
+  let count = null;
+  const cap = parseInt(settings.responseCap, 10);
+  if (cap > 0) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(row.id).first(); count = (cr && cr.c) || 0; }
+  const availability = formAvailability(!!row.is_open, settings, count);
   return json({
     form: {
       id: row.id,
       title: row.title,
       description: row.description,
       theme: safeParse(row.theme, defaultTheme()),
-      schema: safeParse(row.schema, { questions: [], settings: {} }),
+      schema,
       is_open: !!row.is_open,
       owner: { username: row.username, name: row.name },
     },
+    availability,
   });
 }
 
 async function submitResponse(formId, request, env, context) {
   const form = await env.DB.prepare("SELECT id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
   if (!form) return json({ error: "not_found" }, 404);
-  if (!form.is_open) return json({ error: "form_closed" }, 403);
+  {
+    const schemaA = safeParse(form.schema, { questions: [], settings: {} });
+    const settingsA = schemaA.settings || {};
+    let countA = null;
+    const capA = parseInt(settingsA.responseCap, 10);
+    if (capA > 0) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(formId).first(); countA = (cr && cr.c) || 0; }
+    const availA = formAvailability(!!form.is_open, settingsA, countA);
+    if (!availA.open) return json({ error: "form_closed", reason: availA.reason }, 403);
+  }
 
   const body = await readJson(request) || {};
   const data = body.data && typeof body.data === "object" ? body.data : {};

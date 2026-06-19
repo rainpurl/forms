@@ -2112,7 +2112,8 @@ function PublicForm({
         notFound: true
       });else setSt({
         loading: false,
-        form: data.form
+        form: data.form,
+        availability: data.availability
       });
     });
     return () => {
@@ -2134,7 +2135,12 @@ function PublicForm({
     "--fa": form.theme && form.theme.accent || "#5b4fe0",
     fontFamily: FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans
   };
-  if (!form.is_open) {
+  const avail = st.availability || {
+    open: form.is_open,
+    reason: form.is_open ? null : "closed"
+  };
+  if (!avail.open) {
+    const cmsg = avail.reason === "scheduled" ? "This form is not open yet." + (avail.opensAt ? " It opens " + fmtDate(avail.opensAt) + "." : "") : avail.reason === "ended" ? "This form has closed." : avail.reason === "full" ? "This form has reached its response limit." : "This form is no longer accepting responses.";
     return /*#__PURE__*/React.createElement("div", {
       className: "form-page"
     }, /*#__PURE__*/React.createElement("div", {
@@ -2148,7 +2154,7 @@ function PublicForm({
       className: "ftitle"
     }, form.title), /*#__PURE__*/React.createElement("p", {
       className: "fdesc"
-    }, "This form is no longer accepting responses.")))));
+    }, cmsg)))));
   }
   if (done) {
     const set = form.schema && form.schema.settings || {};
@@ -4029,6 +4035,18 @@ function SettingsPanel({
   id,
   del
 }) {
+  const toLocalInput = iso => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const p = n => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes());
+  };
+  const fromLocalInput = v => {
+    if (!v) return "";
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? "" : d.toISOString();
+  };
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "panel-title"
   }, "Form settings"), /*#__PURE__*/React.createElement(Field, {
@@ -4068,6 +4086,38 @@ function SettingsPanel({
     }),
     label: "Conversational mode (one question at a time)"
   }), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Availability and limits"), /*#__PURE__*/React.createElement(Field, {
+    label: "Response limit (0 for unlimited)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "0",
+    value: form.schema.settings.responseCap || 0,
+    onChange: e => setSettings({
+      responseCap: parseInt(e.target.value || "0", 10)
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Opens at (optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "datetime-local",
+    value: toLocalInput(form.schema.settings.opensAt),
+    onChange: e => setSettings({
+      opensAt: fromLocalInput(e.target.value)
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Closes at (optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "datetime-local",
+    value: toLocalInput(form.schema.settings.closesAt),
+    onChange: e => setSettings({
+      closesAt: fromLocalInput(e.target.value)
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "The form stops accepting responses when the limit is reached or after the close time. Times use this browser's timezone."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "After submission"), /*#__PURE__*/React.createElement(Field, {
     label: "Thank-you heading"

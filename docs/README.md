@@ -103,3 +103,7 @@ Adaptive follow-up questions (a per-question toggle that asks one clarifying que
 ## Signature
 
 The Signature question type lets people sign with a finger or mouse. Signatures are saved with the response as an image and need no external storage. They appear as an image in the response detail, as [signature] in CSV and webhook output, and are counted in the report.
+
+## Availability and limits
+
+In a form's settings you can set a response limit (a cap on total responses) and optional open and close date-times. The form stops accepting responses when the cap is reached or after the close time, and shows respondents a message explaining why. This is enforced on the server, so it holds even against direct posts.
