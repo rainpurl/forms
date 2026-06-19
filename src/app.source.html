@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Mozilla+Headline:wght@400;500;600;700&family=Mozilla+Text:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
 :root{
+  color-scheme: light;
   --bo:#5b4fe0;            /* primary blue-purple */
   --bo-dark:#4536c9;
   --ink:#1b1830;
@@ -34,6 +35,7 @@
   --nav-bg:rgba(246,245,252,.88);
 }
 html[data-theme="dark"]{
+  color-scheme: dark;
   --bo:#7c72f2; --bo-dark:#6b61e8;
   --ink:#ece9f8; --ink-soft:#a9a4c6;
   --line:#2a2740; --line-strong:#3a3660;
@@ -649,6 +651,13 @@ table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
 .cj-choose{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 10px;border:1px solid var(--line-strong);border-radius:8px}
 .cj-choose.sel{border-color:var(--fa);box-shadow:0 0 0 1px var(--fa) inset}
 .cj-attr-edit{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}
+
+.cal-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cal-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 11px;font-size:12.5px;cursor:pointer;background:var(--card);color:var(--ink)}
+.cal-chip.on{border-color:var(--bo);color:var(--bo)}
+.cal-chip input{margin:0}
+.mt-tag{display:inline-block;margin-top:6px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+.form-scope .slot-btn .slot-spots{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px}
 </style>
 </head>
 <body>
@@ -870,33 +879,43 @@ function SchedulingRenderer({ q, value, onChange, error, bookings }){
   const slots = Array.isArray(q.slots) ? q.slots : [];
   const counts = bookings || {};
   const now = Date.now();
+  const tzAuto = q.timezoneAuto !== false;
+  let tzName = ""; try { tzName = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  const minNoticeMs = (q.minNotice || 0) * 3600000;
+  const mt = q.meetingType || "one_on_one";
+  const vlabel = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" };
+  const visible = slots.filter((s)=>{ const d = new Date(s.start); if (isNaN(d)) return true; return d.getTime() >= now + minNoticeMs; });
   const groups = {}; const order = [];
-  slots.forEach((s)=>{ const d = new Date(s.start); const key = isNaN(d) ? "Other" : d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" }); if (!groups[key]){ groups[key] = []; order.push(key); } groups[key].push(s); });
+  visible.forEach((s)=>{ const d = new Date(s.start); const key = isNaN(d) ? "Other" : d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" }); if (!groups[key]){ groups[key] = []; order.push(key); } groups[key].push(s); });
   return (
     <div className="q">
       <QLabel q={q} />
-      {(q.meetingTitle || q.duration || q.location) && (
+      {(q.meetingTitle || q.duration || q.location || (q.video && q.video !== "none")) && (
         <div className="mt-card">
           {q.meetingTitle && <div className="mt-title">{q.meetingTitle}</div>}
-          <div className="mt-meta">{[q.duration ? (q.duration + " min") : "", q.location || ""].filter(Boolean).join(" \u00b7 ")}</div>
+          <div className="mt-meta">{[q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vlabel[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div>
+          {mt === "group" && <div className="mt-tag">Group session</div>}
         </div>
       )}
-      {slots.length === 0 ? <div className="muted" style={{fontSize:13}}>No times have been added yet.</div> : (
+      {tzAuto && tzName && <div className="hint" style={{marginBottom:8}}>Times shown in your time zone ({tzName}).</div>}
+      {visible.length === 0 ? <div className="muted" style={{fontSize:13}}>No times are currently available.</div> : (
         <div className="slot-wrap">
           {order.map((day)=>(
             <div key={day} className="slot-day">
               <div className="slot-date">{day}</div>
               <div className="slot-grid">
-                {groups[day].map((s)=>{ const d = new Date(s.start); const tlabel = isNaN(d) ? s.start : d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" }); const cap = (s.capacity == null ? 1 : s.capacity); const used = counts[s.start] || 0; const full = cap > 0 && used >= cap; const past = !isNaN(d) && d.getTime() < now; const disabled = full || past; const isSel = value === s.start; return (<button type="button" key={s.id || s.start} className={"slot-btn" + (isSel ? " sel" : "")} disabled={disabled && !isSel} onClick={()=>onChange(s.start)}>{tlabel}{full ? <span className="slot-full">Full</span> : null}</button>); })}
+                {groups[day].map((s)=>{ const d = new Date(s.start); const tlabel = isNaN(d) ? s.start : d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" }); const cap = (s.capacity == null ? (mt === "group" ? (q.capacity || 1) : 1) : s.capacity); const used = counts[s.start] || 0; const left = Math.max(0, cap - used); const full = cap > 0 && used >= cap; const isSel = value === s.start; return (<button type="button" key={s.id || s.start} className={"slot-btn" + (isSel ? " sel" : "")} disabled={full && !isSel} onClick={()=>onChange(s.start)}>{tlabel}{(mt === "group" && cap > 1) ? <span className="slot-spots">{full ? "Full" : (left + " left")}</span> : (full ? <span className="slot-full">Full</span> : null)}</button>); })}
               </div>
             </div>
           ))}
         </div>
       )}
+      {(mt === "round_robin" || mt === "collective") && Array.isArray(q.hosts) && q.hosts.filter((h)=>h.name).length > 0 && <div className="hint" style={{marginTop:8}}>{mt === "round_robin" ? "You will be matched with the next available host." : "Scheduled with the full team."}</div>}
       {error && <div className="ferr">{error}</div>}
     </div>
   );
 }
+
 function DocumentSignRenderer({ q, value, onChange, error }){
   const fields = Array.isArray(q.fields) ? q.fields : [];
   const data = (value && value.fields) || {};
@@ -943,9 +962,23 @@ function DocumentSignRenderer({ q, value, onChange, error }){
 function SchedulingControls({ q, update }){
   const slots = Array.isArray(q.slots) ? q.slots : [];
   const [newSlot, setNewSlot] = useState("");
-  const add = ()=>{ if (!newSlot) return; update({ slots: slots.concat([{ id: uid(), start: newSlot, capacity: 1 }]) }); setNewSlot(""); };
+  const mt = q.meetingType || "one_on_one";
+  const add = ()=>{ if (!newSlot) return; update({ slots: slots.concat([{ id: uid(), start: newSlot, capacity: mt === "group" ? (q.capacity || 1) : 1 }]) }); setNewSlot(""); };
   const remove = (id)=> update({ slots: slots.filter((s)=>s.id !== id) });
   const setCap = (id, c)=> update({ slots: slots.map((s)=> s.id === id ? { ...s, capacity: c } : s) });
+  const cals = q.calendars || {};
+  const setCal = (k, v)=> update({ calendars: { ...cals, [k]: v } });
+  const hosts = Array.isArray(q.hosts) ? q.hosts : [];
+  const setHost = (id, patch)=> update({ hosts: hosts.map((h)=> h.id === id ? { ...h, ...patch } : h) });
+  const addHost = ()=> update({ hosts: hosts.concat([{ id: uid(), name:"", email:"" }]) });
+  const rmHost = (id)=> update({ hosts: hosts.filter((h)=> h.id !== id) });
+  const reminders = Array.isArray(q.reminders) ? q.reminders : [];
+  const setRem = (id, patch)=> update({ reminders: reminders.map((r)=> r.id === id ? { ...r, ...patch } : r) });
+  const addRem = ()=> update({ reminders: reminders.concat([{ id: uid(), channel:"email", value:1, unit:"hours" }]) });
+  const rmRem = (id)=> update({ reminders: reminders.filter((r)=> r.id !== id) });
+  const fu = q.followup || {};
+  const VL = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" };
+  const CAL = [["google","Google Calendar"],["outlook","Outlook"],["office365","Office 365"],["icloud","Apple iCloud"],["exchange","Exchange"]];
   return (
     <div>
       <Field label="Meeting title"><input className="input" value={q.meetingTitle || ""} onChange={(e)=>update({meetingTitle:e.target.value})} /></Field>
@@ -953,6 +986,37 @@ function SchedulingControls({ q, update }){
         <Field label="Duration (min)" style={{flex:1}}><input className="input" type="number" min="5" value={q.duration || 30} onChange={(e)=>update({duration: parseInt(e.target.value || "0", 10)})} /></Field>
         <Field label="Location / link" style={{flex:2}}><input className="input" placeholder="Video call, address" value={q.location || ""} onChange={(e)=>update({location:e.target.value})} /></Field>
       </div>
+
+      <div className="panel-section">Meeting type</div>
+      <select className="select" value={mt} onChange={(e)=>update({meetingType:e.target.value})}>
+        <option value="one_on_one">One on one</option>
+        <option value="group">Group or seminar</option>
+        <option value="collective">Collective (all hosts free)</option>
+        <option value="round_robin">Round robin (rotate hosts)</option>
+      </select>
+      {mt === "group" && <Field label="Spots per time slot" style={{marginTop:8}}><input className="input" type="number" min="1" value={q.capacity || 1} onChange={(e)=>update({capacity: Math.max(1, parseInt(e.target.value || "1", 10))})} /></Field>}
+      {(mt === "collective" || mt === "round_robin") && (<div style={{marginTop:8}}>
+        <div className="label" style={{marginBottom:4}}>Hosts</div>
+        {hosts.map((h)=>(<div key={h.id} className="row" style={{gap:6,marginBottom:6}}><input className="input" placeholder="Name" value={h.name} onChange={(e)=>setHost(h.id,{name:e.target.value})} /><input className="input" placeholder="Email" value={h.email} onChange={(e)=>setHost(h.id,{email:e.target.value})} /><button className="iconbtn" title="Remove" onClick={()=>rmHost(h.id)}>\u00d7</button></div>))}
+        <button className="btn sm" onClick={addHost}>+ Add host</button>
+        <div className="hint" style={{marginTop:4}}>{mt === "collective" ? "A slot is offered only when every host is free." : "Bookings rotate across hosts based on availability."}</div>
+      </div>)}
+
+      <div className="panel-section">Connected calendars</div>
+      <div className="cal-grid">{CAL.map((c)=>(<label key={c[0]} className={"cal-chip" + (cals[c[0]] ? " on" : "")}><input type="checkbox" checked={!!cals[c[0]]} onChange={(e)=>setCal(c[0], e.target.checked)} /><span>{c[1]}</span></label>))}</div>
+      <div className="hint" style={{marginTop:6}}>Busy times from connected calendars are blocked automatically once the calendar is linked in your account.</div>
+
+      <div className="panel-section">Scheduling rules</div>
+      <div className="row" style={{gap:10}}>
+        <Field label="Buffer before (min)" style={{flex:1}}><input className="input" type="number" min="0" value={q.bufferBefore || 0} onChange={(e)=>update({bufferBefore: Math.max(0, parseInt(e.target.value || "0", 10))})} /></Field>
+        <Field label="Buffer after (min)" style={{flex:1}}><input className="input" type="number" min="0" value={q.bufferAfter || 0} onChange={(e)=>update({bufferAfter: Math.max(0, parseInt(e.target.value || "0", 10))})} /></Field>
+      </div>
+      <div className="row" style={{gap:10}}>
+        <Field label="Max per day (0 = none)" style={{flex:1}}><input className="input" type="number" min="0" value={q.dailyCap || 0} onChange={(e)=>update({dailyCap: Math.max(0, parseInt(e.target.value || "0", 10))})} /></Field>
+        <Field label="Minimum notice (hours)" style={{flex:1}}><input className="input" type="number" min="0" value={q.minNotice || 0} onChange={(e)=>update({minNotice: Math.max(0, parseInt(e.target.value || "0", 10))})} /></Field>
+      </div>
+      <Toggle checked={q.timezoneAuto !== false} onChange={(c)=>update({timezoneAuto:c})} label="Show times in the visitor's time zone" />
+
       <div className="panel-section">Available times</div>
       <div className="row" style={{gap:8}}>
         <input className="input" type="datetime-local" value={newSlot} onChange={(e)=>setNewSlot(e.target.value)} />
@@ -960,14 +1024,42 @@ function SchedulingControls({ q, update }){
       </div>
       <div className="slot-edit">
         {slots.length === 0 ? <div className="muted" style={{fontSize:13,marginTop:8}}>No times added yet.</div> :
-          slots.map((s)=>(<div key={s.id} className="slot-edit-row"><span className="slot-edit-when">{fmtSlot(s.start)}</span><label className="slot-cap">cap<input className="input" type="number" min="1" value={s.capacity == null ? 1 : s.capacity} onChange={(e)=>setCap(s.id, parseInt(e.target.value || "1", 10))} /></label><button className="iconbtn" title="Remove" onClick={()=>remove(s.id)}>×</button></div>))}
+          slots.map((s)=>(<div key={s.id} className="slot-edit-row"><span className="slot-edit-when">{fmtSlot(s.start)}</span>{mt === "group" && <label className="slot-cap">spots<input className="input" type="number" min="1" value={s.capacity == null ? (q.capacity || 1) : s.capacity} onChange={(e)=>setCap(s.id, parseInt(e.target.value || "1", 10))} /></label>}<button className="iconbtn" title="Remove" onClick={()=>remove(s.id)}>\u00d7</button></div>))}
       </div>
+
+      <div className="panel-section">Reminders</div>
+      {reminders.map((r)=>(<div key={r.id} className="row" style={{gap:6,marginBottom:6,alignItems:"center"}}>
+        <select className="select" style={{flex:"0 0 84px"}} value={r.channel} onChange={(e)=>setRem(r.id,{channel:e.target.value})}><option value="email">Email</option><option value="sms">SMS</option></select>
+        <input className="input" type="number" min="0" style={{flex:"0 0 64px"}} value={r.value} onChange={(e)=>setRem(r.id,{value: Math.max(0, parseInt(e.target.value||"0",10))})} />
+        <select className="select" style={{flex:1}} value={r.unit} onChange={(e)=>setRem(r.id,{unit:e.target.value})}><option value="minutes">minutes before</option><option value="hours">hours before</option><option value="days">days before</option></select>
+        <button className="iconbtn" title="Remove" onClick={()=>rmRem(r.id)}>\u00d7</button>
+      </div>))}
+      <button className="btn sm" onClick={addRem}>+ Add reminder</button>
+
+      <div className="panel-section">After the meeting</div>
+      <Toggle checked={!!fu.enabled} onChange={(c)=>update({followup:{...fu, enabled:c}})} label="Send a follow-up message" />
+      {fu.enabled && (<div style={{marginTop:8}}>
+        <Field label="Message"><textarea className="textarea" style={{minHeight:60}} value={fu.message || ""} onChange={(e)=>update({followup:{...fu, message:e.target.value}})} placeholder="Thanks for meeting. Here are the next steps..." /></Field>
+        <Field label="Link to share (optional)"><input className="input" value={fu.link || ""} onChange={(e)=>update({followup:{...fu, link:e.target.value}})} placeholder="https://" /></Field>
+      </div>)}
+
+      <div className="panel-section">Video conferencing</div>
+      <select className="select" value={q.video || "none"} onChange={(e)=>update({video:e.target.value})}>
+        <option value="none">No video link</option>
+        <option value="zoom">Zoom</option>
+        <option value="meet">Google Meet</option>
+        <option value="teams">Microsoft Teams</option>
+        <option value="webex">Webex</option>
+      </select>
+      {q.video && q.video !== "none" && <div className="hint" style={{marginTop:6}}>A {VL[q.video]} link is generated and included in the confirmation once {VL[q.video]} is connected.</div>}
+
       <div className="panel-section">Response requirements</div>
       <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
       <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
     </div>
   );
 }
+
 function DocumentControls({ q, update }){
   const { toast } = useApp();
   const fields = Array.isArray(q.fields) ? q.fields : [];
@@ -1601,8 +1693,8 @@ const QTYPES = {
     label: "Meeting signup",
     hint: "Let people book one of your time slots",
     isInput: true,
-    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[] }),
-    summary: (q) => ((q.slots && q.slots.length) || 0) + " time slots",
+    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[], meetingType:"one_on_one", capacity:1, hosts:[], calendars:{ google:false, outlook:false, office365:false, icloud:false, exchange:false }, bufferBefore:0, bufferAfter:0, dailyCap:0, minNotice:0, timezoneAuto:true, reminders:[{ id: uid(), channel:"email", value:24, unit:"hours" }], followup:{ enabled:false, message:"", link:"" }, video:"none" }),
+    summary: (q) => (({ one_on_one:"One on one", group:"Group", collective:"Collective", round_robin:"Round robin" }[q.meetingType || "one_on_one"]) + " \u00b7 " + ((q.slots && q.slots.length) || 0) + " time slots"),
     validate: (q, v) => (q.required && !v) ? "Please choose a time." : null,
     Renderer: SchedulingRenderer,
   },
@@ -2292,8 +2384,8 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
         if (!list.length){ if (b.title || b.desc) out.push({ qs:[], title:b.title, desc:b.desc, bid:b.id }); }
         else list.forEach((q, i)=> out.push({ qs:[q], title: i === 0 ? b.title : "", desc: i === 0 ? b.desc : "", bid:b.id }));
       } else {
-        const pages = [[]];
-        for (const q of b.items){ if (q.type === "page_break") pages.push([]); else pages[pages.length - 1].push(q); }
+        const pages = [[]]; const ownPage = (t)=> t === "scheduling" || t === "document_sign";
+        for (const q of b.items){ if (q.type === "page_break"){ pages.push([]); } else if (ownPage(q.type)){ if (pages[pages.length - 1].length) pages.push([]); pages[pages.length - 1].push(q); pages.push([]); } else { pages[pages.length - 1].push(q); } }
         let pgs = pages.filter((p)=>p.length);
         if (!pgs.length){ if (b.title || b.desc) out.push({ qs:[], title:b.title, desc:b.desc, bid:b.id }); }
         else { if (settings.randomizeQuestions) pgs = pgs.map((p)=> shuffle(p.slice())); pgs.forEach((p, i)=> out.push({ qs:p, title: i === 0 ? b.title : "", desc: i === 0 ? b.desc : "", bid:b.id })); }
@@ -2543,13 +2635,13 @@ function Landing({ showLogin }){
     { icon:"chart", title:"Results and overview", desc:"Per question charts, a response table, themed exports, and a written overview of open text answers." },
     { icon:"palette", title:"Themes and dark mode", desc:"Set your colors and font. Forms follow light or dark to match the reader." },
     { icon:"globe", title:"Your branding", desc:"Hide the footer, set a page title and favicon, and add custom styling for a fully white-label form." },
-    { icon:"upload", title:"File uploads", desc:"Collect images and documents, stored in your own storage bucket." },
+    { icon:"upload", title:"File uploads", desc:"Collect images and documents alongside the rest of the response." },
     { icon:"sections", title:"Multi-section surveys", desc:"Group questions into sections and pages, with optional randomization." },
     { icon:"doc", title:"Themed PDF exports", desc:"Download a clean PDF of any single response or a summary report in your form's style." },
   ];
   const diffs = [
-    { icon:"lock", title:"Self-hosted", desc:"Runs on your own Cloudflare account. You own the deployment." },
-    { icon:"globe", title:"Your data stays yours", desc:"Responses live in your database, not on someone else's platform." },
+    { icon:"lock", title:"Private by default", desc:"No ads and no third-party tracking baked into your forms." },
+    { icon:"globe", title:"Your data stays yours", desc:"Export every response anytime as clean CSV or a themed PDF." },
     { icon:"spark", title:"No buzzwords", desc:"Helpful features without the hype. Plain labels and clean output." },
     { icon:"target", title:"Free for early users", desc:"Full access while zetetiq is getting started." },
   ];
@@ -2573,9 +2665,9 @@ function Landing({ showLogin }){
 
       <section className="lp-hero">
         <div className="lp-hero-text">
-          <div className="lp-eyebrow">Experience management, self-hosted</div>
+          <div className="lp-eyebrow">Experience management, simplified</div>
           <h1 className="lp-h1">Build a form, theme it your way, and share a clean link.</h1>
-          <p className="lp-sub">A full survey and form builder you run yourself. Twenty-seven question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users.</p>
+          <p className="lp-sub">A full survey and form builder. Twenty-seven question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users.</p>
           {user ? (
             <div className="lp-cta-row"><button className="btn primary lg" onClick={()=>navigate("/dashboard")}>Go to dashboard</button></div>
           ) : (
@@ -2814,7 +2906,7 @@ function blankForm(kind){
 function normalizeForm(f){ return { ...f, theme: f.theme || blankForm().theme, schema:{ questions: (f.schema && f.schema.questions) || [], settings: (f.schema && f.schema.settings) || { randomizeQuestions:false } } }; }
 function ColorPick({ label, value, onChange }){
   return (<div><div className="label">{label}</div><div className="row" style={{gap:8}}>
-    <input type="color" value={value || "#5b4fe0"} onChange={(e)=>onChange(e.target.value)} style={{width:40,height:34,border:"1px solid var(--line-strong)",borderRadius:8,padding:2,background:"#fff",cursor:"pointer"}} />
+    <input type="color" value={value || "#5b4fe0"} onChange={(e)=>onChange(e.target.value)} style={{width:40,height:34,border:"1px solid var(--line-strong)",borderRadius:8,padding:2,background:"var(--card)",cursor:"pointer"}} />
     <input className="input mono" style={{width:96,fontSize:13}} value={value || ""} onChange={(e)=>onChange(e.target.value)} />
   </div></div>);
 }

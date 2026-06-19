@@ -260,3 +260,9 @@ When you add a question, the picker shows the common types first. Tap Advanced q
 ## Smoother reordering
 
 Dragging questions to reorder them is smoother now: the card you grab lifts and follows your pointer, the others glide aside to open a gap, and everything settles into place when you let go. It works with touch as well as a mouse.
+
+## Scheduling, in depth
+
+A meeting signup question now has its own full panel. You can choose the meeting type (one on one, group or seminar, collective where all hosts must be free, or round robin that rotates hosts), set spots per slot for group sessions, list your hosts, mark which calendars to sync (Google, Outlook, Office 365, Apple iCloud, Exchange), set buffers before and after, a daily cap, a minimum notice window, reminders by email or SMS, an after-meeting follow-up message, and a video provider (Zoom, Meet, Teams, or Webex). Because there is so much to a booking, a scheduling question gets its own page on the form, and so does a document signing question.
+
+On the booking page, visitors see times in their own time zone, slots inside your minimum notice window are hidden, and group sessions show how many spots are left. Connecting calendars, generating real video links, and sending reminders need those services linked to your account; everything is saved and ready for when they are.

@@ -509,3 +509,23 @@ The Add a question picker first shows a short list of common types defined in BA
 ## Drag and drop (pointer based)
 
 Reordering questions in the builder uses a pointer based drag rather than native HTML5 drag. On pointer down on the handle the card lifts and follows the pointer with no browser ghost image; the other cards slide open a gap with a transform transition to show where the card will land; on release the order is committed. A FLIP layout effect animates any remaining position changes, and it is suppressed for the commit frame so the cards settle without a jump. Touch is supported because the handle sets touch-action none. The drag computes the target index from the pointer position against the cards' midpoints, so varying card heights are handled.
+
+## Landing copy: no self-hosting claims
+
+The landing no longer describes the product as self-hosted. The Self-hosted value card became Private by default (no ads or third-party tracking), the data card now talks about exporting responses as CSV or PDF, the file uploads line dropped the storage bucket mention, the hero eyebrow reads Experience management simplified, and the hero subheading dropped you run yourself.
+
+## Themed dropdowns and color picker
+
+The root sets color-scheme (light on the default theme, dark on the dark theme) so native controls such as select option lists, date and time pickers, and scrollbars render in the active theme rather than always light. The color picker swatch wrapper uses the card background variable instead of a hardcoded white, so it sits correctly in dark mode. The custom menu popovers already used theme variables.
+
+## Scheduling and e-sign get their own page
+
+In the step builder (the non-conversational path), a scheduling question or a document sign question is forced onto its own page: a page boundary is inserted before and after it so it is never combined with other questions. Conversational mode already placed every question on its own step. This is why the booking and signing experiences each stand alone for the respondent.
+
+## Scheduling configuration
+
+The scheduling question now carries a full configuration set, edited from its dedicated left panel: meetingType (one_on_one, group, collective, round_robin); capacity (spots per slot for group or seminar); hosts (name and email list, used for collective and round robin); calendars (booleans for google, outlook, office365, icloud, exchange); bufferBefore and bufferAfter in minutes; dailyCap (max meetings per day); minNotice in hours; timezoneAuto; reminders (a list of {channel email or sms, value, unit minutes/hours/days}); followup ({enabled, message, link}); and video (none, zoom, meet, teams, webex). The make default seeds one host-less one on one with a 24 hour email reminder.
+
+On the booking page the renderer applies the parts that are computable in the browser: it shows times in the visitor's detected time zone when timezoneAuto is on, hides any slot that falls inside the minimum notice window, shows spots left and a Full state for group slots using the live booking counts, surfaces the chosen video provider and a Group session tag in the meeting card, and notes round robin or collective host matching. Slots are still entered manually.
+
+External pieces are configured but require connection to function: pulling busy times from Google, Outlook, Office 365, iCloud, or Exchange; generating real Zoom, Meet, Teams, or Webex links; and actually sending email or SMS reminders and follow-ups. These need the relevant accounts and credentials wired up on the backend; until then they are stored as settings and degrade gracefully (no link or message is sent, and availability is driven only by the manually entered slots). Buffer times, the daily cap, and round robin rotation are stored and intended to apply once calendar sync is connected.
