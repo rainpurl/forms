@@ -236,3 +236,27 @@ For multi-select multiple choice you can set a minimum and a maximum number of c
 ## Fields on a document
 
 For a document to sign that is an image, you can place fields exactly where they belong: pick a field and click the spot on the document. Placed fields appear right on the page for the signer; anything you do not place still shows in a list below.
+
+## Conjoint (choice based)
+
+Add a conjoint question to learn which combinations people prefer. Define a few attributes and their levels (for example Price with $10, $20, $30 and Brand with two names), choose how many tasks and how many options per task, and optionally add a None choice. Respondents pick their favorite bundle in each task, and the dashboard shows how often each level was chosen. There are now twenty-seven question types.
+
+## A None of the above choice
+
+For multi-select multiple choice you can add an exclusive None of the above choice. Picking it clears the others, and picking any normal choice clears it.
+
+## Seeing who was screened out
+
+When you use Disqualify (screen out) in skip logic, the dashboard now shows a Screen-outs card with how many people were screened out and what share that is, and the CSV export includes a disqualified column.
+
+## When responses came in
+
+On your dashboard, each form card shows when the latest response arrived in plain language: today, yesterday, or for example 4 days ago, up to 60 days, after which it shows the date.
+
+## Picking a question type
+
+When you add a question, the picker shows the common types first. Tap Advanced question types to reveal the specialized ones like conjoint, MaxDiff, hot spot, and document signing.
+
+## Smoother reordering
+
+Dragging questions to reorder them is smoother now: the card you grab lifts and follows your pointer, the others glide aside to open a gap, and everything settles into place when you let go. It works with touch as well as a mouse.

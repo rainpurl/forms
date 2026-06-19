@@ -332,14 +332,12 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .menu{animation:pop .15s ease both}
 .tab{transition:color .15s,border-color .15s}
 .form-scope .opt,.form-scope .nps button,.form-scope .stars .star,.form-scope .submit,.form-scope .rankrow{transition:all .14s ease}
-.qccard{transition:border-color .12s,box-shadow .12s,opacity .12s,transform .12s}
+.qccard,.blockcard,.pbreak{transition:border-color .12s,box-shadow .15s,transform .18s cubic-bezier(.2,.8,.2,1)}
 /* drag and drop */
 .drag-handle{cursor:grab;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 5px;border-radius:6px;user-select:none}
 .drag-handle:hover{background:var(--paper);color:var(--ink)}
 .drag-handle:active{cursor:grabbing}
-.qccard.dragging,.pbreak.dragging{opacity:.5;border:1px dashed var(--bo) !important;box-shadow:none !important}
-.qccard.over{box-shadow:0 -3px 0 0 var(--bo);border-color:var(--bo)}
-.pbreak.over{box-shadow:0 -3px 0 0 var(--bo)}
+.qccard.dragging,.blockcard.dragging,.pbreak.dragging{box-shadow:0 16px 36px rgba(0,0,0,.24);border-color:var(--bo);position:relative;z-index:40;cursor:grabbing}
 .form-scope .rankrow .rgrip{cursor:grab;color:var(--ink-soft);user-select:none;font-size:14px}
 .form-scope .rankrow .rgrip:active{cursor:grabbing}
 .form-scope .rankrow.dragging{opacity:.5}
@@ -365,6 +363,8 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .addq-item:hover{border-color:var(--bo);background:#f6f5ff}
 .addq-item .t{font-weight:600;font-size:14px}
 .addq-item .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.addq-adv-toggle{grid-column:1/-1;text-align:center;border:1px dashed var(--line-strong);background:transparent;border-radius:10px;padding:9px 12px;cursor:pointer;color:var(--ink-soft);font-size:13px;font-weight:600;transition:border-color .12s,color .12s}
+.addq-adv-toggle:hover{border-color:var(--bo);color:var(--ink)}
 @media(max-width:560px){.addq-grid{grid-template-columns:1fr}}
 /* trash */
 .trashbox{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
@@ -638,6 +638,17 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .doc-sig-mini{width:180px}
 .doc-place{position:relative;display:inline-block;max-width:100%;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;line-height:0}
 .doc-pin{position:absolute;transform:translate(-50%,-50%);background:var(--brand,#5b4fe0);color:#fff;font-size:11px;line-height:1.2;padding:2px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.3);max-width:140px;overflow:hidden;text-overflow:ellipsis}
+
+.cj-task{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+.cj-tasktitle{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:8px}
+.cj-scroll{overflow-x:auto}
+table.cj-table{border-collapse:collapse;width:100%}
+table.cj-table th.cj-attr{text-align:left;font-size:12px;color:var(--ink-soft);font-weight:600;padding:6px 10px 6px 0;white-space:nowrap;vertical-align:middle}
+table.cj-table td.cj-cell{border:1px solid var(--line);padding:8px 12px;text-align:center;font-size:14px;min-width:90px}
+table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
+.cj-choose{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 10px;border:1px solid var(--line-strong);border-radius:8px}
+.cj-choose.sel{border-color:var(--fa);box-shadow:0 0 0 1px var(--fa) inset}
+.cj-attr-edit{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -740,6 +751,19 @@ function fmtWhen(s){
   const d = new Date(s.replace(" ", "T") + (s.includes("Z") ? "" : "Z"));
   if (isNaN(d)) return s;
   return d.toLocaleDateString(undefined, { month:"short", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+}
+function fmtAgo(s){
+  if (!s) return "";
+  const d = new Date(s.replace(" ", "T") + (s.includes("Z") ? "" : "Z"));
+  if (isNaN(d)) return s;
+  const now = new Date();
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startThat = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const days = Math.round((startToday - startThat) / 86400000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days <= 60) return days + " days ago";
+  return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
 }
 function Spark(){
   return (<svg className="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2zM19 14l.8 2.7L22.5 17l-2.7.8L19 20.5l-.8-2.7L15.5 17l2.7-.8L19 14z"/></svg>);
@@ -1236,6 +1260,75 @@ function HotSpotControls({ q, update }){
   );
 }
 
+function ConjointRenderer({ q, value, onChange, error }){
+  const attrs = Array.isArray(q.attributes) ? q.attributes : [];
+  const tasks = Math.max(1, q.tasks || 3);
+  const per = Math.max(2, Math.min(4, q.profilesPerTask || 3));
+  const profiles = useMemo(()=>{
+    let seed = 0; const sid = String(q.id || "x"); for (let i = 0; i < sid.length; i++) seed = (seed * 31 + sid.charCodeAt(i)) & 0x7fffffff; if (!seed) seed = 1;
+    const rnd = ()=>{ seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+    const out = [];
+    for (let t = 0; t < tasks; t++){
+      const set = []; const seen = {}; let guard = 0; const canVary = attrs.some((a)=> (a.levels || []).length > 1);
+      while (set.length < per && guard < 80){
+        guard++;
+        const p = {}; attrs.forEach((a)=>{ const lv = (a.levels && a.levels.length) ? a.levels[Math.floor(rnd() * a.levels.length)] : ""; p[a.name] = lv; });
+        const k = attrs.map((a)=> p[a.name]).join("\u0001"); if (seen[k] && canVary){ continue; } seen[k] = true; set.push(p);
+      }
+      out.push(set);
+    }
+    return out;
+  }, [q.id, JSON.stringify(attrs), tasks, per]);
+  const val = Array.isArray(value) ? value : [];
+  const pick = (ti, p)=>{ const next = val.slice(); next[ti] = p; onChange(next); };
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      {attrs.length === 0 ? <div className="muted" style={{fontSize:13}}>Add attributes in the left panel.</div> :
+      profiles.map((set, ti)=>{
+        const chosen = val[ti];
+        return (<div key={ti} className="cj-task">
+          <div className="cj-tasktitle">Choice {ti + 1} of {profiles.length}</div>
+          <div className="cj-scroll"><table className="cj-table"><tbody>
+            {attrs.map((a)=>(<tr key={a.id}><th className="cj-attr">{a.name}</th>{set.map((p,pi)=>(<td key={pi} className="cj-cell">{p[a.name]}</td>))}{q.noneOption && <td className="cj-cell cj-none"></td>}</tr>))}
+            <tr><th className="cj-attr"></th>{set.map((p,pi)=>{ const sel = chosen && !chosen.none && attrs.every((a)=> chosen[a.name] === p[a.name]); return (<td key={pi} className="cj-pickcell"><label className={"cj-choose" + (sel ? " sel" : "")}><input type="radio" name={"cj-" + q.id + "-" + ti} checked={!!sel} onChange={()=>pick(ti, p)} /><span>Choose</span></label></td>); })}{q.noneOption && <td className="cj-pickcell"><label className={"cj-choose" + (chosen && chosen.none ? " sel" : "")}><input type="radio" name={"cj-" + q.id + "-" + ti} checked={!!(chosen && chosen.none)} onChange={()=>pick(ti, { none:true })} /><span>None</span></label></td>}</tr>
+          </tbody></table></div>
+        </div>);
+      })}
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+function ConjointControls({ q, update }){
+  const attrs = Array.isArray(q.attributes) ? q.attributes : [];
+  const setAttr = (id, patch)=> update({ attributes: attrs.map((a)=> a.id === id ? { ...a, ...patch } : a) });
+  const addAttr = ()=> update({ attributes: attrs.concat([{ id: uid(), name:"New attribute", levels:["Level 1","Level 2"] }]) });
+  const removeAttr = (id)=> update({ attributes: attrs.filter((a)=> a.id !== id) });
+  const setLevel = (aid, i, val)=>{ const a = attrs.find((x)=>x.id === aid); const lv = (a.levels||[]).slice(); lv[i] = val; setAttr(aid, { levels: lv }); };
+  const addLevel = (aid)=>{ const a = attrs.find((x)=>x.id === aid); setAttr(aid, { levels: (a.levels||[]).concat(["Level " + ((a.levels||[]).length + 1)]) }); };
+  const removeLevel = (aid, i)=>{ const a = attrs.find((x)=>x.id === aid); setAttr(aid, { levels: (a.levels||[]).filter((_,k)=>k !== i) }); };
+  return (<div>
+    <div className="panel-section">Attributes</div>
+    <div className="hint" style={{marginBottom:8}}>Each option is built from one level of every attribute.</div>
+    {attrs.map((a)=>(<div key={a.id} className="cj-attr-edit">
+      <div className="row" style={{gap:6}}><input className="input" value={a.name} onChange={(e)=>setAttr(a.id, { name:e.target.value })} /><button className="iconbtn" title="Remove attribute" disabled={attrs.length <= 1} onClick={()=>removeAttr(a.id)}>\u00d7</button></div>
+      <div className="label" style={{margin:"6px 0 4px"}}>Levels</div>
+      {(a.levels||[]).map((lv,i)=>(<div key={i} className="row" style={{gap:6,marginBottom:4}}><input className="input" value={lv} onChange={(e)=>setLevel(a.id, i, e.target.value)} /><button className="iconbtn" title="Remove level" disabled={(a.levels||[]).length <= 1} onClick={()=>removeLevel(a.id, i)}>\u00d7</button></div>))}
+      <button className="btn sm ghost" onClick={()=>addLevel(a.id)}>+ Add level</button>
+    </div>))}
+    <button className="btn sm" style={{marginTop:8}} onClick={addAttr} disabled={attrs.length >= 5}>+ Add attribute</button>
+    <div className="panel-section">Choice tasks</div>
+    <div className="row" style={{gap:10}}>
+      <Field label="Number of tasks" style={{flex:1}}><input className="input" type="number" min="1" max="12" value={q.tasks || 3} onChange={(e)=>update({ tasks: Math.max(1, Math.min(12, parseInt(e.target.value || "3", 10))) })} /></Field>
+      <Field label="Options per task" style={{flex:1}}><input className="input" type="number" min="2" max="4" value={q.profilesPerTask || 3} onChange={(e)=>update({ profilesPerTask: Math.max(2, Math.min(4, parseInt(e.target.value || "3", 10))) })} /></Field>
+    </div>
+    <Toggle checked={!!q.noneOption} onChange={(c)=>update({ noneOption:c })} label="Include a None option" />
+    <div className="panel-section">Response requirements</div>
+    <Toggle checked={!!q.required} onChange={(c)=>update({ required:c })} label="Force response" />
+    <div style={{height:8}}></div>
+    <Toggle checked={!!q.request} onChange={(c)=>update({ request:c })} label="Request response" />
+  </div>);
+}
 function MaxDiffRenderer({ q, value, onChange, error }){
   const ans = value && typeof value === "object" ? value : {};
   const set = (kind, item) => {
@@ -1351,11 +1444,12 @@ const QTYPES = {
     label: "Multiple choice",
     hint: "Single, multi-select, or dropdown",
     isInput: true,
-    make: () => ({ type:"multiple_choice", id: uid(), label:"Untitled question", required:false, request:false, multi:false, display:"list", options:["Option 1","Option 2"], randomize:false, allowOther:false, otherLabel:"Other", minSel:0, maxSel:0 }),
+    make: () => ({ type:"multiple_choice", id: uid(), label:"Untitled question", required:false, request:false, multi:false, display:"list", options:["Option 1","Option 2"], randomize:false, allowOther:false, otherLabel:"Other", minSel:0, maxSel:0, noneOption:false, noneLabel:"None of the above" }),
     summary: (q) => q.options.length + " options, " + (q.display === "dropdown" ? "dropdown" : (q.multi ? "multiple answers" : "one answer")),
     validate: (q, v) => {
       const arr = Array.isArray(v) ? v : [];
       if (q.multi){
+        if (q.noneOption && arr.includes(q.noneLabel || "None of the above")) return null;
         if (q.maxSel && arr.length > q.maxSel) return "Please select no more than " + q.maxSel + ".";
         if ((q.required || arr.length > 0) && q.minSel && arr.length < q.minSel) return "Please select at least " + q.minSel + ".";
         if (q.required && !arr.length) return "Please select at least one option.";
@@ -1411,10 +1505,12 @@ const QTYPES = {
       }
       const multi = !!q.multi;
       const arr = Array.isArray(value) ? value : [];
+      const noneLbl = q.noneLabel || "None of the above";
       const toggle = (o) => {
-        if (multi){ const next = arr.includes(o) ? arr.filter(x=>x!==o) : arr.concat([o]); if (q.maxSel && next.length > q.maxSel && !arr.includes(o)) return; onChange(next); }
+        if (multi){ let next = arr.includes(o) ? arr.filter(x=>x!==o) : arr.concat([o]); next = next.filter((x)=> x !== noneLbl); if (q.maxSel && next.length > q.maxSel && !arr.includes(o)) return; onChange(next); }
         else onChange(o);
       };
+      const toggleNone = () => onChange(arr.includes(noneLbl) ? [] : [noneLbl]);
       const otherSel = !!q.allowOther && !multi && (value != null) && !opts.includes(value);
       return (
         <div className="q">
@@ -1430,6 +1526,7 @@ const QTYPES = {
             );
           })}
           {q.allowOther && !multi && (<><label className={"opt" + (otherSel ? " sel" : "")}><input type="radio" checked={otherSel} onChange={()=>onChange("")} /><span>{q.otherLabel || "Other"}</span></label>{otherSel && <input className="finput" style={{marginTop:8}} placeholder="Please specify" value={value || ""} onChange={(e)=>onChange(e.target.value)} />}</>)}
+          {q.noneOption && multi && (<label className={"opt" + (arr.includes(noneLbl) ? " sel" : "")}><input type="checkbox" checked={arr.includes(noneLbl)} onChange={toggleNone} /><span>{noneLbl}</span></label>)}
           {error && <div className="ferr">{error}</div>}
         </div>
       );
@@ -1808,6 +1905,15 @@ const QTYPES = {
     validate: (q, v) => { if (!q.required) return null; if (!v || !v.best || !v.worst) return "Please pick a best and a worst."; if (v.best === v.worst) return "Best and worst must be different."; return null; },
     Renderer: MaxDiffRenderer,
   },
+  conjoint: {
+    label: "Conjoint (choice based)",
+    hint: "Compare option bundles across attributes",
+    isInput: true,
+    make: () => ({ type:"conjoint", id: uid(), label:"Which option do you prefer?", required:false, request:false, attributes:[{ id: uid(), name:"Price", levels:["$10","$20","$30"] }, { id: uid(), name:"Brand", levels:["Acme","Globex"] }], tasks:3, profilesPerTask:3, noneOption:false }),
+    summary: (q) => ((q.attributes||[]).length) + " attributes, " + (q.tasks||3) + " choice tasks",
+    validate: (q, v) => { if (!q.required) return null; const t = Math.max(1, q.tasks || 3); if (!Array.isArray(v) || v.filter(Boolean).length < t) return "Please make a choice in each task."; return null; },
+    Renderer: ConjointRenderer,
+  },
   constant_sum: {
     label: "Constant sum",
     hint: "Numbers that must add to a total",
@@ -1936,7 +2042,8 @@ const QTYPES = {
     Renderer: () => null,
   },
 };
-const QTYPE_ORDER = ["multiple_choice","image_choice","hot_spot","text_entry","number_entry","matrix","side_by_side","rank_order","maxdiff","constant_sum","form_field","drill_down","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","embed","block","hidden_field","page_break"];
+const QTYPE_ORDER = ["multiple_choice","image_choice","hot_spot","text_entry","number_entry","matrix","side_by_side","rank_order","maxdiff","conjoint","constant_sum","form_field","drill_down","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","embed","block","hidden_field","page_break"];
+const BASIC_TYPES = ["multiple_choice","text_entry","number_entry","nps","star_rating","matrix","date","rank_order","file_upload","page_break","block","text_graphic"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -2427,7 +2534,7 @@ function Landing({ showLogin }){
   const google = ()=>{ window.location.href = "/api/auth/google/start"; };
 
   const features = [
-    { icon:"list", title:"Twenty-six question types", desc:"Multiple choice, matrix, rank order, sliders, NPS, ratings, drill downs, file uploads, and more, in one builder." },
+    { icon:"list", title:"Twenty-seven question types", desc:"Multiple choice, matrix, rank order, sliders, NPS, ratings, drill downs, file uploads, and more, in one builder." },
     { icon:"branch", title:"Logic and branching", desc:"Show or skip questions based on earlier answers, and pipe those answers into later questions and text." },
     { icon:"target", title:"Scoring and quizzes", desc:"Give choices point values, show a score on the thank-you screen, and see results in analytics and exports." },
     { icon:"calendar", title:"Meeting scheduling", desc:"Offer time slots with capacity limits so people can book a time without leaving your form." },
@@ -2468,7 +2575,7 @@ function Landing({ showLogin }){
         <div className="lp-hero-text">
           <div className="lp-eyebrow">Experience management, self-hosted</div>
           <h1 className="lp-h1">Build a form, theme it your way, and share a clean link.</h1>
-          <p className="lp-sub">A full survey and form builder you run yourself. Twenty-six question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users.</p>
+          <p className="lp-sub">A full survey and form builder you run yourself. Twenty-seven question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users.</p>
           {user ? (
             <div className="lp-cta-row"><button className="btn primary lg" onClick={()=>navigate("/dashboard")}>Go to dashboard</button></div>
           ) : (
@@ -2502,7 +2609,7 @@ function Landing({ showLogin }){
       </section>
 
       <section className="lp-section lp-types-sec">
-        <h2 className="lp-h2">Twenty-six question types</h2>
+        <h2 className="lp-h2">Twenty-seven question types</h2>
         <p className="lp-lead">Mix and match in any form.</p>
         <div className="lp-chips">{types.map((t,i)=><span key={i} className="lp-chip">{t}</span>)}</div>
       </section>
@@ -2686,7 +2793,7 @@ function Dashboard(){
                   <div className="fc-top"><span className={"badge "+(f.is_open?"open":"closed")}>{f.is_open?"Open":"Closed"}</span>{f.kind && <span className="kind-badge">{f.kind==="schedule"?"Scheduler":f.kind==="esign"?"E-sign":""}</span>}<span className="fc-count">{f.responses} {f.responses===1?"response":"responses"}</span></div>
                   <div className="fc-title">{f.title || "Untitled form"}</div>
                   <div className="fc-meta">{f.username === "admin" ? "/"+f.slug : "/"+f.username+"/"+f.slug}</div>
-                  <div className="fc-foot">{f.last_response ? ("Latest response on " + fmtWhen(f.last_response)) : "No responses yet"}</div>
+                  <div className="fc-foot">{f.last_response ? ("Last response " + fmtAgo(f.last_response)) : "No responses yet"}</div>
                 </button>
               ))}
             </div>
@@ -2773,18 +2880,10 @@ function NpsPrev({ q }){
 
 function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, onDown, dnd, cardRef }){
   const [menu, setMenu] = useState(false);
-  const handle = {
-    draggable: true,
-    onDragStart: (e)=>{ e.stopPropagation(); dnd.start(index); try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(index)); } catch (_) {} },
-    onDragEnd: ()=>dnd.end(),
-  };
-  const dropProps = {
-    onDragOver: (e)=>{ e.preventDefault(); dnd.over_(index); },
-    onDrop: (e)=>{ e.preventDefault(); dnd.drop(index); },
-  };
+  const handle = { onPointerDown: (e)=>dnd.beginDrag(e, index) };
   if (q.type === "block"){
     return (
-      <div ref={cardRef} className={"blockcard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
+      <div ref={cardRef} className={"blockcard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect}>
         <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
         <div className="blockcard-body">
           <div className="blockcard-tag">Section</div>
@@ -2797,7 +2896,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
   }
   if (q.type === "page_break"){
     return (
-      <div ref={cardRef} className={"pbreak" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
+      <div ref={cardRef} className={"pbreak" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect}>
         <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
         <span className="pbreak-line"></span>
         <span className="pbreak-label">Page break</span>
@@ -2808,7 +2907,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
   }
   if (q.type === "hidden_field"){
     return (
-      <div ref={cardRef} className={"qccard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
+      <div ref={cardRef} className={"qccard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect}>
         <div className="qcc-head">
           <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
           <span className="qcc-num">Q{index + 1}</span>
@@ -2824,7 +2923,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
     );
   }
   return (
-    <div ref={cardRef} className={"qccard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
+    <div ref={cardRef} className={"qccard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect}>
       <div className="qcc-head">
         <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
         <span className="qcc-num">Q{index + 1}</span>
@@ -2870,6 +2969,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         {q.type === "document_sign" && <div className="wq-prev-input">{q.document ? ("Document attached · " + ((q.fields&&q.fields.length)||0) + " field" + (((q.fields&&q.fields.length)||0)===1?"":"s")) : "Upload a document in the left panel"}</div>}
         {q.type === "side_by_side" && <div className="wq-prev-input">{(((q.rows&&q.rows.length)||0) + " items × " + ((q.columns&&q.columns.length)||0) + " columns")}</div>}
         {q.type === "maxdiff" && <div className="wq-prev-input">{(((q.items&&q.items.length)||0) + " items, pick best and worst")}</div>}
+        {q.type === "conjoint" && <div className="wq-prev-input">{(((q.attributes&&q.attributes.length)||0) + " attributes, " + (q.tasks||3) + " choice tasks")}</div>}
         {q.type === "hot_spot" && <div className="wq-prev-input">{q.image ? "Image set · people click a point" : "Upload an image in the left panel"}</div>}
         {q.type === "file_upload" && <div className="wq-prev-input">{(q.accept ? ("Accepts: " + q.accept) : "Any file type") + (q.multiple ? " · multiple" : "")}</div>}
         {q.type === "image_choice" && <div className="wq-prev-input">{((q.options&&q.options.length)||0) + " image choice" + (((q.options&&q.options.length)||0)===1?"":"s")}</div>}
@@ -2896,6 +2996,7 @@ function MCControls({ q, update, scoring }){
       <label className="opt-radio"><input type="radio" name={"at-" + q.id} checked={!q.multi} onChange={()=>update({multi:false})} /><span>Allow one answer</span></label>
       <label className={"opt-radio" + (dropdown ? " disabled" : "")}><input type="radio" name={"at-" + q.id} checked={!!q.multi} disabled={dropdown} onChange={()=>update({multi:true, display:"list"})} /><span>Allow multiple answers</span></label>
       {q.multi && (<div className="row" style={{gap:10,marginTop:8}}><Field label="Min choices (0 = none)" style={{flex:1}}><input className="input" type="number" min="0" value={q.minSel || 0} onChange={(e)=>update({minSel: parseInt(e.target.value||"0",10)})} /></Field><Field label="Max choices (0 = none)" style={{flex:1}}><input className="input" type="number" min="0" value={q.maxSel || 0} onChange={(e)=>update({maxSel: parseInt(e.target.value||"0",10)})} /></Field></div>)}
+      {q.multi && (<><div style={{height:8}}></div><Toggle checked={!!q.noneOption} onChange={(c)=>update({noneOption:c})} label="Add an exclusive None of the above choice" />{q.noneOption && <Field label="Exclusive choice label"><input className="input" value={q.noneLabel || ""} onChange={(e)=>update({noneLabel:e.target.value})} placeholder="None of the above" /></Field>}</>)}
       <div className="panel-section">Choices</div>
       <div className="label">Number of choices</div>
       <div className="stepper">
@@ -3250,6 +3351,7 @@ function LeftEditor({ q, update, questions, setQuestions, scoring, experiment })
       {q.type === "matrix" && <MatrixControls q={q} update={update} />}
       {q.type === "side_by_side" && <SbsControls q={q} update={update} />}
       {q.type === "maxdiff" && <MaxDiffControls q={q} update={update} />}
+      {q.type === "conjoint" && <ConjointControls q={q} update={update} />}
       {q.type === "hot_spot" && <HotSpotControls q={q} update={update} />}
       {q.type === "rank_order" && <RankControls q={q} update={update} />}
       {q.type === "constant_sum" && <ConstantSumControls q={q} update={update} />}
@@ -3425,6 +3527,7 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
 
 function AddQuestionMenu({ onAdd }){
   const [open, setOpen] = useState(false);
+  const [adv, setAdv] = useState(false);
   return (
     <div className="addq" onClick={(e)=>e.stopPropagation()}>
       <button className="btn primary" onClick={()=>setOpen(true)}>+ Add new question</button>
@@ -3436,7 +3539,14 @@ function AddQuestionMenu({ onAdd }){
               <button className="iconbtn" onClick={()=>setOpen(false)} title="Close">×</button>
             </div>
             <div className="addq-grid">
-              {QTYPE_ORDER.map((t)=>(
+              {BASIC_TYPES.filter((t)=>QTYPES[t]).map((t)=>(
+                <button key={t} className="addq-item" onClick={()=>{ onAdd(t); setOpen(false); }}>
+                  <div className="t">{QTYPES[t].label}</div>
+                  <div className="h">{QTYPES[t].hint}</div>
+                </button>
+              ))}
+              <button className="addq-adv-toggle" onClick={()=>setAdv((a)=>!a)}>{adv ? "▾" : "▸"} Advanced question types</button>
+              {adv && QTYPE_ORDER.filter((t)=>!BASIC_TYPES.includes(t)).map((t)=>(
                 <button key={t} className="addq-item" onClick={()=>{ onAdd(t); setOpen(false); }}>
                   <div className="t">{QTYPES[t].label}</div>
                   <div className="h">{QTYPES[t].hint}</div>
@@ -3466,6 +3576,39 @@ const FORM_TEMPLATES = [
       const ff = QTYPES.form_field.make(); ff.label = "Your details"; ff.fields = ["Name","Email"];
       const d = QTYPES.date.make(); d.label = "Which date works best for you?";
       return { title:"Event RSVP", description:"Let us know if you can join.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[mc, ff, d], settings:{} }, is_open:true };
+  }},
+  { key:"application", name:"Job application", desc:"Contact details, resume upload, and a cover note", build:()=>{
+      const ff = QTYPES.form_field.make(); ff.label = "Your details"; ff.fields = ["Full name","Email","Phone"];
+      const file = QTYPES.file_upload.make(); file.label = "Upload your resume"; file.accept = ".pdf,.doc,.docx";
+      const txt = QTYPES.text_entry.make(); txt.label = "Why are you a good fit?"; txt.mode = "long";
+      return { title:"Job application", description:"Tell us about yourself and attach your resume.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[ff, file, txt], settings:{} }, is_open:true };
+  }},
+  { key:"registration", name:"Event registration", desc:"Ticket type, guest count, and contact", build:()=>{
+      const ff = QTYPES.form_field.make(); ff.label = "Attendee"; ff.fields = ["Name","Email"];
+      const mc = QTYPES.multiple_choice.make(); mc.label = "Ticket type"; mc.options = ["General","VIP","Student"];
+      const num = QTYPES.number_entry.make(); num.label = "Number of guests"; num.min = 1; num.max = 10;
+      return { title:"Event registration", description:"Reserve your spot.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[ff, mc, num], settings:{} }, is_open:true };
+  }},
+  { key:"nps", name:"NPS survey", desc:"One recommendation score and a reason", build:()=>{
+      const nps = QTYPES.nps.make(); nps.label = "How likely are you to recommend us?";
+      const txt = QTYPES.text_entry.make(); txt.label = "What is the main reason for your score?"; txt.mode = "long";
+      return { title:"Net promoter score", description:"A quick two question survey.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[nps, txt], settings:{} }, is_open:true };
+  }},
+  { key:"lead", name:"Lead capture", desc:"Name, work email, company, and interest", build:()=>{
+      const ff = QTYPES.form_field.make(); ff.label = "Get in touch"; ff.fields = ["Name","Work email","Company"];
+      const mc = QTYPES.multiple_choice.make(); mc.label = "What are you interested in?"; mc.options = ["A demo","Pricing","A partnership","Just browsing"];
+      return { title:"Talk to our team", description:"We will follow up shortly.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[ff, mc], settings:{} }, is_open:true };
+  }},
+  { key:"quiz", name:"Scored quiz", desc:"Multiple choice with points and a final score", build:()=>{
+      const q1 = QTYPES.multiple_choice.make(); q1.label = "What is the capital of France?"; q1.options = ["Paris","London","Berlin"]; q1.points = { "Paris": 1 };
+      const q2 = QTYPES.multiple_choice.make(); q2.label = "What is 2 + 2?"; q2.options = ["3","4","5"]; q2.points = { "4": 1 };
+      return { title:"Quick quiz", description:"Test your knowledge.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[q1, q2], settings:{ scoring:true, showScore:true } }, is_open:true };
+  }},
+  { key:"csat", name:"Support satisfaction", desc:"Star rating, resolution, and a comment", build:()=>{
+      const star = QTYPES.star_rating.make(); star.label = "How would you rate the support you received?";
+      const mc = QTYPES.multiple_choice.make(); mc.label = "Was your issue resolved?"; mc.options = ["Yes","Partly","No"];
+      const txt = QTYPES.text_entry.make(); txt.label = "Anything else you would like to share?"; txt.mode = "long";
+      return { title:"How did we do?", description:"Your feedback helps us improve.", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[star, mc, txt], settings:{} }, is_open:true };
   }},
   { key:"poll", name:"Quick poll", desc:"A single multiple choice question", build:()=>{
       const mc = QTYPES.multiple_choice.make(); mc.label = "Which option do you prefer?"; mc.options = ["Option A","Option B","Option C"];
@@ -3533,6 +3676,8 @@ function Builder({ formId }){
   const [dragIdx, setDragIdx] = useState(null);
   const [overIdx, setOverIdx] = useState(null);
   const [dragId, setDragId] = useState(null);
+  const dragSess = useRef(null);
+  const suppressFlip = useRef(false);
   const [chooser, setChooser] = useState(isNew);
   const [share, setShare] = useState(null);
 
@@ -3549,6 +3694,7 @@ function Builder({ formId }){
   const flipSig = form ? (form.schema.questions || []).map((q)=>q.id).join(",") : "";
   useLayoutEffect(()=>{
     const refs = cardRefs.current;
+    if (suppressFlip.current){ suppressFlip.current = false; const n = {}; Object.keys(refs).forEach((qid)=>{ const el = refs[qid]; if (el) n[qid] = el.getBoundingClientRect(); }); prevRects.current = n; return; }
     Object.keys(refs).forEach((qid)=>{
       const el = refs[qid]; if (!el) return;
       const prev = prevRects.current[qid];
@@ -3583,8 +3729,41 @@ function Builder({ formId }){
   const moveQ = (i, dir)=>{ const qs = questions.slice(); const j = i + dir; if (j < 0 || j >= qs.length) return; const t = qs[i]; qs[i] = qs[j]; qs[j] = t; setQuestions(qs); };
   const dupQ = (qid)=>{ const qs = questions.slice(); const idx = qs.findIndex((q)=>q.id === qid); const copy = { ...qs[idx], id: uid() }; qs.splice(idx + 1, 0, copy); setQuestions(qs); setSel(copy.id); };
   const reorder = (from, to)=>{ if (from === null || from === to) return; const qs = questions.slice(); const [m] = qs.splice(from, 1); qs.splice(to, 0, m); setQuestions(qs); };
-  const moveById = (j)=>{ setQuestions((prev)=>{ const from = prev.findIndex((q)=>q.id === dragId); if (from === -1 || from === j) return prev; const a = prev.slice(); const [m] = a.splice(from, 1); a.splice(j, 0, m); return a; }); };
-  const dnd = { draggingId: dragId, start: (i)=>setDragId(questions[i] ? questions[i].id : null), over_: (j)=>{ if (dragId != null) moveById(j); }, drop: ()=>setDragId(null), end: ()=>setDragId(null) };
+  const applyShifts = (D, dropTo)=>{
+    const H = D.height;
+    D.list.forEach((q, i)=>{ if (i === D.fromIdx) return; const el = cardRefs.current[q.id]; if (!el) return;
+      const removeUp = (i > D.fromIdx) ? -H : 0; const eff = (i < D.fromIdx) ? i : i - 1; const insertDown = (eff >= dropTo) ? H : 0; const sh = removeUp + insertDown;
+      el.style.transform = sh ? ("translateY(" + sh + "px)") : ""; });
+  };
+  const onDragMove = (e)=>{
+    const D = dragSess.current; if (!D) return;
+    const py = e.touches ? e.touches[0].clientY : e.clientY;
+    const el = cardRefs.current[D.id]; if (el) el.style.transform = "translateY(" + (py - D.grabDy - D.fromTop) + "px)";
+    const dc = py - D.grabDy + D.height / 2;
+    let above = 0; for (let i = 0; i < D.centers.length; i++){ if (i === D.fromIdx) continue; if (D.centers[i] < dc) above++; }
+    if (above !== D.dropTo){ D.dropTo = above; applyShifts(D, above); }
+  };
+  const onDragUp = ()=>{
+    const D = dragSess.current;
+    window.removeEventListener("pointermove", onDragMove); window.removeEventListener("pointerup", onDragUp);
+    if (!D) return;
+    D.list.forEach((q)=>{ const el = cardRefs.current[q.id]; if (el){ el.style.transition = "none"; el.style.transform = ""; } });
+    suppressFlip.current = true; dragSess.current = null; setDragId(null);
+    reorder(D.fromIdx, D.dropTo);
+    requestAnimationFrame(()=>{ D.list.forEach((q)=>{ const el = cardRefs.current[q.id]; if (el) el.style.transition = ""; }); });
+  };
+  const beginDrag = (e, index)=>{
+    if (e.button != null && e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    const list = questions;
+    const centers = list.map((q)=>{ const el = cardRefs.current[q.id]; if (!el) return 0; const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
+    const el0 = cardRefs.current[list[index].id]; const r0 = el0 ? el0.getBoundingClientRect() : { top:0, height:0 };
+    if (el0) el0.style.transition = "none";
+    dragSess.current = { id: list[index].id, fromIdx: index, dropTo: index, grabDy: e.clientY - r0.top, fromTop: r0.top, height: r0.height, centers, list };
+    setDragId(list[index].id);
+    window.addEventListener("pointermove", onDragMove); window.addEventListener("pointerup", onDragUp);
+  };
+  const dnd = { draggingId: dragId, beginDrag };
 
   const del = ()=>{ if (!id) return; if (!window.confirm("Delete this form and all its responses? This cannot be undone.")) return; api.deleteForm(id).then(()=>{ toast("Form deleted"); navigate("/dashboard"); }); };
 
@@ -3804,6 +3983,14 @@ function statLines(q, rows){
   const vals = rows.map((r)=>r.data[q.id]).filter((v)=> v !== undefined && v !== null && v !== "");
   const title = q.label || q.id;
   const type = QTYPES[q.type].label + " · " + vals.length + " answered";
+  if (q.type === "conjoint"){
+    const attrs = q.attributes || [];
+    const counts = {};
+    rows.forEach((r)=>{ const v = r.data[q.id]; if (!Array.isArray(v)) return; v.forEach((c)=>{ if (!c || c.none) return; attrs.forEach((a)=>{ const lv = c[a.name]; if (lv == null) return; counts[a.name] = counts[a.name] || {}; counts[a.name][lv] = (counts[a.name][lv] || 0) + 1; }); }); });
+    const bars = []; attrs.forEach((a)=>{ (a.levels||[]).forEach((lv)=>{ bars.push({ k: a.name + ": " + lv, v: (counts[a.name] && counts[a.name][lv]) || 0 }); }); });
+    const lines = attrs.map((a)=>{ const lc = counts[a.name] || {}; const top = Object.entries(lc).sort((x,y)=>y[1]-x[1])[0]; return a.name + ": " + (top ? (top[0] + " (" + top[1] + ")") : "no data"); });
+    return { title, type, bars, lines };
+  }
   if (q.type === "maxdiff"){
     const sc = {}; (q.items||[]).forEach((it)=>{ sc[it] = { b:0, w:0 }; });
     rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object"){ if (o.best && sc[o.best]) sc[o.best].b++; if (o.worst && sc[o.worst]) sc[o.worst].w++; } });
@@ -4179,6 +4366,16 @@ function QuestionStat({ q, rows }){
     </div>
   );
 
+  if (q.type === "conjoint"){
+    const attrs = q.attributes || [];
+    const counts = {}; let totalChosen = 0, noneCount = 0;
+    rows.forEach((r)=>{ const v = r.data[q.id]; if (!Array.isArray(v)) return; v.forEach((c)=>{ if (!c) return; if (c.none){ noneCount++; return; } totalChosen++; attrs.forEach((a)=>{ const lv = c[a.name]; if (lv == null) return; counts[a.name] = counts[a.name] || {}; counts[a.name][lv] = (counts[a.name][lv] || 0) + 1; }); }); });
+    return (<div className="card pad-lg">{head(totalChosen + " choices" + (noneCount ? (" · " + noneCount + " none") : ""))}
+      {attrs.length ? attrs.map((a)=>{ const lc = counts[a.name] || {}; const entries = (a.levels||[]).map((lv)=>({ k: lv, v: lc[lv] || 0 })); const mx = Math.max(1, ...entries.map((e)=>e.v)); return (<div key={a.id} style={{marginTop:10}}><div className="label" style={{marginBottom:4,fontSize:12}}>{a.name}</div>{entries.map((e,i)=>(<div className="bar-row" key={i}><span className="k">{e.k}</span><span className="track2"><span className="fill" style={{width:((e.v / mx) * 100) + "%"}}></span></span><span className="v">{e.v}</span></div>))}</div>); }) : <div className="muted" style={{fontSize:13}}>No attributes.</div>}
+      <div className="hint" style={{marginTop:8}}>Times each level appeared in a chosen option.</div>
+    </div>);
+  }
+
   if (q.type === "multiple_choice"){
     const counts = {}; q.options.forEach((o)=>counts[o] = 0);
     rows.forEach((r)=>{ const v = r.data[q.id]; if (Array.isArray(v)) v.forEach((o)=>{ counts[o] = (counts[o] || 0) + 1; }); else if (v) counts[v] = (counts[v] || 0) + 1; });
@@ -4356,6 +4553,7 @@ function AnalyticsTab({ id, form }){
       <ExportButtons id={id} form={form} rows={rows} />
       {(()=>{ const sc = rows.filter((r)=> r.meta && typeof r.meta.score === "number"); if (!sc.length) return null; const avg = sc.reduce((a,r)=> a + r.meta.score, 0) / sc.length; const mx = sc.reduce((a,r)=> Math.max(a, r.meta.maxScore || 0), 0); const best = sc.reduce((a,r)=> Math.max(a, r.meta.score), -Infinity); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>Quiz scores</div><div className="statgrid"><div><div className="bignum">{Math.round(avg * 100) / 100}{mx ? (" / " + mx) : ""}</div><div className="hint">Average</div></div><div><div className="bignum">{best}</div><div className="hint">Highest</div></div><div><div className="bignum">{sc.length}</div><div className="hint">Scored</div></div></div></div>); })()}
       {(()=>{ const st = (form.schema && form.schema.settings) || {}; if (!st.experiment) return null; const c = {}; rows.forEach((r)=>{ const v = (r.meta && r.meta.variant) || "Unassigned"; c[v] = (c[v] || 0) + 1; }); const entries = Object.entries(c).sort((a,b)=> a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0)); const mx = Math.max(1, ...entries.map((e)=>e[1])); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>A/B variants</div>{entries.map(([k,n],i)=>(<div className="bar-row" key={i}><span className="k">{k === "Unassigned" ? k : ("Variant " + k)}</span><span className="track2"><span className="fill" style={{width:((n / mx) * 100) + "%"}}></span></span><span className="v">{n}</span></div>))}<div className="hint" style={{marginTop:8}}>How responses split across variants.</div></div>); })()}
+      {(()=>{ const dq = rows.filter((r)=> r.meta && r.meta.disqualified).length; if (!dq) return null; const total = rows.length || 1; return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>Screen-outs</div><div className="statgrid"><div><div className="bignum">{dq}</div><div className="hint">Disqualified</div></div><div><div className="bignum">{Math.round((dq / total) * 100)}%</div><div className="hint">Of responses</div></div></div></div>); })()}
       <div className="card pad-lg"><div className="label">Total responses</div><div style={{fontFamily:"var(--display)",fontSize:46,fontWeight:600,lineHeight:1}}>{a.total || 0}</div></div>
       {tone && <ToneCard tone={tone} />}
       {inputQs.length > 0 && <div className="label" style={{marginTop:4}}>Question breakdown</div>}

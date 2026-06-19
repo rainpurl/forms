@@ -593,10 +593,13 @@ async function exportCsv(user, id, env) {
     "SELECT id, data, meta, created_at FROM responses WHERE form_id = ? ORDER BY created_at ASC"
   ).bind(id).all();
 
+  const anyDisq = (results || []).some((r) => { const m = safeParse(r.meta, {}); return m.disqualified === true; });
+
   const header = ["response_id", "submitted_at", "country", "city", "region", "browser", "os"];
   questions.forEach((q) => header.push(q.exportKey || q.label || q.heading || q.id));
   if (scoring) { header.push("score"); header.push("max_score"); }
   if (experiment) header.push("variant");
+  if (anyDisq) header.push("disqualified");
 
   const lines = [header.map(csvCell).join(",")];
   for (const r of (results || [])) {
@@ -609,6 +612,7 @@ async function exportCsv(user, id, env) {
     questions.forEach((q) => row.push(formatAnswer(data[q.id])));
     if (scoring) { row.push(meta.score != null ? meta.score : ""); row.push(meta.maxScore != null ? meta.maxScore : ""); }
     if (experiment) row.push(meta.variant || "");
+    if (anyDisq) row.push(meta.disqualified ? "yes" : "no");
     lines.push(row.map(csvCell).join(","));
   }
 
