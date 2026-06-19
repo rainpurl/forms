@@ -487,6 +487,17 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .filelist{margin-top:10px;display:flex;flex-direction:column;gap:6px}
 .fileitem{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
 .fileitem .filename{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.blockcard{display:flex;align-items:flex-start;gap:10px;background:linear-gradient(180deg,var(--hover),var(--card));border:1px solid var(--bo);border-left:3px solid var(--bo);border-radius:12px;padding:12px 14px;margin:20px 0 6px;cursor:pointer}
+.blockcard.sel{box-shadow:0 0 0 2px rgba(91,79,224,.2)}
+.blockcard.dragging{opacity:.5}
+.blockcard-body{flex:1;min-width:0}
+.blockcard-tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--bo);font-weight:700;margin-bottom:4px}
+.blockcard-title{width:100%;border:0;background:none;font-family:var(--display);font-size:18px;font-weight:600;color:var(--ink);outline:none;padding:1px 0}
+.blockcard-desc{width:100%;border:0;background:none;font-size:13px;color:var(--ink-soft);outline:none;padding:2px 0;margin-top:2px}
+.form-scope .form-section{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.form-scope .form-section-title{font-size:21px;font-weight:600;font-family:inherit;color:var(--ink)}
+.form-scope .form-section-desc{font-size:14px;color:var(--ink-soft);margin-top:4px;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -1296,6 +1307,15 @@ const QTYPES = {
       );
     },
   },
+  block: {
+    label: "Section",
+    hint: "Start a new titled section on its own page",
+    isInput: false,
+    make: () => ({ type:"block", id: uid(), title:"New section", description:"" }),
+    summary: (q) => q.title || "section",
+    validate: () => null,
+    Renderer: () => null,
+  },
   page_break: {
     label: "Page break",
     hint: "Start a new page in the form",
@@ -1315,7 +1335,7 @@ const QTYPES = {
     Renderer: () => null,
   },
 };
-const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","hidden_field","page_break"];
+const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","block","hidden_field","page_break"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -1383,20 +1403,34 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
   const settings = form.schema.settings || {};
   const conversational = !!settings.conversational;
   const startRef = useRef(Date.now());
+  const blockSig = questions.filter((q)=> q.type === "block").map((q)=> q.id + ":" + (q.title || "") + ":" + (q.description || "")).join("|");
   const steps = useMemo(()=>{
     const real = questions.filter((q)=> q.type !== "hidden_field");
-    if (conversational){
-      const items = real.filter((q)=> q.type !== "page_break");
-      const list = settings.randomizeQuestions ? shuffle(items) : items;
-      const out = list.map((q)=>[q]);
-      return out.length ? out : [[]];
+    const blocks = []; let curB = { title:"", desc:"", items:[] };
+    for (const q of real){
+      if (q.type === "block"){ if (curB.items.length || curB.title || curB.desc) blocks.push(curB); curB = { title: q.title || "", desc: q.description || "", items: [] }; }
+      else curB.items.push(q);
     }
-    const ps = [[]];
-    for (const q of real){ if (q.type === "page_break") ps.push([]); else ps[ps.length - 1].push(q); }
-    let out = ps.filter((p)=>p.length);
-    if (!out.length) out = [[]];
-    return settings.randomizeQuestions ? out.map((p)=>shuffle(p)) : out;
-  }, [form.id, questions.length, settings.randomizeQuestions, conversational]);
+    if (curB.items.length || curB.title || curB.desc) blocks.push(curB);
+    let blk = blocks.length ? blocks.slice() : [{ title:"", desc:"", items:[] }];
+    if (settings.randomizeBlocks && blk.length > 1) blk = shuffle(blk.slice());
+    const out = [];
+    for (const b of blk){
+      if (conversational){
+        const items = b.items.filter((q)=> q.type !== "page_break");
+        const list = settings.randomizeQuestions ? shuffle(items.slice()) : items;
+        if (!list.length){ if (b.title || b.desc) out.push({ qs:[], title:b.title, desc:b.desc }); }
+        else list.forEach((q, i)=> out.push({ qs:[q], title: i === 0 ? b.title : "", desc: i === 0 ? b.desc : "" }));
+      } else {
+        const pages = [[]];
+        for (const q of b.items){ if (q.type === "page_break") pages.push([]); else pages[pages.length - 1].push(q); }
+        let pgs = pages.filter((p)=>p.length);
+        if (!pgs.length){ if (b.title || b.desc) out.push({ qs:[], title:b.title, desc:b.desc }); }
+        else { if (settings.randomizeQuestions) pgs = pgs.map((p)=> shuffle(p.slice())); pgs.forEach((p, i)=> out.push({ qs:p, title: i === 0 ? b.title : "", desc: i === 0 ? b.desc : "" })); }
+      }
+    }
+    return out.length ? out : [{ qs:[], title:"", desc:"" }];
+  }, [form.id, questions.length, blockSig, settings.randomizeQuestions, settings.randomizeBlocks, conversational]);
 
   const [page, setPage] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -1415,7 +1449,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
   const scopeStyle = { "--fp": theme.primary || "#5b4fe0", "--fs": theme.secondary || "#1b1830", "--fa": theme.accent || theme.primary || "#5b4fe0", fontFamily: (theme.customFont ? ("'" + theme.customFont + "', ") : "") + (FORM_FONTS[theme.font] || FORM_FONTS.sans) };
   useEffect(()=>{ loadGoogleFont(theme.customFont); },[theme.customFont]);
 
-  const stepHasVisible = (i) => steps[i] && steps[i].some((q)=> qVisible(q, answers));
+  const stepHasVisible = (i) => steps[i] && (steps[i].qs || []).some((q)=> qVisible(q, answers));
   const cur = Math.min(page, steps.length - 1);
   const visibleIdxs = steps.map((_, i)=>i).filter(stepHasVisible);
   const nextIdx = visibleIdxs.find((i)=> i > cur);
@@ -1444,8 +1478,8 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
   const doNext = () => { setErrors({}); if (nextIdx !== undefined){ setPage(nextIdx); window.scrollTo(0, 0); } };
   const goNext = () => {
     if (!preview){
-      const errs = validateList(steps[cur]); if (Object.keys(errs).length){ setErrors(errs); return; }
-      const fq = pendingFollowupQ(steps[cur]); if (fq){ setErrors({}); runFollowup(fq, doNext); return; }
+      const errs = validateList((steps[cur] && steps[cur].qs) || []); if (Object.keys(errs).length){ setErrors(errs); return; }
+      const fq = pendingFollowupQ((steps[cur] && steps[cur].qs) || []); if (fq){ setErrors({}); runFollowup(fq, doNext); return; }
     }
     doNext();
   };
@@ -1463,8 +1497,8 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
     if (preview) return;
     const allErrs = {};
     for (const q of questions){ const def = QTYPES[q.type]; if (!def || !def.isInput) continue; if (!qVisible(q, answers)) continue; const e = def.validate(q, answers[q.id]); if (e) allErrs[q.id] = e; }
-    if (Object.keys(allErrs).length){ setErrors(allErrs); const bad = steps.findIndex((st)=> st.some((q)=> allErrs[q.id])); if (bad >= 0) setPage(bad); return; }
-    const fq = pendingFollowupQ(steps[cur]); if (fq){ runFollowup(fq, doSubmit); return; }
+    if (Object.keys(allErrs).length){ setErrors(allErrs); const bad = steps.findIndex((st)=> (st.qs || []).some((q)=> allErrs[q.id])); if (bad >= 0) setPage(bad); return; }
+    const fq = pendingFollowupQ((steps[cur] && steps[cur].qs) || []); if (fq){ runFollowup(fq, doSubmit); return; }
     doSubmit();
   };
   const renderFollowup = (q) => {
@@ -1477,7 +1511,8 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
     return (<div className="followup"><div className="qlabel">{f.question}</div><textarea className="finput" rows={2} placeholder="Optional" value={f.answer} onChange={(e)=>setFollowups((p)=>({ ...p, [q.id]: { ...p[q.id], answer: e.target.value } }))} /></div>);
   };
 
-  const shown = (steps[cur] || []).filter((q)=> qVisible(q, answers));
+  const sec = steps[cur] || {};
+  const shown = ((steps[cur] && steps[cur].qs) || []).filter((q)=> qVisible(q, answers));
   return (
     <div className="form-scope" style={scopeStyle}>
       <div className="fcard">
@@ -1486,6 +1521,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
         {form.description && <div className="fdesc">{form.description}</div>}
         {multi && <div className="fprogress"><div className="fprogress-bar" style={{width:((pos / total) * 100) + "%"}}></div></div>}
         <div className="fpage" key={cur} style={{marginTop:12}}>
+          {sec && sec.title ? (<div className="form-section"><div className="form-section-title">{sec.title}</div>{sec.desc ? <div className="form-section-desc">{sec.desc}</div> : null}</div>) : null}
           {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; return (<div key={q.id}><R q={q} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
           {shown.length === 0 && <div className="muted" style={{fontSize:13}}>Nothing to show on this step.</div>}
         </div>
@@ -1812,6 +1848,19 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
     onDragOver: (e)=>{ e.preventDefault(); dnd.over_(index); },
     onDrop: (e)=>{ e.preventDefault(); dnd.drop(index); },
   };
+  if (q.type === "block"){
+    return (
+      <div ref={cardRef} className={"blockcard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
+        <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
+        <div className="blockcard-body">
+          <div className="blockcard-tag">Section</div>
+          <input className="blockcard-title" placeholder="Section title" value={q.title || ""} onClick={(e)=>e.stopPropagation()} onChange={(e)=>update({ title: e.target.value })} />
+          <input className="blockcard-desc" placeholder="Optional description" value={q.description || ""} onClick={(e)=>e.stopPropagation()} onChange={(e)=>update({ description: e.target.value })} />
+        </div>
+        <button className="iconbtn" title="Remove" onClick={(e)=>{ e.stopPropagation(); onDel(); }}>×</button>
+      </div>
+    );
+  }
   if (q.type === "page_break"){
     return (
       <div ref={cardRef} className={"pbreak" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
@@ -2306,6 +2355,7 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Field label="Description"><textarea className="textarea" value={form.description} onChange={(e)=>setForm((f)=>({ ...f, description:e.target.value }))} /></Field>
       <div className="panel-section">Behavior</div>
       <Toggle checked={!!form.schema.settings.randomizeQuestions} onChange={(c)=>setSettings({randomizeQuestions:c})} label="Randomize question order" />
+      <Toggle checked={!!form.schema.settings.randomizeBlocks} onChange={(c)=>setSettings({randomizeBlocks:c})} label="Randomize section order" />
       <div style={{height:8}}></div>
       <Toggle checked={!!form.schema.settings.conversational} onChange={(c)=>setSettings({conversational:c})} label="Conversational mode (one question at a time)" />
       <div className="panel-section">Availability and limits</div>
@@ -2579,7 +2629,7 @@ function Builder({ formId }){
                   ? <div className="muted" style={{padding:"14px 16px",fontSize:13}}>Deleted questions land here for this session. They are cleared if you leave or refresh.</div>
                   : trash.map((q)=>(
                       <div className="trash-item" key={q.id}>
-                        <span className="ti-label">{q.type === "page_break" ? "Page break" : (q.label || q.heading || "Untitled question")}</span>
+                        <span className="ti-label">{q.type === "page_break" ? "Page break" : q.type === "block" ? (q.title || "Section") : (q.label || q.heading || "Untitled question")}</span>
                         <span className="ti-type">{QTYPES[q.type] ? QTYPES[q.type].label : q.type}</span>
                         <button className="btn sm" onClick={()=>restoreQ(q.id)}>Restore</button>
                       </div>

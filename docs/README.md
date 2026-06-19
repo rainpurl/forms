@@ -137,3 +137,7 @@ Meeting signup and Document to sign are now native question types. Meeting signu
 ## Native file uploads
 
 A File upload question type lets forms collect attachments. Files are stored in Cloudflare R2. Choose accepted types, a max size, and single or multiple files. Respondents upload in place; the owner downloads each file from the responses view through an owner only link (files are namespaced per form and access checked). Setup: create a Cloudflare R2 bucket and add a Pages Functions R2 binding named FILES. Without it, the type still appears and uploads show a friendly not set up message. The upload endpoint works only while a form is open and enforces a size cap.
+
+## Multi-section surveys
+
+Organize a form into sections. Add a Section from the question menu; it starts a new page with a title and optional description shown to respondents. Questions after a section card belong to it, up to the next section. Reorder or remove sections like questions. A Randomize section order setting presents sections in random order per respondent. Sections are organizational only and never appear in CSV, analytics, or webhooks.

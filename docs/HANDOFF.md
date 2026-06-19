@@ -313,3 +313,13 @@ Uploaded files are saved with the response. In the responses view and on each re
 Setup required: this feature needs a Cloudflare R2 bucket bound to the project as FILES. Create an R2 bucket in the Cloudflare dashboard, then in Pages, Settings, Functions, add an R2 bucket binding with the variable name FILES pointing to that bucket. Until that binding exists, the File upload type still appears, but uploads show a friendly message saying file storage is not set up yet (the rest of the form keeps working).
 
 Notes and limits. The public upload endpoint accepts files only while the form is open and enforces a server side size cap (25 MB by default, on top of the per question limit you set). Because respondents are anonymous, the upload endpoint is public by necessity; the form being open plus the size cap are the main guards against abuse. CSV and PDF exports show the file name; the actual file is reached through the owner only download link in the responses view.
+
+## Multi-section surveys
+
+Forms can now be organized into sections, similar to blocks in other survey tools. Add a Section from the question menu (it appears alongside Page break and the other types). A section starts a new page and can carry a title and an optional description, both shown to the respondent at the top of that page.
+
+In the builder a section appears as a labeled card with editable title and description fields, in line with your questions. Everything after a section card, up to the next section card, belongs to that section. The questions before the first section form an untitled opening section. Sections are reordered or removed the same way as questions, using the drag handle and the remove button.
+
+On the public form each section is its own page (page breaks still work to split a long section into several pages), and the section title and description appear above its questions. There is a Randomize section order setting in Form settings that presents the sections in a random order for each respondent, which is useful for reducing order effects.
+
+Sections are purely organizational: they never appear as columns in the CSV, as questions in the analytics, or in webhook payloads. One thing to know: dragging a section card moves the section boundary, it does not carry the questions under it along with it, so to move a whole group you move the section marker and then the questions as needed.

@@ -424,7 +424,7 @@ async function submitResponse(formId, request, env, context) {
 
 async function fireWebhook(url, formId, data, meta, questions){
   try {
-    const inputs = (questions || []).filter((q)=> q && q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "hidden_field");
+    const inputs = (questions || []).filter((q)=> q && q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "hidden_field" && q.type !== "block");
     const responses = inputs.map((q)=>({ question: q.label || q.id, answer: formatAnswer(data[q.id]) }));
     const emailQ = inputs.find((q)=> q.type === "text_entry" && q.validation === "email" && data[q.id]);
     const npsQ = inputs.find((q)=> q.type === "nps" && data[q.id] !== undefined && data[q.id] !== null);
@@ -505,7 +505,7 @@ async function exportCsv(user, id, env) {
   if (!form || form.owner_id !== user.uid) return json({ error: "not_found" }, 404);
 
   const schema = safeParse(form.schema, { questions: [] });
-  const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic" && q.type !== "page_break");
+  const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "block");
 
   const { results } = await env.DB.prepare(
     "SELECT id, data, meta, created_at FROM responses WHERE form_id = ? ORDER BY created_at ASC"
