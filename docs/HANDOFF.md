@@ -277,3 +277,17 @@ For all three, the heading and description are edited directly on the question c
 Sharing now includes embedding. The Share button in the builder toolbar opens a panel with the form's public link and a ready to paste embed code. The embed code is an iframe you can drop into any web page to show the form inline. Both have one click copy buttons.
 
 Every response can be exported individually as a PDF. In a form's Responses tab there is a PDF button on each response row, and an Export PDF button at the top of the response detail. The PDF is themed with the form's colors and font and includes the answers, any drawn signature, the follow-up answers, and the submission location and device. The aggregate Export report PDF that summarizes all responses is unchanged.
+
+## Dark mode polish, toggle placement, fonts, and export branding
+
+Dark mode now covers the parts that were still showing light: the automated Overview card and the form builder surfaces (the question block headers, the rail's active button, the page break highlight, the analytics bar tracks, badges, and the loading shimmer) all follow the theme.
+
+The light and dark toggle now sits right next to the logo. It appears in the top navigation bar (dashboard and form pages) and also in the form builder's top bar, so it is reachable from everywhere in the app.
+
+Fonts outside the form are now consistently the Mozilla typeface. The homepage cards used to show each form's own font on its title, which looked out of place; the card titles now use the Mozilla headline font like the rest of the app. The form preview and the public form still use whatever font the form is set to.
+
+The form settings icon in the builder rail is now a clear gear instead of the previous shape that read like a sun.
+
+The homepage cards are ordered by most recent response, so the forms getting activity rise to the top. Each card shows when its latest response arrived, for example Latest response on Jun 10 at 3:24 PM, or No responses yet for forms that have not been filled in.
+
+Exports are now branded to the form. If a form has an uploaded logo (set as the header image, including from a brand kit), that logo replaces the zetetiq mark in the top corner of the PDF report and the per-response PDFs, shown on a clean white chip so it reads well on the colored header. Forms without an uploaded logo keep the zetetiq mark. The export footer now reads powered by zetetiq.

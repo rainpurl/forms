@@ -224,10 +224,11 @@ async function listForms(user, env) {
   const { results } = await env.DB.prepare(
     `SELECT f.id, f.slug, f.title, f.is_open, f.created_at, u.username,
             json_extract(f.theme,'$.font') AS font, json_extract(f.theme,'$.customFont') AS customFont,
-            (SELECT COUNT(*) FROM responses r WHERE r.form_id = f.id) AS responses
+            (SELECT COUNT(*) FROM responses r WHERE r.form_id = f.id) AS responses,
+            (SELECT MAX(r.created_at) FROM responses r WHERE r.form_id = f.id) AS last_response
      FROM forms f JOIN users u ON u.id = f.owner_id
      WHERE f.owner_id = ?
-     ORDER BY f.created_at DESC`
+     ORDER BY last_response DESC, f.created_at DESC`
   ).bind(user.uid).all();
   return json({ forms: results || [] });
 }

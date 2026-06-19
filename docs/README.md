@@ -125,3 +125,7 @@ One time setup: brand kits need a new brand_kits table. Paste the new CREATE TAB
 ## Scheduling, payments, e-signature, embedding, and per-response PDFs
 
 The builder has new question types for Scheduling (Calendly), Payment (Stripe, PayPal, or any payment link), and E-signature (DocuSign PowerForm). Each works by pasting a provider link; scheduling can embed inline, while payment and e-signature open the provider, which handles the transaction or signing securely. The Share button now also gives a copyable iframe embed code so the form can be placed on any web page. In a form's Responses tab, each response can be exported individually as a themed PDF (per row and from the response detail), in addition to the existing aggregate report.
+
+## Dark mode polish, toggle, fonts, and export branding
+
+Dark mode now themes the Overview card and the builder. The light/dark toggle sits next to the logo and appears in both the top bar and the builder. App chrome (including homepage card titles) uses the Mozilla font; only the form preview and public form use the form's chosen font. The settings icon is a proper gear. Homepage cards are ordered by most recent response and show when the latest response arrived. In PDF exports, an uploaded form logo replaces the zetetiq mark, and the footer reads powered by zetetiq.

@@ -36,6 +36,11 @@ html[data-theme="dark"]{
   --hover:#272343;
   --nav-bg:rgba(18,16,32,.86);
 }
+html[data-theme="dark"] .badge.open{background:rgba(84,201,138,.18)}
+html[data-theme="dark"] .badge.closed{background:rgba(169,164,198,.16)}
+html[data-theme="dark"] .bar-row .track2{background:#272343}
+html[data-theme="dark"] .shimmer{background:linear-gradient(90deg,#272343 25%,#322d52 37%,#272343 63%);background-size:400% 100%}
+html[data-theme="dark"] .ai{background:#191730}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -68,7 +73,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .btn.primary{background:var(--bo);border-color:var(--bo);color:#fff}
 .btn.primary:hover{background:var(--bo-dark);border-color:var(--bo-dark)}
 .btn.ghost{border-color:transparent;background:transparent}
-.btn.ghost:hover{background:#edebf8}
+.btn.ghost:hover{background:var(--hover)}
 .btn.danger{color:#fff;background:var(--bad);border-color:var(--bad)}
 .btn.danger:hover{filter:brightness(.95)}
 .btn.sm{padding:6px 11px;font-size:13px;border-radius:8px}
@@ -110,7 +115,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .switch input:checked + .track .knob{left:18px}
 
 /* ai summary card */
-.ai{background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative}
+.ai{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative}
 .ai .ai-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .ai .spark{width:16px;height:16px;color:var(--bo)}
 .ai .ai-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--bo);font-weight:700}
@@ -206,7 +211,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .b-rail{width:54px;flex:none;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:6px}
 .b-rail button{width:38px;height:38px;border:0;background:none;border-radius:9px;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center}
 .b-rail button:hover{background:var(--hover);color:var(--ink)}
-.b-rail button.active{background:#eceaff;color:var(--bo)}
+.b-rail button.active{background:rgba(124,114,242,.16);color:var(--bo)}
 .b-panel{width:320px;flex:none;background:var(--card);border-right:1px solid var(--line);overflow:auto;padding:18px}
 .panel-title{font-family:var(--display);font-size:18px;margin-bottom:14px}
 .panel-section{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin:16px 0 9px;padding-top:13px;border-top:1px solid var(--line)}
@@ -224,7 +229,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .canvas-title{width:100%;border:0;background:none;font-family:var(--display);font-size:26px;font-weight:600;color:var(--ink);padding:6px 4px;margin-bottom:14px;outline:none;border-bottom:1px solid transparent}
 .canvas-title:focus{border-bottom-color:var(--line-strong)}
 .qblock{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:18px}
-.qblock-head{padding:11px 16px;background:#f6f5ff;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
+.qblock-head{padding:11px 16px;background:var(--hover);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
 .qblock-body{padding:14px}
 .qblock-foot{padding:12px 14px;border-top:1px solid var(--line);background:var(--hover)}
 .qccard{border:1px solid var(--line);border-radius:11px;background:var(--card);padding:14px;margin-bottom:12px;cursor:pointer;transition:border-color .1s, box-shadow .1s}
@@ -250,7 +255,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .wq-addchoice{border:0;background:none;color:var(--bo);font-weight:600;font-size:13px;cursor:pointer;padding:6px 2px;margin-top:2px}
 .wq-addchoice:hover{text-decoration:underline}
 .wq-prev{margin-top:4px}
-.wq-prev-input{border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;color:#a39ec2;font-size:14px;background:var(--hover)}
+.wq-prev-input{border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;color:var(--ink-soft);font-size:14px;background:var(--hover)}
 .wq-prev-input.tall{min-height:64px}
 .addq{position:relative;display:inline-block}
 .addq-menu{position:absolute;bottom:calc(100% + 8px);left:0;background:var(--card);border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 14px 36px rgba(0,0,0,.16);padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:420px;z-index:50}
@@ -330,7 +335,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .form-scope .rankrow.over{box-shadow:0 -3px 0 0 var(--fa)}
 /* page break divider (builder) */
 .pbreak{display:flex;align-items:center;gap:10px;margin:10px 2px;padding:6px 8px;border-radius:9px;cursor:pointer}
-.pbreak.sel{background:#eceaff}
+.pbreak.sel{background:rgba(124,114,242,.16)}
 .pbreak-line{flex:1;height:1px;background:var(--line-strong)}
 .pbreak-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--bo);font-weight:700}
 /* paginated form */
@@ -409,6 +414,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 .nav .navbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:64px;padding:0 24px;gap:12px}
 .nav .navbar .brand{justify-self:start}
+.navleft{display:flex;align-items:center;gap:10px;justify-self:start}
 .navnew{justify-self:center;font-size:16px;padding:13px 30px;border-radius:13px}
 .navright{justify-self:end;display:flex;align-items:center;gap:12px}
 .themebtn{appearance:none;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.12s}
@@ -428,7 +434,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .form-card:hover{border-color:var(--bo);box-shadow:0 10px 26px rgba(91,79,224,.13);transform:translateY(-2px)}
 .form-card .fc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .form-card .fc-count{font-size:12px;color:var(--ink-soft)}
-.form-card .fc-title{font-size:19px;font-weight:600;line-height:1.25;flex:1;word-break:break-word}
+.form-card .fc-title{font-family:var(--display);font-size:19px;font-weight:600;line-height:1.25;flex:1;word-break:break-word}
 .form-card .fc-meta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .form-card .fc-foot{font-size:12px;color:var(--ink-soft)}
 .bk-list{display:flex;flex-direction:column;gap:10px}
@@ -612,6 +618,18 @@ function fmtDate(s) {
     year: "numeric",
     month: "short",
     day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+function fmtWhen(s) {
+  if (!s) return "";
+  const d = new Date(s.replace(" ", "T") + (s.includes("Z") ? "" : "Z"));
+  if (isNaN(d)) return s;
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric"
+  }) + " at " + d.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit"
   });
@@ -2942,22 +2960,24 @@ function TopNav() {
     className: "nav"
   }, /*#__PURE__*/React.createElement("div", {
     className: "navbar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "navleft"
   }, /*#__PURE__*/React.createElement("button", {
     className: "brand",
     onClick: () => navigate("/dashboard")
   }, /*#__PURE__*/React.createElement(Logo, {
     size: 26
   })), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary navnew",
-    onClick: () => navigate("/builder/new")
-  }, "+ New form"), /*#__PURE__*/React.createElement("div", {
-    className: "navright"
-  }, /*#__PURE__*/React.createElement("button", {
     className: "themebtn",
     onClick: toggleTheme,
     title: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
     "aria-label": "Toggle theme"
-  }, theme === "dark" ? /*#__PURE__*/React.createElement(IconSun, null) : /*#__PURE__*/React.createElement(IconMoon, null)), user && /*#__PURE__*/React.createElement("span", {
+  }, theme === "dark" ? /*#__PURE__*/React.createElement(IconSun, null) : /*#__PURE__*/React.createElement(IconMoon, null))), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary navnew",
+    onClick: () => navigate("/builder/new")
+  }, "+ New form"), /*#__PURE__*/React.createElement("div", {
+    className: "navright"
+  }, user && /*#__PURE__*/React.createElement("span", {
     className: "greet"
   }, "hey ", user.name), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
@@ -3024,11 +3044,6 @@ function Dashboard() {
       data
     }) => setForms(data && data.forms || []));
   }, []);
-  useEffect(() => {
-    (forms || []).forEach(f => {
-      if (f && f.customFont) loadGoogleFont(f.customFont);
-    });
-  }, [forms]);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
     className: "wrap page"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3061,15 +3076,12 @@ function Dashboard() {
   }, f.is_open ? "Open" : "Closed"), /*#__PURE__*/React.createElement("span", {
     className: "fc-count"
   }, f.responses, " ", f.responses === 1 ? "response" : "responses")), /*#__PURE__*/React.createElement("div", {
-    className: "fc-title",
-    style: {
-      fontFamily: (f.customFont ? "'" + f.customFont + "', " : "") + (FORM_FONTS[f.font] || FORM_FONTS.sans)
-    }
+    className: "fc-title"
   }, f.title || "Untitled form"), /*#__PURE__*/React.createElement("div", {
     className: "fc-meta"
   }, f.username === "admin" ? "/" + f.slug : "/" + f.username + "/" + f.slug), /*#__PURE__*/React.createElement("div", {
     className: "fc-foot"
-  }, fmtDate(f.created_at))))), forms !== null && forms.length < 10 && /*#__PURE__*/React.createElement(TemplateGrid, {
+  }, f.last_response ? "Latest response on " + fmtWhen(f.last_response) : "No responses yet")))), forms !== null && forms.length < 10 && /*#__PURE__*/React.createElement(TemplateGrid, {
     onPick: createFromTemplate,
     creating: creating
   })));
@@ -3224,15 +3236,15 @@ function IconCog() {
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: "1.7",
+    strokeWidth: "1.6",
     strokeLinecap: "round",
     strokeLinejoin: "round"
-  }, /*#__PURE__*/React.createElement("circle", {
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M19.4 13a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V19a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.5 17.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H2a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 3.65 8.5a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H8a1.7 1.7 0 0 0 1-1.56V2a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V8a1.7 1.7 0 0 0 1.56 1H22a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: "12",
     cy: "12",
     r: "3"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M5 19l2.1-2.1M16.9 7.1 19 5"
   }));
 }
 function FullMsg({
@@ -5057,7 +5069,9 @@ function Builder({
   const {
     navigate,
     toast,
-    user
+    user,
+    theme,
+    toggleTheme
   } = useApp();
   const isNew = formId === "new";
   const [form, setForm] = useState(isNew ? blankForm() : null);
@@ -5363,7 +5377,12 @@ function Builder({
     onClick: () => navigate("/dashboard")
   }, /*#__PURE__*/React.createElement(Logo, {
     size: 26
-  })), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "themebtn",
+    onClick: toggleTheme,
+    title: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
+    "aria-label": "Toggle theme"
+  }, theme === "dark" ? /*#__PURE__*/React.createElement(IconSun, null) : /*#__PURE__*/React.createElement(IconMoon, null)), /*#__PURE__*/React.createElement("div", {
     className: "b-tools"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
@@ -6015,6 +6034,72 @@ async function loadPdfFonts(doc, key) {
     };
   }
 }
+function imgDims(src) {
+  return new Promise(res => {
+    try {
+      const im = new Image();
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        res({
+          w: im.naturalWidth || im.width || 300,
+          h: im.naturalHeight || im.height || 120
+        });
+      };
+      im.onload = finish;
+      im.onerror = () => {
+        if (!done) {
+          done = true;
+          res({
+            w: 300,
+            h: 120
+          });
+        }
+      };
+      im.src = src;
+      setTimeout(finish, 2500);
+    } catch (e) {
+      res({
+        w: 300,
+        h: 120
+      });
+    }
+  });
+}
+async function drawExportLogo(doc, form, W, M) {
+  const hdr = form.schema && form.schema.settings && form.schema.settings.headerImage || null;
+  if (hdr) {
+    try {
+      const d = await imgDims(hdr);
+      const maxW = 120,
+        maxH = 46;
+      let lw = maxW,
+        lh = lw * (d.h / d.w);
+      if (lh > maxH) {
+        lh = maxH;
+        lw = lh * (d.w / d.h);
+      }
+      const fmt = hdr.indexOf("image/png") >= 0 ? "PNG" : "JPEG";
+      const pad = 6,
+        cy = 18,
+        cx = W - M - lw - pad * 2;
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(cx, cy, lw + pad * 2, lh + pad * 2, 5, 5, "F");
+      doc.addImage(hdr, fmt, cx + pad, cy + pad, lw, lh);
+      return;
+    } catch (e) {}
+  }
+  let logo = null;
+  try {
+    logo = await svgToPng(LOGO_SVG, "#ffffff", 150);
+  } catch (e) {}
+  if (logo && logo.data) {
+    const lw = 92,
+      lh = lw * (logo.h / logo.w);
+    doc.addImage(logo.data, "PNG", W - M - lw, 22, lw, lh);
+  }
+}
 async function exportReport(form, rows) {
   await ensureJsPDF();
   const {
@@ -6044,15 +6129,7 @@ async function exportReport(form, rows) {
   };
   doc.setFillColor(pr, pg, pb);
   doc.rect(0, 0, W, 82, "F");
-  let logo = null;
-  try {
-    logo = await svgToPng(LOGO_SVG, "#ffffff", 150);
-  } catch (e) {}
-  if (logo && logo.data) {
-    const lw = 92,
-      lh = lw * (logo.h / logo.w);
-    doc.addImage(logo.data, "PNG", W - M - lw, 22, lw, lh);
-  }
+  await drawExportLogo(doc, form, W, M);
   doc.setTextColor(255, 255, 255);
   doc.setFont(ff, "bold");
   doc.setFontSize(20);
@@ -6139,7 +6216,7 @@ async function exportReport(form, rows) {
   doc.setFont(ff, "normal");
   doc.setFontSize(9);
   doc.setTextColor.apply(doc, soft);
-  doc.text("Generated by zetetiq", M, H - 24);
+  doc.text("powered by zetetiq", M, H - 24);
   doc.save((form.title || "form").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-report.pdf");
 }
 function answerText(v) {
@@ -6245,15 +6322,7 @@ async function exportResponsePdf(form, r) {
   };
   doc.setFillColor(pr, pg, pb);
   doc.rect(0, 0, W, 82, "F");
-  let logo = null;
-  try {
-    logo = await svgToPng(LOGO_SVG, "#ffffff", 150);
-  } catch (e) {}
-  if (logo && logo.data) {
-    const lw = 92,
-      lh = lw * (logo.h / logo.w);
-    doc.addImage(logo.data, "PNG", W - M - lw, 22, lw, lh);
-  }
+  await drawExportLogo(doc, form, W, M);
   doc.setTextColor(255, 255, 255);
   doc.setFont(ff, "bold");
   doc.setFontSize(20);
@@ -6339,7 +6408,7 @@ async function exportResponsePdf(form, r) {
     doc.text(meta, M, y);
     y += 14;
   }
-  doc.text("Generated by zetetiq", M, H - 24);
+  doc.text("powered by zetetiq", M, H - 24);
   const stamp = String(r.created_at || "").replace(/[^0-9]/g, "").slice(0, 12) || "response";
   doc.save((form.title || "form").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-response-" + stamp + ".pdf");
 }
