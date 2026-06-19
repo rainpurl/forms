@@ -115,3 +115,9 @@ The PDF report matches the form font (Figtree, Roboto Slab, or Mozilla Text), no
 ## Dark mode, navigation, and templates
 
 A light/dark toggle in the top bar defaults to the visitor's system setting and is remembered per browser; the public form always stays light. The top bar spans the full width with the logo at the far left, a large New form button in the center, and account actions at the right. The dashboard shows one-click starter templates when the user has fewer than ten forms.
+
+## Forms grid, form fonts, and brand studio
+
+The homepage shows forms as a grid of cards, each previewing the form's title in its own font. Inside a form, the title now matches the form's chosen font. The builder has a new Brand studio panel (swatch icon) for saving a logo, font, and colors as a reusable kit you can apply to any form in one click, including an optional custom Google font. The drag to reorder crash is fixed, and the side panel now uses a palette icon for Theme and a gear icon for Form settings.
+
+One time setup: brand kits need a new brand_kits table. Paste the new CREATE TABLE at the bottom of schema.sql into your D1 console once.

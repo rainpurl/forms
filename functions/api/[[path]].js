@@ -61,6 +61,14 @@ async function route(seg, method, request, env, context) {
     if (path.length === 3 && path[2] === "tone" && method === "GET") return toneRead(user, id, request, env);
   }
 
+  if (path[0] === "brand-kits") {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "unauthorized" }, 401);
+    if (path.length === 1 && method === "GET") return listBrandKits(user, env);
+    if (path.length === 1 && method === "POST") return createBrandKit(user, request, env);
+    if (path.length === 2 && method === "DELETE") return deleteBrandKit(user, path[1], env);
+  }
+
   return json({ error: "not_found", path: p }, 404);
 }
 
@@ -215,6 +223,7 @@ async function googleCallback(request, env) {
 async function listForms(user, env) {
   const { results } = await env.DB.prepare(
     `SELECT f.id, f.slug, f.title, f.is_open, f.created_at, u.username,
+            json_extract(f.theme,'$.font') AS font, json_extract(f.theme,'$.customFont') AS customFont,
             (SELECT COUNT(*) FROM responses r WHERE r.form_id = f.id) AS responses
      FROM forms f JOIN users u ON u.id = f.owner_id
      WHERE f.owner_id = ?
@@ -289,6 +298,37 @@ function formAvailability(isOpen, settings, count) {
   const cap = parseInt(settings.responseCap, 10);
   if (cap > 0 && typeof count === "number" && count >= cap) return { open: false, reason: "full" };
   return { open: true, reason: null };
+}
+
+async function listBrandKits(user, env) {
+  const { results } = await env.DB.prepare(
+    "SELECT id, name, data, created_at FROM brand_kits WHERE owner_id = ? ORDER BY created_at DESC"
+  ).bind(user.uid).all();
+  const kits = (results || []).map((r) => ({ id: r.id, name: r.name, created_at: r.created_at, ...safeParse(r.data, {}) }));
+  return json({ kits });
+}
+
+async function createBrandKit(user, request, env) {
+  const body = await readJson(request) || {};
+  const name = String(body.name || "Untitled kit").slice(0, 80);
+  const data = JSON.stringify({
+    logo: typeof body.logo === "string" ? body.logo : null,
+    font: body.font || "sans",
+    customFont: String(body.customFont || "").slice(0, 60),
+    primary: body.primary || "#5b4fe0",
+    secondary: body.secondary || "#1b1830",
+    accent: body.accent || "#5b4fe0",
+  });
+  const id = "bk_" + ((globalThis.crypto && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, "").slice(0, 10) : Math.random().toString(36).slice(2, 12));
+  await env.DB.prepare(
+    "INSERT INTO brand_kits (id, owner_id, name, data, created_at) VALUES (?, ?, ?, ?, datetime('now'))"
+  ).bind(id, user.uid, name, data).run();
+  return json({ id });
+}
+
+async function deleteBrandKit(user, id, env) {
+  await env.DB.prepare("DELETE FROM brand_kits WHERE id = ? AND owner_id = ?").bind(id, user.uid).run();
+  return json({ ok: true });
 }
 
 async function publicForm(username, slug, env) {

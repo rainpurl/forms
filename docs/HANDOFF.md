@@ -245,3 +245,19 @@ Internally, dark mode is driven by a data-theme attribute on the page root and a
 ## Homepage templates
 
 On the dashboard, when the user has fewer than ten forms, a Start from a template section appears with the four starter templates (Customer feedback, Contact form, Event RSVP, Quick poll). Clicking one creates the form on the server and opens it in the builder. The section hides automatically once the user has ten or more forms.
+
+## Card grid, brand studio, and the drag fix
+
+The forms homepage is now a grid of cards instead of a table. Each card shows the status, response count, slug, and date, and the form title is rendered in that form's own font for a quick visual preview.
+
+Inside a form, the title now uses the form's selected font as well, instead of a separate display font, so the form reads as one consistent typeface.
+
+Brand studio is a new option in the builder side panel (the swatch icon, between Theme and Form settings). It lets you save a reusable brand kit made of a logo, a font, and primary, secondary, and accent colors. Saved kits are listed at the top of the panel, and Apply drops the kit's colors, font, and logo onto the current form in one click. Kits are stored per account on the server.
+
+The font field in a brand kit offers the built in font choices, plus an optional Custom font box where you can type any Google Fonts family name (for example Poppins). When set, that font is loaded from Google Fonts and used throughout the form. The printable report falls back to a standard font for arbitrary custom fonts, since it embeds a fixed set of typefaces.
+
+IMPORTANT, one time database step: brand kits use a new table called brand_kits. Open your D1 database console and run the new CREATE TABLE statement that is now at the bottom of schema.sql (the brand_kits table and its index). Until you do, saving a brand kit will fail.
+
+The drag to reorder crash is fixed. Reordering a question by dragging used to throw a map is not a function error because the reorder helper was accidentally storing a function in place of the question list. The helper now always keeps the question list as a proper array, so dragging, the move up and down buttons, duplicate, and delete all behave correctly.
+
+The side panel icons were updated: the Theme button now uses an artist palette icon and the Form settings button now uses a gear icon.

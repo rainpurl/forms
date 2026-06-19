@@ -163,7 +163,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .form-scope{--fp:#5b4fe0;--fs:#1b1830;--fa:#5b4fe0;font-family:var(--sans)}
 .form-page,.form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--good:#2f7d52;--bad:#b23b3b;--hover:#f1eefc}
 .form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
-.form-scope .ftitle{font-family:var(--display);font-size:27px;color:var(--fs);font-weight:600;line-height:1.2}
+.form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--fs);font-weight:600;line-height:1.2}
 .form-scope .fdesc{color:var(--ink-soft);margin-top:8px;font-size:15px}
 .form-scope .q{padding:18px 0;border-bottom:1px solid var(--line)}
 .form-scope .q:last-of-type{border-bottom:0}
@@ -422,6 +422,23 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .tpl-card .td{font-size:13px;color:var(--ink-soft);margin-top:5px;line-height:1.45}
 .tpl-card .tdot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
 @media(max-width:620px){.nav .navbar{padding:0 14px;gap:8px}.navnew{font-size:14px;padding:10px 16px}.greet{display:none}}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.form-card{text-align:left;border:1px solid var(--line-strong);background:var(--card);border-radius:15px;padding:16px 17px;cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .08s;color:var(--ink);display:flex;flex-direction:column;gap:8px;min-height:132px}
+.form-card:hover{border-color:var(--bo);box-shadow:0 10px 26px rgba(91,79,224,.13);transform:translateY(-2px)}
+.form-card .fc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.form-card .fc-count{font-size:12px;color:var(--ink-soft)}
+.form-card .fc-title{font-size:19px;font-weight:600;line-height:1.25;flex:1;word-break:break-word}
+.form-card .fc-meta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.form-card .fc-foot{font-size:12px;color:var(--ink-soft)}
+.bk-list{display:flex;flex-direction:column;gap:10px}
+.bk-card{border:1px solid var(--line-strong);border-radius:12px;padding:12px;background:var(--card)}
+.bk-row{display:flex;align-items:center;gap:10px}
+.bk-name{font-weight:600;font-size:14px}
+.bk-sw{display:inline-flex;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bk-sw span{width:16px;height:18px;display:inline-block}
+.bk-logo{display:block;max-height:42px;max-width:150px;margin-top:8px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:3px;object-fit:contain}
+.bk-actions{display:flex;gap:8px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -492,6 +509,17 @@ const api = {
     })
   }),
   tone: (id, refresh) => req("/api/forms/" + id + "/tone" + (refresh ? "?refresh=1" : "")),
+  listBrandKits: () => req("/api/brand-kits"),
+  createBrandKit: payload => req("/api/brand-kits", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  }),
+  deleteBrandKit: id => req("/api/brand-kits/" + id, {
+    method: "DELETE"
+  }),
   updateForm: (id, payload) => req("/api/forms/" + id, {
     method: "PUT",
     headers: {
@@ -526,6 +554,19 @@ const FORM_FONTS = {
   slab: "'Roboto Slab',Georgia,serif",
   zetetiq: "'Mozilla Text','Mozilla Headline',system-ui,sans-serif"
 };
+const _loadedFonts = {};
+function loadGoogleFont(name) {
+  if (!name || typeof name !== "string") return;
+  const key = name.trim();
+  if (!key || _loadedFonts[key]) return;
+  _loadedFonts[key] = true;
+  try {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=" + encodeURIComponent(key).replace(/%20/g, "+") + ":wght@400;500;600;700&display=swap";
+    document.head.appendChild(link);
+  } catch (e) {}
+}
 function readImageScaled(file, maxW, cb) {
   const reader = new FileReader();
   reader.onerror = () => cb(null);
@@ -1883,8 +1924,11 @@ function FormRenderer({
     "--fp": theme.primary || "#5b4fe0",
     "--fs": theme.secondary || "#1b1830",
     "--fa": theme.accent || theme.primary || "#5b4fe0",
-    fontFamily: FORM_FONTS[theme.font] || FORM_FONTS.sans
+    fontFamily: (theme.customFont ? "'" + theme.customFont + "', " : "") + (FORM_FONTS[theme.font] || FORM_FONTS.sans)
   };
+  useEffect(() => {
+    loadGoogleFont(theme.customFont);
+  }, [theme.customFont]);
   const stepHasVisible = i => steps[i] && steps[i].some(q => qVisible(q, answers));
   const cur = Math.min(page, steps.length - 1);
   const visibleIdxs = steps.map((_, i) => i).filter(stepHasVisible);
@@ -2486,6 +2530,267 @@ function TemplateGrid({
     className: "td"
   }, t.desc)))));
 }
+function IconBrand() {
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "3",
+    width: "7",
+    height: "7",
+    rx: "1.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "14",
+    y: "3",
+    width: "7",
+    height: "7",
+    rx: "1.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "14",
+    width: "7",
+    height: "7",
+    rx: "1.5"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "17.5",
+    cy: "17.5",
+    r: "3.5"
+  }));
+}
+function BrandStudio({
+  form,
+  setTheme,
+  setSettings
+}) {
+  const {
+    toast
+  } = useApp();
+  const [kits, setKits] = useState(null);
+  const [name, setName] = useState("");
+  const [logo, setLogo] = useState(null);
+  const [font, setFont] = useState(form.theme.font || "sans");
+  const [customFont, setCustomFont] = useState(form.theme.customFont || "");
+  const [primary, setPrimary] = useState(form.theme.primary || "#5b4fe0");
+  const [secondary, setSecondary] = useState(form.theme.secondary || "#1b1830");
+  const [accent, setAccent] = useState(form.theme.accent || "#5b4fe0");
+  const [saving, setSaving] = useState(false);
+  const load = () => api.listBrandKits().then(({
+    ok,
+    data
+  }) => setKits(ok && data && data.kits ? data.kits : []));
+  useEffect(() => {
+    load();
+  }, []);
+  const save = () => {
+    if (!name.trim()) {
+      toast("Name your brand kit first.");
+      return;
+    }
+    setSaving(true);
+    api.createBrandKit({
+      name: name.trim(),
+      logo,
+      font,
+      customFont: customFont.trim(),
+      primary,
+      secondary,
+      accent
+    }).then(({
+      ok
+    }) => {
+      setSaving(false);
+      if (ok) {
+        toast("Brand kit saved");
+        setName("");
+        setLogo(null);
+        load();
+      } else toast("Could not save the kit");
+    });
+  };
+  const apply = k => {
+    setTheme({
+      primary: k.primary,
+      secondary: k.secondary,
+      accent: k.accent,
+      font: k.font || "sans",
+      customFont: k.customFont || ""
+    });
+    if (k.logo) setSettings({
+      headerImage: k.logo
+    });
+    if (k.customFont) loadGoogleFont(k.customFont);
+    toast("Applied " + k.name);
+  };
+  const del = k => {
+    if (!window.confirm("Delete the brand kit " + k.name + "?")) return;
+    api.deleteBrandKit(k.id).then(() => {
+      toast("Brand kit deleted");
+      load();
+    });
+  };
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title"
+  }, "Brand studio"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 14
+    }
+  }, "Save your logo, font, and colors as a kit, then apply it to any form in one click."), /*#__PURE__*/React.createElement("div", {
+    className: "bk-list"
+  }, kits === null ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "Loading kits...") : kits.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No saved kits yet. Create one below.") : kits.map(k => /*#__PURE__*/React.createElement("div", {
+    key: k.id,
+    className: "bk-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bk-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "bk-sw"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: k.primary
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: k.secondary
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: k.accent
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "bk-name"
+  }, k.name)), k.logo && /*#__PURE__*/React.createElement("img", {
+    className: "bk-logo",
+    src: k.logo,
+    alt: ""
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "bk-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
+    onClick: () => apply(k)
+  }, "Apply"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: () => del(k)
+  }, "Delete"))))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Create a kit"), /*#__PURE__*/React.createElement(Field, {
+    label: "Kit name"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: name,
+    onChange: e => setName(e.target.value),
+    placeholder: "Acme brand"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Logo"), logo ? /*#__PURE__*/React.createElement("div", {
+    className: "himg-preview"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: logo,
+    alt: ""
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => setLogo(null)
+  }, "Remove")) : /*#__PURE__*/React.createElement("label", {
+    className: "himg-upload"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*",
+    style: {
+      display: "none"
+    },
+    onChange: e => {
+      const f = e.target.files && e.target.files[0];
+      if (f) readImageScaled(f, 1000, url => {
+        if (!url) {
+          toast("Could not read that image.");
+          return;
+        }
+        if (url.length > 900000) {
+          toast("That image is too large.");
+          return;
+        }
+        setLogo(url);
+      });
+      e.target.value = "";
+    }
+  }), /*#__PURE__*/React.createElement("span", null, "Upload logo")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 12
+    }
+  }), /*#__PURE__*/React.createElement(Field, {
+    label: "Font"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: font,
+    onChange: e => setFont(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "sans"
+  }, "Sans"), /*#__PURE__*/React.createElement("option", {
+    value: "serif"
+  }, "Serif"), /*#__PURE__*/React.createElement("option", {
+    value: "mono"
+  }, "Monospace"), /*#__PURE__*/React.createElement("option", {
+    value: "slab"
+  }, "Slab"), /*#__PURE__*/React.createElement("option", {
+    value: "zetetiq"
+  }, "zetetiq"))), /*#__PURE__*/React.createElement(Field, {
+    label: "Custom font (Google Fonts name, optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: customFont,
+    onChange: e => setCustomFont(e.target.value),
+    placeholder: "e.g. Poppins"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: "-6px",
+      marginBottom: 10
+    }
+  }, "If set, this Google font is loaded and used in the form. The printable report falls back to a standard font."), /*#__PURE__*/React.createElement(ColorPick, {
+    label: "Primary",
+    value: primary,
+    onChange: setPrimary
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 10
+    }
+  }), /*#__PURE__*/React.createElement(ColorPick, {
+    label: "Secondary",
+    value: secondary,
+    onChange: setSecondary
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 10
+    }
+  }), /*#__PURE__*/React.createElement(ColorPick, {
+    label: "Accent",
+    value: accent,
+    onChange: setAccent
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 14
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: saving,
+    onClick: save
+  }, saving ? "Saving..." : "Save brand kit"));
+}
 function TopNav() {
   const {
     user,
@@ -2580,6 +2885,11 @@ function Dashboard() {
       data
     }) => setForms(data && data.forms || []));
   }, []);
+  useEffect(() => {
+    (forms || []).forEach(f => {
+      if (f && f.customFont) loadGoogleFont(f.customFont);
+    });
+  }, [forms]);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
     className: "wrap page"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2600,38 +2910,27 @@ function Dashboard() {
       marginBottom: 6
     }
   }, "You have no forms yet. Start from a template below, or use New form in the top bar to build one from scratch.") : /*#__PURE__*/React.createElement("div", {
-    className: "card",
-    style: {
-      overflowX: "auto"
-    }
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "table"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Title"), /*#__PURE__*/React.createElement("th", {
-    className: "hide-sm"
-  }, "Link"), /*#__PURE__*/React.createElement("th", null, "Responses"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
-    className: "hide-sm"
-  }, "Created"))), /*#__PURE__*/React.createElement("tbody", null, forms.map(f => /*#__PURE__*/React.createElement("tr", {
+    className: "form-grid"
+  }, forms.map(f => /*#__PURE__*/React.createElement("button", {
     key: f.id,
-    className: "clickable",
+    className: "form-card",
     onClick: () => navigate("/dashboard/" + f.id)
-  }, /*#__PURE__*/React.createElement("td", {
-    style: {
-      fontWeight: 600
-    }
-  }, f.title), /*#__PURE__*/React.createElement("td", {
-    className: "hide-sm mono",
-    style: {
-      fontSize: 12,
-      color: "var(--ink-soft)"
-    }
-  }, f.username === "admin" ? "/" + f.slug : "/" + f.username + "/" + f.slug), /*#__PURE__*/React.createElement("td", null, f.responses), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fc-top"
+  }, /*#__PURE__*/React.createElement("span", {
     className: "badge " + (f.is_open ? "open" : "closed")
-  }, f.is_open ? "Open" : "Closed")), /*#__PURE__*/React.createElement("td", {
-    className: "hide-sm muted",
+  }, f.is_open ? "Open" : "Closed"), /*#__PURE__*/React.createElement("span", {
+    className: "fc-count"
+  }, f.responses, " ", f.responses === 1 ? "response" : "responses")), /*#__PURE__*/React.createElement("div", {
+    className: "fc-title",
     style: {
-      fontSize: 13
+      fontFamily: (f.customFont ? "'" + f.customFont + "', " : "") + (FORM_FONTS[f.font] || FORM_FONTS.sans)
     }
-  }, fmtDate(f.created_at))))))), forms !== null && forms.length < 10 && /*#__PURE__*/React.createElement(TemplateGrid, {
+  }, f.title || "Untitled form"), /*#__PURE__*/React.createElement("div", {
+    className: "fc-meta"
+  }, f.username === "admin" ? "/" + f.slug : "/" + f.username + "/" + f.slug), /*#__PURE__*/React.createElement("div", {
+    className: "fc-foot"
+  }, fmtDate(f.created_at))))), forms !== null && forms.length < 10 && /*#__PURE__*/React.createElement(TemplateGrid, {
     onPick: createFromTemplate,
     creating: creating
   })));
@@ -2755,10 +3054,28 @@ function IconTheme() {
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: "2",
+    strokeWidth: "1.7",
     strokeLinejoin: "round"
   }, /*#__PURE__*/React.createElement("path", {
-    d: "M12 3c4 4.8 6 7.2 6 10a6 6 0 0 1-12 0c0-2.8 2-5.2 6-10z"
+    d: "M12 3a9 9 0 0 0 0 18c1.66 0 2.02-1.17 1.2-2.08-.74-.83-.5-2.02.62-2.32l1.66-.28A4 4 0 0 0 21 12.2 9 9 0 0 0 12 3z"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "7.5",
+    cy: "11",
+    r: "1.05",
+    fill: "currentColor",
+    stroke: "none"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "9.8",
+    cy: "7.4",
+    r: "1.05",
+    fill: "currentColor",
+    stroke: "none"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "14.4",
+    cy: "7.4",
+    r: "1.05",
+    fill: "currentColor",
+    stroke: "none"
   }));
 }
 function IconCog() {
@@ -2768,28 +3085,15 @@ function IconCog() {
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: "2",
-    strokeLinecap: "round"
-  }, /*#__PURE__*/React.createElement("line", {
-    x1: "4",
-    y1: "8",
-    x2: "20",
-    y2: "8"
-  }), /*#__PURE__*/React.createElement("line", {
-    x1: "4",
-    y1: "16",
-    x2: "20",
-    y2: "16"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "15",
-    cy: "8",
-    r: "2.4",
-    fill: "#fff"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "9",
-    cy: "16",
-    r: "2.4",
-    fill: "#fff"
+    strokeWidth: "1.7",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "3"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M5 19l2.1-2.1M16.9 7.1 19 5"
   }));
 }
 function FullMsg({
@@ -4587,7 +4891,7 @@ function Builder({
   if (!form) return /*#__PURE__*/React.createElement(FullMsg, {
     text: "Loading..."
   });
-  const questions = form.schema.questions || [];
+  const questions = Array.isArray(form.schema.questions) ? form.schema.questions : [];
   const selQ = questions.find(q => q.id === sel) || null;
   const setTheme = patch => setForm(f => ({
     ...f,
@@ -4610,7 +4914,7 @@ function Builder({
     ...f,
     schema: {
       ...f.schema,
-      questions: qs
+      questions: typeof qs === "function" ? qs(Array.isArray(f.schema.questions) ? f.schema.questions : []) : qs
     }
   }));
   const addQ = type => {
@@ -4883,6 +5187,10 @@ function Builder({
     title: "Theme",
     onClick: () => setMode("theme")
   }, /*#__PURE__*/React.createElement(IconTheme, null)), /*#__PURE__*/React.createElement("button", {
+    className: mode === "brand" ? "active" : "",
+    title: "Brand studio",
+    onClick: () => setMode("brand")
+  }, /*#__PURE__*/React.createElement(IconBrand, null)), /*#__PURE__*/React.createElement("button", {
     className: mode === "settings" ? "active" : "",
     title: "Form settings",
     onClick: () => setMode("settings")
@@ -4901,6 +5209,10 @@ function Builder({
       fontSize: 14
     }
   }, "Select a question in the canvas to edit it here, or add a new question."))), mode === "theme" && /*#__PURE__*/React.createElement(ThemePanel, {
+    form: form,
+    setTheme: setTheme,
+    setSettings: setSettings
+  }), mode === "brand" && /*#__PURE__*/React.createElement(BrandStudio, {
     form: form,
     setTheme: setTheme,
     setSettings: setSettings
