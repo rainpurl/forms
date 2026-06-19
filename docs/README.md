@@ -153,3 +153,19 @@ Weave an earlier answer into later text. Write a reference like a question label
 ## Per-option quotas
 
 Cap how many people can pick a multiple choice option. Each choice on the question card has a number box; set a limit or leave it blank for none. On the public form a full choice is shown but not selectable (dimmed and marked Full in a list, (full) in a dropdown), with counts computed live from responses. Renaming a choice keeps its limit. Enforcement is soft (like the response cap), and if every choice on a required question fills, respondents cannot finish it.
+
+## White-label and branding
+
+In Form settings, the Branding and white-label section lets you hide the powered by zetetiq footer, set a custom browser tab title and favicon, and add custom CSS. Custom CSS applies to the public form only and targets its class names (.fcard, .ftitle, .fdesc, .opt, .finput, .submit). Title, favicon, and CSS apply on load and are cleaned up on exit.
+
+## Image choice
+
+Pick from a grid of images instead of text. Each choice has an image and an optional caption; set one to six columns and allow single or multiple answers. The stored answer is the caption (or Choice N), so captions make for readable analytics and exports.
+
+## Number
+
+A numeric input with a minimum, maximum, step, optional decimals, and a prefix or suffix such as a currency or percent symbol. Validation enforces the range and whole numbers when decimals are off. Analytics shows average, min, and max.
+
+## Drill-down
+
+Cascading dropdowns where each pick reveals the next level (for example Country then State then City). Build the choices as a tree and name each level. Changing a parent clears its children, and a required question must be drilled to a leaf. The answer is stored as the full path (Europe / France).

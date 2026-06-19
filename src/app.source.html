@@ -510,6 +510,32 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .wq-quota-hint{font-size:11px;color:var(--ink-soft);margin-top:6px}
 .form-scope .opt.full{opacity:.55}
 .form-scope .opt .opt-full{display:inline-block;margin-left:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:5px;padding:1px 5px;vertical-align:middle}
+
+.imgchoice-grid{display:grid;gap:10px;margin-top:4px}
+.imgchoice{display:flex;flex-direction:column;align-items:stretch;gap:0;border:1.5px solid var(--line-strong);border-radius:12px;overflow:hidden;cursor:pointer;background:var(--card);padding:0;text-align:left}
+.imgchoice:hover{border-color:var(--fa)}
+.imgchoice.sel{border-color:var(--fa);box-shadow:0 0 0 2px var(--fa) inset}
+.imgchoice img{width:100%;height:130px;object-fit:cover;display:block}
+.imgchoice-ph{width:100%;height:130px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:13px;background:var(--hover)}
+.imgchoice-cap{padding:8px 10px;font-size:13px;font-weight:500;color:var(--ink)}
+.num-wrap{display:flex;align-items:center;gap:0;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;max-width:280px;background:var(--card)}
+.num-wrap.err{border-color:var(--bad)}
+.num-wrap:focus-within{border-color:var(--fa);box-shadow:0 0 0 3px rgba(91,79,224,.16)}
+.num-affix{padding:0 11px;color:var(--ink-soft);font-size:14px;background:var(--hover);align-self:stretch;display:flex;align-items:center}
+.num-input{border:0 !important;border-radius:0 !important;box-shadow:none !important;flex:1;min-width:0}
+.ic-edit{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ic-edit .input{flex:1;min-width:0}
+.ic-thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line);flex:none}
+.ic-up{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line-strong);border-radius:8px;cursor:pointer;font-size:10px;color:var(--ink-soft);text-align:center}
+.ic-up:hover{border-color:var(--fa)}
+
+.dd-tree{margin-top:2px}
+.dd-node{margin-bottom:6px}
+.dd-row{display:flex;align-items:center;gap:6px}
+.dd-row .input{flex:1;min-width:0;padding:7px 9px;font-size:13px}
+.dd-add{margin-top:4px}
+.dd-selects{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.dd-sel-label{font-size:12px;font-weight:600;color:var(--fa);margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -833,6 +859,171 @@ function DocSignAnswer({ q, val }){
   return (<div>{fields.map((f)=>{ const v = data[f.id]; return (<div key={f.id} style={{marginBottom:8}}><div style={{fontSize:12,color:"var(--ink-soft)"}}>{f.label}</div>{f.kind === "signature" ? (typeof v === "string" && v.indexOf("data:") === 0 ? <img src={v} alt="signature" style={{maxWidth:240,border:"1px solid var(--line)",borderRadius:8,background:"#fff"}} /> : <span className="muted">Not signed</span>) : (f.kind === "check" ? (v ? "Yes" : "No") : (v || <span className="muted">No answer</span>))}</div>); })}</div>);
 }
 
+function ImageChoiceRenderer({ q, value, onChange, error }){
+  const multi = !!q.multi;
+  const arr = Array.isArray(value) ? value : [];
+  const valOf = (opt, i) => opt.label || ("Choice " + (i + 1));
+  const toggle = (val) => { if (multi) onChange(arr.includes(val) ? arr.filter(x=>x!==val) : arr.concat([val])); else onChange(val); };
+  const cols = Math.max(1, Math.min(6, q.columns || 3));
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <div className="imgchoice-grid" style={{gridTemplateColumns:"repeat(" + cols + ", 1fr)"}}>
+        {(q.options || []).map((opt, i)=>{
+          const val = valOf(opt, i); const sel = multi ? arr.includes(val) : value === val;
+          return (
+            <button type="button" key={opt.id || i} className={"imgchoice" + (sel ? " sel" : "")} onClick={()=>toggle(val)}>
+              {opt.image ? <img src={opt.image} alt={opt.label || ""} /> : <div className="imgchoice-ph">No image</div>}
+              {opt.label ? <div className="imgchoice-cap">{opt.label}</div> : null}
+            </button>
+          );
+        })}
+      </div>
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+function ImageChoiceControls({ q, update }){
+  const { toast } = useApp();
+  const opts = Array.isArray(q.options) ? q.options : [];
+  const setOpt = (id, patch)=> update({ options: opts.map((o)=> o.id === id ? { ...o, ...patch } : o) });
+  const addOpt = ()=> update({ options: opts.concat([{ id: uid(), label:"", image:"" }]) });
+  const rmOpt = (id)=> update({ options: opts.filter((o)=> o.id !== id) });
+  const upload = (id, file)=>{ if (!file) return; readImageScaled(file, 900, (url)=>{ if (!url){ toast("Could not read that image."); return; } if (url.length > 900000){ toast("That image is too large."); return; } setOpt(id, { image: url }); }); };
+  return (
+    <div>
+      <div className="panel-section">Answer type</div>
+      <label className="opt-radio"><input type="radio" name={"ict-" + q.id} checked={!q.multi} onChange={()=>update({multi:false})} /><span>Allow one answer</span></label>
+      <label className="opt-radio"><input type="radio" name={"ict-" + q.id} checked={!!q.multi} onChange={()=>update({multi:true})} /><span>Allow multiple answers</span></label>
+      <Field label="Columns"><input className="input" type="number" min="1" max="6" value={q.columns || 3} onChange={(e)=>update({columns: parseInt(e.target.value || "3", 10)})} /></Field>
+      <div className="panel-section">Choices</div>
+      {opts.map((o, i)=>(
+        <div key={o.id} className="ic-edit">
+          {o.image ? <img className="ic-thumb" src={o.image} alt="" /> : <label className="ic-up"><input type="file" accept="image/*" style={{display:"none"}} onChange={(e)=>{ const f = e.target.files && e.target.files[0]; upload(o.id, f); e.target.value = ""; }} /><span>Image</span></label>}
+          <input className="input" placeholder={"Caption " + (i + 1) + " (optional)"} value={o.label} onChange={(e)=>setOpt(o.id, { label: e.target.value })} />
+          {o.image && <button className="iconbtn" title="Replace image" onClick={()=>setOpt(o.id, { image:"" })}>\u21bb</button>}
+          <button className="iconbtn" title="Remove" disabled={opts.length <= 1} onClick={()=>rmOpt(o.id)}>\u00d7</button>
+        </div>
+      ))}
+      <button className="btn sm" style={{marginTop:8}} onClick={addOpt}>Add choice</button>
+      <div className="panel-section">Response requirements</div>
+      <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
+      <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
+    </div>
+  );
+}
+function NumberRenderer({ q, value, onChange, error }){
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <div className={"num-wrap" + (error ? " err" : "")}>
+        {q.prefix ? <span className="num-affix">{q.prefix}</span> : null}
+        <input className="finput num-input" type="number" inputMode="decimal" placeholder={q.placeholder || ""}
+          value={value === undefined || value === null ? "" : value}
+          min={q.min !== "" && q.min !== undefined && q.min !== null ? q.min : undefined}
+          max={q.max !== "" && q.max !== undefined && q.max !== null ? q.max : undefined}
+          step={q.step !== "" && q.step !== undefined && q.step !== null ? q.step : (q.decimals === false ? "1" : "any")}
+          onChange={(e)=>onChange(e.target.value)} />
+        {q.suffix ? <span className="num-affix">{q.suffix}</span> : null}
+      </div>
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+function NumberControls({ q, update }){
+  return (
+    <div>
+      <div className="panel-section">Range</div>
+      <div className="row" style={{gap:10}}>
+        <Field label="Minimum" style={{flex:1}}><input className="input" type="number" value={q.min === undefined ? "" : q.min} onChange={(e)=>update({min: e.target.value})} /></Field>
+        <Field label="Maximum" style={{flex:1}}><input className="input" type="number" value={q.max === undefined ? "" : q.max} onChange={(e)=>update({max: e.target.value})} /></Field>
+      </div>
+      <Field label="Step (optional)"><input className="input" type="number" value={q.step === undefined ? "" : q.step} onChange={(e)=>update({step: e.target.value})} /></Field>
+      <Toggle checked={q.decimals !== false} onChange={(c)=>update({decimals: c})} label="Allow decimals" />
+      <div className="panel-section">Display</div>
+      <div className="row" style={{gap:10}}>
+        <Field label="Prefix" style={{flex:1}}><input className="input" placeholder="$" value={q.prefix || ""} onChange={(e)=>update({prefix: e.target.value})} /></Field>
+        <Field label="Suffix" style={{flex:1}}><input className="input" placeholder="%" value={q.suffix || ""} onChange={(e)=>update({suffix: e.target.value})} /></Field>
+      </div>
+      <Field label="Placeholder"><input className="input" value={q.placeholder || ""} onChange={(e)=>update({placeholder: e.target.value})} /></Field>
+      <div className="panel-section">Response requirements</div>
+      <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
+      <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
+    </div>
+  );
+}
+
+function ddDepth(nodes){ if (!nodes || !nodes.length) return 0; let m = 0; nodes.forEach((n)=>{ const d = ddDepth(n.children); if (d > m) m = d; }); return 1 + m; }
+function DrillTree({ nodes, onChange, depth }){
+  nodes = Array.isArray(nodes) ? nodes : [];
+  const set = (id, patch)=> onChange(nodes.map((n)=> n.id === id ? { ...n, ...patch } : n));
+  const add = ()=> onChange(nodes.concat([{ id: uid(), label:"", children:[] }]));
+  const rm = (id)=> onChange(nodes.filter((n)=> n.id !== id));
+  return (
+    <div className="dd-tree" style={depth ? {marginLeft:14,borderLeft:"2px solid var(--line)",paddingLeft:10} : null}>
+      {nodes.map((n)=>(
+        <div key={n.id} className="dd-node">
+          <div className="dd-row">
+            <input className="input" placeholder="Option label" value={n.label} onChange={(e)=>set(n.id, { label:e.target.value })} />
+            <button className="iconbtn" title="Add sub-option" onClick={()=>set(n.id, { children:(n.children || []).concat([{ id: uid(), label:"", children:[] }]) })}>+</button>
+            <button className="iconbtn" title="Remove" onClick={()=>rm(n.id)}>\u00d7</button>
+          </div>
+          {(n.children && n.children.length > 0) && <DrillTree nodes={n.children} depth={(depth || 0) + 1} onChange={(ch)=>set(n.id, { children:ch })} />}
+        </div>
+      ))}
+      <button className="btn sm ghost dd-add" onClick={add}>{depth ? "Add sub-option" : "Add top-level option"}</button>
+    </div>
+  );
+}
+function DrillControls({ q, update }){
+  const depth = Math.max(1, ddDepth(q.tree || []));
+  return (
+    <div>
+      <div className="panel-section">Level names (optional)</div>
+      <div className="hint" style={{marginBottom:6}}>Name each dropdown, e.g. Country then State. Leave blank for generic prompts.</div>
+      {Array.from({length:depth}).map((_,i)=>(
+        <Field key={i} label={"Level " + (i + 1)}><input className="input" placeholder={i === 0 ? "e.g. Country" : "e.g. State"} value={(q.levels && q.levels[i]) || ""} onChange={(e)=>{ const lv = (q.levels || []).slice(); lv[i] = e.target.value; update({ levels:lv }); }} /></Field>
+      ))}
+      <div className="panel-section">Options</div>
+      <div className="hint" style={{marginBottom:8}}>Use + on a row to add choices that appear after it is picked.</div>
+      <DrillTree nodes={q.tree || []} depth={0} onChange={(t)=>update({ tree:t })} />
+      <div className="panel-section">Response requirements</div>
+      <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
+      <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
+    </div>
+  );
+}
+function DrillRenderer({ q, value, onChange, error }){
+  const path = Array.isArray(value) ? value : [];
+  const levels = Array.isArray(q.levels) ? q.levels : [];
+  const selects = []; let nodes = q.tree || []; let depth = 0;
+  while (nodes && nodes.length){
+    const chosen = path[depth] || "";
+    selects.push({ depth, nodes, chosen });
+    const node = nodes.find((n)=> n.label === chosen);
+    if (!node || !node.children || !node.children.length) break;
+    nodes = node.children; depth++;
+  }
+  const choose = (d, label)=>{ let np = path.slice(0, d); if (label) np = np.concat([label]); onChange(np); };
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <div className="dd-selects">
+        {selects.map((s)=>(
+          <div className="dd-sel" key={s.depth}>
+            {levels[s.depth] ? <div className="dd-sel-label">{levels[s.depth]}</div> : null}
+            <select className="finput" value={s.chosen} onChange={(e)=>choose(s.depth, e.target.value)}>
+              <option value="">{levels[s.depth] ? ("Select " + levels[s.depth]) : "Select..."}</option>
+              {s.nodes.map((n)=>(<option key={n.id || n.label} value={n.label}>{n.label}</option>))}
+            </select>
+          </div>
+        ))}
+      </div>
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+
 function SignatureRenderer({ q, value, onChange, error }){
   const ref = useRef(null);
   const drawing = useRef(false);
@@ -1054,6 +1245,51 @@ const QTYPES = {
     ),
   },
 
+  image_choice: {
+    label: "Image choice",
+    hint: "Pick from images",
+    isInput: true,
+    make: () => ({ type:"image_choice", id: uid(), label:"Choose one", required:false, request:false, multi:false, columns:3, options:[{ id: uid(), label:"", image:"" }, { id: uid(), label:"", image:"" }] }),
+    summary: (q) => ((q.options && q.options.length) || 0) + " image choices",
+    validate: (q, v) => { if (!q.required) return null; const ok = q.multi ? (Array.isArray(v) && v.length > 0) : !!v; return ok ? null : "Please choose an option."; },
+    Renderer: ImageChoiceRenderer,
+  },
+  number_entry: {
+    label: "Number",
+    hint: "A numeric answer with limits",
+    isInput: true,
+    make: () => ({ type:"number_entry", id: uid(), label:"Enter a number", required:false, request:false, min:"", max:"", step:"", decimals:true, prefix:"", suffix:"", placeholder:"" }),
+    summary: (q) => "number",
+    validate: (q, v) => {
+      const empty = v === "" || v === null || v === undefined;
+      if (q.required && empty) return "Please enter a number.";
+      if (empty) return null;
+      const n = Number(v);
+      if (isNaN(n)) return "Please enter a valid number.";
+      if (q.decimals === false && !Number.isInteger(n)) return "Please enter a whole number.";
+      if (q.min !== "" && q.min !== undefined && q.min !== null && n < Number(q.min)) return "Must be at least " + q.min + ".";
+      if (q.max !== "" && q.max !== undefined && q.max !== null && n > Number(q.max)) return "Must be at most " + q.max + ".";
+      return null;
+    },
+    Renderer: NumberRenderer,
+  },
+  drill_down: {
+    label: "Drill down",
+    hint: "Cascading dropdowns",
+    isInput: true,
+    make: () => ({ type:"drill_down", id: uid(), label:"Make a selection", required:false, request:false, levels:[], tree:[{ id: uid(), label:"", children:[] }] }),
+    summary: (q) => ((q.tree && q.tree.length) || 0) + " top-level options",
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const path = Array.isArray(v) ? v : [];
+      if (!path.length) return "Please make a selection.";
+      let nodes = q.tree || [], node = null;
+      for (let i = 0; i < path.length; i++){ node = (nodes || []).find((n)=> n.label === path[i]); if (!node) return "Please make a selection."; nodes = node.children || []; }
+      if (node && node.children && node.children.length) return "Please complete all levels.";
+      return null;
+    },
+    Renderer: DrillRenderer,
+  },
   file_upload: {
     label: "File upload",
     hint: "Let people attach a file",
@@ -1350,7 +1586,7 @@ const QTYPES = {
     Renderer: () => null,
   },
 };
-const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","block","hidden_field","page_break"];
+const QTYPE_ORDER = ["multiple_choice","image_choice","text_entry","number_entry","matrix","rank_order","constant_sum","form_field","drill_down","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","block","hidden_field","page_break"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -1677,6 +1913,16 @@ function PublicForm({ username, slug }){
   const [done, setDone] = useState(false);
   const [doneAnswers, setDoneAnswers] = useState({});
   useEffect(()=>{
+    const wl = (st.form && st.form.schema && st.form.schema.settings) || null;
+    if (!wl) return;
+    const prevTitle = document.title;
+    if (wl.pageTitle) document.title = wl.pageTitle;
+    let icon = null, styleEl = null;
+    try { if (wl.favicon){ icon = document.createElement("link"); icon.rel = "icon"; icon.href = wl.favicon; document.head.appendChild(icon); } } catch (e) {}
+    try { if (wl.customCss){ styleEl = document.createElement("style"); styleEl.setAttribute("data-zq-custom", "1"); styleEl.textContent = wl.customCss; document.head.appendChild(styleEl); } } catch (e) {}
+    return ()=>{ document.title = prevTitle; if (icon && icon.parentNode) icon.parentNode.removeChild(icon); if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl); };
+  }, [st.form]);
+  useEffect(()=>{
     let m = true;
     api.publicForm(username, slug).then(({ok,data})=>{
       if (!m) return;
@@ -1699,7 +1945,7 @@ function PublicForm({ username, slug }){
   if (done){
     const set = (form.schema && form.schema.settings) || {};
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
-    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}<div style={{fontSize:38,color:"var(--fa)"}}>✓</div><div className="ftitle" style={{marginTop:6}}>{pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you"}</div><p className="fdesc">{pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded."}</p>{set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div><div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div></div></div>);
+    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}<div style={{fontSize:38,color:"var(--fa)"}}>✓</div><div className="ftitle" style={{marginTop:6}}>{pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you"}</div><p className="fdesc">{pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded."}</p>{set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div>{!set.hideBranding && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
   const submit = (answers, extra) => {
     extra = extra || {};
@@ -1717,7 +1963,7 @@ function PublicForm({ username, slug }){
   return (
     <div className="form-page"><div className="form-page-inner">
       <FormRenderer form={form} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} />
-      <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>
+      {!(form.schema && form.schema.settings && form.schema.settings.hideBranding) && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}
     </div></div>
   );
 }
@@ -2077,6 +2323,9 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         {q.type === "payment" && <div className="wq-prev-input">{q.url ? ((q.buttonText||"Pay now") + (q.amount?(" \u00b7 "+q.amount):"")) : "Add a payment link in the left panel"}</div>}
         {q.type === "document_sign" && <div className="wq-prev-input">{q.document ? ("Document attached · " + ((q.fields&&q.fields.length)||0) + " field" + (((q.fields&&q.fields.length)||0)===1?"":"s")) : "Upload a document in the left panel"}</div>}
         {q.type === "file_upload" && <div className="wq-prev-input">{(q.accept ? ("Accepts: " + q.accept) : "Any file type") + (q.multiple ? " · multiple" : "")}</div>}
+        {q.type === "image_choice" && <div className="wq-prev-input">{((q.options&&q.options.length)||0) + " image choice" + (((q.options&&q.options.length)||0)===1?"":"s")}</div>}
+        {q.type === "number_entry" && <div className="wq-prev-input" style={{maxWidth:240}}>{(q.prefix||"") + "0" + (q.suffix||"") + (((q.min!==""&&q.min!=null)||(q.max!==""&&q.max!=null)) ? ("  (" + ((q.min!==""&&q.min!=null)?q.min:"") + " to " + ((q.max!==""&&q.max!=null)?q.max:"") + ")") : "")}</div>}
+        {q.type === "drill_down" && <div className="wq-prev-input">{((q.tree&&q.tree.length)||0) ? ("Cascading dropdowns · " + q.tree.length + " top-level") : "Add options in the left panel"}</div>}
       </div>
     </div>
   );
@@ -2433,6 +2682,9 @@ function LeftEditor({ q, update, questions, setQuestions }){
       {q.type === "scheduling" && <SchedulingControls q={q} update={update} />}
       {q.type === "document_sign" && <DocumentControls q={q} update={update} />}
       {q.type === "file_upload" && <FileUploadControls q={q} update={update} />}
+      {q.type === "image_choice" && <ImageChoiceControls q={q} update={update} />}
+      {q.type === "number_entry" && <NumberControls q={q} update={update} />}
+      {q.type === "drill_down" && <DrillControls q={q} update={update} />}
       {q.type === "hidden_field" && <HiddenControls q={q} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <LogicControls q={q} questions={questions} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <SkipControls q={q} questions={questions} update={update} />}
@@ -2489,6 +2741,7 @@ function ThemePanel({ form, setTheme, setSettings }){
 }
 
 function SettingsPanel({ form, setForm, setSettings, id, del }){
+  const { toast } = useApp();
   const toLocalInput = (iso) => { if (!iso) return ""; const d = new Date(iso); if (isNaN(d.getTime())) return ""; const p = (n)=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes()); };
   const fromLocalInput = (v) => { if (!v) return ""; const d = new Date(v); return isNaN(d.getTime()) ? "" : d.toISOString(); };
   return (
@@ -2514,6 +2767,17 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Field label="Button URL (optional)"><input className="input" placeholder="https://example.com" value={form.schema.settings.endButtonUrl || ""} onChange={(e)=>setSettings({endButtonUrl:e.target.value})} /></Field>
       <Field label="Redirect URL (optional)"><input className="input" placeholder="https://example.com/thanks" value={form.schema.settings.redirectUrl || ""} onChange={(e)=>setSettings({redirectUrl:e.target.value})} /></Field>
       <div className="hint">If a redirect URL is set, respondents go there on submit. Otherwise they see the thank-you page above, with the optional button.</div>
+      <div className="panel-section">Branding and white-label</div>
+      <Toggle checked={!!form.schema.settings.hideBranding} onChange={(c)=>setSettings({hideBranding:c})} label="Hide the powered by zetetiq footer" />
+      <div style={{height:10}}></div>
+      <Field label="Browser tab title (optional)"><input className="input" placeholder={form.title || "Form"} value={form.schema.settings.pageTitle || ""} onChange={(e)=>setSettings({pageTitle:e.target.value})} /></Field>
+      <div className="label">Favicon (optional)</div>
+      {form.schema.settings.favicon
+        ? (<div className="himg-preview"><img src={form.schema.settings.favicon} alt="" style={{width:24,height:24,borderRadius:4}} /><button className="btn sm ghost" onClick={()=>setSettings({favicon:null})}>Remove</button></div>)
+        : (<label className="himg-upload"><input type="file" accept="image/*" style={{display:"none"}} onChange={(e)=>{ const f = e.target.files && e.target.files[0]; if (f) readImageScaled(f, 64, (u)=>{ if (!u){ toast("Could not read that image."); return; } setSettings({favicon:u}); }); e.target.value=""; }} /><span>Upload a favicon</span></label>)}
+      <div style={{height:10}}></div>
+      <Field label="Custom CSS (advanced)"><textarea className="textarea" style={{minHeight:120,fontFamily:"var(--mono)",fontSize:12}} placeholder=".fcard { border-radius: 0; } .submit { background: #111; }" value={form.schema.settings.customCss || ""} onChange={(e)=>setSettings({customCss:e.target.value})} /></Field>
+      <div className="hint">Custom CSS applies to your public form only. Target classes such as .fcard, .ftitle, .fdesc, .opt, .finput, or .submit. The thank-you and closed screens use the same classes.</div>
       <div className="panel-section">Integrations</div>
       <Field label="Webhook URL (optional)"><input className="input" placeholder="https://hooks.example.com/..." value={form.schema.settings.webhookUrl || ""} onChange={(e)=>setSettings({webhookUrl:e.target.value})} /></Field>
       <div className="hint">On each submission we POST a JSON payload (event, responses, and metadata like UTM source and time to complete) to this URL.</div>
@@ -3298,6 +3562,36 @@ function QuestionStat({ q, rows }){
   if (q.type === "date"){
     const ds = vals.map(String).filter(Boolean).sort();
     return (<div className="card pad-lg">{head()}<div className="hint">{ds.length ? ("Earliest " + ds[0] + ", latest " + ds[ds.length - 1]) : "No data yet."}</div></div>);
+  }
+
+  if (q.type === "image_choice"){
+    const counts = {};
+    rows.forEach((r)=>{ const v = r.data[q.id]; if (Array.isArray(v)) v.forEach((o)=>{ if (o) counts[o] = (counts[o] || 0) + 1; }); else if (v) counts[v] = (counts[v] || 0) + 1; });
+    const entries = Object.entries(counts).sort((a,b)=>b[1] - a[1]);
+    const mx = Math.max(1, ...entries.map((e)=>e[1]));
+    return (<div className="card pad-lg">{head()}
+      {entries.length ? entries.map(([k,c],i)=>(<div className="bar-row" key={i}><span className="k">{k}</span><span className="track2"><span className="fill" style={{width:(c / mx * 100) + "%"}}></span></span><span className="v">{c}</span></div>)) : <div className="muted" style={{fontSize:13}}>No data yet.</div>}
+    </div>);
+  }
+
+  if (q.type === "number_entry"){
+    const nums = vals.map(Number).filter((n)=>!isNaN(n));
+    const avg = nums.length ? nums.reduce((a,b)=>a + b, 0) / nums.length : 0;
+    return (<div className="card pad-lg">{head()}<div className="statgrid">
+      <div><div className="bignum">{nums.length ? (Math.round(avg * 100) / 100) : "-"}</div><div className="hint">Average</div></div>
+      <div><div className="bignum">{nums.length ? Math.min(...nums) : "-"}</div><div className="hint">Min</div></div>
+      <div><div className="bignum">{nums.length ? Math.max(...nums) : "-"}</div><div className="hint">Max</div></div>
+    </div></div>);
+  }
+
+  if (q.type === "drill_down"){
+    const counts = {};
+    rows.forEach((r)=>{ const v = r.data[q.id]; const key = Array.isArray(v) ? v.join(" / ") : (v || ""); if (key) counts[key] = (counts[key] || 0) + 1; });
+    const entries = Object.entries(counts).sort((a,b)=>b[1] - a[1]);
+    const mx = Math.max(1, ...entries.map((e)=>e[1]));
+    return (<div className="card pad-lg">{head()}
+      {entries.length ? entries.map(([k,c],i)=>(<div className="bar-row" key={i}><span className="k">{k}</span><span className="track2"><span className="fill" style={{width:(c / mx * 100) + "%"}}></span></span><span className="v">{c}</span></div>)) : <div className="muted" style={{fontSize:13}}>No data yet.</div>}
+    </div>);
   }
 
   return (<div className="card pad-lg">{head()}<div className="hint">{answered ? (answered + " text response" + (answered === 1 ? "" : "s") + ". See the Responses tab for details.") : "No data yet."}</div></div>);

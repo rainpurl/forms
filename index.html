@@ -504,6 +504,32 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .wq-quota-hint{font-size:11px;color:var(--ink-soft);margin-top:6px}
 .form-scope .opt.full{opacity:.55}
 .form-scope .opt .opt-full{display:inline-block;margin-left:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:5px;padding:1px 5px;vertical-align:middle}
+
+.imgchoice-grid{display:grid;gap:10px;margin-top:4px}
+.imgchoice{display:flex;flex-direction:column;align-items:stretch;gap:0;border:1.5px solid var(--line-strong);border-radius:12px;overflow:hidden;cursor:pointer;background:var(--card);padding:0;text-align:left}
+.imgchoice:hover{border-color:var(--fa)}
+.imgchoice.sel{border-color:var(--fa);box-shadow:0 0 0 2px var(--fa) inset}
+.imgchoice img{width:100%;height:130px;object-fit:cover;display:block}
+.imgchoice-ph{width:100%;height:130px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:13px;background:var(--hover)}
+.imgchoice-cap{padding:8px 10px;font-size:13px;font-weight:500;color:var(--ink)}
+.num-wrap{display:flex;align-items:center;gap:0;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;max-width:280px;background:var(--card)}
+.num-wrap.err{border-color:var(--bad)}
+.num-wrap:focus-within{border-color:var(--fa);box-shadow:0 0 0 3px rgba(91,79,224,.16)}
+.num-affix{padding:0 11px;color:var(--ink-soft);font-size:14px;background:var(--hover);align-self:stretch;display:flex;align-items:center}
+.num-input{border:0 !important;border-radius:0 !important;box-shadow:none !important;flex:1;min-width:0}
+.ic-edit{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ic-edit .input{flex:1;min-width:0}
+.ic-thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line);flex:none}
+.ic-up{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line-strong);border-radius:8px;cursor:pointer;font-size:10px;color:var(--ink-soft);text-align:center}
+.ic-up:hover{border-color:var(--fa)}
+
+.dd-tree{margin-top:2px}
+.dd-node{margin-bottom:6px}
+.dd-row{display:flex;align-items:center;gap:6px}
+.dd-row .input{flex:1;min-width:0;padding:7px 9px;font-size:13px}
+.dd-add{margin-top:4px}
+.dd-selects{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.dd-sel-label{font-size:12px;font-weight:600;color:var(--fa);margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -1489,6 +1515,494 @@ function DocSignAnswer({
     }, "No answer"));
   }));
 }
+function ImageChoiceRenderer({
+  q,
+  value,
+  onChange,
+  error
+}) {
+  const multi = !!q.multi;
+  const arr = Array.isArray(value) ? value : [];
+  const valOf = (opt, i) => opt.label || "Choice " + (i + 1);
+  const toggle = val => {
+    if (multi) onChange(arr.includes(val) ? arr.filter(x => x !== val) : arr.concat([val]));else onChange(val);
+  };
+  const cols = Math.max(1, Math.min(6, q.columns || 3));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q"
+  }, /*#__PURE__*/React.createElement(QLabel, {
+    q: q
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "imgchoice-grid",
+    style: {
+      gridTemplateColumns: "repeat(" + cols + ", 1fr)"
+    }
+  }, (q.options || []).map((opt, i) => {
+    const val = valOf(opt, i);
+    const sel = multi ? arr.includes(val) : value === val;
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: opt.id || i,
+      className: "imgchoice" + (sel ? " sel" : ""),
+      onClick: () => toggle(val)
+    }, opt.image ? /*#__PURE__*/React.createElement("img", {
+      src: opt.image,
+      alt: opt.label || ""
+    }) : /*#__PURE__*/React.createElement("div", {
+      className: "imgchoice-ph"
+    }, "No image"), opt.label ? /*#__PURE__*/React.createElement("div", {
+      className: "imgchoice-cap"
+    }, opt.label) : null);
+  })), error && /*#__PURE__*/React.createElement("div", {
+    className: "ferr"
+  }, error));
+}
+function ImageChoiceControls({
+  q,
+  update
+}) {
+  const {
+    toast
+  } = useApp();
+  const opts = Array.isArray(q.options) ? q.options : [];
+  const setOpt = (id, patch) => update({
+    options: opts.map(o => o.id === id ? {
+      ...o,
+      ...patch
+    } : o)
+  });
+  const addOpt = () => update({
+    options: opts.concat([{
+      id: uid(),
+      label: "",
+      image: ""
+    }])
+  });
+  const rmOpt = id => update({
+    options: opts.filter(o => o.id !== id)
+  });
+  const upload = (id, file) => {
+    if (!file) return;
+    readImageScaled(file, 900, url => {
+      if (!url) {
+        toast("Could not read that image.");
+        return;
+      }
+      if (url.length > 900000) {
+        toast("That image is too large.");
+        return;
+      }
+      setOpt(id, {
+        image: url
+      });
+    });
+  };
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Answer type"), /*#__PURE__*/React.createElement("label", {
+    className: "opt-radio"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "ict-" + q.id,
+    checked: !q.multi,
+    onChange: () => update({
+      multi: false
+    })
+  }), /*#__PURE__*/React.createElement("span", null, "Allow one answer")), /*#__PURE__*/React.createElement("label", {
+    className: "opt-radio"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "ict-" + q.id,
+    checked: !!q.multi,
+    onChange: () => update({
+      multi: true
+    })
+  }), /*#__PURE__*/React.createElement("span", null, "Allow multiple answers")), /*#__PURE__*/React.createElement(Field, {
+    label: "Columns"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "1",
+    max: "6",
+    value: q.columns || 3,
+    onChange: e => update({
+      columns: parseInt(e.target.value || "3", 10)
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Choices"), opts.map((o, i) => /*#__PURE__*/React.createElement("div", {
+    key: o.id,
+    className: "ic-edit"
+  }, o.image ? /*#__PURE__*/React.createElement("img", {
+    className: "ic-thumb",
+    src: o.image,
+    alt: ""
+  }) : /*#__PURE__*/React.createElement("label", {
+    className: "ic-up"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*",
+    style: {
+      display: "none"
+    },
+    onChange: e => {
+      const f = e.target.files && e.target.files[0];
+      upload(o.id, f);
+      e.target.value = "";
+    }
+  }), /*#__PURE__*/React.createElement("span", null, "Image")), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "Caption " + (i + 1) + " (optional)",
+    value: o.label,
+    onChange: e => setOpt(o.id, {
+      label: e.target.value
+    })
+  }), o.image && /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "Replace image",
+    onClick: () => setOpt(o.id, {
+      image: ""
+    })
+  }, "\\u21bb"), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "Remove",
+    disabled: opts.length <= 1,
+    onClick: () => rmOpt(o.id)
+  }, "\\u00d7"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    style: {
+      marginTop: 8
+    },
+    onClick: addOpt
+  }, "Add choice"), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function NumberRenderer({
+  q,
+  value,
+  onChange,
+  error
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q"
+  }, /*#__PURE__*/React.createElement(QLabel, {
+    q: q
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "num-wrap" + (error ? " err" : "")
+  }, q.prefix ? /*#__PURE__*/React.createElement("span", {
+    className: "num-affix"
+  }, q.prefix) : null, /*#__PURE__*/React.createElement("input", {
+    className: "finput num-input",
+    type: "number",
+    inputMode: "decimal",
+    placeholder: q.placeholder || "",
+    value: value === undefined || value === null ? "" : value,
+    min: q.min !== "" && q.min !== undefined && q.min !== null ? q.min : undefined,
+    max: q.max !== "" && q.max !== undefined && q.max !== null ? q.max : undefined,
+    step: q.step !== "" && q.step !== undefined && q.step !== null ? q.step : q.decimals === false ? "1" : "any",
+    onChange: e => onChange(e.target.value)
+  }), q.suffix ? /*#__PURE__*/React.createElement("span", {
+    className: "num-affix"
+  }, q.suffix) : null), error && /*#__PURE__*/React.createElement("div", {
+    className: "ferr"
+  }, error));
+}
+function NumberControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Range"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Minimum",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: q.min === undefined ? "" : q.min,
+    onChange: e => update({
+      min: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Maximum",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: q.max === undefined ? "" : q.max,
+    onChange: e => update({
+      max: e.target.value
+    })
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Step (optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: q.step === undefined ? "" : q.step,
+    onChange: e => update({
+      step: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Toggle, {
+    checked: q.decimals !== false,
+    onChange: c => update({
+      decimals: c
+    }),
+    label: "Allow decimals"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Display"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Prefix",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "$",
+    value: q.prefix || "",
+    onChange: e => update({
+      prefix: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Suffix",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "%",
+    value: q.suffix || "",
+    onChange: e => update({
+      suffix: e.target.value
+    })
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Placeholder"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.placeholder || "",
+    onChange: e => update({
+      placeholder: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function ddDepth(nodes) {
+  if (!nodes || !nodes.length) return 0;
+  let m = 0;
+  nodes.forEach(n => {
+    const d = ddDepth(n.children);
+    if (d > m) m = d;
+  });
+  return 1 + m;
+}
+function DrillTree({
+  nodes,
+  onChange,
+  depth
+}) {
+  nodes = Array.isArray(nodes) ? nodes : [];
+  const set = (id, patch) => onChange(nodes.map(n => n.id === id ? {
+    ...n,
+    ...patch
+  } : n));
+  const add = () => onChange(nodes.concat([{
+    id: uid(),
+    label: "",
+    children: []
+  }]));
+  const rm = id => onChange(nodes.filter(n => n.id !== id));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dd-tree",
+    style: depth ? {
+      marginLeft: 14,
+      borderLeft: "2px solid var(--line)",
+      paddingLeft: 10
+    } : null
+  }, nodes.map(n => /*#__PURE__*/React.createElement("div", {
+    key: n.id,
+    className: "dd-node"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dd-row"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "Option label",
+    value: n.label,
+    onChange: e => set(n.id, {
+      label: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "Add sub-option",
+    onClick: () => set(n.id, {
+      children: (n.children || []).concat([{
+        id: uid(),
+        label: "",
+        children: []
+      }])
+    })
+  }, "+"), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "Remove",
+    onClick: () => rm(n.id)
+  }, "\\u00d7")), n.children && n.children.length > 0 && /*#__PURE__*/React.createElement(DrillTree, {
+    nodes: n.children,
+    depth: (depth || 0) + 1,
+    onChange: ch => set(n.id, {
+      children: ch
+    })
+  }))), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost dd-add",
+    onClick: add
+  }, depth ? "Add sub-option" : "Add top-level option"));
+}
+function DrillControls({
+  q,
+  update
+}) {
+  const depth = Math.max(1, ddDepth(q.tree || []));
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Level names (optional)"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 6
+    }
+  }, "Name each dropdown, e.g. Country then State. Leave blank for generic prompts."), Array.from({
+    length: depth
+  }).map((_, i) => /*#__PURE__*/React.createElement(Field, {
+    key: i,
+    label: "Level " + (i + 1)
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: i === 0 ? "e.g. Country" : "e.g. State",
+    value: q.levels && q.levels[i] || "",
+    onChange: e => {
+      const lv = (q.levels || []).slice();
+      lv[i] = e.target.value;
+      update({
+        levels: lv
+      });
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Options"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 8
+    }
+  }, "Use + on a row to add choices that appear after it is picked."), /*#__PURE__*/React.createElement(DrillTree, {
+    nodes: q.tree || [],
+    depth: 0,
+    onChange: t => update({
+      tree: t
+    })
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function DrillRenderer({
+  q,
+  value,
+  onChange,
+  error
+}) {
+  const path = Array.isArray(value) ? value : [];
+  const levels = Array.isArray(q.levels) ? q.levels : [];
+  const selects = [];
+  let nodes = q.tree || [];
+  let depth = 0;
+  while (nodes && nodes.length) {
+    const chosen = path[depth] || "";
+    selects.push({
+      depth,
+      nodes,
+      chosen
+    });
+    const node = nodes.find(n => n.label === chosen);
+    if (!node || !node.children || !node.children.length) break;
+    nodes = node.children;
+    depth++;
+  }
+  const choose = (d, label) => {
+    let np = path.slice(0, d);
+    if (label) np = np.concat([label]);
+    onChange(np);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q"
+  }, /*#__PURE__*/React.createElement(QLabel, {
+    q: q
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "dd-selects"
+  }, selects.map(s => /*#__PURE__*/React.createElement("div", {
+    className: "dd-sel",
+    key: s.depth
+  }, levels[s.depth] ? /*#__PURE__*/React.createElement("div", {
+    className: "dd-sel-label"
+  }, levels[s.depth]) : null, /*#__PURE__*/React.createElement("select", {
+    className: "finput",
+    value: s.chosen,
+    onChange: e => choose(s.depth, e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, levels[s.depth] ? "Select " + levels[s.depth] : "Select..."), s.nodes.map(n => /*#__PURE__*/React.createElement("option", {
+    key: n.id || n.label,
+    value: n.label
+  }, n.label)))))), error && /*#__PURE__*/React.createElement("div", {
+    className: "ferr"
+  }, error));
+}
 function SignatureRenderer({
   q,
   value,
@@ -2082,6 +2596,102 @@ const QTYPES = {
         marginTop: 10
       }
     }))
+  },
+  image_choice: {
+    label: "Image choice",
+    hint: "Pick from images",
+    isInput: true,
+    make: () => ({
+      type: "image_choice",
+      id: uid(),
+      label: "Choose one",
+      required: false,
+      request: false,
+      multi: false,
+      columns: 3,
+      options: [{
+        id: uid(),
+        label: "",
+        image: ""
+      }, {
+        id: uid(),
+        label: "",
+        image: ""
+      }]
+    }),
+    summary: q => (q.options && q.options.length || 0) + " image choices",
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const ok = q.multi ? Array.isArray(v) && v.length > 0 : !!v;
+      return ok ? null : "Please choose an option.";
+    },
+    Renderer: ImageChoiceRenderer
+  },
+  number_entry: {
+    label: "Number",
+    hint: "A numeric answer with limits",
+    isInput: true,
+    make: () => ({
+      type: "number_entry",
+      id: uid(),
+      label: "Enter a number",
+      required: false,
+      request: false,
+      min: "",
+      max: "",
+      step: "",
+      decimals: true,
+      prefix: "",
+      suffix: "",
+      placeholder: ""
+    }),
+    summary: q => "number",
+    validate: (q, v) => {
+      const empty = v === "" || v === null || v === undefined;
+      if (q.required && empty) return "Please enter a number.";
+      if (empty) return null;
+      const n = Number(v);
+      if (isNaN(n)) return "Please enter a valid number.";
+      if (q.decimals === false && !Number.isInteger(n)) return "Please enter a whole number.";
+      if (q.min !== "" && q.min !== undefined && q.min !== null && n < Number(q.min)) return "Must be at least " + q.min + ".";
+      if (q.max !== "" && q.max !== undefined && q.max !== null && n > Number(q.max)) return "Must be at most " + q.max + ".";
+      return null;
+    },
+    Renderer: NumberRenderer
+  },
+  drill_down: {
+    label: "Drill down",
+    hint: "Cascading dropdowns",
+    isInput: true,
+    make: () => ({
+      type: "drill_down",
+      id: uid(),
+      label: "Make a selection",
+      required: false,
+      request: false,
+      levels: [],
+      tree: [{
+        id: uid(),
+        label: "",
+        children: []
+      }]
+    }),
+    summary: q => (q.tree && q.tree.length || 0) + " top-level options",
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const path = Array.isArray(v) ? v : [];
+      if (!path.length) return "Please make a selection.";
+      let nodes = q.tree || [],
+        node = null;
+      for (let i = 0; i < path.length; i++) {
+        node = (nodes || []).find(n => n.label === path[i]);
+        if (!node) return "Please make a selection.";
+        nodes = node.children || [];
+      }
+      if (node && node.children && node.children.length) return "Please complete all levels.";
+      return null;
+    },
+    Renderer: DrillRenderer
   },
   file_upload: {
     label: "File upload",
@@ -2747,7 +3357,7 @@ const QTYPES = {
     Renderer: () => null
   }
 };
-const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "signature", "file_upload", "scheduling", "payment", "document_sign", "text_graphic", "block", "hidden_field", "page_break"];
+const QTYPE_ORDER = ["multiple_choice", "image_choice", "text_entry", "number_entry", "matrix", "rank_order", "constant_sum", "form_field", "drill_down", "slider", "nps", "star_rating", "date", "signature", "file_upload", "scheduling", "payment", "document_sign", "text_graphic", "block", "hidden_field", "page_break"];
 
 /* small shared bits */
 function Field({
@@ -3505,6 +4115,35 @@ function PublicForm({
   const [done, setDone] = useState(false);
   const [doneAnswers, setDoneAnswers] = useState({});
   useEffect(() => {
+    const wl = st.form && st.form.schema && st.form.schema.settings || null;
+    if (!wl) return;
+    const prevTitle = document.title;
+    if (wl.pageTitle) document.title = wl.pageTitle;
+    let icon = null,
+      styleEl = null;
+    try {
+      if (wl.favicon) {
+        icon = document.createElement("link");
+        icon.rel = "icon";
+        icon.href = wl.favicon;
+        document.head.appendChild(icon);
+      }
+    } catch (e) {}
+    try {
+      if (wl.customCss) {
+        styleEl = document.createElement("style");
+        styleEl.setAttribute("data-zq-custom", "1");
+        styleEl.textContent = wl.customCss;
+        document.head.appendChild(styleEl);
+      }
+    } catch (e) {}
+    return () => {
+      document.title = prevTitle;
+      if (icon && icon.parentNode) icon.parentNode.removeChild(icon);
+      if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+    };
+  }, [st.form]);
+  useEffect(() => {
     let m = true;
     api.publicForm(username, slug).then(({
       ok,
@@ -3598,7 +4237,7 @@ function PublicForm({
       href: btnUrl,
       target: "_blank",
       rel: "noopener"
-    }, set.endButtonLabel))), /*#__PURE__*/React.createElement("div", {
+    }, set.endButtonLabel))), !set.hideBranding && /*#__PURE__*/React.createElement("div", {
       style: {
         textAlign: "center",
         marginTop: 18
@@ -3651,7 +4290,7 @@ function PublicForm({
     submitting: submitting,
     bookings: st.bookings,
     optionCounts: st.optionCounts
-  }), /*#__PURE__*/React.createElement("div", {
+  }), !(form.schema && form.schema.settings && form.schema.settings.hideBranding) && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       marginTop: 18
@@ -4866,7 +5505,16 @@ function CanvasCard({
     className: "wq-prev-input"
   }, q.document ? "Document attached · " + (q.fields && q.fields.length || 0) + " field" + ((q.fields && q.fields.length || 0) === 1 ? "" : "s") : "Upload a document in the left panel"), q.type === "file_upload" && /*#__PURE__*/React.createElement("div", {
     className: "wq-prev-input"
-  }, (q.accept ? "Accepts: " + q.accept : "Any file type") + (q.multiple ? " · multiple" : ""))));
+  }, (q.accept ? "Accepts: " + q.accept : "Any file type") + (q.multiple ? " · multiple" : "")), q.type === "image_choice" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, (q.options && q.options.length || 0) + " image choice" + ((q.options && q.options.length || 0) === 1 ? "" : "s")), q.type === "number_entry" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input",
+    style: {
+      maxWidth: 240
+    }
+  }, (q.prefix || "") + "0" + (q.suffix || "") + (q.min !== "" && q.min != null || q.max !== "" && q.max != null ? "  (" + (q.min !== "" && q.min != null ? q.min : "") + " to " + (q.max !== "" && q.max != null ? q.max : "") + ")" : "")), q.type === "drill_down" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, q.tree && q.tree.length || 0 ? "Cascading dropdowns · " + q.tree.length + " top-level" : "Add options in the left panel")));
 }
 function MCControls({
   q,
@@ -5815,6 +6463,15 @@ function LeftEditor({
   }), q.type === "file_upload" && /*#__PURE__*/React.createElement(FileUploadControls, {
     q: q,
     update: update
+  }), q.type === "image_choice" && /*#__PURE__*/React.createElement(ImageChoiceControls, {
+    q: q,
+    update: update
+  }), q.type === "number_entry" && /*#__PURE__*/React.createElement(NumberControls, {
+    q: q,
+    update: update
+  }), q.type === "drill_down" && /*#__PURE__*/React.createElement(DrillControls, {
+    q: q,
+    update: update
   }), q.type === "hidden_field" && /*#__PURE__*/React.createElement(HiddenControls, {
     q: q,
     update: update
@@ -5986,6 +6643,9 @@ function SettingsPanel({
   id,
   del
 }) {
+  const {
+    toast
+  } = useApp();
   const toLocalInput = iso => {
     if (!iso) return "";
     const d = new Date(iso);
@@ -6130,6 +6790,85 @@ function SettingsPanel({
   })), /*#__PURE__*/React.createElement("div", {
     className: "hint"
   }, "If a redirect URL is set, respondents go there on submit. Otherwise they see the thank-you page above, with the optional button."), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Branding and white-label"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!form.schema.settings.hideBranding,
+    onChange: c => setSettings({
+      hideBranding: c
+    }),
+    label: "Hide the powered by zetetiq footer"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 10
+    }
+  }), /*#__PURE__*/React.createElement(Field, {
+    label: "Browser tab title (optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: form.title || "Form",
+    value: form.schema.settings.pageTitle || "",
+    onChange: e => setSettings({
+      pageTitle: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Favicon (optional)"), form.schema.settings.favicon ? /*#__PURE__*/React.createElement("div", {
+    className: "himg-preview"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: form.schema.settings.favicon,
+    alt: "",
+    style: {
+      width: 24,
+      height: 24,
+      borderRadius: 4
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => setSettings({
+      favicon: null
+    })
+  }, "Remove")) : /*#__PURE__*/React.createElement("label", {
+    className: "himg-upload"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*",
+    style: {
+      display: "none"
+    },
+    onChange: e => {
+      const f = e.target.files && e.target.files[0];
+      if (f) readImageScaled(f, 64, u => {
+        if (!u) {
+          toast("Could not read that image.");
+          return;
+        }
+        setSettings({
+          favicon: u
+        });
+      });
+      e.target.value = "";
+    }
+  }), /*#__PURE__*/React.createElement("span", null, "Upload a favicon")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 10
+    }
+  }), /*#__PURE__*/React.createElement(Field, {
+    label: "Custom CSS (advanced)"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    className: "textarea",
+    style: {
+      minHeight: 120,
+      fontFamily: "var(--mono)",
+      fontSize: 12
+    },
+    placeholder: ".fcard { border-radius: 0; } .submit { background: #111; }",
+    value: form.schema.settings.customCss || "",
+    onChange: e => setSettings({
+      customCss: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Custom CSS applies to your public form only. Target classes such as .fcard, .ftitle, .fdesc, .opt, .finput, or .submit. The thank-you and closed screens use the same classes."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Integrations"), /*#__PURE__*/React.createElement(Field, {
     label: "Webhook URL (optional)"
@@ -8247,6 +8986,92 @@ function QuestionStat({
     }, head(), /*#__PURE__*/React.createElement("div", {
       className: "hint"
     }, ds.length ? "Earliest " + ds[0] + ", latest " + ds[ds.length - 1] : "No data yet."));
+  }
+  if (q.type === "image_choice") {
+    const counts = {};
+    rows.forEach(r => {
+      const v = r.data[q.id];
+      if (Array.isArray(v)) v.forEach(o => {
+        if (o) counts[o] = (counts[o] || 0) + 1;
+      });else if (v) counts[v] = (counts[v] || 0) + 1;
+    });
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const mx = Math.max(1, ...entries.map(e => e[1]));
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), entries.length ? entries.map(([k, c], i) => /*#__PURE__*/React.createElement("div", {
+      className: "bar-row",
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "k"
+    }, k), /*#__PURE__*/React.createElement("span", {
+      className: "track2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "fill",
+      style: {
+        width: c / mx * 100 + "%"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "v"
+    }, c))) : /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13
+      }
+    }, "No data yet."));
+  }
+  if (q.type === "number_entry") {
+    const nums = vals.map(Number).filter(n => !isNaN(n));
+    const avg = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), /*#__PURE__*/React.createElement("div", {
+      className: "statgrid"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, nums.length ? Math.round(avg * 100) / 100 : "-"), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Average")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, nums.length ? Math.min(...nums) : "-"), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Min")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, nums.length ? Math.max(...nums) : "-"), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Max"))));
+  }
+  if (q.type === "drill_down") {
+    const counts = {};
+    rows.forEach(r => {
+      const v = r.data[q.id];
+      const key = Array.isArray(v) ? v.join(" / ") : v || "";
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    });
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const mx = Math.max(1, ...entries.map(e => e[1]));
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, head(), entries.length ? entries.map(([k, c], i) => /*#__PURE__*/React.createElement("div", {
+      className: "bar-row",
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "k"
+    }, k), /*#__PURE__*/React.createElement("span", {
+      className: "track2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "fill",
+      style: {
+        width: c / mx * 100 + "%"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "v"
+    }, c))) : /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13
+      }
+    }, "No data yet."));
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "card pad-lg"

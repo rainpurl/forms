@@ -351,3 +351,29 @@ On the public form, a choice that has reached its limit is shown but cannot be s
 Renaming a choice keeps its limit attached to it. This works for both single and multiple selection and for the dropdown display.
 
 Two things to know. Enforcement is soft, like the overall response cap and the meeting slot capacity: the count and the new submission are not a single atomic step, so a burst of simultaneous submissions could push a choice slightly over its limit. And if every choice on a required question fills up, respondents cannot complete that question, so for tightly capped forms it is worth pairing option limits with the overall response cap in Form settings or watching the totals.
+
+## White-label and custom branding
+
+Public forms can now be fully branded under Form settings, in a new section called Branding and white-label.
+
+There is a toggle to hide the powered by zetetiq footer on the public form and the thank-you and closed screens. There is a browser tab title field, so the form can show its own title in the browser tab instead of the default. There is a favicon upload, so the form shows a custom icon in the browser tab. And there is a custom CSS box for advanced styling.
+
+Custom CSS applies to the public form only, never to the builder or dashboard. It targets the same class names the public form uses, such as .fcard for the card, .ftitle and .fdesc for the title and description, .opt for choice rows, .finput for inputs, and .submit for the submit button. The title, favicon, and CSS are applied when the form loads and cleaned up when the visitor leaves, so they never leak into the rest of the app.
+
+## Image choice question
+
+A new question type where respondents pick from a grid of images rather than text. Each choice has an image upload and an optional caption, and you can set how many columns the grid uses (one to six). It supports either a single answer or multiple answers, like multiple choice.
+
+Images are downscaled on upload to keep forms light. The stored answer is the caption, or Choice N if there is no caption, so add captions if you want readable analytics and exports. Analytics shows a bar chart of how often each choice was picked.
+
+## Number question
+
+A numeric input with validation. You can set a minimum, a maximum, and a step, choose whether decimals are allowed, and add a prefix or suffix (for example a dollar sign before or a percent sign after). There is also a placeholder field.
+
+On submit it checks that the value is a valid number, is within the range, and is a whole number when decimals are turned off. Analytics shows the average, minimum, and maximum across responses.
+
+## Drill-down question
+
+Cascading dropdowns, where each choice reveals the next level. A common use is Country then State then City. You build the choices as a tree in the left panel: type a top-level option, then use the plus button on its row to add the options that appear once it is picked, and so on to any depth. Each level can be given a name (such as Country or State) that labels its dropdown.
+
+On the form, picking an option reveals the next dropdown; changing a higher-level choice clears the lower ones. When the question is required, the respondent must drill all the way to a final option with no further choices. The stored answer is the full path (for example Europe / France), which is what appears in exports, and analytics shows a bar chart of the most common full paths.
