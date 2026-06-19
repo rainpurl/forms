@@ -319,3 +319,7 @@ Text boxes can now have a maximum length with a live character count, so people 
 ## A new look
 
 The brand moved to a warm sand background with a blue accent. Buttons, inputs, toggles and cards now look pressed into or raised off the page instead of outlined, and every control responds when you hover or click it, with smooth, restrained animation throughout. The light and dark modes both follow the new palette. Open brand-preview.html to see the colours and components. If your device is set to reduce motion, the animations quiet down automatically.
+
+## Themed dropdowns, colour picker, and tooltips
+
+Dropdown menus and the colour picker now match the app's look instead of using the plain browser versions, in both light and dark. Hovering an icon button shows a small label that follows your cursor. Language and translation options now live as an expandable section inside Form settings rather than a separate panel. Buttons and cards were also refined to feel a touch crisper. Date and time pickers are next on the themed-control list.

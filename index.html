@@ -11,7 +11,7 @@
 <style>
 :root{
   color-scheme: light;
-  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1.5px 0 rgba(120,95,55,.16),0 1px 2px rgba(70,55,30,.12);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(70,55,30,.1);
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,92,60,.1),0 1px 1.5px rgba(55,45,28,.09);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);
   --ease:cubic-bezier(.4,0,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--t-fast:.14s;--t:.2s;--ring:0 0 0 3px rgba(92,136,205,.32);
   --bo:#5C88CD;            /* primary blue */
   --bo-dark:#4A73B5;
@@ -171,11 +171,11 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 /* form scope (respondent + preview): themed */
 .form-scope{--fp:#5C88CD;--fs:#2A2620;--fa:#5C88CD;--ftext:var(--fs);font-family:var(--sans)}
-.form-page,.form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--good:#4F8A5B;--bad:#C0563F;--hover:#E7DFD0;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1.5px 0 rgba(120,95,55,.16),0 1px 2px rgba(70,55,30,.12);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(70,55,30,.1);}
+.form-page,.form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--good:#4F8A5B;--bad:#C0563F;--hover:#E7DFD0;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,92,60,.1),0 1px 1.5px rgba(55,45,28,.09);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
 html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#151310;--card:#211E18;--ink:#ECE7DB;--ink-soft:#A69E8C;--line:#332F24;--line-strong:#46402F;--hover:#2A2620;--ftext:#ECE7DB;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.5);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);}
 html[data-theme="dark"] .form-scope .finput,html[data-theme="dark"] .form-scope textarea,html[data-theme="dark"] .form-scope select{background:var(--card);color:var(--ink)}
 html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
-.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--hover:#E7DFD0;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1.5px 0 rgba(120,95,55,.16),0 1px 2px rgba(70,55,30,.12);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(70,55,30,.1);}
+.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--hover:#E7DFD0;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,92,60,.1),0 1px 1.5px rgba(55,45,28,.09);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
 .form-embed.form-page{min-height:auto;padding:14px 14px 22px;background:transparent}
 .form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
 .form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--ftext);font-weight:600;line-height:1.2}
@@ -814,6 +814,41 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 .form-scope .star:hover{transform:scale(1.18)}
 /* cinematic page-in for each form step */
 .form-scope .fpage{animation:fadeUp .3s var(--ease) both}
+
+/* ===== themed dropdowns, colour picker, tooltips, sub-menus (v3) ===== */
+.setting-sub{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;border-radius:8px;padding:7px 8px;margin-left:-8px;margin-right:-8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;transition:background-color var(--t-fast) var(--ease)}
+.setting-sub:hover{background:var(--hover)}
+.setting-sub .sub-caret{font-size:16px;font-weight:700;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center}
+.setting-sub-body{padding-left:2px;animation:fadeUp .2s var(--ease) both}
+/* themed select */
+.zsel-wrap{position:relative;display:block}
+.zsel{width:100%;display:inline-flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer;font:inherit}
+.zsel-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zsel-arrow{flex:none;font-size:11px;color:var(--ink-soft);transition:transform var(--t-fast) var(--ease)}
+.zsel[aria-expanded="true"] .zsel-arrow{transform:rotate(180deg)}
+.zsel-menu{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:var(--card);border-radius:10px;box-shadow:var(--bevel-raise),0 12px 30px rgba(40,30,15,.16);padding:5px;z-index:60;max-height:260px;overflow:auto;transform-origin:top left;animation:menupop .14s var(--ease) both}
+.zsel-opt{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;cursor:pointer;font:inherit;font-size:14px;color:var(--ink);transition:background-color var(--t-fast) var(--ease),color var(--t-fast)}
+.zsel-opt:hover{background:var(--hover)}
+.zsel-opt.sel{background:var(--bo);color:#fff}
+.zsel-opt:disabled{opacity:.45;cursor:not-allowed}
+.zsel-disabled{opacity:.55;pointer-events:none}
+.form-scope .zsel-opt.sel{background:var(--fp);color:#fff}
+/* themed colour picker */
+.cpick-wrap{position:relative;display:inline-block}
+.cpick-trigger{display:inline-flex;align-items:center;gap:9px;border:1px solid transparent;background:var(--card);border-radius:10px;padding:7px 11px;cursor:pointer;box-shadow:var(--bevel-raise);font:inherit;transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.cpick-trigger:hover{transform:translateY(-1px)}
+.cpick-trigger:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
+.cpick-sw{width:20px;height:20px;border-radius:6px;box-shadow:var(--bevel-inset);flex:none}
+.cpick-val{font-size:13px;color:var(--ink)}
+.cpick-pop{position:absolute;top:calc(100% + 6px);left:0;z-index:60;background:var(--card);border-radius:12px;box-shadow:var(--bevel-raise),0 14px 34px rgba(40,30,15,.18);padding:12px;width:212px;transform-origin:top left;animation:menupop .14s var(--ease) both}
+.cpick-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:10px}
+.cpick-chip{width:100%;aspect-ratio:1/1;border:0;border-radius:7px;cursor:pointer;box-shadow:var(--bevel-soft);transition:transform .12s var(--ease-spring)}
+.cpick-chip:hover{transform:scale(1.14)}
+.cpick-chip.sel{outline:2px solid var(--ink);outline-offset:2px}
+.cpick-hexrow{display:flex;align-items:center;gap:8px}
+/* cursor tooltip card */
+.cursor-tip{position:fixed;z-index:9999;pointer-events:none;background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 9px;border-radius:7px;box-shadow:0 8px 22px rgba(0,0,0,.3);max-width:260px;animation:tipin .12s var(--ease) both}
+@keyframes tipin{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -1297,7 +1332,7 @@ function FileUploadControls({
 }) {
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Field, {
     label: "Accepted file types"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.accept || "",
     onChange: e => update({
@@ -2022,7 +2057,7 @@ function PollConfig({
     style: {
       flex: 1
     }
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.slotMinutes || 60,
     onChange: e => update({
@@ -2593,7 +2628,7 @@ function SchedulingControls({
     })
   }))), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
-  }, "Meeting type"), /*#__PURE__*/React.createElement("select", {
+  }, "Meeting type"), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: mt,
     onChange: e => update({
@@ -2799,7 +2834,7 @@ function SchedulingControls({
       marginBottom: 6,
       alignItems: "center"
     }
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     style: {
       flex: "0 0 84px"
@@ -2823,7 +2858,7 @@ function SchedulingControls({
     onChange: e => setRem(r.id, {
       value: Math.max(0, parseInt(e.target.value || "0", 10))
     })
-  }), /*#__PURE__*/React.createElement("select", {
+  }), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     style: {
       flex: 1
@@ -2889,7 +2924,7 @@ function SchedulingControls({
     placeholder: "https://"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
-  }, "Video conferencing"), /*#__PURE__*/React.createElement("select", {
+  }, "Video conferencing"), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.video || "none",
     onChange: e => update({
@@ -3029,7 +3064,7 @@ function DocumentControls({
     onChange: e => setField(f.id, {
       label: e.target.value
     })
-  }), /*#__PURE__*/React.createElement("select", {
+  }), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: f.kind,
     onChange: e => setField(f.id, {
@@ -3745,7 +3780,7 @@ function DrillRenderer({
     key: s.depth
   }, levels[s.depth] ? /*#__PURE__*/React.createElement("div", {
     className: "dd-sel-label"
-  }, levels[s.depth]) : null, /*#__PURE__*/React.createElement("select", {
+  }, levels[s.depth]) : null, /*#__PURE__*/React.createElement(Select, {
     className: "finput",
     value: s.chosen,
     onChange: e => choose(s.depth, e.target.value)
@@ -3792,7 +3827,7 @@ function SbsRenderer({
     className: "mrow"
   }, r), cols.map(c => /*#__PURE__*/React.createElement("td", {
     key: c.id
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "finput sbs-sel",
     value: ans[r] && ans[r][c.label] || "",
     onChange: e => set(r, c.label, e.target.value)
@@ -4370,7 +4405,7 @@ function AdvancedControls({
     className: "panel-section"
   }, "Advanced"), experiment && experiment.on && /*#__PURE__*/React.createElement(Field, {
     label: "Show in variant"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.variant || "",
     onChange: e => update({
@@ -4475,7 +4510,7 @@ function EmbedControls({
     className: "hint"
   }, "You have no other forms yet. Create another form first, then you can embed it here.") : /*#__PURE__*/React.createElement(Field, {
     label: "Item"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.embedSlug || "",
     onChange: e => pick(e.target.value)
@@ -4671,7 +4706,7 @@ const QTYPES = {
         })
       })), /*#__PURE__*/React.createElement(Field, {
         label: "Type"
-      }, /*#__PURE__*/React.createElement("select", {
+      }, /*#__PURE__*/React.createElement(Select, {
         className: "select",
         value: q.mode,
         onChange: ev => update({
@@ -4763,7 +4798,7 @@ const QTYPES = {
           className: "q"
         }, /*#__PURE__*/React.createElement(QLabel, {
           q: q
-        }), /*#__PURE__*/React.createElement("select", {
+        }), /*#__PURE__*/React.createElement(Select, {
           className: "finput",
           value: value || "",
           onChange: ev => onChange(ev.target.value)
@@ -4903,7 +4938,7 @@ const QTYPES = {
       style: {
         flex: 1
       }
-    }, /*#__PURE__*/React.createElement("select", {
+    }, /*#__PURE__*/React.createElement(Select, {
       className: "select",
       value: q.mode,
       onChange: ev => update({
@@ -4918,7 +4953,7 @@ const QTYPES = {
       style: {
         flex: 1
       }
-    }, /*#__PURE__*/React.createElement("select", {
+    }, /*#__PURE__*/React.createElement(Select, {
       className: "select",
       value: q.validation,
       onChange: ev => update({
@@ -6354,7 +6389,7 @@ function PipeInput({
     className: "pipe-row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "mini-label"
-  }, "insert answer"), /*#__PURE__*/React.createElement("select", {
+  }, "insert answer"), /*#__PURE__*/React.createElement(Select, {
     className: "select pipe-select",
     value: "",
     onChange: e => {
@@ -6430,7 +6465,7 @@ function SkipControls({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "mini-label"
-  }, "if answer"), /*#__PURE__*/React.createElement("select", {
+  }, "if answer"), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: r.op,
     onChange: e => setR(r.id, {
@@ -6446,7 +6481,7 @@ function SkipControls({
     value: "answered"
   }, "is answered"), /*#__PURE__*/React.createElement("option", {
     value: "empty"
-  }, "is empty"))), needsValue(r.op) && (opts ? /*#__PURE__*/React.createElement("select", {
+  }, "is empty"))), needsValue(r.op) && (opts ? /*#__PURE__*/React.createElement(Select, {
     className: "select",
     style: {
       marginTop: 6
@@ -6478,7 +6513,7 @@ function SkipControls({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "mini-label"
-  }, "go to"), /*#__PURE__*/React.createElement("select", {
+  }, "go to"), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: r.target,
     onChange: e => setR(r.id, {
@@ -7252,7 +7287,7 @@ function PublicForm({
     submit: _t("ui:submit", "Submit"),
     langBar: _langs.length > 1 ? /*#__PURE__*/React.createElement("div", {
       className: "lang-bar"
-    }, /*#__PURE__*/React.createElement("select", {
+    }, /*#__PURE__*/React.createElement(Select, {
       className: "lang-select",
       value: curLang,
       onChange: e => setLang(e.target.value)
@@ -8123,7 +8158,7 @@ function BrandStudio({
     }
   }), /*#__PURE__*/React.createElement(Field, {
     label: "Font"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: font,
     onChange: e => setFont(e.target.value)
@@ -8369,40 +8404,156 @@ function normalizeForm(f) {
     }
   };
 }
+function selText(node) {
+  if (node == null || node === false || node === true) return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(selText).join("");
+  if (node.props && node.props.children != null) return selText(node.props.children);
+  return "";
+}
+function Select({
+  value,
+  onChange,
+  className,
+  style,
+  disabled,
+  children,
+  ...rest
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const opts = [];
+  React.Children.toArray(children).forEach(ch => {
+    if (ch && ch.props && ch.type === "option") {
+      const ov = ch.props.value != null ? ch.props.value : selText(ch.props.children);
+      opts.push({
+        value: ov,
+        label: selText(ch.props.children),
+        disabled: !!ch.props.disabled
+      });
+    }
+  });
+  useEffect(() => {
+    if (!open) return;
+    const h = e => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const k = e => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", h);
+    document.addEventListener("keydown", k);
+    return () => {
+      document.removeEventListener("pointerdown", h);
+      document.removeEventListener("keydown", k);
+    };
+  }, [open]);
+  const cur = opts.find(o => String(o.value) === String(value));
+  const lbl = cur ? cur.label : opts[0] ? opts[0].label : "";
+  const pick = v => {
+    setOpen(false);
+    if (onChange) onChange({
+      target: {
+        value: v
+      }
+    });
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "zsel-wrap" + (disabled ? " zsel-disabled" : ""),
+    ref: ref,
+    style: style
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: (className || "") + " zsel",
+    disabled: disabled,
+    "aria-haspopup": "listbox",
+    "aria-expanded": open,
+    onClick: () => !disabled && setOpen(o => !o)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "zsel-label"
+  }, lbl), /*#__PURE__*/React.createElement("span", {
+    className: "zsel-arrow",
+    "aria-hidden": "true"
+  }, "\\u25be")), open && /*#__PURE__*/React.createElement("div", {
+    className: "zsel-menu",
+    role: "listbox"
+  }, opts.map((o, i) => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: i,
+    role: "option",
+    "aria-selected": String(o.value) === String(value),
+    disabled: o.disabled,
+    className: "zsel-opt" + (String(o.value) === String(value) ? " sel" : ""),
+    onClick: () => !o.disabled && pick(o.value)
+  }, o.label))));
+}
+const COLOR_SWATCHES = ["#5C88CD", "#4A73B5", "#2A6F97", "#4F8A5B", "#2F9E63", "#E0A23B", "#C0563F", "#B5446E", "#7A5CCD", "#736B5E", "#2A2620", "#FBFAF6"];
 function ColorPick({
   label,
   value,
   onChange
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const h = e => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", h);
+    return () => document.removeEventListener("pointerdown", h);
+  }, [open]);
+  const v = value || "#5C88CD";
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "label"
   }, label), /*#__PURE__*/React.createElement("div", {
-    className: "row",
+    className: "cpick-wrap",
+    ref: ref
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "cpick-trigger",
+    onClick: () => setOpen(o => !o),
+    title: "Pick a colour"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cpick-sw",
     style: {
-      gap: 8
+      background: v
     }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "color",
-    value: value || "#5C88CD",
-    onChange: e => onChange(e.target.value),
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "mono cpick-val"
+  }, v), /*#__PURE__*/React.createElement("span", {
+    className: "zsel-arrow",
+    "aria-hidden": "true"
+  }, "\\u25be")), open && /*#__PURE__*/React.createElement("div", {
+    className: "cpick-pop"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "cpick-grid"
+  }, COLOR_SWATCHES.map(c => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: c,
+    className: "cpick-chip" + (String(v).toLowerCase() === c.toLowerCase() ? " sel" : ""),
     style: {
-      width: 40,
-      height: 34,
-      border: "1px solid var(--line-strong)",
-      borderRadius: 8,
-      padding: 2,
-      background: "var(--card)",
-      cursor: "pointer"
+      background: c
+    },
+    title: c,
+    onClick: () => onChange(c)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "cpick-hexrow"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cpick-sw",
+    style: {
+      background: v
     }
   }), /*#__PURE__*/React.createElement("input", {
     className: "input mono",
     style: {
-      width: 96,
+      flex: 1,
       fontSize: 13
     },
     value: value || "",
-    onChange: e => onChange(e.target.value)
-  })));
+    onChange: e => onChange(e.target.value),
+    placeholder: "#5C88CD"
+  })))));
 }
 function IconList() {
   return /*#__PURE__*/React.createElement("svg", {
@@ -9051,7 +9202,7 @@ function MCControls({
     className: "panel-section"
   }, "Format"), /*#__PURE__*/React.createElement(Field, {
     label: "Display"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.display,
     onChange: e => {
@@ -9147,7 +9298,7 @@ function TextControls({
     className: "panel-section"
   }, "Format"), /*#__PURE__*/React.createElement(Field, {
     label: "Text type"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.mode,
     onChange: e => update({
@@ -9169,7 +9320,7 @@ function TextControls({
     className: "panel-section"
   }, "Validation"), /*#__PURE__*/React.createElement(Field, {
     label: "Validate as"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.validation,
     onChange: e => update({
@@ -9490,7 +9641,7 @@ function CarryControls({
     label: "Use choices from an earlier question"
   }), on && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
     label: "From question"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.carryFrom,
     onChange: e => update({
@@ -9501,7 +9652,7 @@ function CarryControls({
     value: sq.id
   }, sq.label || "Question " + (questions.indexOf(sq) + 1))))), /*#__PURE__*/React.createElement(Field, {
     label: "Which choices"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.carryMode || "selected",
     onChange: e => update({
@@ -9939,7 +10090,7 @@ function LogicControls({
       flexDirection: "column",
       gap: 8
     }
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: lg.q,
     onChange: e => update({
@@ -9952,7 +10103,7 @@ function LogicControls({
   }, priors.map(p => /*#__PURE__*/React.createElement("option", {
     key: p.id,
     value: p.id
-  }, p.label || p.id))), /*#__PURE__*/React.createElement("select", {
+  }, p.label || p.id))), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: lg.op,
     onChange: e => update({
@@ -9967,7 +10118,7 @@ function LogicControls({
     value: "ne"
   }, "is not"), /*#__PURE__*/React.createElement("option", {
     value: "contains"
-  }, "contains")), opts ? /*#__PURE__*/React.createElement("select", {
+  }, "contains")), opts ? /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: lg.value,
     onChange: e => update({
@@ -10058,7 +10209,7 @@ function LeftEditor({
     className: "panel-title"
   }, "Edit question"), /*#__PURE__*/React.createElement(Field, {
     label: "Question type"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: q.type,
     onChange: e => changeType(e.target.value)
@@ -10256,7 +10407,7 @@ function ThemePanel({
     })
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "label"
-  }, "Font"), /*#__PURE__*/React.createElement("select", {
+  }, "Font"), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: form.theme.font,
     onChange: e => setTheme({
@@ -10436,7 +10587,7 @@ function TranslationsPanel({
     className: "panel-section"
   }, "Translate into"), /*#__PURE__*/React.createElement(Field, {
     label: "Target language"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: target,
     onChange: e => setTarget(e.target.value)
@@ -10488,6 +10639,7 @@ function SettingsPanel({
     const d = new Date(v);
     return isNaN(d.getTime()) ? "" : d.toISOString();
   };
+  const [showLang, setShowLang] = useState(false);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "panel-title"
   }, "Form settings"), /*#__PURE__*/React.createElement(Field, {
@@ -10775,7 +10927,7 @@ function SettingsPanel({
     label: "Run an experiment (assign a random variant)"
   }), form.schema.settings.experiment && /*#__PURE__*/React.createElement(Field, {
     label: "Number of variants"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
     value: String(form.schema.settings.variantCount || 2),
     onChange: e => setSettings({
@@ -10802,7 +10954,17 @@ function SettingsPanel({
     })
   })), /*#__PURE__*/React.createElement("div", {
     className: "hint"
-  }, "On each submission we POST a JSON payload (event, responses, and metadata like UTM source and time to complete) to this URL."), id && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "On each submission we POST a JSON payload (event, responses, and metadata like UTM source and time to complete) to this URL."), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section setting-sub",
+    onClick: () => setShowLang(v => !v)
+  }, /*#__PURE__*/React.createElement("span", null, "Languages and translation"), /*#__PURE__*/React.createElement("span", {
+    className: "sub-caret"
+  }, showLang ? "−" : "+")), showLang && /*#__PURE__*/React.createElement("div", {
+    className: "setting-sub-body"
+  }, /*#__PURE__*/React.createElement(TranslationsPanel, {
+    form: form,
+    setSettings: setSettings
+  })), id && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Programmatic API"), form.schema.settings.apiKey ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
     label: "API key"
@@ -11857,11 +12019,7 @@ function Builder({
     className: mode === "settings" ? "active" : "",
     title: "Form settings",
     onClick: () => setMode("settings")
-  }, /*#__PURE__*/React.createElement(IconCog, null)), /*#__PURE__*/React.createElement("button", {
-    className: mode === "i18n" ? "active" : "",
-    title: "Translations",
-    onClick: () => setMode("i18n")
-  }, /*#__PURE__*/React.createElement(IconGlobe, null))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(IconCog, null))), /*#__PURE__*/React.createElement("div", {
     className: "b-panel"
   }, mode === "edit" && (selQ ? /*#__PURE__*/React.createElement(LeftEditor, {
     q: selQ,
@@ -11897,9 +12055,6 @@ function Builder({
     setSettings: setSettings,
     id: id,
     del: del
-  }), mode === "i18n" && /*#__PURE__*/React.createElement(TranslationsPanel, {
-    form: form,
-    setSettings: setSettings
   }), mode === "schedule" && /*#__PURE__*/React.createElement(SchedulerPanel, {
     form: form,
     questions: questions,
@@ -11916,7 +12071,7 @@ function Builder({
     setMode: setMode
   })), /*#__PURE__*/React.createElement("div", {
     className: "b-canvas"
-  }, mode === "theme" || mode === "schedule" || mode === "esign" || mode === "i18n" ? /*#__PURE__*/React.createElement("div", {
+  }, mode === "theme" || mode === "schedule" || mode === "esign" ? /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 680,
       margin: "26px auto",
@@ -13232,7 +13387,7 @@ function ResponsesTab({
     placeholder: "Search responses",
     value: query,
     onChange: e => setQuery(e.target.value)
-  }), /*#__PURE__*/React.createElement("select", {
+  }), /*#__PURE__*/React.createElement(Select, {
     className: "select",
     style: {
       width: "auto",
@@ -13246,7 +13401,7 @@ function ResponsesTab({
     value: "completed"
   }, "Completed"), /*#__PURE__*/React.createElement("option", {
     value: "screenout"
-  }, "Screened out")), experiment && variants.length > 0 && /*#__PURE__*/React.createElement("select", {
+  }, "Screened out")), experiment && variants.length > 0 && /*#__PURE__*/React.createElement(Select, {
     className: "select",
     style: {
       width: "auto",
@@ -14330,6 +14485,75 @@ function App() {
       document.documentElement.setAttribute("data-theme", theme);
     } catch (e) {}
   }, [theme]);
+  useEffect(() => {
+    const tip = document.createElement("div");
+    tip.className = "cursor-tip";
+    tip.style.display = "none";
+    document.body.appendChild(tip);
+    let cur = null;
+    const tipText = el => el.getAttribute("data-tip") || el.getAttribute("title") || "";
+    const findTip = t => {
+      let el = t;
+      while (el && el !== document.body) {
+        if (el.getAttribute && (el.getAttribute("data-tip") || el.getAttribute("title"))) return el;
+        el = el.parentElement;
+      }
+      return null;
+    };
+    const place = (x, y) => {
+      const r = tip.getBoundingClientRect();
+      let nx = x + 14,
+        ny = y + 18;
+      if (nx + r.width > window.innerWidth - 6) nx = x - r.width - 12;
+      if (ny + r.height > window.innerHeight - 6) ny = y - r.height - 14;
+      tip.style.left = Math.max(6, nx) + "px";
+      tip.style.top = Math.max(6, ny) + "px";
+    };
+    const show = (el, x, y) => {
+      const t = tipText(el);
+      if (!t) return;
+      if (el.hasAttribute("title")) {
+        el.setAttribute("data-otitle", el.getAttribute("title"));
+        el.removeAttribute("title");
+      }
+      tip.textContent = t;
+      tip.style.display = "block";
+      place(x, y);
+    };
+    const hide = el => {
+      if (el && el.hasAttribute("data-otitle")) {
+        el.setAttribute("title", el.getAttribute("data-otitle"));
+        el.removeAttribute("data-otitle");
+      }
+      tip.style.display = "none";
+    };
+    const onOver = e => {
+      const el = findTip(e.target);
+      if (el === cur) return;
+      if (cur) hide(cur);
+      cur = el;
+      if (el) show(el, e.clientX, e.clientY);
+    };
+    const onMove = e => {
+      if (cur && tip.style.display !== "none") place(e.clientX, e.clientY);
+    };
+    const onDown = () => {
+      if (cur) {
+        hide(cur);
+        cur = null;
+      }
+    };
+    document.addEventListener("pointerover", onOver);
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerdown", onDown, true);
+    return () => {
+      document.removeEventListener("pointerover", onOver);
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerdown", onDown, true);
+      if (cur) hide(cur);
+      tip.remove();
+    };
+  }, []);
   const toggleTheme = useCallback(() => {
     setTheme(t => {
       const n = t === "dark" ? "light" : "dark";

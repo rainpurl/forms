@@ -641,3 +641,19 @@ The bevel system was reworked so it replaces borders rather than sitting on top 
 A motion layer was added on top. Interactive elements transition smoothly; buttons lift on hover and push in on press; the toggle knob slides on a slight spring and squishes when pressed; the theme toggle icon turns a little on hover; stars scale on hover; menus and modals animate in (scale and fade from their origin); and each form step fades up as it appears. Everything is gated behind prefers-reduced-motion, which collapses transitions and animations for visitors who ask their system to reduce motion, so it stays practical and accessible.
 
 Motion and bevel are driven by CSS custom properties (the ease curves, durations, the focus ring, and the four bevel shadows) defined per theme, so future tuning is one place.
+
+## Themed controls, tooltips, and the language sub-menu
+
+UI work this round; no backend changes.
+
+Every native dropdown is gone. A single Select component now backs all 35 dropdowns across the app and the public form. It reads the option children it is given, renders a beveled button that opens a themed list (matching the rest of the app, light and dark, with the selected row highlighted), closes on outside click or Escape, and reports changes through the same onChange shape the old selects used, so call sites did not have to change beyond the tag name. In the public form the highlight uses the form's own accent colour.
+
+The colour picker no longer uses the browser control. It is a beveled swatch palette plus a hex field in a themed popover, so it looks the same in both modes and on every platform. A full spectrum picker can be added later if you want arbitrary colours beyond the palette and hex.
+
+Icon buttons now show a themed tooltip that follows the cursor on hover, instead of the browser's default. A small effect at the app root watches for any element carrying a title (or data-tip), shows a dark card near the pointer with that text, suppresses the native tooltip while hovering, and restores it on leave or click. It is keyboard and pointer safe and cleans up after itself.
+
+Language and translation settings are no longer a separate panel. They are a collapsible sub-menu inside Form settings: a Languages and translation row that expands to the full language list, add-language controls, and the per-string translation editor. The standalone translations rail button was removed.
+
+The bevel was also crisped this pass based on feedback that raised pieces felt a little heavy: a brighter top highlight and a lighter, less brown bottom edge and drop, so buttons and cards read closer to the segmented Booking / Group poll control. The brand-preview.html in this folder reflects the change. Bevel strength remains a small set of per-theme variables if further tuning is wanted.
+
+Still to come on the theming request: themed date and time pickers (a calendar popover and a time list), which are larger custom widgets and are next.
