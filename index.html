@@ -495,6 +495,9 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 .skip-rule{border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:8px}
 .mini-label{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+
+.pipe-row{display:flex;align-items:center;gap:6px;margin-top:6px}
+.pipe-select{flex:1;font-size:12px;padding:6px 8px}
 </style>
 </head>
 <body>
@@ -2853,6 +2856,81 @@ function answerToText(v) {
   if (typeof v === "object") return Object.keys(v).map(k => k + ":" + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(",");
   return String(v);
 }
+function pipeText(text, answers, questions) {
+  if (!text || typeof text !== "string" || text.indexOf("{{") < 0) return text;
+  return text.replace(/\{\{([^{}]+)\}\}/g, (m, ref) => {
+    ref = String(ref).trim();
+    let q = (questions || []).find(x => x.id === ref);
+    if (!q) q = (questions || []).find(x => (x.label || "").trim().toLowerCase() === ref.toLowerCase());
+    if (!q) return "";
+    return answerToText(answers ? answers[q.id] : null) || "";
+  });
+}
+function pipeQuestion(q, answers, questions) {
+  if (!q) return q;
+  const has = t => typeof t === "string" && t.indexOf("{{") >= 0;
+  if (!has(q.label) && !has(q.heading) && !has(q.content)) return q;
+  const out = {
+    ...q
+  };
+  if (has(q.label)) out.label = pipeText(q.label, answers, questions);
+  if (has(q.heading)) out.heading = pipeText(q.heading, answers, questions);
+  if (has(q.content)) out.content = pipeText(q.content, answers, questions);
+  return out;
+}
+function PipeInput({
+  value,
+  onChange,
+  placeholder,
+  textarea,
+  questions
+}) {
+  const ref = useRef(null);
+  const inputs = (questions || []).filter(x => QTYPES[x.type] && QTYPES[x.type].isInput && x.type !== "hidden_field" && (x.label || "").trim());
+  const insert = token => {
+    const el = ref.current;
+    const v = value || "";
+    let pos = v.length;
+    try {
+      if (el && typeof el.selectionStart === "number") pos = el.selectionStart;
+    } catch (e) {}
+    onChange(v.slice(0, pos) + token + v.slice(pos));
+    try {
+      if (el && el.focus) el.focus();
+    } catch (e) {}
+  };
+  return /*#__PURE__*/React.createElement("div", null, textarea ? /*#__PURE__*/React.createElement("textarea", {
+    ref: ref,
+    className: "textarea",
+    placeholder: placeholder,
+    value: value || "",
+    onChange: e => onChange(e.target.value)
+  }) : /*#__PURE__*/React.createElement("input", {
+    ref: ref,
+    className: "input",
+    placeholder: placeholder,
+    value: value || "",
+    onChange: e => onChange(e.target.value)
+  }), inputs.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "pipe-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mini-label"
+  }, "insert answer"), /*#__PURE__*/React.createElement("select", {
+    className: "select pipe-select",
+    value: "",
+    onChange: e => {
+      if (e.target.value) {
+        insert("{{" + e.target.value + "}}");
+        e.target.value = "";
+      }
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "choose a question"), inputs.map(x => /*#__PURE__*/React.createElement("option", {
+    key: x.id,
+    value: x.label
+  }, x.label)))));
+}
 function skipMatch(a, rule) {
   const empty = a === undefined || a === null || a === "" || Array.isArray(a) && a.length === 0;
   if (rule.op === "answered") return !empty;
@@ -3342,16 +3420,17 @@ function FormRenderer({
     className: "form-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "form-section-title"
-  }, sec.title), sec.desc ? /*#__PURE__*/React.createElement("div", {
+  }, pipeText(sec.title, answers, questions)), sec.desc ? /*#__PURE__*/React.createElement("div", {
     className: "form-section-desc"
-  }, sec.desc) : null) : null, shown.map(q => {
+  }, pipeText(sec.desc, answers, questions)) : null) : null, shown.map(q => {
     const def = QTYPES[q.type];
     if (!def) return null;
     const R = def.Renderer;
+    const pq = pipeQuestion(q, answers, questions);
     return /*#__PURE__*/React.createElement("div", {
       key: q.id
     }, /*#__PURE__*/React.createElement(R, {
-      q: q,
+      q: pq,
       value: answers[q.id],
       onChange: v => setA(q.id, v),
       error: errors[q.id],
@@ -3401,6 +3480,7 @@ function PublicForm({
   });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [doneAnswers, setDoneAnswers] = useState({});
   useEffect(() => {
     let m = true;
     api.publicForm(username, slug).then(({
@@ -3487,9 +3567,9 @@ function PublicForm({
       style: {
         marginTop: 6
       }
-    }, set.endTitle || "Thank you"), /*#__PURE__*/React.createElement("p", {
+    }, pipeText(set.endTitle, doneAnswers, form.schema && form.schema.questions || []) || "Thank you"), /*#__PURE__*/React.createElement("p", {
       className: "fdesc"
-    }, set.endMessage || "Your response has been recorded."), set.endButtonLabel && btnUrl && /*#__PURE__*/React.createElement("a", {
+    }, pipeText(set.endMessage, doneAnswers, form.schema && form.schema.questions || []) || "Your response has been recorded."), set.endButtonLabel && btnUrl && /*#__PURE__*/React.createElement("a", {
       className: "fcta",
       href: btnUrl,
       target: "_blank",
@@ -3532,6 +3612,7 @@ function PublicForm({
           window.location.href = /^https?:\/\//i.test(r) ? r : "https://" + r;
           return;
         }
+        setDoneAnswers(answers);
         setDone(true);
       } else window.alert(data && data.error === "form_closed" ? "This form just closed." : "Something went wrong. Please try again.");
     });
@@ -5931,24 +6012,30 @@ function SettingsPanel({
     className: "hint"
   }, "The form stops accepting responses when the limit is reached or after the close time. Times use this browser's timezone."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
-  }, "After submission"), /*#__PURE__*/React.createElement(Field, {
+  }, "After submission"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 8
+    }
+  }, "Tip: insert an answer with the picker, or type a reference like ", "{{Your name}}", " to greet people by their answer."), /*#__PURE__*/React.createElement(Field, {
     label: "Thank-you heading"
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
+  }, /*#__PURE__*/React.createElement(PipeInput, {
+    value: form.schema.settings.endTitle,
+    onChange: v => setSettings({
+      endTitle: v
+    }),
     placeholder: "Thank you",
-    value: form.schema.settings.endTitle || "",
-    onChange: e => setSettings({
-      endTitle: e.target.value
-    })
+    questions: form.schema.questions
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Thank-you message"
-  }, /*#__PURE__*/React.createElement("textarea", {
-    className: "textarea",
+  }, /*#__PURE__*/React.createElement(PipeInput, {
+    textarea: true,
+    value: form.schema.settings.endMessage,
+    onChange: v => setSettings({
+      endMessage: v
+    }),
     placeholder: "Your response has been recorded.",
-    value: form.schema.settings.endMessage || "",
-    onChange: e => setSettings({
-      endMessage: e.target.value
-    })
+    questions: form.schema.questions
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Button label (optional)"
   }, /*#__PURE__*/React.createElement("input", {

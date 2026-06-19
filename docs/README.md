@@ -145,3 +145,7 @@ Organize a form into sections. Add a Section from the question menu; it starts a
 ## Skip logic and branching
 
 Input questions can branch the respondent forward. In the question editor, the Skip logic panel adds rules: if the answer is / is not / contains / is answered / is empty, then go to a later section or end the survey. Rules are checked top to bottom; targets are later sections only (forward, no loops). Back follows the real path, and questions on skipped pages are not required. Works together with display logic and sections.
+
+## Piped text
+
+Weave an earlier answer into later text. Write a reference like a question label in double braces, for example Thanks, {{Your name}}. References work in question text, section titles and descriptions, text and graphic blocks, and the thank-you screen, and the thank-you settings include an insert answer picker. References resolve by question label or id, and an unanswered reference shows nothing.

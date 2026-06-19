@@ -501,6 +501,9 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 .skip-rule{border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:8px}
 .mini-label{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+
+.pipe-row{display:flex;align-items:center;gap:6px;margin-top:6px}
+.pipe-select{flex:1;font-size:12px;padding:6px 8px}
 </style>
 </head>
 <body>
@@ -1387,6 +1390,53 @@ function answerToText(v){
   if (typeof v === "object") return Object.keys(v).map((k)=>k + ":" + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(",");
   return String(v);
 }
+function pipeText(text, answers, questions){
+  if (!text || typeof text !== "string" || text.indexOf("{{") < 0) return text;
+  return text.replace(/\{\{([^{}]+)\}\}/g, (m, ref)=>{
+    ref = String(ref).trim();
+    let q = (questions || []).find((x)=> x.id === ref);
+    if (!q) q = (questions || []).find((x)=> (x.label || "").trim().toLowerCase() === ref.toLowerCase());
+    if (!q) return "";
+    return answerToText(answers ? answers[q.id] : null) || "";
+  });
+}
+function pipeQuestion(q, answers, questions){
+  if (!q) return q;
+  const has = (t)=> typeof t === "string" && t.indexOf("{{") >= 0;
+  if (!has(q.label) && !has(q.heading) && !has(q.content)) return q;
+  const out = { ...q };
+  if (has(q.label)) out.label = pipeText(q.label, answers, questions);
+  if (has(q.heading)) out.heading = pipeText(q.heading, answers, questions);
+  if (has(q.content)) out.content = pipeText(q.content, answers, questions);
+  return out;
+}
+function PipeInput({ value, onChange, placeholder, textarea, questions }){
+  const ref = useRef(null);
+  const inputs = (questions || []).filter((x)=> QTYPES[x.type] && QTYPES[x.type].isInput && x.type !== "hidden_field" && (x.label || "").trim());
+  const insert = (token)=>{
+    const el = ref.current; const v = value || "";
+    let pos = v.length; try { if (el && typeof el.selectionStart === "number") pos = el.selectionStart; } catch (e) {}
+    onChange(v.slice(0, pos) + token + v.slice(pos));
+    try { if (el && el.focus) el.focus(); } catch (e) {}
+  };
+  return (
+    <div>
+      {textarea
+        ? <textarea ref={ref} className="textarea" placeholder={placeholder} value={value || ""} onChange={(e)=>onChange(e.target.value)} />
+        : <input ref={ref} className="input" placeholder={placeholder} value={value || ""} onChange={(e)=>onChange(e.target.value)} />}
+      {inputs.length > 0 && (
+        <div className="pipe-row">
+          <span className="mini-label">insert answer</span>
+          <select className="select pipe-select" value="" onChange={(e)=>{ if (e.target.value){ insert("{{" + e.target.value + "}}"); e.target.value = ""; } }}>
+            <option value="">choose a question</option>
+            {inputs.map((x)=>(<option key={x.id} value={x.label}>{x.label}</option>))}
+          </select>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function skipMatch(a, rule){
   const empty = a === undefined || a === null || a === "" || (Array.isArray(a) && a.length === 0);
   if (rule.op === "answered") return !empty;
@@ -1594,8 +1644,8 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
         {form.description && <div className="fdesc">{form.description}</div>}
         {multi && <div className="fprogress"><div className="fprogress-bar" style={{width:((pos / total) * 100) + "%"}}></div></div>}
         <div className="fpage" key={cur} style={{marginTop:12}}>
-          {sec && sec.title ? (<div className="form-section"><div className="form-section-title">{sec.title}</div>{sec.desc ? <div className="form-section-desc">{sec.desc}</div> : null}</div>) : null}
-          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; return (<div key={q.id}><R q={q} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
+          {sec && sec.title ? (<div className="form-section"><div className="form-section-title">{pipeText(sec.title, answers, questions)}</div>{sec.desc ? <div className="form-section-desc">{pipeText(sec.desc, answers, questions)}</div> : null}</div>) : null}
+          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; const pq = pipeQuestion(q, answers, questions); return (<div key={q.id}><R q={pq} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
           {shown.length === 0 && <div className="muted" style={{fontSize:13}}>Nothing to show on this step.</div>}
         </div>
         <div className="fnav" style={{marginTop:18}}>
@@ -1616,6 +1666,7 @@ function PublicForm({ username, slug }){
   const [st, setSt] = useState({ loading:true });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [doneAnswers, setDoneAnswers] = useState({});
   useEffect(()=>{
     let m = true;
     api.publicForm(username, slug).then(({ok,data})=>{
@@ -1639,7 +1690,7 @@ function PublicForm({ username, slug }){
   if (done){
     const set = (form.schema && form.schema.settings) || {};
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
-    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}<div style={{fontSize:38,color:"var(--fa)"}}>✓</div><div className="ftitle" style={{marginTop:6}}>{set.endTitle || "Thank you"}</div><p className="fdesc">{set.endMessage || "Your response has been recorded."}</p>{set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div><div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div></div></div>);
+    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}<div style={{fontSize:38,color:"var(--fa)"}}>✓</div><div className="ftitle" style={{marginTop:6}}>{pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you"}</div><p className="fdesc">{pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded."}</p>{set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div><div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div></div></div>);
   }
   const submit = (answers, extra) => {
     extra = extra || {};
@@ -1649,7 +1700,7 @@ function PublicForm({ username, slug }){
       if (ok && data && data.ok){
         const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
         if (r){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
-        setDone(true);
+        setDoneAnswers(answers); setDone(true);
       }
       else window.alert((data && data.error === "form_closed") ? "This form just closed." : "Something went wrong. Please try again.");
     });
@@ -2438,8 +2489,9 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Field label="Closes at (optional)"><input className="input" type="datetime-local" value={toLocalInput(form.schema.settings.closesAt)} onChange={(e)=>setSettings({closesAt: fromLocalInput(e.target.value)})} /></Field>
       <div className="hint">The form stops accepting responses when the limit is reached or after the close time. Times use this browser's timezone.</div>
       <div className="panel-section">After submission</div>
-      <Field label="Thank-you heading"><input className="input" placeholder="Thank you" value={form.schema.settings.endTitle || ""} onChange={(e)=>setSettings({endTitle:e.target.value})} /></Field>
-      <Field label="Thank-you message"><textarea className="textarea" placeholder="Your response has been recorded." value={form.schema.settings.endMessage || ""} onChange={(e)=>setSettings({endMessage:e.target.value})} /></Field>
+      <div className="hint" style={{marginBottom:8}}>Tip: insert an answer with the picker, or type a reference like {"{{Your name}}"} to greet people by their answer.</div>
+      <Field label="Thank-you heading"><PipeInput value={form.schema.settings.endTitle} onChange={(v)=>setSettings({endTitle:v})} placeholder="Thank you" questions={form.schema.questions} /></Field>
+      <Field label="Thank-you message"><PipeInput textarea value={form.schema.settings.endMessage} onChange={(v)=>setSettings({endMessage:v})} placeholder="Your response has been recorded." questions={form.schema.questions} /></Field>
       <Field label="Button label (optional)"><input className="input" placeholder="Visit our site" value={form.schema.settings.endButtonLabel || ""} onChange={(e)=>setSettings({endButtonLabel:e.target.value})} /></Field>
       <Field label="Button URL (optional)"><input className="input" placeholder="https://example.com" value={form.schema.settings.endButtonUrl || ""} onChange={(e)=>setSettings({endButtonUrl:e.target.value})} /></Field>
       <Field label="Redirect URL (optional)"><input className="input" placeholder="https://example.com/thanks" value={form.schema.settings.redirectUrl || ""} onChange={(e)=>setSettings({redirectUrl:e.target.value})} /></Field>

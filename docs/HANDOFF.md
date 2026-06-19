@@ -333,3 +333,11 @@ When the respondent moves on from a page, the rules on that page are evaluated. 
 Navigation stays sane: the Back button follows the actual path the respondent took, so it returns to the page they came from rather than re-showing a section that was skipped. Questions on skipped pages are treated as not required, so a branch that jumps past required questions still lets the respondent submit. This pairs with display logic (show or hide a single question) and with sections, giving both question level and section level control over the flow.
 
 Note: the page counter shows linear position and does not try to predict the shortened path a branch produces.
+
+## Piped text
+
+You can now weave an earlier answer into text shown later in the same response, so a form can address people by what they told you. A reference looks like a question label wrapped in double braces, for example writing Thanks, {{Your name}} produces Thanks, Ada once someone answers the question labelled Your name.
+
+References work in question text, section titles and descriptions, text and graphic blocks, and the thank-you screen. On the thank-you settings there is an insert answer picker that drops the right reference in for you, and you can also type a reference by hand anywhere. References resolve by the question label, or by its internal id, and a reference to a question that has not been answered yet simply shows nothing.
+
+This pairs naturally with branching: you can route someone to a section and greet them there using an answer they already gave.
