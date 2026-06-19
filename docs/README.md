@@ -107,3 +107,7 @@ The Signature question type lets people sign with a finger or mouse. Signatures 
 ## Availability and limits
 
 In a form's settings you can set a response limit (a cap on total responses) and optional open and close date-times. The form stops accepting responses when the cap is reached or after the close time, and shows respondents a message explaining why. This is enforced on the server, so it holds even against direct posts.
+
+## Report fonts and theme presets
+
+The PDF report matches the form font (Figtree, Roboto Slab, or Mozilla Text), not only the colors, by embedding the real font at export time with a safe fallback. The theme panel also has one-click presets that set the palette and font together.

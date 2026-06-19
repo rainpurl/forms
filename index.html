@@ -389,6 +389,11 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .sigcanvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
 .sigrow{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
 .sighint{font-size:12px;color:var(--ink-soft)}
+
+.theme-presets{display:flex;flex-wrap:wrap;gap:8px}
+.theme-presets .preset{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-strong);background:#fff;border-radius:9px;padding:6px 10px;cursor:pointer;font-size:13px;color:var(--ink)}
+.theme-presets .preset:hover{border-color:var(--bo);background:#f6f5fc}
+.theme-presets .preset .sw{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
@@ -3934,6 +3939,43 @@ function LeftEditor({
     update: update
   }));
 }
+const THEME_PRESETS = [{
+  name: "Indigo",
+  primary: "#5b4fe0",
+  secondary: "#1b1830",
+  accent: "#5b4fe0",
+  font: "sans"
+}, {
+  name: "Forest",
+  primary: "#2f7d52",
+  secondary: "#16321f",
+  accent: "#2f7d52",
+  font: "sans"
+}, {
+  name: "Slate",
+  primary: "#475569",
+  secondary: "#1e293b",
+  accent: "#64748b",
+  font: "sans"
+}, {
+  name: "Sunset",
+  primary: "#c2410c",
+  secondary: "#5b2c0e",
+  accent: "#ea7317",
+  font: "slab"
+}, {
+  name: "Berry",
+  primary: "#a4133c",
+  secondary: "#3d0814",
+  accent: "#c9184a",
+  font: "serif"
+}, {
+  name: "Editorial",
+  primary: "#1b1830",
+  secondary: "#1b1830",
+  accent: "#5b4fe0",
+  font: "zetetiq"
+}];
 function ThemePanel({
   form,
   setTheme,
@@ -3951,7 +3993,27 @@ function ThemePanel({
       flexDirection: "column",
       gap: 14
     }
-  }, /*#__PURE__*/React.createElement(ColorPick, {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Presets"), /*#__PURE__*/React.createElement("div", {
+    className: "theme-presets"
+  }, THEME_PRESETS.map(p => /*#__PURE__*/React.createElement("button", {
+    key: p.name,
+    type: "button",
+    className: "preset",
+    onClick: () => setTheme({
+      primary: p.primary,
+      secondary: p.secondary,
+      accent: p.accent,
+      font: p.font
+    }),
+    title: p.name
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sw",
+    style: {
+      background: p.primary
+    }
+  }), p.name)))), /*#__PURE__*/React.createElement(ColorPick, {
     label: "Primary",
     value: form.theme.primary,
     onChange: v => setTheme({
@@ -5215,6 +5277,67 @@ function svgToPng(svg, color, widthPx) {
     }
   });
 }
+async function fetchFontB64(url) {
+  const blob = await fetch(url).then(r => {
+    if (!r.ok) throw new Error("font " + r.status);
+    return r.blob();
+  });
+  return await new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(String(fr.result).split(",")[1]);
+    fr.onerror = () => rej(new Error("font_read"));
+    fr.readAsDataURL(blob);
+  });
+}
+const PDF_FONT_FILES = {
+  sans: {
+    family: "Figtree",
+    reg: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/figtree/Figtree_400Regular.ttf",
+    bold: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/figtree/Figtree_700Bold.ttf"
+  },
+  slab: {
+    family: "RobotoSlab",
+    reg: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/roboto-slab/RobotoSlab_400Regular.ttf",
+    bold: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/roboto-slab/RobotoSlab_700Bold.ttf"
+  },
+  zetetiq: {
+    family: "MozillaText",
+    reg: "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/mozillatext/MozillaText%5Bwght%5D.ttf",
+    bold: null
+  }
+};
+async function loadPdfFonts(doc, key) {
+  const builtin = {
+    serif: "times",
+    mono: "courier"
+  };
+  if (builtin[key]) return {
+    family: builtin[key]
+  };
+  const f = PDF_FONT_FILES[key] || PDF_FONT_FILES.sans;
+  try {
+    const regFile = f.family + "-R.ttf";
+    doc.addFileToVFS(regFile, await fetchFontB64(f.reg));
+    doc.addFont(regFile, f.family, "normal");
+    let boldFile = regFile;
+    if (f.bold) {
+      try {
+        boldFile = f.family + "-B.ttf";
+        doc.addFileToVFS(boldFile, await fetchFontB64(f.bold));
+      } catch (e) {
+        boldFile = regFile;
+      }
+    }
+    doc.addFont(boldFile, f.family, "bold");
+    return {
+      family: f.family
+    };
+  } catch (e) {
+    return {
+      family: "helvetica"
+    };
+  }
+}
 async function exportReport(form, rows) {
   await ensureJsPDF();
   const {
@@ -5230,15 +5353,9 @@ async function exportReport(form, rows) {
   const theme = form.theme || {};
   const [pr, pg, pb] = hexRgb(theme.primary || "#5b4fe0");
   const [ar, ag, ab] = hexRgb(theme.accent || theme.primary || "#5b4fe0");
-  const FONT_MAP = {
-    sans: "helvetica",
-    serif: "times",
-    mono: "courier",
-    slab: "times",
-    zetetiq: "helvetica"
-  };
-  const ff = FONT_MAP[theme.font] || "helvetica";
-  const ink = [27, 24, 48],
+  const pf = await loadPdfFonts(doc, theme.font);
+  const ff = pf.family;
+  const ink = hexRgb(theme.secondary || "#1b1830"),
     soft = [120, 116, 140],
     track = [231, 228, 243];
   const ensure = (y, need) => {
