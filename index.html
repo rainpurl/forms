@@ -373,12 +373,25 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .b-canvas-live{max-width:680px;margin:26px auto;padding:0 18px}
 .drag-handle{cursor:grab;touch-action:none}
 .drag-handle:active{cursor:grabbing}
+
+.followup{margin-top:12px;padding:12px 14px;border-left:3px solid var(--fa);background:rgba(91,79,224,.05);border-radius:0 10px 10px 0;animation:fadeUp .25s ease both}
+.followup .qlabel{margin-bottom:8px}
+.followup.loading{color:var(--ink-soft);font-size:13px;border-left-color:var(--line-strong);background:transparent}
+.followup-note{margin-top:10px;font-size:12px;color:var(--ink-soft);border-left:3px dashed var(--line-strong);padding:8px 12px}
+.tonebar{display:flex;height:12px;border-radius:6px;overflow:hidden}
+.tonebar span{display:block;height:100%}
+.tonebar .t-pos{background:var(--good)}
+.tonebar .t-neu{background:var(--line-strong)}
+.tonebar .t-neg{background:var(--bad)}
 </style>
 </head>
 <body>
 <div id="root"></div>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script><script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script><script>function boot(){const {
+<script>window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||r.childNodes.length)return;r.innerHTML='<pre style="padding:16px;font:13px monospace;color:#b23b3b;white-space:pre-wrap">'+(e.message||'Error')+'</pre>';},true);</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script>function boot(){const {
   useState,
   useEffect,
   useLayoutEffect,
@@ -429,6 +442,17 @@ const api = {
     body: JSON.stringify(payload)
   }),
   getForm: id => req("/api/forms/" + id),
+  followup: (formId, questionId, answer) => req("/api/public/" + formId + "/followup", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      questionId,
+      answer
+    })
+  }),
+  tone: (id, refresh) => req("/api/forms/" + id + "/tone" + (refresh ? "?refresh=1" : "")),
   updateForm: (id, payload) => req("/api/forms/" + id, {
     method: "PUT",
     headers: {
@@ -1678,6 +1702,7 @@ function FormRenderer({
   const [page, setPage] = useState(0);
   const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
+  const [followups, setFollowups] = useState({});
   const setA = (qid, v) => setAnswers(a => ({
     ...a,
     [qid]: v
@@ -1723,6 +1748,57 @@ function FormRenderer({
     }
     return errs;
   };
+  const fuList = () => Object.keys(followups).filter(k => followups[k] && followups[k].question).map(k => ({
+    questionId: k,
+    question: followups[k].question,
+    answer: followups[k].answer || ""
+  }));
+  const pendingFollowupQ = list => (list || []).find(q => q.type === "text_entry" && q.followUp && qVisible(q, answers) && !isEmpty(answers[q.id]) && !(followups[q.id] && followups[q.id].done));
+  const runFollowup = (q, after) => {
+    setFollowups(f => ({
+      ...f,
+      [q.id]: {
+        loading: true,
+        question: null,
+        answer: "",
+        done: false
+      }
+    }));
+    api.followup(form.id, q.id, answers[q.id]).then(({
+      ok,
+      data
+    }) => {
+      const question = ok && data && data.question ? data.question : null;
+      setFollowups(f => ({
+        ...f,
+        [q.id]: {
+          loading: false,
+          question,
+          answer: f[q.id] && f[q.id].answer || "",
+          done: true
+        }
+      }));
+      if (!question && after) after();
+    }).catch(() => {
+      setFollowups(f => ({
+        ...f,
+        [q.id]: {
+          loading: false,
+          question: null,
+          answer: "",
+          done: true
+        }
+      }));
+      if (after) after();
+    });
+  };
+  const doNext = () => {
+    setErrors({});
+    if (nextIdx !== undefined) {
+      setPage(nextIdx);
+      window.scrollTo(0, 0);
+    }
+  };
   const goNext = () => {
     if (!preview) {
       const errs = validateList(steps[cur]);
@@ -1730,12 +1806,14 @@ function FormRenderer({
         setErrors(errs);
         return;
       }
+      const fq = pendingFollowupQ(steps[cur]);
+      if (fq) {
+        setErrors({});
+        runFollowup(fq, doNext);
+        return;
+      }
     }
-    setErrors({});
-    if (nextIdx !== undefined) {
-      setPage(nextIdx);
-      window.scrollTo(0, 0);
-    }
+    doNext();
   };
   const goBack = () => {
     setErrors({});
@@ -1743,6 +1821,26 @@ function FormRenderer({
       setPage(prevIdx);
       window.scrollTo(0, 0);
     }
+  };
+  const doSubmit = () => {
+    const skipped = questions.filter(q => QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]));
+    if (skipped.length) {
+      const names = skipped.map(q => q.label || "a question").join(", ");
+      if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return;
+    }
+    setErrors({});
+    const params = new URLSearchParams(window.location.search);
+    const utm = {};
+    ["source", "medium", "campaign", "term", "content"].forEach(k => {
+      const v = params.get("utm_" + k);
+      if (v) utm[k] = v;
+    });
+    const seconds = Math.max(0, Math.round((Date.now() - startRef.current) / 1000));
+    onSubmit(answers, {
+      seconds,
+      utm,
+      followups: fuList()
+    });
   };
   const handleSubmit = () => {
     if (preview) return;
@@ -1760,23 +1858,41 @@ function FormRenderer({
       if (bad >= 0) setPage(bad);
       return;
     }
-    const skipped = questions.filter(q => QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]));
-    if (skipped.length) {
-      const names = skipped.map(q => q.label || "a question").join(", ");
-      if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return;
+    const fq = pendingFollowupQ(steps[cur]);
+    if (fq) {
+      runFollowup(fq, doSubmit);
+      return;
     }
-    setErrors({});
-    const params = new URLSearchParams(window.location.search);
-    const utm = {};
-    ["source", "medium", "campaign", "term", "content"].forEach(k => {
-      const v = params.get("utm_" + k);
-      if (v) utm[k] = v;
-    });
-    const seconds = Math.max(0, Math.round((Date.now() - startRef.current) / 1000));
-    onSubmit(answers, {
-      seconds,
-      utm
-    });
+    doSubmit();
+  };
+  const renderFollowup = q => {
+    if (q.type !== "text_entry" || !q.followUp) return null;
+    if (preview) return /*#__PURE__*/React.createElement("div", {
+      className: "followup-note"
+    }, "A follow-up question will appear here based on the answer.");
+    const f = followups[q.id];
+    if (!f) return null;
+    if (f.loading) return /*#__PURE__*/React.createElement("div", {
+      className: "followup loading"
+    }, "One moment...");
+    if (!f.question) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "followup"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qlabel"
+    }, f.question), /*#__PURE__*/React.createElement("textarea", {
+      className: "finput",
+      rows: 2,
+      placeholder: "Optional",
+      value: f.answer,
+      onChange: e => setFollowups(p => ({
+        ...p,
+        [q.id]: {
+          ...p[q.id],
+          answer: e.target.value
+        }
+      }))
+    }));
   };
   const shown = (steps[cur] || []).filter(q => qVisible(q, answers));
   return /*#__PURE__*/React.createElement("div", {
@@ -1809,13 +1925,14 @@ function FormRenderer({
     const def = QTYPES[q.type];
     if (!def) return null;
     const R = def.Renderer;
-    return /*#__PURE__*/React.createElement(R, {
-      key: q.id,
+    return /*#__PURE__*/React.createElement("div", {
+      key: q.id
+    }, /*#__PURE__*/React.createElement(R, {
       q: q,
       value: answers[q.id],
       onChange: v => setA(q.id, v),
       error: errors[q.id]
-    });
+    }), renderFollowup(q));
   }), shown.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "muted",
     style: {
@@ -1969,7 +2086,8 @@ function PublicForm({
       },
       referrer: document.referrer,
       seconds: extra.seconds,
-      utm: extra.utm
+      utm: extra.utm,
+      followups: extra.followups
     }).then(({
       ok,
       data
@@ -2926,6 +3044,16 @@ function TextControls({
       minLength: parseInt(e.target.value || "0", 10)
     })
   })), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Conversation"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.followUp,
+    onChange: c => update({
+      followUp: c
+    }),
+    label: "Ask a follow-up based on the answer"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "When this is answered, a short clarifying question appears before moving on."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.required,
@@ -5167,7 +5295,25 @@ function ResponsesTab({
     className: "label"
   }, q.label || q.id), /*#__PURE__*/React.createElement("div", null, cell(open.data[q.id]) || /*#__PURE__*/React.createElement("span", {
     className: "muted"
-  }, "No answer")))), /*#__PURE__*/React.createElement("hr", {
+  }, "No answer")))), open.meta && Array.isArray(open.meta.followups) && open.meta.followups.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Follow-ups"), open.meta.followups.map((fu, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, fu.question), /*#__PURE__*/React.createElement("div", null, fu.answer || /*#__PURE__*/React.createElement("span", {
+    className: "muted"
+  }, "No answer"))))), /*#__PURE__*/React.createElement("hr", {
     style: {
       border: 0,
       borderTop: "1px solid var(--line)",
@@ -5502,16 +5648,68 @@ function QuestionStat({
     className: "hint"
   }, answered ? answered + " text response" + (answered === 1 ? "" : "s") + ". See the Responses tab for details." : "No data yet."));
 }
+function ToneCard({
+  tone
+}) {
+  const p = tone.positive,
+    n = tone.neutral,
+    neg = tone.negative;
+  const haveCounts = [p, n, neg].every(x => typeof x === "number");
+  const tot = haveCounts ? Math.max(1, p + n + neg) : 0;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card pad-lg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label",
+    style: {
+      marginBottom: 10
+    }
+  }, "Tone of open-text answers"), haveCounts && /*#__PURE__*/React.createElement("div", {
+    className: "tonebar"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: p / tot * 100 + "%"
+    },
+    className: "t-pos",
+    title: "Positive " + p
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: n / tot * 100 + "%"
+    },
+    className: "t-neu",
+    title: "Neutral " + n
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: neg / tot * 100 + "%"
+    },
+    className: "t-neg",
+    title: "Negative " + neg
+  })), haveCounts && /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      margin: "8px 0"
+    }
+  }, "Positive ", p, " · Neutral ", n, " · Negative ", neg), tone.read && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14
+    }
+  }, tone.read));
+}
 function AnalyticsTab({
   id,
   form
 }) {
   const [a, setA] = useState(null);
   const [rows, setRows] = useState(null);
+  const [tone, setTone] = useState(undefined);
   useEffect(() => {
     api.analytics(id).then(({
       data
     }) => setA(data || {}));
+  }, [id]);
+  useEffect(() => {
+    api.tone(id).then(({
+      data
+    }) => setTone(data && data.tone ? data.tone : null));
   }, [id]);
   useEffect(() => {
     api.responses(id).then(({
@@ -5544,7 +5742,9 @@ function AnalyticsTab({
       fontWeight: 600,
       lineHeight: 1
     }
-  }, a.total || 0)), inputQs.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, a.total || 0)), tone && /*#__PURE__*/React.createElement(ToneCard, {
+    tone: tone
+  }), inputQs.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "label",
     style: {
       marginTop: 4
@@ -5650,6 +5850,10 @@ function App() {
     className: "toast"
   }, toastMsg));
 }
-ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));}(function(){function inj(s2,n){var s=document.createElement('script');s.src=s2;s.onload=n;document.head.appendChild(s);}if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',boot);});})();</script>
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));}
+(function(){function fail(msg){var r=document.getElementById('root');if(r&&!r.childNodes.length)r.innerHTML='<pre style="padding:16px;font:13px monospace;color:#b23b3b">'+msg+'</pre>';}
+function inj(src,next){var s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=next;s.onerror=function(){fail('Could not load resources.');};document.head.appendChild(s);}
+try{if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else fail('Could not initialize.');});});}catch(e){fail(String(e));}})();
+</script>
 </body>
 </html>

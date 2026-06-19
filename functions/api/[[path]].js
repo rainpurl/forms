@@ -38,6 +38,9 @@ async function route(seg, method, request, env, context) {
   if (path[0] === "public" && path.length === 3 && path[2] === "responses" && method === "POST") {
     return submitResponse(path[1], request, env, context);
   }
+  if (path[0] === "public" && path.length === 3 && path[2] === "followup" && method === "POST") {
+    return followup(path[1], request, env);
+  }
 
   // ---- forms (auth required) ----
   if (path[0] === "forms") {
@@ -55,6 +58,7 @@ async function route(seg, method, request, env, context) {
     if (path.length === 3 && path[2] === "analytics" && method === "GET") return analytics(user, id, env);
     if (path.length === 3 && path[2] === "export" && method === "GET") return exportCsv(user, id, env);
     if (path.length === 3 && path[2] === "summary" && method === "GET") return formSummary(user, id, request, env);
+    if (path.length === 3 && path[2] === "tone" && method === "GET") return toneRead(user, id, request, env);
   }
 
   return json({ error: "not_found", path: p }, 404);
@@ -319,6 +323,7 @@ async function submitResponse(formId, request, env, context) {
     submittedAt: new Date().toISOString(),
     seconds: typeof body.seconds === "number" ? body.seconds : null,
     utm: body.utm && typeof body.utm === "object" ? body.utm : null,
+    followups: Array.isArray(body.followups) ? body.followups.slice(0, 20) : null,
   };
 
   const id = crypto.randomUUID();
@@ -361,6 +366,7 @@ async function fireWebhook(url, formId, data, meta, questions){
           country: meta.country || null,
           browser: meta.browser || null,
           fields,
+          followups: meta.followups || [],
         },
       },
     };
@@ -773,6 +779,65 @@ Write a 2 to 4 sentence summary of these form responses for the form owner. Cove
   }
   await setCached(env, key, ai.text, signature, ai.model);
   return json({ summary: ai.text, generated: true, cached: false, model: ai.model });
+}
+
+async function followup(formId, request, env) {
+  const body = await readJson(request) || {};
+  const answer = String(body.answer || "").trim().slice(0, 600);
+  if (!answer) return json({ question: null });
+  const form = await env.DB.prepare("SELECT is_open, schema FROM forms WHERE id = ?").bind(formId).first();
+  if (!form || !form.is_open) return json({ question: null });
+  const schema = safeParse(form.schema, {});
+  const q = (schema.questions || []).find((x) => x.id === body.questionId);
+  if (!q || q.type !== "text_entry" || !q.followUp) return json({ question: null });
+  const sys = "You are conducting a brief, friendly interview. Given the question and the person's answer, write ONE short, specific follow-up question that digs into what they said. Keep it under 20 words. Plain text, no preamble, end with a question mark. If there is nothing meaningful to probe, reply with exactly NONE.";
+  const userMsg = "Question: " + (q.label || "") + "\nAnswer: " + answer + "\n\nFollow-up question:";
+  const ai = await runAI(env, sys, userMsg, 48);
+  if (!ai || ai.error || !ai.text) return json({ question: null });
+  const fq = String(ai.text).split("\n").map((l) => l.trim()).filter(Boolean)[0] || "";
+  if (!fq || /^none\b/i.test(fq) || fq.length < 5) return json({ question: null });
+  return json({ question: fq.slice(0, 160) });
+}
+
+async function toneRead(user, id, request, env) {
+  const form = await env.DB.prepare("SELECT owner_id, schema, updated_at FROM forms WHERE id = ?").bind(id).first();
+  if (!form || form.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  const refresh = new URL(request.url).searchParams.get("refresh") === "1";
+  const schema = safeParse(form.schema, {});
+  const textQs = (schema.questions || []).filter((q) => q.type === "text_entry").map((q) => ({ id: q.id }));
+  if (!textQs.length) return json({ tone: null, reason: "no_text" });
+  const totalRow = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(id).first();
+  const total = (totalRow && totalRow.c) || 0;
+  if (total === 0) return json({ tone: null, reason: "no_responses" });
+
+  const signature = total + "|" + form.updated_at + "|tone";
+  const key = "tone:" + id;
+  if (!refresh) {
+    const cached = await getCached(env, key, signature);
+    if (cached) { const t = safeParse(cached.summary, null); if (t) return json({ tone: t, cached: true }); }
+  }
+  const { results } = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ? ORDER BY created_at DESC LIMIT 80").bind(id).all();
+  const samples = [];
+  for (const r of (results || [])) {
+    const d = safeParse(r.data, {});
+    for (const q of textQs) { const v = d[q.id]; if (v && typeof v === "string" && v.trim()) samples.push(v.trim().slice(0, 200)); }
+    if (samples.length >= 40) break;
+  }
+  if (!samples.length) return json({ tone: null, reason: "no_text" });
+  const sys = "You analyze the overall tone of open-text survey answers. Output EXACTLY one line in this format: positive_count|neutral_count|negative_count|one short sentence. The three counts are integers that sum to the number of answers. No other text, no markdown.";
+  const userMsg = "Number of answers: " + samples.length + "\nAnswers:\n" + samples.map((s, i) => (i + 1) + ". " + s).join("\n");
+  const ai = await runAI(env, sys, userMsg, 80);
+  if (!ai || ai.error || !ai.text) return json({ tone: null, reason: "unavailable" });
+  const parts = String(ai.text).split("|");
+  let tone;
+  if (parts.length >= 4) {
+    const p = parseInt(parts[0], 10), n = parseInt(parts[1], 10), neg = parseInt(parts[2], 10);
+    tone = { positive: isNaN(p) ? null : p, neutral: isNaN(n) ? null : n, negative: isNaN(neg) ? null : neg, read: parts.slice(3).join("|").trim(), count: samples.length };
+  } else {
+    tone = { positive: null, neutral: null, negative: null, read: String(ai.text).trim().slice(0, 200), count: samples.length };
+  }
+  await setCached(env, key, JSON.stringify(tone), signature, ai.model);
+  return json({ tone, cached: false });
 }
 
 function dashSystem() {

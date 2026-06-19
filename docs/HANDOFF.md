@@ -203,3 +203,15 @@ Footer and logo: the public footer now reads powered by zetetiq and links to zet
 The question list reorders live while dragging (cards shift to make room) and glides into place with a FLIP animation, which also runs when you use the Move up and Move down menu actions. The dragged card shows as a dashed placeholder, and the grip uses a grab cursor. Touch and keyboard users can reorder with the Move up and Move down actions.
 
 Naming is settled: the product is spelled zetetiq with a q everywhere, and the footer and reports use that spelling. If your live domain currently uses the older spelling, point it at the zetetiq name so the powered by link resolves.
+
+## Response intelligence (no AI wording on screen)
+
+Three capabilities use Workers AI behind the scenes and are surfaced with plain names, never the word AI. They all degrade gracefully: if the AI binding is not configured or a call fails, the form and dashboard work normally and these features simply stay quiet.
+
+Overview: the existing dashboard summary card. It reads recent responses and writes a few plain sentences. Cached per form in the ai_summaries table.
+
+Follow-up questions: a per-text-question toggle in the question editor (Conversation, Ask a follow-up based on the answer). When a respondent answers that question and moves on, the form asks one short clarifying question generated from their answer, they can answer it inline, and the question and answer are saved in the response metadata (visible in the response detail and included in the webhook). The endpoint is POST /api/public/:id/followup. It is public because respondents are not signed in, so it caps the input length and only responds when the named question has follow-ups enabled. For a high-traffic public form you may want to add a rate limit at the edge.
+
+Tone: a card in the Analytics tab that reads the open-text answers and shows an overall split of positive, neutral, and negative plus a one-line read. Cached per form (key tone:formId). Only appears when the form has text questions and at least one response.
+
+All three require the Workers AI binding named AI on the Pages project. The model is configurable with the AI_MODEL variable and defaults to a small Llama model.

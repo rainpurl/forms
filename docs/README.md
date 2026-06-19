@@ -95,3 +95,7 @@ The provided logo and favicon are built in. The logo recolors via currentColor a
 ## Latest additions
 
 This build adds conditional display logic, a one-question-at-a-time conversational mode, hidden fields that capture URL values, automatic UTM and time-to-complete capture, an outbound webhook that posts a clean JSON payload on each submission, and starter templates for new forms. It also themes the PDF report with the form colors, fonts, and logo, adds a Copy link button and a live theme preview in the editor, shows powered by zetetiq on the thank-you screen, enlarges the navbar logo, and gives the favicon a high-contrast background. Export buttons appear in both the Responses and Analytics tabs.
+
+## Response intelligence
+
+Adaptive follow-up questions (a per-question toggle that asks one clarifying question based on a text answer and saves it with the response), an open-text Tone read in the Analytics tab, and the existing Overview summary. These use the Workers AI binding and are shown with plain names, never labeled AI. They need the AI binding on the Pages project and degrade gracefully when it is absent.
