@@ -606,6 +606,38 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .lp-foot-link{color:var(--bo);text-decoration:none;font-weight:600}
 @media(max-width:860px){.lp-hero{grid-template-columns:1fr;gap:30px}.lp-h1{font-size:36px}.lp-grid{grid-template-columns:repeat(2,1fr)}.lp-grid-4{grid-template-columns:repeat(2,1fr)}.lp-steps{grid-template-columns:1fr;gap:20px}}
 @media(max-width:560px){.lp-grid,.lp-grid-4{grid-template-columns:1fr}.lp-h1{font-size:30px}.lp-visual{order:-1}.lp-h2{font-size:25px}}
+
+.form-scope table.matrix.sbs td{padding:6px 8px}
+.form-scope .sbs-sel{min-width:124px;padding:8px 9px;font-size:13px}
+.sbs-col-edit{border:1px solid var(--line);border-radius:10px;padding:10px 10px 4px;margin-bottom:8px}
+
+.form-scope .hotspot-wrap{position:relative;display:inline-block;max-width:100%}
+.form-scope .hotspot-img{max-width:100%;max-height:520px;display:block;cursor:crosshair;border-radius:10px;border:1px solid var(--line-strong)}
+.form-scope .hotspot-pin{position:absolute;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50%;background:var(--fa);border:2px solid #fff;box-shadow:0 0 0 2px var(--fa);pointer-events:none}
+.hotspot-heat{position:relative;display:inline-block;max-width:100%}
+.hotspot-heat img{max-width:100%;max-height:360px;display:block;border-radius:10px;border:1px solid var(--line)}
+.heat-dot{position:absolute;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(224,73,138,.5);border:1px solid rgba(224,73,138,.8);pointer-events:none}
+
+.form-scope table.matrix.maxdiff th.md-h{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+.form-scope table.matrix.maxdiff td.md-cell{width:64px;text-align:center}
+.form-scope table.matrix.maxdiff th.md-item{text-align:center;font-weight:600}
+
+.form-scope .lang-bar{display:flex;justify-content:flex-end;margin-bottom:12px}
+.form-scope .lang-select{padding:6px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--card);color:var(--ink);font-size:13px;font-family:inherit}
+.lang-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.i18n-row{padding:10px 0;border-bottom:1px solid var(--line)}
+.i18n-meta{display:flex;gap:8px;align-items:baseline;margin-bottom:3px}
+.i18n-grp{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.i18n-what{font-size:12px;font-weight:600}
+.i18n-orig{font-size:12px;color:var(--ink-soft);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.doc-canvas{position:relative;display:inline-block;max-width:100%}
+.doc-place-field{position:absolute;transform:translate(-50%,-50%);background:#fff;border:1px solid var(--fa,#5b4fe0);border-radius:6px;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2;min-width:92px;color:#111}
+.doc-place-field .finput{padding:4px 7px;font-size:12px;min-height:0;background:#fff;color:#111}
+.doc-place-check{min-width:0;padding:4px 7px}
+.doc-sig-mini{width:180px}
+.doc-place{position:relative;display:inline-block;max-width:100%;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;line-height:0}
+.doc-pin{position:absolute;transform:translate(-50%,-50%);background:var(--brand,#5b4fe0);color:#fff;font-size:11px;line-height:1.2;padding:2px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.3);max-width:140px;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -845,17 +877,29 @@ function DocumentSignRenderer({ q, value, onChange, error }){
   const fields = Array.isArray(q.fields) ? q.fields : [];
   const data = (value && value.fields) || {};
   const setField = (fid, v)=> onChange({ fields: { ...data, [fid]: v } });
+  const isImg = q.documentKind === "image" && q.document;
+  const placed = isImg ? fields.filter((f)=> f.placed && typeof f.x === "number" && typeof f.y === "number") : [];
+  const placedIds = {}; placed.forEach((f)=>{ placedIds[f.id] = true; });
+  const listFields = fields.filter((f)=> !placedIds[f.id]);
+  const overlay = (f) => (
+    f.kind === "check"
+      ? <label className="opt-radio" style={{margin:0}}><input type="checkbox" checked={!!data[f.id]} onChange={(e)=>setField(f.id, e.target.checked)} /><span>{f.label}</span></label>
+      : f.kind === "signature" ? <div className="doc-sig-mini"><div className="label" style={{fontSize:11,marginBottom:2}}>{f.label}</div><SigPad value={data[f.id]} onChange={(v)=>setField(f.id, v)} height={64} /></div>
+      : f.kind === "date" ? <input className="finput" type="date" value={data[f.id] || ""} onChange={(e)=>setField(f.id, e.target.value)} title={f.label} />
+      : f.kind === "long" ? <textarea className="finput" placeholder={f.label} value={data[f.id] || ""} onChange={(e)=>setField(f.id, e.target.value)} style={{minHeight:50,width:170}} />
+      : <input className="finput" placeholder={f.label} value={data[f.id] || ""} onChange={(e)=>setField(f.id, e.target.value)} />
+  );
   return (
     <div className="q">
       <QLabel q={q} />
       {q.document ? (
         q.documentKind === "pdf"
           ? <iframe className="doc-view" src={q.document} title={q.documentName || "Document"} style={{width:"100%",height:520,border:"1px solid var(--line-strong)",borderRadius:10}}></iframe>
-          : <img className="doc-view" src={q.document} alt={q.documentName || "Document"} style={{maxWidth:"100%",border:"1px solid var(--line-strong)",borderRadius:10}} />
+          : <div className="doc-canvas"><img className="doc-view" src={q.document} alt={q.documentName || "Document"} style={{maxWidth:"100%",display:"block",border:"1px solid var(--line-strong)",borderRadius:10}} />{placed.map((f)=>(<div key={f.id} className={"doc-place-field doc-place-" + f.kind} style={{left:f.x + "%", top:f.y + "%"}}>{overlay(f)}</div>))}</div>
       ) : <div className="muted" style={{fontSize:13}}>No document attached.</div>}
       {q.documentName && <div className="hint" style={{marginTop:6}}>{q.documentName}</div>}
-      <div className="doc-fields">
-        {fields.map((f)=>(
+      {listFields.length > 0 && <div className="doc-fields">
+        {listFields.map((f)=>(
           <div key={f.id} className="doc-field">
             {f.kind === "check"
               ? <label className="opt-radio"><input type="checkbox" checked={!!data[f.id]} onChange={(e)=>setField(f.id, e.target.checked)} /><span>{f.label}</span></label>
@@ -867,7 +911,7 @@ function DocumentSignRenderer({ q, value, onChange, error }){
                 </>)}
           </div>
         ))}
-      </div>
+      </div>}
       {error && <div className="ferr">{error}</div>}
     </div>
   );
@@ -903,6 +947,7 @@ function SchedulingControls({ q, update }){
 function DocumentControls({ q, update }){
   const { toast } = useApp();
   const fields = Array.isArray(q.fields) ? q.fields : [];
+  const [placing, setPlacing] = useState(null);
   const onUpload = (file)=>{ if (!file) return; if (file.type === "application/pdf"){ readFileDataUrl(file, 2000000, (url)=>{ if (!url){ toast("That PDF is too large (2MB max) or could not be read."); return; } update({ document: url, documentName: file.name, documentKind: "pdf" }); }); } else { readImageScaled(file, 1400, (url)=>{ if (!url){ toast("Could not read that image."); return; } if (url.length > 1300000){ toast("That image is too large."); return; } update({ document: url, documentName: file.name, documentKind: "image" }); }); } };
   const addField = ()=> update({ fields: fields.concat([{ id: uid(), label: "New field", kind: "text" }]) });
   const setField = (id, patch)=> update({ fields: fields.map((f)=> f.id === id ? { ...f, ...patch } : f) });
@@ -916,6 +961,15 @@ function DocumentControls({ q, update }){
       <div className="panel-section">Fields to fill</div>
       {fields.map((f)=>(<div key={f.id} className="doc-field-edit"><input className="input" value={f.label} onChange={(e)=>setField(f.id, { label:e.target.value })} /><select className="select" value={f.kind} onChange={(e)=>setField(f.id, { kind:e.target.value })}><option value="text">Short text</option><option value="long">Long text</option><option value="date">Date</option><option value="signature">Signature</option><option value="check">Checkbox</option></select><button className="iconbtn" title="Remove" onClick={()=>removeField(f.id)}>×</button></div>))}
       <button className="btn sm" style={{marginTop:8}} onClick={addField}>Add field</button>
+      {q.documentKind === "image" && q.document && (<>
+        <div className="panel-section">Position on the document</div>
+        <div className="hint" style={{marginBottom:8}}>{placing ? "Click the document to drop the field." : "Pick a field, then click the document to place it. Click a pin to remove it. Unplaced fields show in a list below the document."}</div>
+        {fields.length > 0 && <div className="row" style={{gap:6,flexWrap:"wrap",marginBottom:8}}>{fields.map((f)=>(<button key={f.id} type="button" className={"btn sm" + (placing === f.id ? " primary" : (f.placed ? "" : " ghost"))} onClick={()=>setPlacing(placing === f.id ? null : f.id)}>{f.placed ? "\u25c9 " : ""}{f.label}</button>))}</div>}
+        <div className="doc-place" style={{cursor: placing ? "crosshair" : "default"}} onClick={(e)=>{ if (!placing) return; const r = e.currentTarget.getBoundingClientRect(); if (!r.width || !r.height) return; const x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)); const y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)); setField(placing, { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, placed: true }); setPlacing(null); }}>
+          <img src={q.document} alt="" style={{width:"100%",display:"block"}} />
+          {fields.filter((f)=> f.placed && typeof f.x === "number").map((f)=>(<span key={f.id} className="doc-pin" style={{left:f.x + "%", top:f.y + "%"}} title="Click to remove" onClick={(e)=>{ e.stopPropagation(); setField(f.id, { x:undefined, y:undefined, placed:false }); if (placing === f.id) setPlacing(null); }}>{f.label}</span>))}
+        </div>
+      </>)}
       <div className="panel-section">Response requirements</div>
       <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
       <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
@@ -1097,6 +1151,144 @@ function DrillRenderer({ q, value, onChange, error }){
   );
 }
 
+function SbsRenderer({ q, value, onChange, error }){
+  const ans = value || {};
+  const cols = q.columns || [];
+  const set = (row, colLabel, val) => { const cur = ans[row] || {}; onChange({ ...ans, [row]: { ...cur, [colLabel]: val } }); };
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <div className="matrix-wrap">
+        <table className="matrix sbs">
+          <thead><tr><th></th>{cols.map((c)=>(<th key={c.id}>{c.label}</th>))}</tr></thead>
+          <tbody>
+            {(q.rows || []).map((r,ri)=>(
+              <tr key={ri}>
+                <th className="mrow">{r}</th>
+                {cols.map((c)=>(
+                  <td key={c.id}>
+                    <select className="finput sbs-sel" value={(ans[r] && ans[r][c.label]) || ""} onChange={(e)=>set(r, c.label, e.target.value)}>
+                      <option value="">Select...</option>
+                      {(c.choices || []).map((o,oi)=>(<option key={oi} value={o}>{o}</option>))}
+                    </select>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+function SbsControls({ q, update }){
+  const rows = q.rows || []; const cols = q.columns || [];
+  const setRows = (text) => update({ rows: text.split("\n").map((s)=>s.replace(/\s+$/,"")).filter((s)=>s.trim().length) });
+  const setCol = (i, patch) => update({ columns: cols.map((c,ci)=> ci === i ? { ...c, ...patch } : c) });
+  const addCol = () => update({ columns: cols.concat([{ id: uid(), label: "Column " + (cols.length + 1), choices: ["Option 1","Option 2"] }]) });
+  const delCol = (i) => update({ columns: cols.filter((_,ci)=> ci !== i) });
+  return (
+    <div>
+      <div className="panel-section">Rows (items)</div>
+      <div className="hint" style={{marginBottom:6}}>One item per line.</div>
+      <textarea className="input" rows={Math.max(3, rows.length + 1)} value={rows.join("\n")} onChange={(e)=>setRows(e.target.value)} placeholder={"Item 1\nItem 2"} />
+      <div className="panel-section">Columns</div>
+      {cols.map((c,i)=>(
+        <div key={c.id} className="sbs-col-edit">
+          <Field label="Column label"><input className="input" value={c.label} onChange={(e)=>setCol(i, { label: e.target.value })} /></Field>
+          <Field label="Choices (comma separated)"><input className="input" value={(c.choices || []).join(", ")} onChange={(e)=>setCol(i, { choices: e.target.value.split(",").map((s)=>s.trim()).filter(Boolean) })} /></Field>
+          {cols.length > 1 && <button className="btn sm ghost" onClick={()=>delCol(i)}>Remove column</button>}
+        </div>
+      ))}
+      <button className="btn sm" style={{marginTop:8}} onClick={addCol}>Add column</button>
+      <ReqToggles q={q} update={update} />
+    </div>
+  );
+}
+
+function HotSpotRenderer({ q, value, onChange, error }){
+  if (!q.image) return (<div className="q"><QLabel q={q} /><div className="embed-empty">No image has been added to this question yet.</div></div>);
+  const pick = (e)=>{ const r = e.currentTarget.getBoundingClientRect(); if (!r.width || !r.height) return; const x = Math.round(((e.clientX - r.left) / r.width) * 100); const y = Math.round(((e.clientY - r.top) / r.height) * 100); onChange({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) }); };
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <div className="hotspot-wrap">
+        <img className="hotspot-img" src={q.image} alt="" onClick={pick} draggable={false} />
+        {value && typeof value === "object" && typeof value.x === "number" && <span className="hotspot-pin" style={{ left: value.x + "%", top: value.y + "%" }}></span>}
+      </div>
+      {value && typeof value === "object" && typeof value.x === "number" && <div className="hint" style={{marginTop:6}}>Tap a different spot to move your answer.</div>}
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+function HotSpotControls({ q, update }){
+  const { toast } = useApp();
+  const onUpload = (file)=>{ if (!file) return; readImageScaled(file, 1200, (url)=>{ if (!url){ toast("Could not read that image."); return; } if (url.length > 1300000){ toast("That image is too large."); return; } update({ image: url }); }); };
+  return (
+    <div>
+      <div className="panel-section">Image</div>
+      {q.image ? (<div className="himg-preview"><img src={q.image} alt="" style={{maxWidth:"100%",maxHeight:120,borderRadius:8}} /><button className="btn sm ghost" onClick={()=>update({ image:"" })}>Remove</button></div>)
+        : (<label className="himg-upload"><input type="file" accept="image/*" style={{display:"none"}} onChange={(e)=>{ const f = e.target.files && e.target.files[0]; onUpload(f); e.target.value=""; }} /><span>Upload an image</span></label>)}
+      <div className="hint" style={{marginTop:8}}>People tap or click a point on the image. Analytics overlays every response as a heatmap.</div>
+      <ReqToggles q={q} update={update} />
+    </div>
+  );
+}
+
+function MaxDiffRenderer({ q, value, onChange, error }){
+  const ans = value && typeof value === "object" ? value : {};
+  const set = (kind, item) => {
+    const next = { best: ans.best || "", worst: ans.worst || "" };
+    if (kind === "best"){ if (next.worst === item) next.worst = ""; next.best = item; }
+    else { if (next.best === item) next.best = ""; next.worst = item; }
+    onChange(next);
+  };
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <div className="matrix-wrap">
+        <table className="matrix maxdiff">
+          <thead><tr><th className="md-h">{q.bestLabel || "Best"}</th><th></th><th className="md-h">{q.worstLabel || "Worst"}</th></tr></thead>
+          <tbody>
+            {(q.items || []).map((it, i)=>(
+              <tr key={i}>
+                <td className="md-cell"><input type="radio" name={q.id + "-best"} checked={ans.best === it} onChange={()=>set("best", it)} /></td>
+                <th className="mrow md-item">{it}</th>
+                <td className="md-cell"><input type="radio" name={q.id + "-worst"} checked={ans.worst === it} onChange={()=>set("worst", it)} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+function MaxDiffControls({ q, update }){
+  const items = q.items || [];
+  const setItems = (text)=> update({ items: text.split("\n").map((s)=>s.replace(/\s+$/,"")).filter((s)=>s.trim().length) });
+  return (<div>
+    <div className="panel-section">Items</div>
+    <div className="hint" style={{marginBottom:6}}>One item per line. Respondents pick the single best and the single worst.</div>
+    <textarea className="input" rows={Math.max(3, items.length + 1)} value={items.join("\n")} onChange={(e)=>setItems(e.target.value)} placeholder={"Item 1\nItem 2\nItem 3"} />
+    <div className="panel-section">Column labels (optional)</div>
+    <Field label="Best column"><input className="input" value={q.bestLabel || ""} onChange={(e)=>update({bestLabel:e.target.value})} placeholder="Best" /></Field>
+    <Field label="Worst column"><input className="input" value={q.worstLabel || ""} onChange={(e)=>update({worstLabel:e.target.value})} placeholder="Worst" /></Field>
+    <ReqToggles q={q} update={update} />
+  </div>);
+}
+function AdvancedControls({ q, update, experiment }){
+  const isInput = !!(QTYPES[q.type] && QTYPES[q.type].isInput);
+  if ((!experiment || !experiment.on) && !isInput) return null;
+  return (<div>
+    <div className="panel-section">Advanced</div>
+    {experiment && experiment.on && (<Field label="Show in variant"><select className="select" value={q.variant || ""} onChange={(e)=>update({ variant: e.target.value })}><option value="">All variants</option>{Array.from({length: experiment.count}).map((_, i)=>{ const L = String.fromCharCode(65 + i); return <option key={L} value={L}>{"Variant " + L}</option>; })}</select></Field>)}
+    {isInput && (<><Field label="Export field name (optional)"><input className="input" value={q.exportKey || ""} onChange={(e)=>update({ exportKey: e.target.value.replace(/[^a-zA-Z0-9_]/g, "") })} placeholder="e.g. email or nps_score" /></Field>
+    <div className="hint">Used as the column name in CSV exports and the key in webhook and API payloads.</div></>)}
+  </div>);
+}
+
 function EmbedRenderer({ q }){
   if (!q.embedSlug || !q.embedUser){
     return (<div className="q">{q.label ? <QLabel q={q} /> : null}<div className="embed-empty">Nothing embedded yet.</div></div>);
@@ -1112,7 +1304,7 @@ function EmbedRenderer({ q }){
 function EmbedControls({ q, update }){
   const { user } = useApp();
   const [assets, setAssets] = useState(null);
-  useEffect(()=>{ let on = true; api.listForms().then(({ data })=>{ if (!on) return; const all = (data && data.forms) || []; setAssets(all.filter((f)=> f.kind === "schedule" || f.kind === "esign")); }).catch(()=>{ if (on) setAssets([]); }); return ()=>{ on = false; }; }, []);
+  useEffect(()=>{ let on = true; api.listForms().then(({ data })=>{ if (!on) return; const all = (data && data.forms) || []; setAssets(all); }).catch(()=>{ if (on) setAssets([]); }); return ()=>{ on = false; }; }, []);
   const pick = (slug)=>{
     const a = (assets || []).find((x)=> x.slug === slug);
     if (!a){ update({ embedSlug:"", embedUser:"", embedTitle:"", embedKind:"" }); return; }
@@ -1122,8 +1314,8 @@ function EmbedControls({ q, update }){
     <div>
       <div className="panel-section">What to embed</div>
       {assets === null ? <div className="muted" style={{fontSize:13}}>Loading...</div> : (assets.length === 0
-        ? <div className="hint">You have no schedulers or e-sign documents yet. Create one with New schedule or New esign in the top bar, then embed it here.</div>
-        : <Field label="Item"><select className="select" value={q.embedSlug || ""} onChange={(e)=>pick(e.target.value)}><option value="">Select...</option>{assets.map((a)=>(<option key={a.id} value={a.slug}>{(a.kind === "schedule" ? "Scheduler: " : "E-sign: ") + (a.title || a.slug)}</option>))}</select></Field>)}
+        ? <div className="hint">You have no other forms yet. Create another form first, then you can embed it here.</div>
+        : <Field label="Item"><select className="select" value={q.embedSlug || ""} onChange={(e)=>pick(e.target.value)}><option value="">Select...</option>{assets.map((a)=>(<option key={a.id} value={a.slug}>{(a.kind === "schedule" ? "Scheduler: " : a.kind === "esign" ? "E-sign: " : "") + (a.title || a.slug)}</option>))}</select></Field>)}
       <Field label="Heading (optional)"><input className="input" value={q.label || ""} onChange={(e)=>update({ label:e.target.value })} /></Field>
       {q.embedSlug && <div className="hint">Embedding {q.embedKind === "schedule" ? "scheduler" : "document"}: {q.embedTitle}. Responses are recorded on that item, not this form.</div>}
     </div>
@@ -1159,11 +1351,17 @@ const QTYPES = {
     label: "Multiple choice",
     hint: "Single, multi-select, or dropdown",
     isInput: true,
-    make: () => ({ type:"multiple_choice", id: uid(), label:"Untitled question", required:false, request:false, multi:false, display:"list", options:["Option 1","Option 2"], randomize:false }),
+    make: () => ({ type:"multiple_choice", id: uid(), label:"Untitled question", required:false, request:false, multi:false, display:"list", options:["Option 1","Option 2"], randomize:false, allowOther:false, otherLabel:"Other", minSel:0, maxSel:0 }),
     summary: (q) => q.options.length + " options, " + (q.display === "dropdown" ? "dropdown" : (q.multi ? "multiple answers" : "one answer")),
     validate: (q, v) => {
+      const arr = Array.isArray(v) ? v : [];
+      if (q.multi){
+        if (q.maxSel && arr.length > q.maxSel) return "Please select no more than " + q.maxSel + ".";
+        if ((q.required || arr.length > 0) && q.minSel && arr.length < q.minSel) return "Please select at least " + q.minSel + ".";
+        if (q.required && !arr.length) return "Please select at least one option.";
+        return null;
+      }
       if (!q.required) return null;
-      if (q.multi) return (Array.isArray(v) && v.length) ? null : "Please select at least one option.";
       return v ? null : "Please select an option.";
     },
     Editor: ({ q, update }) => {
@@ -1214,9 +1412,10 @@ const QTYPES = {
       const multi = !!q.multi;
       const arr = Array.isArray(value) ? value : [];
       const toggle = (o) => {
-        if (multi) onChange(arr.includes(o) ? arr.filter(x=>x!==o) : arr.concat([o]));
+        if (multi){ const next = arr.includes(o) ? arr.filter(x=>x!==o) : arr.concat([o]); if (q.maxSel && next.length > q.maxSel && !arr.includes(o)) return; onChange(next); }
         else onChange(o);
       };
+      const otherSel = !!q.allowOther && !multi && (value != null) && !opts.includes(value);
       return (
         <div className="q">
           <QLabel q={q} />
@@ -1230,12 +1429,22 @@ const QTYPES = {
               </label>
             );
           })}
+          {q.allowOther && !multi && (<><label className={"opt" + (otherSel ? " sel" : "")}><input type="radio" checked={otherSel} onChange={()=>onChange("")} /><span>{q.otherLabel || "Other"}</span></label>{otherSel && <input className="finput" style={{marginTop:8}} placeholder="Please specify" value={value || ""} onChange={(e)=>onChange(e.target.value)} />}</>)}
           {error && <div className="ferr">{error}</div>}
         </div>
       );
     },
   },
 
+  hot_spot: {
+    label: "Hot spot",
+    hint: "Click a point on an image",
+    isInput: true,
+    make: () => ({ type:"hot_spot", id: uid(), label:"Click on the image", required:false, request:false, image:"" }),
+    summary: (q) => q.image ? "image hot spot" : "no image yet",
+    validate: (q, v) => (q.required && !(v && typeof v === "object" && typeof v.x === "number")) ? "Please click on the image." : null,
+    Renderer: HotSpotRenderer,
+  },
   text_entry: {
     label: "Text entry",
     hint: "Short line or long paragraph",
@@ -1249,6 +1458,7 @@ const QTYPES = {
       if (q.validation === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)) return "Enter a valid email address.";
       if (q.validation === "phone" && !/^[\d\s()+\-]{7,}$/.test(s)) return "Enter a valid phone number.";
       if (q.validation === "number" && !/^-?\d+(\.\d+)?$/.test(s.trim())) return "Enter a number.";
+      if (q.validation === "pattern" && q.pattern){ try { if (!new RegExp(q.pattern).test(s)) return q.patternMessage || "Please match the requested format."; } catch (e) {} }
       if (q.minLength && s.trim().length < q.minLength) return "Please enter at least " + q.minLength + " characters.";
       return null;
     },
@@ -1535,6 +1745,20 @@ const QTYPES = {
     },
   },
 
+  side_by_side: {
+    label: "Side by side",
+    hint: "Rate each item across several columns",
+    isInput: true,
+    make: () => ({ type:"side_by_side", id: uid(), label:"Untitled question", required:false, request:false, rows:["Item 1","Item 2","Item 3"], columns:[{ id: uid(), label:"Importance", choices:["Low","Medium","High"] }, { id: uid(), label:"Satisfaction", choices:["Poor","Fair","Good"] }] }),
+    summary: (q) => (q.rows || []).length + " items x " + (q.columns || []).length + " columns",
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const ans = v || {};
+      for (const r of (q.rows || [])){ const row = ans[r] || {}; for (const c of (q.columns || [])){ if (!row[c.label]) return "Please complete every cell."; } }
+      return null;
+    },
+    Renderer: SbsRenderer,
+  },
   rank_order: {
     label: "Rank order",
     hint: "Order items by dragging or arrows",
@@ -1575,6 +1799,15 @@ const QTYPES = {
     },
   },
 
+  maxdiff: {
+    label: "MaxDiff (best and worst)",
+    hint: "Pick the best and worst from a set",
+    isInput: true,
+    make: () => ({ type:"maxdiff", id: uid(), label:"Which is best and which is worst?", required:false, request:false, items:["Item 1","Item 2","Item 3","Item 4"], bestLabel:"Best", worstLabel:"Worst" }),
+    summary: (q) => ((q.items||[]).length) + " items, pick best and worst",
+    validate: (q, v) => { if (!q.required) return null; if (!v || !v.best || !v.worst) return "Please pick a best and a worst."; if (v.best === v.worst) return "Best and worst must be different."; return null; },
+    Renderer: MaxDiffRenderer,
+  },
   constant_sum: {
     label: "Constant sum",
     hint: "Numbers that must add to a total",
@@ -1703,7 +1936,7 @@ const QTYPES = {
     Renderer: () => null,
   },
 };
-const QTYPE_ORDER = ["multiple_choice","image_choice","text_entry","number_entry","matrix","rank_order","constant_sum","form_field","drill_down","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","embed","block","hidden_field","page_break"];
+const QTYPE_ORDER = ["multiple_choice","image_choice","hot_spot","text_entry","number_entry","matrix","side_by_side","rank_order","maxdiff","constant_sum","form_field","drill_down","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","embed","block","hidden_field","page_break"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -1749,7 +1982,7 @@ function AiSummary({ fetcher }){
 function answerToText(v){
   if (v === null || v === undefined) return "";
   if (Array.isArray(v)) return v.join(", ");
-  if (typeof v === "object") return Object.keys(v).map((k)=>k + ":" + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(",");
+  if (typeof v === "object") return Object.keys(v).map((k)=>{ const val = v[k]; if (val && typeof val === "object" && !Array.isArray(val)) return k + ": (" + Object.keys(val).map((c)=> c + "=" + val[c]).join(", ") + ")"; return k + ":" + (Array.isArray(val) ? val.join("/") : val); }).join(", ");
   return String(v);
 }
 function pipeText(text, answers, questions){
@@ -1857,6 +2090,7 @@ function SkipControls({ q, questions, update }){
             <select className="select" value={r.target} onChange={(e)=>setR(r.id, { target: e.target.value })}>
               {laterBlocks.map((b)=>(<option key={b.id} value={b.id}>{b.title || "Section"}</option>))}
               <option value="end">End of survey</option>
+              <option value="screenout">Disqualify (screen out)</option>
             </select>
             <button className="iconbtn" title="Remove rule" onClick={()=>remove(r.id)}>\u00d7</button>
           </div>
@@ -1881,12 +2115,58 @@ function qVisible(q, answers){
   return arr ? arr.includes(val) : (txt === val);
 }
 
-function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCounts }){
+function IconGlobe(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>); }
+function localizeForm(form, lang){
+  const set = (form.schema && form.schema.settings) || {};
+  if (!set.multilingual || !lang) return form;
+  const tr = (set.translations && set.translations[lang]) || {};
+  const t = (key, fb) => (tr[key] != null && tr[key] !== "") ? tr[key] : fb;
+  const questions = (form.schema.questions || []).map((q)=>{
+    const nq = { ...q };
+    if (q.label != null) nq.label = t("q:" + q.id + ":label", q.label);
+    if (q.description) nq.description = t("q:" + q.id + ":desc", q.description);
+    if (Array.isArray(q.options)) nq.options = q.options.map((o,i)=> t("q:" + q.id + ":opt:" + i, o));
+    if (Array.isArray(q.items)) nq.items = q.items.map((o,i)=> t("q:" + q.id + ":item:" + i, o));
+    if (Array.isArray(q.rows)) nq.rows = q.rows.map((o,i)=> t("q:" + q.id + ":row:" + i, o));
+    if (Array.isArray(q.cols)) nq.cols = q.cols.map((o,i)=> t("q:" + q.id + ":col:" + i, o));
+    return nq;
+  });
+  const settings = { ...set };
+  if (set.endTitle) settings.endTitle = t("endTitle", set.endTitle);
+  if (set.endMessage) settings.endMessage = t("endMessage", set.endMessage);
+  return { ...form, title: t("title", form.title), description: form.description ? t("desc", form.description) : form.description, schema: { ...form.schema, questions, settings } };
+}
+function formStrings(form){
+  const set = (form.schema && form.schema.settings) || {};
+  const out = [];
+  out.push({ key:"title", group:"Form", what:"Title", original: form.title || "" });
+  if (form.description) out.push({ key:"desc", group:"Form", what:"Description", original: form.description });
+  (form.schema.questions || []).forEach((q)=>{
+    const g = String(q.label || q.heading || q.id || "Question").slice(0, 42);
+    if (q.label != null) out.push({ key:"q:" + q.id + ":label", group:g, what:"Label", original: q.label || "" });
+    if (q.description) out.push({ key:"q:" + q.id + ":desc", group:g, what:"Description", original: q.description });
+    if (Array.isArray(q.options)) q.options.forEach((o,i)=> out.push({ key:"q:" + q.id + ":opt:" + i, group:g, what:"Choice " + (i + 1), original:o }));
+    if (Array.isArray(q.items)) q.items.forEach((o,i)=> out.push({ key:"q:" + q.id + ":item:" + i, group:g, what:"Item " + (i + 1), original:o }));
+    if (Array.isArray(q.rows)) q.rows.forEach((o,i)=> out.push({ key:"q:" + q.id + ":row:" + i, group:g, what:"Row " + (i + 1), original:o }));
+    if (Array.isArray(q.cols)) q.cols.forEach((o,i)=> out.push({ key:"q:" + q.id + ":col:" + i, group:g, what:"Column " + (i + 1), original:o }));
+  });
+  if (set.endTitle) out.push({ key:"endTitle", group:"Ending", what:"Thank-you heading", original:set.endTitle });
+  if (set.endMessage) out.push({ key:"endMessage", group:"Ending", what:"Thank-you message", original:set.endMessage });
+  out.push({ key:"ui:back", group:"Buttons", what:"Back button", original:"Back" });
+  out.push({ key:"ui:next", group:"Buttons", what:"Next button", original:"Next" });
+  out.push({ key:"ui:submit", group:"Buttons", what:"Submit button", original:"Submit" });
+  return out;
+}
+function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCounts, ui }){
+  const U = ui || {};
   const questions = form.schema.questions || [];
   const settings = form.schema.settings || {};
   const conversational = !!settings.conversational;
+  const experiment = !!settings.experiment;
+  const [variant] = useState(()=>{ if (!settings.experiment) return null; const n = Math.max(2, Math.min(8, parseInt(settings.variantCount, 10) || 2)); return String.fromCharCode(65 + Math.floor(Math.random() * n)); });
   const startRef = useRef(Date.now());
   const blockSig = questions.filter((q)=> q.type === "block").map((q)=> q.id + ":" + (q.title || "") + ":" + (q.description || "")).join("|");
+  const contentSig = questions.map((q)=> (q.label || "") + "\u0001" + (Array.isArray(q.options) ? q.options.join("\u0002") : "") + "\u0001" + (Array.isArray(q.items) ? q.items.join("\u0002") : "") + "\u0001" + (Array.isArray(q.rows) ? q.rows.join("\u0002") : "") + "\u0001" + (Array.isArray(q.cols) ? q.cols.join("\u0002") : "")).join("\u0003");
   const steps = useMemo(()=>{
     const real = questions.filter((q)=> q.type !== "hidden_field");
     const blocks = []; let curB = { id:"", title:"", desc:"", items:[] };
@@ -1913,7 +2193,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
       }
     }
     return out.length ? out : [{ qs:[], title:"", desc:"", bid:"" }];
-  }, [form.id, questions.length, blockSig, settings.randomizeQuestions, settings.randomizeBlocks, conversational]);
+  }, [form.id, questions.length, blockSig, contentSig, settings.randomizeQuestions, settings.randomizeBlocks, conversational]);
 
   const [page, setPage] = useState(0);
   const [hist, setHist] = useState([]);
@@ -1921,6 +2201,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
   const [errors, setErrors] = useState({});
   const [followups, setFollowups] = useState({});
   const setA = (qid, v) => setAnswers((a)=>({ ...a, [qid]: v }));
+  const vis = (q) => qVisible(q, answers) && (!experiment || !q.variant || q.variant === variant);
 
   useEffect(()=>{
     const params = new URLSearchParams(window.location.search);
@@ -1933,7 +2214,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
   const scopeStyle = { "--fp": theme.primary || "#5b4fe0", "--fs": theme.secondary || "#1b1830", "--fa": theme.accent || theme.primary || "#5b4fe0", fontFamily: (theme.customFont ? ("'" + theme.customFont + "', ") : "") + (FORM_FONTS[theme.font] || FORM_FONTS.sans) };
   useEffect(()=>{ loadGoogleFont(theme.customFont); },[theme.customFont]);
 
-  const stepHasVisible = (i) => steps[i] && (steps[i].qs || []).some((q)=> qVisible(q, answers));
+  const stepHasVisible = (i) => steps[i] && (steps[i].qs || []).some((q)=> vis(q));
   const cur = Math.min(page, steps.length - 1);
   const visibleIdxs = steps.map((_, i)=>i).filter(stepHasVisible);
   const nextIdx = visibleIdxs.find((i)=> i > cur);
@@ -1946,11 +2227,11 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
 
   const validateList = (list) => {
     const errs = {};
-    for (const q of list){ const def = QTYPES[q.type]; if (!def || !def.isInput) continue; if (!qVisible(q, answers)) continue; if (q.carryFrom){ const _ci = carryItems(q, answers, questions); if (!_ci || !_ci.length) continue; } const e = def.validate(q, answers[q.id]); if (e) errs[q.id] = e; }
+    for (const q of list){ const def = QTYPES[q.type]; if (!def || !def.isInput) continue; if (!vis(q)) continue; if (q.carryFrom){ const _ci = carryItems(q, answers, questions); if (!_ci || !_ci.length) continue; } const e = def.validate(q, answers[q.id]); if (e) errs[q.id] = e; }
     return errs;
   };
   const fuList = () => Object.keys(followups).filter((k)=>followups[k] && followups[k].question).map((k)=>({ questionId:k, question:followups[k].question, answer:followups[k].answer || "" }));
-  const pendingFollowupQ = (list) => (list || []).find((q)=> q.type === "text_entry" && q.followUp && qVisible(q, answers) && !isEmpty(answers[q.id]) && !(followups[q.id] && followups[q.id].done));
+  const pendingFollowupQ = (list) => (list || []).find((q)=> q.type === "text_entry" && q.followUp && vis(q) && !isEmpty(answers[q.id]) && !(followups[q.id] && followups[q.id].done));
   const runFollowup = (q, after) => {
     setFollowups((f)=>({ ...f, [q.id]: { loading: true, question: null, answer: "", done: false } }));
     api.followup(form.id, q.id, answers[q.id]).then(({ ok, data })=>{
@@ -1961,7 +2242,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
   };
   const skipTarget = (qs) => {
     for (const q of (qs || [])){
-      if (!qVisible(q, answers)) continue;
+      if (!vis(q)) continue;
       const rules = Array.isArray(q.skip) ? q.skip : [];
       for (const r of rules){ if (skipMatch(answers[q.id], r)) return r.target; }
     }
@@ -1971,6 +2252,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
     setErrors({});
     const t = skipTarget((steps[cur] && steps[cur].qs) || []);
     if (t === "end"){ doSubmit(); return; }
+    if (t === "screenout"){ doSubmit(true); return; }
     if (t){ const j = steps.findIndex((st)=> st.bid && st.bid === t); if (j >= 0 && j > cur){ setHist((h)=> h.concat([cur])); setPage(j); window.scrollTo(0, 0); return; } }
     if (nextIdx !== undefined){ setHist((h)=> h.concat([cur])); setPage(nextIdx); window.scrollTo(0, 0); }
   };
@@ -1982,15 +2264,15 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
     doNext();
   };
   const goBack = () => { setErrors({}); if (hist.length){ const to = hist[hist.length - 1]; setHist(hist.slice(0, -1)); setPage(to); window.scrollTo(0, 0); } else if (prevIdx !== undefined){ setPage(prevIdx); window.scrollTo(0, 0); } };
-  const doSubmit = () => {
+  const doSubmit = (disq) => {
     const visited = {}; hist.concat([cur]).forEach((i)=> ((steps[i] && steps[i].qs) || []).forEach((q)=>{ visited[q.id] = true; }));
-    const skipped = questions.filter((q)=> visited[q.id] && QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]) && !(q.carryFrom && !(carryItems(q, answers, questions) || []).length));
-    if (skipped.length){ const names = skipped.map((q)=>q.label || "a question").join(", "); if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return; }
+    const skipped = questions.filter((q)=> visited[q.id] && QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && vis(q) && q.request && isEmpty(answers[q.id]) && !(q.carryFrom && !(carryItems(q, answers, questions) || []).length));
+    if (!disq && skipped.length){ const names = skipped.map((q)=>q.label || "a question").join(", "); if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return; }
     setErrors({});
     const params = new URLSearchParams(window.location.search);
     const utm = {}; ["source","medium","campaign","term","content"].forEach((k)=>{ const v = params.get("utm_" + k); if (v) utm[k] = v; });
     const seconds = Math.max(0, Math.round((Date.now() - startRef.current) / 1000));
-    onSubmit(answers, { seconds, utm, followups: fuList() });
+    onSubmit(answers, { seconds, utm, followups: fuList(), variant, disqualified: !!disq });
   };
   const handleSubmit = () => {
     if (preview) return;
@@ -2010,10 +2292,11 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
   };
 
   const sec = steps[cur] || {};
-  const shown = ((steps[cur] && steps[cur].qs) || []).filter((q)=> qVisible(q, answers));
+  const shown = ((steps[cur] && steps[cur].qs) || []).filter((q)=> vis(q));
   return (
     <div className="form-scope" style={scopeStyle}>
       <div className="fcard">
+        {U.langBar}
         {settings.headerImage && <img className="fheader-img" src={settings.headerImage} alt="" />}
         <div className="ftitle">{form.title}</div>
         {form.description && <div className="fdesc">{form.description}</div>}
@@ -2024,12 +2307,12 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
           {shown.length === 0 && <div className="muted" style={{fontSize:13}}>Nothing to show on this step.</div>}
         </div>
         <div className="fnav" style={{marginTop:18}}>
-          {multi && (hist.length || prevIdx !== undefined) && <button className="fbtn-ghost" onClick={goBack} disabled={submitting}>Back</button>}
+          {multi && (hist.length || prevIdx !== undefined) && <button className="fbtn-ghost" onClick={goBack} disabled={submitting}>{U.back || "Back"}</button>}
           {multi && <span className="fpage-count">Page {pos} of {total}</span>}
           <span className="grow"></span>
           {hasNext
-            ? <button className="submit" onClick={goNext}>Next</button>
-            : <button className="submit" onClick={handleSubmit} disabled={preview || submitting}>{submitting ? "Submitting..." : "Submit"}</button>}
+            ? <button className="submit" onClick={goNext}>{U.next || "Next"}</button>
+            : <button className="submit" onClick={handleSubmit} disabled={preview || submitting}>{submitting ? "Submitting..." : (U.submit || "Submit")}</button>}
         </div>
         {preview && <div className="muted" style={{fontSize:13,marginTop:8}}>Preview mode, submit disabled</div>}
       </div>
@@ -2043,6 +2326,8 @@ function PublicForm({ username, slug }){
   const [done, setDone] = useState(false);
   const [doneAnswers, setDoneAnswers] = useState({});
   const [doneScore, setDoneScore] = useState(null);
+  const [disq, setDisq] = useState(false);
+  const [lang, setLang] = useState("");
   useEffect(()=>{
     const wl = (st.form && st.form.schema && st.form.schema.settings) || null;
     if (!wl) return;
@@ -2069,6 +2354,14 @@ function PublicForm({ username, slug }){
   const scope = { "--fa": (form.theme && form.theme.accent) || "#5b4fe0", fontFamily: ((form.theme && form.theme.customFont) ? ("\u0027" + form.theme.customFont + "\u0027, ") : "") + (FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans) };
   const embed = (()=>{ try { return new URLSearchParams(window.location.search).get("embed") === "1"; } catch (e) { return false; } })();
   const pageCls = "form-page" + (embed ? " form-embed" : "");
+  const _set = (form.schema && form.schema.settings) || {};
+  const _langs = (_set.multilingual && Array.isArray(_set.languages)) ? _set.languages : [];
+  const curLang = (_langs.length && _langs.some((l)=>l.code === lang)) ? lang : (_langs[0] ? _langs[0].code : "");
+  const lform = _langs.length ? localizeForm(form, curLang) : form;
+  const _tr = (_set.translations && _set.translations[curLang]) || {};
+  const _t = (k, fb) => (_tr[k] != null && _tr[k] !== "") ? _tr[k] : fb;
+  const uiLabels = { back: _t("ui:back", "Back"), next: _t("ui:next", "Next"), submit: _t("ui:submit", "Submit"),
+    langBar: _langs.length > 1 ? (<div className="lang-bar"><select className="lang-select" value={curLang} onChange={(e)=>setLang(e.target.value)}>{_langs.map((l)=>(<option key={l.code} value={l.code}>{l.label || l.code}</option>))}</select></div>) : null };
 
   const avail = st.availability || { open: form.is_open, reason: form.is_open ? null : "closed" };
   if (!avail.open){
@@ -2076,26 +2369,26 @@ function PublicForm({ username, slug }){
     return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard"><div className="ftitle">{form.title}</div><p className="fdesc">{cmsg}</p></div></div></div></div>);
   }
   if (done){
-    const set = (form.schema && form.schema.settings) || {};
+    const set = (lform.schema && lform.schema.settings) || {};
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
-    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}<div style={{fontSize:38,color:"var(--fa)"}}>✓</div><div className="ftitle" style={{marginTop:6}}>{pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you"}</div><p className="fdesc">{pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded."}</p>{set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
+    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
   const submit = (answers, extra) => {
     extra = extra || {};
     setSubmitting(true);
-    api.submit(form.id, { data: answers, viewport: { w: window.innerWidth, h: window.innerHeight }, referrer: document.referrer, seconds: extra.seconds, utm: extra.utm, followups: extra.followups }).then(({ok,data})=>{
+    api.submit(form.id, { data: answers, viewport: { w: window.innerWidth, h: window.innerHeight }, referrer: document.referrer, seconds: extra.seconds, utm: extra.utm, followups: extra.followups, variant: extra.variant, disqualified: extra.disqualified ? true : undefined }).then(({ok,data})=>{
       setSubmitting(false);
       if (ok && data && data.ok){
         const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
-        if (r){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
-        setDoneAnswers(answers); if (data.score != null) setDoneScore({ score: data.score, max: data.maxScore }); setDone(true);
+        if (r && !extra.disqualified){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
+        setDoneAnswers(answers); if (data.score != null) setDoneScore({ score: data.score, max: data.maxScore }); setDisq(!!extra.disqualified); setDone(true);
       }
       else window.alert((data && data.error === "form_closed") ? "This form just closed." : "Something went wrong. Please try again.");
     });
   };
   return (
     <div className={pageCls}><div className="form-page-inner">
-      <FormRenderer form={form} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} />
+      <FormRenderer form={lform} ui={uiLabels} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} />
       {!(form.schema && form.schema.settings && form.schema.settings.hideBranding) && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}
     </div></div>
   );
@@ -2134,7 +2427,7 @@ function Landing({ showLogin }){
   const google = ()=>{ window.location.href = "/api/auth/google/start"; };
 
   const features = [
-    { icon:"list", title:"Twenty-three question types", desc:"Multiple choice, matrix, rank order, sliders, NPS, ratings, drill downs, file uploads, and more, in one builder." },
+    { icon:"list", title:"Twenty-six question types", desc:"Multiple choice, matrix, rank order, sliders, NPS, ratings, drill downs, file uploads, and more, in one builder." },
     { icon:"branch", title:"Logic and branching", desc:"Show or skip questions based on earlier answers, and pipe those answers into later questions and text." },
     { icon:"target", title:"Scoring and quizzes", desc:"Give choices point values, show a score on the thank-you screen, and see results in analytics and exports." },
     { icon:"calendar", title:"Meeting scheduling", desc:"Offer time slots with capacity limits so people can book a time without leaving your form." },
@@ -2175,7 +2468,7 @@ function Landing({ showLogin }){
         <div className="lp-hero-text">
           <div className="lp-eyebrow">Experience management, self-hosted</div>
           <h1 className="lp-h1">Build a form, theme it your way, and share a clean link.</h1>
-          <p className="lp-sub">A full survey and form builder you run yourself. Twenty-three question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users.</p>
+          <p className="lp-sub">A full survey and form builder you run yourself. Twenty-six question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users.</p>
           {user ? (
             <div className="lp-cta-row"><button className="btn primary lg" onClick={()=>navigate("/dashboard")}>Go to dashboard</button></div>
           ) : (
@@ -2209,7 +2502,7 @@ function Landing({ showLogin }){
       </section>
 
       <section className="lp-section lp-types-sec">
-        <h2 className="lp-h2">Twenty-three question types</h2>
+        <h2 className="lp-h2">Twenty-six question types</h2>
         <p className="lp-lead">Mix and match in any form.</p>
         <div className="lp-chips">{types.map((t,i)=><span key={i} className="lp-chip">{t}</span>)}</div>
       </section>
@@ -2352,11 +2645,7 @@ function TopNav(){
         <button className="brand" onClick={()=>navigate("/dashboard")}><Logo size={26} /></button>
         <button className="themebtn" onClick={toggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{theme === "dark" ? <IconSun/> : <IconMoon/>}</button>
       </div>
-      <div className="navnew-group">
-        <button className="btn primary navnew" onClick={()=>navigate("/builder/new")}>+ New form</button>
-        <button className="btn navnew2" onClick={()=>navigate("/builder/new?kind=schedule")}>+ New schedule</button>
-        <button className="btn navnew2" onClick={()=>navigate("/builder/new?kind=esign")}>+ New esign</button>
-      </div>
+      <button className="btn primary navnew" onClick={()=>navigate("/builder/new")}>+ New form</button>
       <div className="navright">
         {user && <span className="greet">hey {user.name}</span>}
         <button className="btn sm" onClick={()=>{ api.logout().then(()=>{ setUser(null); navigate("/"); }); }}>Log out</button>
@@ -2579,6 +2868,9 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         {q.type === "scheduling" && <div className="wq-prev-input">{(q.slots && q.slots.length) ? (q.slots.length + " time slot" + (q.slots.length===1?"":"s")) : "Add time slots in the left panel"}</div>}
         {q.type === "payment" && <div className="wq-prev-input">{q.url ? ((q.buttonText||"Pay now") + (q.amount?(" \u00b7 "+q.amount):"")) : "Add a payment link in the left panel"}</div>}
         {q.type === "document_sign" && <div className="wq-prev-input">{q.document ? ("Document attached · " + ((q.fields&&q.fields.length)||0) + " field" + (((q.fields&&q.fields.length)||0)===1?"":"s")) : "Upload a document in the left panel"}</div>}
+        {q.type === "side_by_side" && <div className="wq-prev-input">{(((q.rows&&q.rows.length)||0) + " items × " + ((q.columns&&q.columns.length)||0) + " columns")}</div>}
+        {q.type === "maxdiff" && <div className="wq-prev-input">{(((q.items&&q.items.length)||0) + " items, pick best and worst")}</div>}
+        {q.type === "hot_spot" && <div className="wq-prev-input">{q.image ? "Image set · people click a point" : "Upload an image in the left panel"}</div>}
         {q.type === "file_upload" && <div className="wq-prev-input">{(q.accept ? ("Accepts: " + q.accept) : "Any file type") + (q.multiple ? " · multiple" : "")}</div>}
         {q.type === "image_choice" && <div className="wq-prev-input">{((q.options&&q.options.length)||0) + " image choice" + (((q.options&&q.options.length)||0)===1?"":"s")}</div>}
         {q.type === "number_entry" && <div className="wq-prev-input" style={{maxWidth:240}}>{(q.prefix||"") + "0" + (q.suffix||"") + (((q.min!==""&&q.min!=null)||(q.max!==""&&q.max!=null)) ? ("  (" + ((q.min!==""&&q.min!=null)?q.min:"") + " to " + ((q.max!==""&&q.max!=null)?q.max:"") + ")") : "")}</div>}
@@ -2603,6 +2895,7 @@ function MCControls({ q, update, scoring }){
       <div className="panel-section">Answer type</div>
       <label className="opt-radio"><input type="radio" name={"at-" + q.id} checked={!q.multi} onChange={()=>update({multi:false})} /><span>Allow one answer</span></label>
       <label className={"opt-radio" + (dropdown ? " disabled" : "")}><input type="radio" name={"at-" + q.id} checked={!!q.multi} disabled={dropdown} onChange={()=>update({multi:true, display:"list"})} /><span>Allow multiple answers</span></label>
+      {q.multi && (<div className="row" style={{gap:10,marginTop:8}}><Field label="Min choices (0 = none)" style={{flex:1}}><input className="input" type="number" min="0" value={q.minSel || 0} onChange={(e)=>update({minSel: parseInt(e.target.value||"0",10)})} /></Field><Field label="Max choices (0 = none)" style={{flex:1}}><input className="input" type="number" min="0" value={q.maxSel || 0} onChange={(e)=>update({maxSel: parseInt(e.target.value||"0",10)})} /></Field></div>)}
       <div className="panel-section">Choices</div>
       <div className="label">Number of choices</div>
       <div className="stepper">
@@ -2618,6 +2911,7 @@ function MCControls({ q, update, scoring }){
         </select>
       </Field>
       <Toggle checked={!!q.randomize} onChange={(c)=>update({randomize:c})} label="Randomize choice order" />
+      {!q.multi && q.display !== "dropdown" && (<><div style={{height:8}}></div><Toggle checked={!!q.allowOther} onChange={(c)=>update({allowOther:c})} label="Add an Other choice with a write-in" />{q.allowOther && <Field label="Other label"><input className="input" value={q.otherLabel || ""} onChange={(e)=>update({otherLabel:e.target.value})} placeholder="Other" /></Field>}</>)}
       {scoring && (<><div className="panel-section">Scoring</div>
       <div className="hint" style={{marginBottom:6}}>Points awarded for each choice.</div>
       {q.options.map((o, i)=>(<div key={i} className="score-row"><span className="score-opt" title={o}>{o || ("Choice " + (i + 1))}</span><input className="input score-pts" type="number" value={(q.points && q.points[o]) || ""} onChange={(e)=>{ const p = { ...(q.points || {}) }; const n = e.target.value; if (n === "") delete p[o]; else p[o] = Number(n); update({ points:p }); }} /></div>))}</>)}
@@ -2647,8 +2941,10 @@ function TextControls({ q, update }){
           <option value="email">Email</option>
           <option value="phone">Phone</option>
           <option value="number">Number</option>
+          <option value="pattern">Custom pattern</option>
         </select>
       </Field>
+      {q.validation === "pattern" && (<><Field label="Pattern (regular expression)"><input className="input mono" value={q.pattern || ""} onChange={(e)=>update({pattern:e.target.value})} placeholder={"^[A-Z]{2}\\d{4}$"} /></Field><Field label="Message when it does not match"><input className="input" value={q.patternMessage || ""} onChange={(e)=>update({patternMessage:e.target.value})} placeholder="Please match the requested format." /></Field></>)}
       <Field label="Minimum length (0 for none)"><input className="input" type="number" min="0" value={q.minLength || 0} onChange={(e)=>update({minLength: parseInt(e.target.value || "0", 10)})} /></Field>
       <div className="panel-section">Conversation</div>
       <Toggle checked={!!q.followUp} onChange={(c)=>update({followUp:c})} label="Ask a follow-up based on the answer" />
@@ -2929,7 +3225,7 @@ function ActionControls({ q, update }){
   );
 }
 
-function LeftEditor({ q, update, questions, setQuestions, scoring }){
+function LeftEditor({ q, update, questions, setQuestions, scoring, experiment }){
   const changeType = (type) => {
     if (type === q.type) return;
     const made = QTYPES[type].make();
@@ -2952,6 +3248,9 @@ function LeftEditor({ q, update, questions, setQuestions, scoring }){
       {q.type === "slider" && <SliderControls q={q} update={update} />}
       {q.type === "nps" && <NpsControls q={q} update={update} />}
       {q.type === "matrix" && <MatrixControls q={q} update={update} />}
+      {q.type === "side_by_side" && <SbsControls q={q} update={update} />}
+      {q.type === "maxdiff" && <MaxDiffControls q={q} update={update} />}
+      {q.type === "hot_spot" && <HotSpotControls q={q} update={update} />}
       {q.type === "rank_order" && <RankControls q={q} update={update} />}
       {q.type === "constant_sum" && <ConstantSumControls q={q} update={update} />}
       {q.type === "form_field" && <FormFieldControls q={q} update={update} />}
@@ -2971,6 +3270,7 @@ function LeftEditor({ q, update, questions, setQuestions, scoring }){
       {q.type === "hidden_field" && <HiddenControls q={q} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <LogicControls q={q} questions={questions} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <SkipControls q={q} questions={questions} update={update} />}
+      <AdvancedControls q={q} update={update} experiment={experiment} />
     </div>
   );
 }
@@ -3024,6 +3324,32 @@ function ThemePanel({ form, setTheme, setSettings }){
   );
 }
 
+function TranslationsPanel({ form, setSettings }){
+  const set = form.schema.settings || {};
+  const langs = Array.isArray(set.languages) ? set.languages : [];
+  const [target, setTarget] = useState(langs[1] ? langs[1].code : "");
+  const [code, setCode] = useState(""); const [label, setLabel] = useState("");
+  const setLangs = (arr)=> setSettings({ languages: arr, multilingual: arr.length > 1 });
+  const addLang = ()=>{ const c = code.trim().toLowerCase(); const l = label.trim(); if (!c || !l) return; if (langs.some((x)=>x.code === c)) return; const arr = (langs.length ? langs : [{ code:"en", label:"English" }]).concat([{ code:c, label:l }]); setLangs(arr); setCode(""); setLabel(""); setTarget(c); };
+  const removeLang = (c)=>{ const arr = langs.filter((x)=>x.code !== c); setLangs(arr); if (target === c) setTarget(arr[1] ? arr[1].code : ""); };
+  const tr = (set.translations && set.translations[target]) || {};
+  const setT = (key, val)=>{ const all = { ...(set.translations || {}) }; const one = { ...(all[target] || {}) }; if (val === "") delete one[key]; else one[key] = val; all[target] = one; setSettings({ translations: all }); };
+  const strings = formStrings(form);
+  const filled = strings.filter((x)=> tr[x.key] != null && tr[x.key] !== "").length;
+  return (<div>
+    <div className="panel-section">Languages</div>
+    <div className="hint" style={{marginBottom:8}}>The first language is the default. Add others to offer the form with a language picker for respondents.</div>
+    {langs.map((l,i)=>(<div key={l.code} className="lang-row"><span className="mono" style={{fontSize:12,width:40,flex:"none"}}>{l.code}</span><span style={{flex:1}}>{l.label}{i === 0 ? " (default)" : ""}</span>{i > 0 && <button className="iconbtn" title="Remove" onClick={()=>removeLang(l.code)}>×</button>}</div>))}
+    <div className="row" style={{marginTop:10,gap:6}}><input className="input" style={{width:64,flex:"none"}} value={code} onChange={(e)=>setCode(e.target.value)} placeholder="es" /><input className="input" style={{flex:1}} value={label} onChange={(e)=>setLabel(e.target.value)} placeholder="Espanol" /><button className="btn sm" onClick={addLang}>Add</button></div>
+    {langs.length > 1 && target && (<>
+      <div className="panel-section">Translate into</div>
+      <Field label="Target language"><select className="select" value={target} onChange={(e)=>setTarget(e.target.value)}>{langs.filter((l,i)=>i > 0).map((l)=>(<option key={l.code} value={l.code}>{l.label}</option>))}</select></Field>
+      <div className="hint">{filled} of {strings.length} strings translated. Leave a field blank to fall back to the default text.</div>
+      <div className="panel-section">Strings</div>
+      {strings.map((x)=>(<div key={x.key} className="i18n-row"><div className="i18n-meta"><span className="i18n-grp">{x.group}</span><span className="i18n-what">{x.what}</span></div><div className="i18n-orig" title={x.original}>{x.original || "(empty)"}</div><input className="input" value={tr[x.key] || ""} onChange={(e)=>setT(x.key, e.target.value)} placeholder={x.original} /></div>))}
+    </>)}
+  </div>);
+}
 function SettingsPanel({ form, setForm, setSettings, id, del }){
   const { toast } = useApp();
   const toLocalInput = (iso) => { if (!iso) return ""; const d = new Date(iso); if (isNaN(d.getTime())) return ""; const p = (n)=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes()); };
@@ -3052,6 +3378,10 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <div className="hint" style={{marginBottom:8}}>Tip: insert an answer with the picker, or type a reference like {"{{Your name}}"} to greet people by their answer.</div>
       <Field label="Thank-you heading"><PipeInput value={form.schema.settings.endTitle} onChange={(v)=>setSettings({endTitle:v})} placeholder="Thank you" questions={form.schema.questions} /></Field>
       <Field label="Thank-you message"><PipeInput textarea value={form.schema.settings.endMessage} onChange={(v)=>setSettings({endMessage:v})} placeholder="Your response has been recorded." questions={form.schema.questions} /></Field>
+      <div className="panel-section">Disqualification</div>
+      <div className="hint" style={{marginBottom:6}}>Shown when skip logic sends a respondent to "Disqualify (screen out)".</div>
+      <Field label="Screen-out heading"><input className="input" value={form.schema.settings.screenoutTitle || ""} onChange={(e)=>setSettings({screenoutTitle:e.target.value})} placeholder="Thanks for your time" /></Field>
+      <Field label="Screen-out message"><textarea className="input" value={form.schema.settings.screenoutMessage || ""} onChange={(e)=>setSettings({screenoutMessage:e.target.value})} placeholder="Based on your answers, this survey is not a match." style={{minHeight:70,resize:"vertical"}} /></Field>
       <Field label="Button label (optional)"><input className="input" placeholder="Visit our site" value={form.schema.settings.endButtonLabel || ""} onChange={(e)=>setSettings({endButtonLabel:e.target.value})} /></Field>
       <Field label="Button URL (optional)"><input className="input" placeholder="https://example.com" value={form.schema.settings.endButtonUrl || ""} onChange={(e)=>setSettings({endButtonUrl:e.target.value})} /></Field>
       <Field label="Redirect URL (optional)"><input className="input" placeholder="https://example.com/thanks" value={form.schema.settings.redirectUrl || ""} onChange={(e)=>setSettings({redirectUrl:e.target.value})} /></Field>
@@ -3067,9 +3397,22 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <div style={{height:10}}></div>
       <Field label="Custom CSS (advanced)"><textarea className="textarea" style={{minHeight:120,fontFamily:"var(--mono)",fontSize:12}} placeholder=".fcard { border-radius: 0; } .submit { background: #111; }" value={form.schema.settings.customCss || ""} onChange={(e)=>setSettings({customCss:e.target.value})} /></Field>
       <div className="hint">Custom CSS applies to your public form only. Target classes such as .fcard, .ftitle, .fdesc, .opt, .finput, or .submit. The thank-you and closed screens use the same classes.</div>
+      <div className="panel-section">A/B testing</div>
+      <Toggle checked={!!form.schema.settings.experiment} onChange={(c)=>setSettings({experiment:c})} label="Run an experiment (assign a random variant)" />
+      {form.schema.settings.experiment && <Field label="Number of variants"><select className="select" value={String(form.schema.settings.variantCount || 2)} onChange={(e)=>setSettings({variantCount: parseInt(e.target.value, 10)})}><option value="2">2 (A, B)</option><option value="3">3 (A, B, C)</option><option value="4">4 (A, B, C, D)</option></select></Field>}
+      <div className="hint">Each respondent is randomly assigned a variant, recorded with their response and shown in analytics and exports. Set a question's variant under Advanced to show it only to that group.</div>
+
       <div className="panel-section">Integrations</div>
       <Field label="Webhook URL (optional)"><input className="input" placeholder="https://hooks.example.com/..." value={form.schema.settings.webhookUrl || ""} onChange={(e)=>setSettings({webhookUrl:e.target.value})} /></Field>
       <div className="hint">On each submission we POST a JSON payload (event, responses, and metadata like UTM source and time to complete) to this URL.</div>
+      {id && (<>
+        <div className="panel-section">Programmatic API</div>
+        {form.schema.settings.apiKey ? (<>
+          <Field label="API key"><input className="input mono" readOnly value={form.schema.settings.apiKey} onFocus={(e)=>e.target.select()} /></Field>
+          <div className="hint">GET <span className="mono">/api/v1/forms/{id}</span> returns the form. POST <span className="mono">/api/v1/forms/{id}/responses</span> with a JSON body {"{ data: { questionId: value } }"} records one. Authenticate with header <span className="mono">Authorization: Bearer KEY</span> or <span className="mono">?key=KEY</span>.</div>
+          <button className="btn sm ghost" style={{marginTop:8}} onClick={()=>setSettings({apiKey:""})}>Revoke key</button>
+        </>) : (<button className="btn sm" onClick={()=>setSettings({ apiKey: "zq_" + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10) })}>Generate API key</button>)}
+      </>)}
       {id && (
         <div style={{marginTop:18}}>
           <div className="panel-section">Danger zone</div>
@@ -3129,6 +3472,49 @@ const FORM_TEMPLATES = [
       return { title:"Quick poll", description:"", theme:{ primary:"#5b4fe0", secondary:"#1b1830", accent:"#5b4fe0", font:"sans" }, schema:{ questions:[mc], settings:{} }, is_open:true };
   }},
 ];
+
+function IconCalendar(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>); }
+function IconPen(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>); }
+function SchedulerPanel({ form, questions, updateQ, setQuestions, setSel, setMode }){
+  const q = questions.find((x)=> x.type === "scheduling");
+  const add = ()=>{ const nq = QTYPES.scheduling.make(); nq.label = "Choose a time"; setQuestions(questions.concat([nq])); };
+  if (!q) return (
+    <div>
+      <div className="panel-title">Scheduler</div>
+      <p className="muted" style={{fontSize:14,margin:"0 0 14px"}}>Let people book a time inside this form. Add a scheduler, then set your available slots and how many bookings each one allows.</p>
+      <button className="btn primary" onClick={add}>Add a scheduler</button>
+    </div>
+  );
+  return (
+    <div>
+      <div className="panel-title">Scheduler</div>
+      <Field label="Heading"><input className="input" value={q.label || ""} onChange={(e)=>updateQ(q.id, { label: e.target.value })} /></Field>
+      <SchedulingControls q={q} update={(p)=>updateQ(q.id, p)} />
+      <div className="hint" style={{marginTop:14}}>This is question {questions.indexOf(q) + 1} in your form.</div>
+      <button className="btn ghost sm" style={{marginTop:8}} onClick={()=>{ setSel(q.id); setMode("edit"); }}>Open in questions</button>
+    </div>
+  );
+}
+function EsignPanel({ form, questions, updateQ, setQuestions, setSel, setMode }){
+  const q = questions.find((x)=> x.type === "document_sign");
+  const add = ()=>{ const nq = QTYPES.document_sign.make(); nq.label = "Review and sign"; setQuestions(questions.concat([nq])); };
+  if (!q) return (
+    <div>
+      <div className="panel-title">E-sign</div>
+      <p className="muted" style={{fontSize:14,margin:"0 0 14px"}}>Collect a signature on a document inside this form. Add a document, then upload it and place the fields people fill in.</p>
+      <button className="btn primary" onClick={add}>Add a document to sign</button>
+    </div>
+  );
+  return (
+    <div>
+      <div className="panel-title">E-sign</div>
+      <Field label="Heading"><input className="input" value={q.label || ""} onChange={(e)=>updateQ(q.id, { label: e.target.value })} /></Field>
+      <DocumentControls q={q} update={(p)=>updateQ(q.id, p)} />
+      <div className="hint" style={{marginTop:14}}>This is question {questions.indexOf(q) + 1} in your form.</div>
+      <button className="btn ghost sm" style={{marginTop:8}} onClick={()=>{ setSel(q.id); setMode("edit"); }}>Open in questions</button>
+    </div>
+  );
+}
 
 function Builder({ formId }){
   const { navigate, toast, user, theme, toggleTheme } = useApp();
@@ -3254,8 +3640,11 @@ function Builder({ formId }){
             {tools && (
               <div className="menu">
                 {id && <button onClick={()=>{ navigate("/dashboard/" + id); }}>View responses</button>}
+                <button onClick={()=>{ setMode("schedule"); setTools(false); }}>Scheduler</button>
+                <button onClick={()=>{ setMode("esign"); setTools(false); }}>E-sign</button>
                 <button onClick={()=>{ setMode("theme"); setTools(false); }}>Theme</button>
                 <button onClick={()=>{ setMode("settings"); setTools(false); }}>Form settings</button>
+                <button onClick={()=>{ setMode("i18n"); setTools(false); }}>Translations</button>
                 {id && <button className="danger-text" onClick={()=>{ setTools(false); del(); }}>Delete form</button>}
               </div>
             )}
@@ -3278,22 +3667,28 @@ function Builder({ formId }){
         <div className="b-main" onClick={()=>{ if (tools) setTools(false); }}>
           <div className="b-rail">
             <button className={mode === "edit" ? "active" : ""} title="Questions" onClick={()=>setMode("edit")}><IconList /></button>
+            <button className={mode === "schedule" ? "active" : ""} title="Scheduler" onClick={()=>setMode("schedule")}><IconCalendar /></button>
+            <button className={mode === "esign" ? "active" : ""} title="E-sign" onClick={()=>setMode("esign")}><IconPen /></button>
             <button className={mode === "theme" ? "active" : ""} title="Theme" onClick={()=>setMode("theme")}><IconTheme /></button>
             <button className={mode === "brand" ? "active" : ""} title="Brand studio" onClick={()=>setMode("brand")}><IconBrand /></button>
             <button className={mode === "settings" ? "active" : ""} title="Form settings" onClick={()=>setMode("settings")}><IconCog /></button>
+            <button className={mode === "i18n" ? "active" : ""} title="Translations" onClick={()=>setMode("i18n")}><IconGlobe /></button>
           </div>
 
           <div className="b-panel">
             {mode === "edit" && (selQ
-              ? <LeftEditor q={selQ} update={(p)=>updateQ(selQ.id, p)} questions={questions} setQuestions={setQuestions} scoring={!!(form.schema.settings && form.schema.settings.scoring)} />
+              ? <LeftEditor q={selQ} update={(p)=>updateQ(selQ.id, p)} questions={questions} setQuestions={setQuestions} scoring={!!(form.schema.settings && form.schema.settings.scoring)} experiment={form.schema.settings && form.schema.settings.experiment ? { on:true, count: Math.max(2, Math.min(8, parseInt(form.schema.settings.variantCount, 10) || 2)) } : { on:false, count:2 }} />
               : <div><div className="panel-title">Edit question</div><div className="muted" style={{fontSize:14}}>Select a question in the canvas to edit it here, or add a new question.</div></div>)}
             {mode === "theme" && <ThemePanel form={form} setTheme={setTheme} setSettings={setSettings} />}
             {mode === "brand" && <BrandStudio form={form} setTheme={setTheme} setSettings={setSettings} />}
             {mode === "settings" && <SettingsPanel form={form} setForm={setForm} setSettings={setSettings} id={id} del={del} />}
+            {mode === "i18n" && <TranslationsPanel form={form} setSettings={setSettings} />}
+            {mode === "schedule" && <SchedulerPanel form={form} questions={questions} updateQ={updateQ} setQuestions={setQuestions} setSel={setSel} setMode={setMode} />}
+            {mode === "esign" && <EsignPanel form={form} questions={questions} updateQ={updateQ} setQuestions={setQuestions} setSel={setSel} setMode={setMode} />}
           </div>
 
           <div className="b-canvas">
-            {mode === "theme" ? (
+            {(mode === "theme" || mode === "schedule" || mode === "esign" || mode === "i18n") ? (
               <div style={{maxWidth:680,margin:"26px auto",padding:"0 18px"}}><FormRenderer form={form} preview /></div>
             ) : (
             <div className="b-canvas-inner">
@@ -3409,6 +3804,12 @@ function statLines(q, rows){
   const vals = rows.map((r)=>r.data[q.id]).filter((v)=> v !== undefined && v !== null && v !== "");
   const title = q.label || q.id;
   const type = QTYPES[q.type].label + " · " + vals.length + " answered";
+  if (q.type === "maxdiff"){
+    const sc = {}; (q.items||[]).forEach((it)=>{ sc[it] = { b:0, w:0 }; });
+    rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object"){ if (o.best && sc[o.best]) sc[o.best].b++; if (o.worst && sc[o.worst]) sc[o.worst].w++; } });
+    const arr = (q.items||[]).map((it)=>({ k: it, v: sc[it].b - sc[it].w })).sort((a,b)=>b.v - a.v);
+    return { title, type, bars: arr, lines: ["Preference score: chosen best minus chosen worst"] };
+  }
   if (q.type === "multiple_choice"){
     const c = {}; q.options.forEach((o)=>c[o] = 0);
     rows.forEach((r)=>{ const v = r.data[q.id]; if (Array.isArray(v)) v.forEach((o)=>c[o] = (c[o] || 0) + 1); else if (v) c[v] = (c[v] || 0) + 1; });
@@ -3428,6 +3829,10 @@ function statLines(q, rows){
   }
   if (q.type === "matrix"){
     return { title, type, bars: [], lines: q.rows.map((row)=>{ const c = {}; rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object"){ const a = o[row]; (Array.isArray(a) ? a : [a]).forEach((x)=>{ if (x) c[x] = (c[x] || 0) + 1; }); } }); const top = Object.entries(c).sort((a,b)=>b[1] - a[1])[0]; return row + ": " + (top ? top[0] + " (" + top[1] + ")" : "no data"); }) };
+  }
+  if (q.type === "side_by_side"){
+    const cols = q.columns || [];
+    return { title, type, bars: [], lines: (q.rows || []).map((row)=>{ const parts = cols.map((c)=>{ const cc = {}; rows.forEach((r)=>{ const o = r.data[q.id]; if (o && o[row] && o[row][c.label]){ const x = o[row][c.label]; cc[x] = (cc[x] || 0) + 1; } }); const top = Object.entries(cc).sort((a,b)=>b[1] - a[1])[0]; return c.label + ": " + (top ? top[0] : "-"); }); return row + " - " + parts.join(", "); }) };
   }
   if (q.type === "star_rating"){
     const nums = vals.map(Number).filter((n)=>!isNaN(n)); const avg = nums.length ? nums.reduce((a,b)=>a + b, 0) / nums.length : 0;
@@ -3795,6 +4200,36 @@ function QuestionStat({ q, rows }){
     </div>);
   }
 
+  if (q.type === "side_by_side"){
+    const cols = q.columns || [];
+    return (<div className="card pad-lg">{head()}
+      <div className="matrix-wrap"><table className="table" style={{fontSize:13}}>
+        <thead><tr><th></th>{cols.map((c)=>(<th key={c.id} style={{textAlign:"left"}}>{c.label}</th>))}</tr></thead>
+        <tbody>{(q.rows || []).map((row,ri)=>(<tr key={ri}><td style={{fontWeight:500}}>{row}</td>{cols.map((c)=>{ const cc = {}; rows.forEach((r)=>{ const o = r.data[q.id]; if (o && o[row] && o[row][c.label]){ const x = o[row][c.label]; cc[x] = (cc[x] || 0) + 1; } }); const top = Object.entries(cc).sort((a,b)=>b[1] - a[1])[0]; return (<td key={c.id}>{top ? (top[0] + " (" + top[1] + ")") : <span className="muted">-</span>}</td>); })}</tr>))}</tbody>
+      </table></div>
+      <div className="hint" style={{marginTop:8}}>Most common answer per item and column.</div>
+    </div>);
+  }
+
+  if (q.type === "hot_spot"){
+    const pts = rows.map((r)=> r.data[q.id]).filter((v)=> v && typeof v === "object" && typeof v.x === "number");
+    return (<div className="card pad-lg">{head(pts.length + " points")}
+      {q.image ? (<div className="hotspot-heat"><img src={q.image} alt="" />{pts.map((p,i)=>(<span key={i} className="heat-dot" style={{left:p.x + "%",top:p.y + "%"}}></span>))}</div>) : <div className="muted" style={{fontSize:13}}>No image.</div>}
+      <div className="hint" style={{marginTop:8}}>Every response shown as a point on the image.</div>
+    </div>);
+  }
+
+  if (q.type === "maxdiff"){
+    const sc = {}; (q.items||[]).forEach((it)=>{ sc[it] = { b:0, w:0 }; });
+    rows.forEach((r)=>{ const o = r.data[q.id]; if (o && typeof o === "object"){ if (o.best && sc[o.best]) sc[o.best].b++; if (o.worst && sc[o.worst]) sc[o.worst].w++; } });
+    const arr = (q.items||[]).map((it)=>({ k: it, score: sc[it].b - sc[it].w })).sort((a,b)=>b.score - a.score);
+    const mn = Math.min(0, ...arr.map((x)=>x.score)), mx = Math.max(1, ...arr.map((x)=>x.score)); const span = (mx - mn) || 1;
+    return (<div className="card pad-lg">{head()}
+      {arr.length ? arr.map((x,i)=>(<div className="bar-row" key={i}><span className="k">{x.k}</span><span className="track2"><span className="fill" style={{width:(((x.score - mn) / span) * 100) + "%"}}></span></span><span className="v">{x.score > 0 ? "+" : ""}{x.score}</span></div>)) : <div className="muted" style={{fontSize:13}}>No data yet.</div>}
+      <div className="hint" style={{marginTop:8}}>Preference score: times chosen best minus times chosen worst.</div>
+    </div>);
+  }
+
   if (q.type === "rank_order"){
     const sums = {}, cnt = {}; q.items.forEach((it)=>{ sums[it] = 0; cnt[it] = 0; });
     rows.forEach((r)=>{ const arr = r.data[q.id]; if (Array.isArray(arr)) arr.forEach((it,idx)=>{ if (sums[it] !== undefined){ sums[it] += idx + 1; cnt[it]++; } }); });
@@ -3920,6 +4355,7 @@ function AnalyticsTab({ id, form }){
     <div style={{display:"grid",gridTemplateColumns:"1fr",gap:18,maxWidth:680}}>
       <ExportButtons id={id} form={form} rows={rows} />
       {(()=>{ const sc = rows.filter((r)=> r.meta && typeof r.meta.score === "number"); if (!sc.length) return null; const avg = sc.reduce((a,r)=> a + r.meta.score, 0) / sc.length; const mx = sc.reduce((a,r)=> Math.max(a, r.meta.maxScore || 0), 0); const best = sc.reduce((a,r)=> Math.max(a, r.meta.score), -Infinity); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>Quiz scores</div><div className="statgrid"><div><div className="bignum">{Math.round(avg * 100) / 100}{mx ? (" / " + mx) : ""}</div><div className="hint">Average</div></div><div><div className="bignum">{best}</div><div className="hint">Highest</div></div><div><div className="bignum">{sc.length}</div><div className="hint">Scored</div></div></div></div>); })()}
+      {(()=>{ const st = (form.schema && form.schema.settings) || {}; if (!st.experiment) return null; const c = {}; rows.forEach((r)=>{ const v = (r.meta && r.meta.variant) || "Unassigned"; c[v] = (c[v] || 0) + 1; }); const entries = Object.entries(c).sort((a,b)=> a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0)); const mx = Math.max(1, ...entries.map((e)=>e[1])); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>A/B variants</div>{entries.map(([k,n],i)=>(<div className="bar-row" key={i}><span className="k">{k === "Unassigned" ? k : ("Variant " + k)}</span><span className="track2"><span className="fill" style={{width:((n / mx) * 100) + "%"}}></span></span><span className="v">{n}</span></div>))}<div className="hint" style={{marginTop:8}}>How responses split across variants.</div></div>); })()}
       <div className="card pad-lg"><div className="label">Total responses</div><div style={{fontFamily:"var(--display)",fontSize:46,fontWeight:600,lineHeight:1}}>{a.total || 0}</div></div>
       {tone && <ToneCard tone={tone} />}
       {inputQs.length > 0 && <div className="label" style={{marginTop:4}}>Question breakdown</div>}

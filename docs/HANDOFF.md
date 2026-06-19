@@ -415,3 +415,69 @@ If nothing applies, for example they selected nothing and you carried the select
 ## Custom font
 
 The Theme panel now has a Custom font field that takes a Google Fonts name such as Poppins. Previously a custom font could only be set through a saved brand kit, and it only showed in the builder preview. Now it can be set directly, and it is also applied on the live public form: the font is loaded on the public page and used in the form's font stack. The font name lives in theme.customFont and is loaded with the existing loadGoogleFont helper, which de-duplicates link tags.
+
+## Scheduler and e-sign as editor panels (supersedes the top-bar buttons)
+
+The earlier approach of New schedule and New esign buttons in the top bar has been removed. The top bar is back to a single New form button. Instead, the form editor's left rail now has two extra panels next to Questions, Theme, Brand studio, and Form settings: a Scheduler panel and an E-sign panel.
+
+Each panel works on the current form. If the form has no scheduling question yet, the Scheduler panel shows a short explanation and an Add a scheduler button that inserts one; once it exists, the panel shows a heading field and the full slot and capacity editor, with an Open in questions shortcut. The E-sign panel behaves the same way for a document to sign (add, then upload the document and place fields). While either panel is open the canvas on the right shows the live form preview, so you see the scheduler or document as you configure it. On mobile, both also appear in the Tools menu.
+
+These panels simply find or create the relevant question (scheduling or document_sign) in the current form and reuse the existing SchedulingControls and DocumentControls, so there is no separate data model. The kind tag, dashboard badges, and blankForm seeding from the old approach are left in place but are no longer reachable from the UI.
+
+The Embedded item question, which used to be limited to schedulers and e-sign documents, now lists all of your forms so you can embed any form into another. Its help text was updated to match.
+
+## Side by side question type
+
+A new question type, side by side, brings the question count to twenty-four. It is a grid where each row is an item and each column is its own dropdown with its own choices, so respondents rate every item across several dimensions at once (for example Importance and Satisfaction). In the editor the Side by side panel has a rows box, one item per line, and a list of columns, each with a label and a comma separated set of choices, plus Add column and Remove column.
+
+The answer is stored as a nested object, item label to a map of column label to chosen value. To make that readable everywhere, both the backend formatAnswer and the frontend answerToText were extended to render a nested object as item: (column=value, column=value); ordinary flat objects like the matrix answer are unchanged. In analytics it shows a compact table of the most common answer for each item and column, and the summary report lists the same per item. The CSV export carries the flattened string in the question's single column. Rows and columns are keyed by their labels in the answer, like the matrix type, so renaming a row or column starts a fresh column of data.
+
+## Hot spot question type
+
+A new question type, hot spot, brings the count to twenty-five. The owner uploads an image and respondents tap or click a single point on it. The answer is stored as a position in percent of the image width and height, so it stays correct at any display size. The renderer shows the image with a crosshair cursor and drops a pin where the person clicks; tapping again moves it.
+
+In analytics the question shows a heatmap: the image with a translucent dot for every response, so overlapping clicks read as hotter areas. The image is stored as a data URL in the form like other image features, the click handler converts the cursor position against the image's bounding box into a clamped 0 to 100 coordinate, and validation requires a point when the question is required. The editor panel is a single image upload plus the usual response toggles.
+
+## MaxDiff question type
+
+A best and worst (MaxDiff) type brings the count to twenty-six. The owner lists items; the respondent picks the single best and the single worst from the set. The renderer is a three column table (Best radio, item, Worst radio); picking an item as best clears it from worst and vice versa, so the same item can never be both. Validation, when required, asks for a best and a worst that differ. In analytics each item gets a preference score equal to times chosen best minus times chosen worst, drawn as a sorted bar chart, and the PDF report carries the same scores.
+
+## A/B testing (experiments)
+
+Form settings now include an experiment toggle and a variant count of two to four. When it is on, each respondent is assigned a random variant letter (A, B, ...) once on load and it travels with their submission into the response metadata. Any question can be set, under its Advanced panel, to show only in a chosen variant; the form renderer hides questions whose variant does not match the visitor's. Analytics gain an A/B variants card showing how responses split, and the CSV export gains a variant column. The variant assignment is purely client side and recorded server side, with no separate table.
+
+## Field mapping for exports (CRM keys)
+
+Each input question can carry an export field name (letters, numbers, underscore) under its Advanced panel. When set, it becomes the column header in CSV exports and the key in two machine readable payloads: a new mapped object in the webhook payload (export name to answer) and the question key in the programmatic API schema. This lets a CRM or downstream system map answers by a stable name rather than the human label.
+
+## Programmatic API
+
+A form can generate an API key from its settings (Integrations, Programmatic API). Two server to server endpoints accept it. GET /api/v1/forms/{formId} returns the form's title and its input questions (id, export key, type, label, required) plus settings with the key stripped. POST /api/v1/forms/{formId}/responses with a JSON body of the shape { data: { questionId: value } } records a response, running the same scoring, availability, and webhook path as a normal submission. Both authenticate by Authorization: Bearer KEY or a key query parameter. The key check reads settings.apiKey on the form; revoking clears it. No CORS headers are sent, so this is intended for server to server use, not browser fetches from another origin.
+
+## Multilingual forms
+
+A form can be offered in several languages. Settings carry multilingual (bool), languages (an array of {code, label} where the first is the default), and translations (a map of language code to a flat key to string map). Translation keys are title, desc, q:<id>:label, q:<id>:desc, q:<id>:opt:<i>, q:<id>:item:<i>, q:<id>:row:<i>, q:<id>:col:<i>, endTitle, endMessage, and ui:back / ui:next / ui:submit. localizeForm(form, lang) returns a copy of the form with those strings swapped for the chosen language, falling back to the default text wherever a translation is blank; formStrings(form) lists every translatable string for the editor. The public form shows a language picker at the top of the card whenever more than one language is defined, and switching re-renders titles, descriptions, question labels, choices, matrix rows and columns, the thank-you screen, and the navigation buttons. Switching keeps answers, since they are keyed by question id. In the builder a globe icon opens a Translations panel (mode i18n) for managing languages and entering translations per target language. Exports and webhooks keep using the default-language labels and keys, so column names stay stable across languages. Limitations in this version: the closed-form message and inline validation messages are not translated, drill-down levels and signed-document field labels are not translated, choice translations are keyed by index so reordering choices can misalign them, and the builder canvas preview shows the default language.
+
+## Multiple choice Other (write-in)
+
+Single-select multiple choice (list display, not dropdown) can include an Other choice with a free-text box, controlled by q.allowOther with an optional q.otherLabel. When the respondent selects Other a write-in field appears and the typed text becomes the stored answer (a value that is not one of the defined choices). A required question treats an empty Other selection as unanswered. The write-in is stored as a plain string, so it flows through CSV, webhooks, and the API like any other answer and appears in analytics as its own value. Multi-select Other is not implemented in this version.
+
+## Custom pattern validation
+
+Text entry questions gain a Custom pattern validation option: q.validation set to pattern with q.pattern holding a regular expression and q.patternMessage the message shown when the input does not match. Validation runs on the client before submission; an invalid regular expression is caught and ignored so a bad pattern never blocks a respondent. Empty optional fields still pass.
+
+## Disqualification (screen out)
+
+Skip logic gains a Disqualify (screen out) target alongside the existing End of survey target. When a rule sends a respondent there, the form submits immediately and shows a dedicated screen-out message taken from settings.screenoutTitle and settings.screenoutMessage (with sensible defaults), rather than the normal thank-you, and the score and end button are hidden. The skipped-questions confirmation is bypassed since the early exit is intentional. The response is still recorded so screen-out rates can be analyzed, flagged with meta.disqualified set to true; the client sends disqualified in the submission body and the backend stores it. A redirect URL is skipped for a screen-out so the message is shown. Settings has a Disqualification section with the heading and message fields. Surfacing a screen-out count in analytics and the CSV is a future enhancement; the flag is stored now.
+
+## Minimum and maximum choices
+
+Multi-select multiple choice supports a minimum and a maximum number of choices through q.minSel and q.maxSel (0 means no limit), edited in the question controls when multiple answers are allowed. The renderer prevents checking beyond the maximum (unchecking is always allowed), and validation enforces the minimum when the question is required or the respondent has selected at least one option, and the maximum always. Messages read like Please select at least 2 and Please select no more than 3.
+
+## Placing fields on a signed document
+
+Document-sign fields can be positioned directly on an image document instead of only listed beneath it. Each field may carry x and y as percentages of the document plus a placed flag. In the question controls, when the document is an image, a Position on the document section shows the document; you pick a field then click where it should sit, and click a pin to remove it. On the public form, placed fields render as overlays anchored at their coordinates (compact inputs for text and date, a checkbox for check, a small signature pad for signature), while any unplaced fields and all fields on a PDF document continue to appear in the list below. PDF documents are not supported for coordinate placement in this version because overlays over the PDF viewer are unreliable; their fields stay in the list.
+
+## Embedded data from the URL
+
+Hidden field questions capture a value with no visible input. With source set to url they read a named URL query parameter (q.key) when the form loads, falling back to q.value if the parameter is absent; with source set to fixed they store q.value directly. The captured value is submitted with the response like any answer, which is useful for passing campaign tags or identifiers through a link such as a form URL ending in ?source=newsletter.

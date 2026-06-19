@@ -46,6 +46,13 @@ async function route(seg, method, request, env, context) {
   }
 
   // ---- forms (auth required) ----
+  if (path[0] === "v1" && path[1] === "forms" && path.length === 3 && method === "GET") {
+    return apiGetForm(path[2], request, env);
+  }
+  if (path[0] === "v1" && path[1] === "forms" && path.length === 4 && path[3] === "responses" && method === "POST") {
+    return apiSubmit(path[2], request, env, context);
+  }
+
   if (path[0] === "forms") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "unauthorized" }, 401);
@@ -437,6 +444,8 @@ async function submitResponse(formId, request, env, context) {
     seconds: typeof body.seconds === "number" ? body.seconds : null,
     utm: body.utm && typeof body.utm === "object" ? body.utm : null,
     followups: Array.isArray(body.followups) ? body.followups.slice(0, 20) : null,
+    variant: typeof body.variant === "string" ? body.variant.slice(0, 4) : null,
+    disqualified: body.disqualified === true,
   };
 
   const id = crypto.randomUUID();
@@ -460,6 +469,35 @@ async function submitResponse(formId, request, env, context) {
   return json({ ok: true, id, score: scoreInfo ? scoreInfo.score : null, maxScore: scoreInfo ? scoreInfo.max : null });
 }
 
+function apiKeyFromReq(request){
+  const a = request.headers.get("authorization") || "";
+  const m = a.match(/Bearer\s+(.+)/i);
+  if (m) return m[1].trim();
+  try { return new URL(request.url).searchParams.get("key") || ""; } catch (e) { return ""; }
+}
+async function apiGetForm(formId, request, env){
+  const form = await env.DB.prepare("SELECT id, slug, title, schema FROM forms WHERE id = ?").bind(formId).first();
+  if (!form) return json({ error: "not_found" }, 404);
+  const schema = safeParse(form.schema, { questions: [], settings: {} });
+  const key = (schema.settings && schema.settings.apiKey) || "";
+  if (!key || apiKeyFromReq(request) !== key) return json({ error: "unauthorized" }, 401);
+  const skip = { text_graphic: 1, page_break: 1, block: 1, embed: 1 };
+  const settings = { ...(schema.settings || {}) };
+  delete settings.apiKey;
+  const questions = (schema.questions || []).filter((q)=> q && !skip[q.type]).map((q)=>({
+    id: q.id, key: q.exportKey || null, type: q.type, label: q.label || q.heading || null, required: !!q.required,
+  }));
+  return json({ form: { id: form.id, slug: form.slug, title: form.title, questions, settings } });
+}
+async function apiSubmit(formId, request, env, context){
+  const form = await env.DB.prepare("SELECT id, schema FROM forms WHERE id = ?").bind(formId).first();
+  if (!form) return json({ error: "not_found" }, 404);
+  const schema = safeParse(form.schema, { settings: {} });
+  const key = (schema.settings && schema.settings.apiKey) || "";
+  if (!key || apiKeyFromReq(request) !== key) return json({ error: "unauthorized" }, 401);
+  return submitResponse(formId, request, env, context);
+}
+
 async function fireWebhook(url, formId, data, meta, questions){
   try {
     const inputs = (questions || []).filter((q)=> q && q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "hidden_field" && q.type !== "block" && q.type !== "embed");
@@ -469,6 +507,8 @@ async function fireWebhook(url, formId, data, meta, questions){
     const hidden = (questions || []).filter((q)=> q && q.type === "hidden_field");
     const fields = {};
     hidden.forEach((q)=>{ if (q.key) fields[q.key] = data[q.id]; });
+    const mapped = {};
+    inputs.forEach((q)=>{ if (q.exportKey) mapped[q.exportKey] = formatAnswer(data[q.id]); });
     const payload = {
       event: "form_submission",
       data: {
@@ -478,6 +518,7 @@ async function fireWebhook(url, formId, data, meta, questions){
           nps_score: npsQ ? data[npsQ.id] : null,
         },
         responses,
+        mapped,
         metadata: {
           utm_source: (meta.utm && meta.utm.source) || null,
           time_to_complete_seconds: typeof meta.seconds === "number" ? meta.seconds : null,
@@ -485,6 +526,7 @@ async function fireWebhook(url, formId, data, meta, questions){
           browser: meta.browser || null,
           fields,
           followups: meta.followups || [],
+          variant: meta.variant || null,
         },
       },
     };
@@ -545,14 +587,16 @@ async function exportCsv(user, id, env) {
   const schema = safeParse(form.schema, { questions: [] });
   const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "block" && q.type !== "embed");
   const scoring = !!(schema.settings && schema.settings.scoring);
+  const experiment = !!(schema.settings && schema.settings.experiment);
 
   const { results } = await env.DB.prepare(
     "SELECT id, data, meta, created_at FROM responses WHERE form_id = ? ORDER BY created_at ASC"
   ).bind(id).all();
 
   const header = ["response_id", "submitted_at", "country", "city", "region", "browser", "os"];
-  questions.forEach((q) => header.push(q.label || q.heading || q.id));
+  questions.forEach((q) => header.push(q.exportKey || q.label || q.heading || q.id));
   if (scoring) { header.push("score"); header.push("max_score"); }
+  if (experiment) header.push("variant");
 
   const lines = [header.map(csvCell).join(",")];
   for (const r of (results || [])) {
@@ -564,6 +608,7 @@ async function exportCsv(user, id, env) {
     ];
     questions.forEach((q) => row.push(formatAnswer(data[q.id])));
     if (scoring) { row.push(meta.score != null ? meta.score : ""); row.push(meta.maxScore != null ? meta.maxScore : ""); }
+    if (experiment) row.push(meta.variant || "");
     lines.push(row.map(csvCell).join(","));
   }
 
@@ -626,7 +671,7 @@ function formatAnswer(v) {
   if (typeof v === "string" && v.indexOf("data:image") === 0) return "[signature]";
   if (v && typeof v === "object" && v.key && v.name) return v.name;
   if (Array.isArray(v)) return v.map((x) => (x && typeof x === "object" && x.name) ? x.name : x).join("; ");
-  if (typeof v === "object") return Object.keys(v).map((k) => k + ": " + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(" | ");
+  if (typeof v === "object") return Object.keys(v).map((k) => { const val = v[k]; if (val && typeof val === "object" && !Array.isArray(val)) return k + ": (" + Object.keys(val).map((c)=> c + "=" + val[c]).join(", ") + ")"; return k + ": " + (Array.isArray(val) ? val.join("/") : val); }).join(" | ");
   return String(v);
 }
 

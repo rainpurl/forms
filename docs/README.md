@@ -188,3 +188,51 @@ On a multiple choice or rank order question, open Carry forward and reuse an ear
 ## Custom font
 
 The Theme panel takes a Google Fonts name (for example Poppins). It now applies on the live form as well as the builder preview.
+
+## Scheduler and e-sign panels
+
+Schedulers and e-sign documents are set up inside the form editor, not from the top bar. The editor's left rail has Scheduler and E-sign panels next to Questions, Theme, Brand, and Settings. Each adds and configures that capability in the current form, with a live preview on the right. The top bar has a single New form button. The Embedded item question now lets you embed any of your forms.
+
+## Side by side
+
+A grid question where each row is an item and each column is its own dropdown scale, so people rate every item across several dimensions at once. Set the items (one per line) and the columns (each with a label and comma separated choices) in the Side by side editor panel. It exports as a readable string and shows a per item and column breakdown in analytics. There are now twenty-four question types.
+
+## Hot spot
+
+Upload an image and have people tap or click a point on it (for example, where something is or how they feel about a region). The answer is the point's position in percent, and analytics overlays every response as a heatmap on the image. There are now twenty-five question types.
+
+## MaxDiff (best and worst)
+
+List a set of items and respondents pick the single best and the single worst. Analytics shows a preference score per item (chosen best minus chosen worst). There are now twenty-six question types.
+
+## A/B testing
+
+Turn on an experiment in form settings (two to four variants). Each respondent is randomly assigned a variant, which is recorded with their response, shown in analytics, and included in CSV exports. Set a question's variant under its Advanced panel to show it only to that group.
+
+## Field mapping and the API
+
+Give any question an export field name under Advanced and it becomes the column name in CSV exports and the key in webhook and API payloads. Each form can also generate an API key to fetch its schema and submit responses programmatically: GET and POST against /api/v1/forms/{id}, authenticated with a bearer token or key parameter.
+
+## Multiple languages
+
+Open the Translations panel (the globe in the builder) to offer your form in more than one language. Add languages by code and name; the first is the default. Pick a target language and translate each string, leaving any field blank to fall back to the default. Respondents get a language picker at the top of the form, and switching translates titles, questions, choices, the thank-you screen, and the buttons while keeping their answers.
+
+## An Other choice
+
+For single-select multiple choice, turn on Add an Other choice with a write-in. Respondents who pick Other get a text box, and what they type is saved as their answer.
+
+## Pattern validation
+
+Text questions can validate against a custom pattern (a regular expression) with your own error message, on top of the built-in email, phone, and number checks.
+
+## Disqualifying respondents
+
+In a question's skip logic, choose Disqualify (screen out) as the destination to end the survey for people who do not qualify. They see a screen-out message you set under Form settings, and the response is still recorded so you can measure how many were screened out.
+
+## Limiting how many can be chosen
+
+For multi-select multiple choice you can set a minimum and a maximum number of choices. Respondents cannot tick more than the maximum, and they are reminded if they pick fewer than the minimum.
+
+## Fields on a document
+
+For a document to sign that is an image, you can place fields exactly where they belong: pick a field and click the spot on the document. Placed fields appear right on the page for the signer; anything you do not place still shows in a list below.
