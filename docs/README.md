@@ -331,3 +331,7 @@ The background is now a warm off-white (including in the builder, which had been
 ## Themed date and time selection
 
 Date and time fields now open an in-app calendar and time selector that match the rest of zetetiq, instead of the browser's date popup. The calendar supports month navigation, marks today and the chosen day, and greys out dates outside any allowed range. That was the last browser control, so dropdowns, colours, and dates and times are now all themed in both light and dark.
+
+## Lighter buttons
+
+The glossy sheen on buttons was removed. They still lift off the page with a soft shadow and a crisp top edge, just without the shine.

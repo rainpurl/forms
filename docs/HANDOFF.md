@@ -685,3 +685,7 @@ A DateTimeField backs the date-and-time inputs (the scheduling slot adder and th
 The calendar and the time selects reuse the existing themed Select and bevel system, so they match the rest of the app, animate in like the other popovers, close on outside click or Escape, and respect reduced motion.
 
 This completes the themed-control request: dropdowns, the colour picker, and now date and time are all in-app rather than browser controls.
+
+## Sheen removed
+
+The top sheen gradient on raised controls was removed on feedback that it was too much. It was a single per-theme variable, now set to none, so raised buttons keep their lift from the soft drop shadow and the crisp top highlight only, with no gloss. The variable remains in place if a faint sheen is ever wanted again.
