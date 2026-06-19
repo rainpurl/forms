@@ -133,3 +133,7 @@ Dark mode now themes the Overview card and the builder. The light/dark toggle si
 ## Native scheduling and document signing
 
 Meeting signup and Document to sign are now native question types. Meeting signup lets people book one of your time slots (with per slot capacity) without leaving the form, like a built in Calendly. Document to sign lets you upload an image or PDF and have people fill in fields and draw a signature inside zetetiq, instead of using DocuSign. Both save everything with the response and on the per-response PDF. Payments remain a payment link opened from a button, since card handling is best left to the payment provider.
+
+## Native file uploads
+
+A File upload question type lets forms collect attachments. Files are stored in Cloudflare R2. Choose accepted types, a max size, and single or multiple files. Respondents upload in place; the owner downloads each file from the responses view through an owner only link (files are namespaced per form and access checked). Setup: create a Cloudflare R2 bucket and add a Pages Functions R2 binding named FILES. Without it, the type still appears and uploads show a friendly not set up message. The upload endpoint works only while a form is open and enforces a size cap.

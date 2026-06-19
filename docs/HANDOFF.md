@@ -301,3 +301,15 @@ Meeting signup. Add a Meeting signup question to let people book one of your tim
 Document to sign. Add a Document to sign question to upload a document and have people fill it out and sign it inside zetetiq, instead of sending them to DocuSign. Upload an image or a PDF; the respondent views it and then completes the fields you define below it. Fields can be short text, long text, a date, a checkbox, or a signature drawn with a finger or mouse. The default fields are full name, signature, and date, and you can add or remove fields. Everything the respondent enters, including the drawn signature, is saved with the response, shown in the responses view, and included on the per-response PDF.
 
 Payments stay as an embed. Collecting money still uses a payment link (Stripe, PayPal, or similar) opened from a button, because handling card details directly carries security and compliance burden that is better left to the payment provider. The owner sets the link, an amount label, and the button text.
+
+## Native file uploads (Cloudflare R2)
+
+There is now a File upload question type, so forms can collect attachments (resumes, photos, documents, and so on). Files are stored in Cloudflare R2, kept separate from the form data in D1.
+
+In the builder you choose which file types to accept (any, images, PDF, documents, spreadsheets, or images and PDF), set a maximum size in megabytes, and optionally allow multiple files. On the public form the respondent gets a drop zone, picks a file, and it uploads in place with a friendly status while it transfers. The file name appears with a remove option.
+
+Uploaded files are saved with the response. In the responses view and on each response, the owner sees a download link for every uploaded file. Downloads are owner only: each file is stored under a key namespaced to its form, and the download endpoint checks that the signed in owner owns that form before serving the file.
+
+Setup required: this feature needs a Cloudflare R2 bucket bound to the project as FILES. Create an R2 bucket in the Cloudflare dashboard, then in Pages, Settings, Functions, add an R2 bucket binding with the variable name FILES pointing to that bucket. Until that binding exists, the File upload type still appears, but uploads show a friendly message saying file storage is not set up yet (the rest of the form keeps working).
+
+Notes and limits. The public upload endpoint accepts files only while the form is open and enforces a server side size cap (25 MB by default, on top of the per question limit you set). Because respondents are anonymous, the upload endpoint is public by necessity; the form being open plus the size cap are the main guards against abuse. CSV and PDF exports show the file name; the actual file is reached through the owner only download link in the responses view.

@@ -41,6 +41,9 @@ async function route(seg, method, request, env, context) {
   if (path[0] === "public" && path.length === 3 && path[2] === "followup" && method === "POST") {
     return followup(path[1], request, env);
   }
+  if (path[0] === "public" && path.length === 3 && path[2] === "upload" && method === "POST") {
+    return uploadFile(path[1], request, env);
+  }
 
   // ---- forms (auth required) ----
   if (path[0] === "forms") {
@@ -59,6 +62,7 @@ async function route(seg, method, request, env, context) {
     if (path.length === 3 && path[2] === "export" && method === "GET") return exportCsv(user, id, env);
     if (path.length === 3 && path[2] === "summary" && method === "GET") return formSummary(user, id, request, env);
     if (path.length === 3 && path[2] === "tone" && method === "GET") return toneRead(user, id, request, env);
+    if (path.length === 3 && path[2] === "file" && method === "GET") return serveFile(user, id, request, env);
   }
 
   if (path[0] === "brand-kits") {
@@ -533,10 +537,54 @@ async function exportCsv(user, id, env) {
   });
 }
 
+async function uploadFile(formId, request, env) {
+  if (!env.FILES) return json({ error: "storage_unconfigured" }, 501);
+  const form = await env.DB.prepare("SELECT id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
+  if (!form) return json({ error: "not_found" }, 404);
+  const schemaA = safeParse(form.schema, { questions: [], settings: {} });
+  const settingsA = schemaA.settings || {};
+  let countA = null; const capA = parseInt(settingsA.responseCap, 10);
+  if (capA > 0) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(formId).first(); countA = (cr && cr.c) || 0; }
+  const availA = formAvailability(!!form.is_open, settingsA, countA);
+  if (!availA.open) return json({ error: "form_closed" }, 403);
+  let file;
+  try { const fd = await request.formData(); file = fd.get("file"); } catch (e) { return json({ error: "bad_request" }, 400); }
+  if (!file || typeof file === "string") return json({ error: "no_file" }, 400);
+  const maxMb = Math.min(50, parseInt(settingsA.maxUploadMb, 10) || 25);
+  if (file.size && file.size > maxMb * 1024 * 1024) return json({ error: "too_large", maxMb }, 413);
+  const safe = String(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "file";
+  const key = "uploads/" + formId + "/" + crypto.randomUUID() + "-" + safe;
+  try {
+    const buf = await file.arrayBuffer();
+    await env.FILES.put(key, buf, { httpMetadata: { contentType: file.type || "application/octet-stream" } });
+  } catch (e) { return json({ error: "store_failed", detail: String(e && e.message || e) }, 500); }
+  return json({ key, name: file.name || safe, size: file.size || 0, type: file.type || "" });
+}
+
+async function serveFile(user, id, request, env) {
+  if (!env.FILES) return json({ error: "storage_unconfigured" }, 501);
+  const own = await env.DB.prepare("SELECT owner_id FROM forms WHERE id = ?").bind(id).first();
+  if (!own || own.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  const url = new URL(request.url);
+  const key = url.searchParams.get("key") || "";
+  if (key.indexOf("uploads/" + id + "/") !== 0) return json({ error: "forbidden" }, 403);
+  const obj = await env.FILES.get(key);
+  if (!obj) return json({ error: "not_found" }, 404);
+  const headers = new Headers();
+  const ct = (obj.httpMetadata && obj.httpMetadata.contentType) || "application/octet-stream";
+  headers.set("Content-Type", ct);
+  const fname = (key.split("/").pop() || "file").replace(/^[0-9a-fA-F-]{36}-/, "");
+  const disp = url.searchParams.get("download") ? "attachment" : "inline";
+  headers.set("Content-Disposition", disp + '; filename="' + fname.replace(/"/g, "") + '"');
+  headers.set("Cache-Control", "private, max-age=300");
+  return new Response(obj.body, { status: 200, headers });
+}
+
 function formatAnswer(v) {
   if (v === null || v === undefined) return "";
   if (typeof v === "string" && v.indexOf("data:image") === 0) return "[signature]";
-  if (Array.isArray(v)) return v.join("; ");
+  if (v && typeof v === "object" && v.key && v.name) return v.name;
+  if (Array.isArray(v)) return v.map((x) => (x && typeof x === "object" && x.name) ? x.name : x).join("; ");
   if (typeof v === "object") return Object.keys(v).map((k) => k + ": " + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(" | ");
   return String(v);
 }

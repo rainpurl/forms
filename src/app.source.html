@@ -477,6 +477,16 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .doc-field-edit{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .doc-field-edit input{flex:1;min-width:0}
 .doc-field-edit select{width:118px;flex:none}
+
+.filezone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1.5px dashed var(--line-strong);border-radius:12px;padding:22px 16px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s}
+.filezone:hover{border-color:var(--fa);background:var(--hover)}
+.filezone.err{border-color:var(--bad)}
+.filezone.busy{opacity:.7;cursor:progress}
+.filezone-ico{font-weight:600;font-size:15px;color:var(--fs)}
+.filezone-hint{font-size:12px;color:var(--ink-soft)}
+.filelist{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.fileitem{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.fileitem .filename{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -516,6 +526,7 @@ const api = {
   formSummary: (id, refresh) => req("/api/forms/" + id + "/summary" + (refresh ? "?refresh=1" : "")),
   publicForm: (username, slug) => req("/api/public/" + encodeURIComponent(username) + "/" + encodeURIComponent(slug)),
   submit: (formId, payload) => req("/api/public/" + formId + "/responses", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
+  uploadFile: (formId, file) => { const fd = new FormData(); fd.append("file", file); return req("/api/public/" + formId + "/upload", { method:"POST", body: fd }); },
 };
 
 /* ----------------------------- helpers ----------------------------- */
@@ -602,6 +613,66 @@ function readFileDataUrl(file, maxBytes, cb){
   reader.onload = ()=>{ const r = reader.result; if (typeof r === "string" && maxBytes && r.length > maxBytes * 1.4){ cb(null); return; } cb(r); };
   reader.readAsDataURL(file);
 }
+function FileUploadRenderer({ q, value, onChange, error, formId, preview }){
+  const { toast } = useApp();
+  const [busy, setBusy] = useState(false);
+  const multiple = !!q.multiple;
+  const items = multiple ? (Array.isArray(value) ? value : (value ? [value] : [])) : (value && value.key ? [value] : []);
+  const pick = (file)=>{
+    if (!file) return;
+    if (preview || !formId){ toast("File uploads work on the published form."); return; }
+    const maxMb = q.maxMb || 10;
+    if (file.size && file.size > maxMb * 1024 * 1024){ toast("That file is larger than " + maxMb + " MB."); return; }
+    setBusy(true);
+    api.uploadFile(formId, file).then(({ ok, data })=>{
+      setBusy(false);
+      if (!ok || !data || !data.key){ toast((data && data.error === "storage_unconfigured") ? "File uploads are not set up for this form yet." : "Upload failed. Please try again."); return; }
+      const rec = { key: data.key, name: data.name, size: data.size, type: data.type };
+      if (multiple) onChange(items.concat([rec])); else onChange(rec);
+    });
+  };
+  const removeAt = (i)=>{ if (multiple){ const next = items.slice(); next.splice(i, 1); onChange(next); } else onChange(null); };
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <label className={"filezone" + (error ? " err" : "") + (busy ? " busy" : "")}>
+        <input type="file" accept={q.accept || undefined} multiple={multiple} style={{display:"none"}} disabled={busy} onChange={(e)=>{ const fs = e.target.files; if (multiple){ Array.prototype.slice.call(fs).forEach(pick); } else { pick(fs && fs[0]); } e.target.value = ""; }} />
+        <span className="filezone-ico">{busy ? "Uploading\u2026" : (multiple ? "Choose files" : "Choose a file")}</span>
+        <span className="filezone-hint">{q.accept ? ("Accepted: " + q.accept) : "Any file type"}{q.maxMb ? (" \u00b7 up to " + q.maxMb + " MB") : ""}</span>
+      </label>
+      {items.length > 0 && <div className="filelist">{items.map((it, i)=>(<div key={i} className="fileitem"><span className="filename">{it.name || "File"}</span><button type="button" className="fbtn-ghost sm" onClick={()=>removeAt(i)}>Remove</button></div>))}</div>}
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+function FileUploadControls({ q, update }){
+  return (
+    <div>
+      <Field label="Accepted file types">
+        <select className="select" value={q.accept || ""} onChange={(e)=>update({accept:e.target.value})}>
+          <option value="">Any file</option>
+          <option value="image/*">Images</option>
+          <option value="application/pdf">PDF</option>
+          <option value=".doc,.docx,.pdf,.txt,.rtf">Documents</option>
+          <option value=".csv,.xls,.xlsx">Spreadsheets</option>
+          <option value="image/*,application/pdf">Images and PDF</option>
+        </select>
+      </Field>
+      <Field label="Maximum size (MB)"><input className="input" type="number" min="1" max="50" value={q.maxMb || 10} onChange={(e)=>update({maxMb: parseInt(e.target.value || "10", 10)})} /></Field>
+      <Toggle checked={!!q.multiple} onChange={(c)=>update({multiple:c})} label="Allow multiple files" />
+      <div className="hint" style={{marginTop:6}}>File storage must be enabled for your deployment (a Cloudflare R2 bucket bound as FILES). Without it, uploads show a friendly message.</div>
+      <div className="panel-section">Response requirements</div>
+      <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
+      <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
+    </div>
+  );
+}
+function FileAnswer({ val, formId }){
+  const items = Array.isArray(val) ? val : (val && val.key ? [val] : []);
+  if (!items.length) return <span className="muted">No file</span>;
+  return (<div>{items.map((it, i)=>(<div key={i} style={{marginBottom:4}}><a href={"/api/forms/" + formId + "/file?key=" + encodeURIComponent(it.key) + "&download=1"} target="_blank" rel="noopener noreferrer">{it.name || "Download file"}</a>{it.size ? <span className="muted" style={{fontSize:12,marginLeft:8}}>{Math.round(it.size/1024) + " KB"}</span> : null}</div>))}</div>);
+}
+
 function SigPad({ value, onChange, error, height }){
   const ref = useRef(null);
   const drawing = useRef(false);
@@ -957,6 +1028,15 @@ const QTYPES = {
     ),
   },
 
+  file_upload: {
+    label: "File upload",
+    hint: "Let people attach a file",
+    isInput: true,
+    make: () => ({ type:"file_upload", id: uid(), label:"Upload a file", required:false, request:false, accept:"", maxMb:10, multiple:false }),
+    summary: (q) => "file upload",
+    validate: (q, v) => { if (!q.required) return null; const has = q.multiple ? (Array.isArray(v) && v.length > 0) : !!(v && v.key); return has ? null : "Please upload a file."; },
+    Renderer: FileUploadRenderer,
+  },
   slider: {
     label: "Slider",
     hint: "Numeric scale with a draggable thumb",
@@ -1235,7 +1315,7 @@ const QTYPES = {
     Renderer: () => null,
   },
 };
-const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","scheduling","payment","document_sign","text_graphic","hidden_field","page_break"];
+const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","file_upload","scheduling","payment","document_sign","text_graphic","hidden_field","page_break"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -1406,7 +1486,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
         {form.description && <div className="fdesc">{form.description}</div>}
         {multi && <div className="fprogress"><div className="fprogress-bar" style={{width:((pos / total) * 100) + "%"}}></div></div>}
         <div className="fpage" key={cur} style={{marginTop:12}}>
-          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; return (<div key={q.id}><R q={q} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} />{renderFollowup(q)}</div>); })}
+          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; return (<div key={q.id}><R q={q} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
           {shown.length === 0 && <div className="muted" style={{fontSize:13}}>Nothing to show on this step.</div>}
         </div>
         <div className="fnav" style={{marginTop:18}}>
@@ -1805,6 +1885,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         {q.type === "scheduling" && <div className="wq-prev-input">{(q.slots && q.slots.length) ? (q.slots.length + " time slot" + (q.slots.length===1?"":"s")) : "Add time slots in the left panel"}</div>}
         {q.type === "payment" && <div className="wq-prev-input">{q.url ? ((q.buttonText||"Pay now") + (q.amount?(" \u00b7 "+q.amount):"")) : "Add a payment link in the left panel"}</div>}
         {q.type === "document_sign" && <div className="wq-prev-input">{q.document ? ("Document attached · " + ((q.fields&&q.fields.length)||0) + " field" + (((q.fields&&q.fields.length)||0)===1?"":"s")) : "Upload a document in the left panel"}</div>}
+        {q.type === "file_upload" && <div className="wq-prev-input">{(q.accept ? ("Accepts: " + q.accept) : "Any file type") + (q.multiple ? " · multiple" : "")}</div>}
       </div>
     </div>
   );
@@ -2160,6 +2241,7 @@ function LeftEditor({ q, update, questions, setQuestions }){
       {q.type === "payment" && <ActionControls q={q} update={update} />}
       {q.type === "scheduling" && <SchedulingControls q={q} update={update} />}
       {q.type === "document_sign" && <DocumentControls q={q} update={update} />}
+      {q.type === "file_upload" && <FileUploadControls q={q} update={update} />}
       {q.type === "hidden_field" && <HiddenControls q={q} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <LogicControls q={q} questions={questions} update={update} />}
     </div>
@@ -2819,6 +2901,12 @@ async function exportResponsePdf(form, r){
       doc.setFont(ff,"normal"); doc.setFontSize(10); doc.setTextColor.apply(doc, v ? ink : soft);
       wrap(text, 10).forEach((ln)=>{ y = ensure(y, 13); doc.text(ln, M, y); y += 13; });
       y += 6;
+    } else if (q.type === "file_upload"){
+      const its = Array.isArray(v) ? v : (v && v.key ? [v] : []);
+      const text = its.length ? its.map((x)=> x.name || "file").join(", ") : "No file";
+      doc.setFont(ff,"normal"); doc.setFontSize(10); doc.setTextColor.apply(doc, its.length ? ink : soft);
+      wrap(text, 10).forEach((ln)=>{ y = ensure(y, 13); doc.text(ln, M, y); y += 13; });
+      y += 6;
     } else if (q.type === "document_sign"){
       const fields = q.fields || []; const fdata = (v && v.fields) || {};
       fields.forEach((f)=>{ const fv = fdata[f.id];
@@ -2906,7 +2994,7 @@ function ResponsesTab({ id, form }){
           <div className="pad-lg">
             <div className="between" style={{marginBottom:12}}><span className="muted" style={{fontSize:13}}>Response detail</span><button className="btn sm primary" disabled={pdfBusy} onClick={async ()=>{ setPdfBusy(true); try { await exportResponsePdf(form, open); } catch (e) { toast("Could not build the PDF."); } setPdfBusy(false); }}>{pdfBusy ? "Preparing..." : "Export PDF"}</button></div>
             {(form.schema.questions||[]).filter(q=>QTYPES[q.type] && QTYPES[q.type].isInput).map(q=>(
-              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#fff"}} /> : <span className="muted">Not signed</span>) : q.type === "scheduling" ? (open.data[q.id] ? fmtSlot(open.data[q.id]) : <span className="muted">Not booked</span>) : q.type === "document_sign" ? <DocSignAnswer q={q} val={open.data[q.id]} /> : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
+              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#fff"}} /> : <span className="muted">Not signed</span>) : q.type === "scheduling" ? (open.data[q.id] ? fmtSlot(open.data[q.id]) : <span className="muted">Not booked</span>) : q.type === "document_sign" ? <DocSignAnswer q={q} val={open.data[q.id]} /> : q.type === "file_upload" ? <FileAnswer val={open.data[q.id]} formId={id} /> : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
             ))}
             {open.meta && Array.isArray(open.meta.followups) && open.meta.followups.length > 0 && (
               <div style={{marginBottom:14}}><div className="label">Follow-ups</div>{open.meta.followups.map((fu, i)=>(<div key={i} style={{marginBottom:8}}><div style={{fontSize:13,fontWeight:600}}>{fu.question}</div><div>{fu.answer || <span className="muted">No answer</span>}</div></div>))}</div>
