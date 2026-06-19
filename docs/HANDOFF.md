@@ -8,7 +8,7 @@ Standing instruction for any assistant working on this project: keep this handof
 
 A self-hosted, Qualtrics style forms builder. Build a form, theme it, share a clean link, collect responses, view analytics, and read an AI written summary. Everything runs on Cloudflare free tiers.
 
-Owner: Rain, handle Katresai. Live at zetetic.pages.dev, zetetic.katr.es, and forms.katr.es, all the same Cloudflare Pages project.
+Owner: Rain, handle Katresai. Live at zetetiq.pages.dev, zetetiq.katr.es, and forms.katr.es, all the same Cloudflare Pages project.
 
 ## Current status
 
@@ -128,7 +128,7 @@ Form font options are now labelled without naming the font: Sans (default), Seri
 
 A header image can be uploaded per form (Theme panel). The file is downscaled in the browser to about 1000px wide, flattened onto white, and stored as a JPEG data URL in settings.headerImage; uploads over roughly 900KB are rejected with a message. It renders full width at the top of the form, the builder canvas, and the thank-you page. There is a Remove control.
 
-The post-submission page is customizable beyond the redirect URL. New form settings: endTitle, endMessage, endButtonLabel, and endButtonUrl. If a redirect URL is set it still wins; otherwise the respondent sees the themed thank-you page with the custom heading, message, and an optional button that links out. The public-form footer now reads built by zetetiq and links to https://zetetiq.pages.dev (note: the current live deploy is zetetic.pages.dev, so point this at whatever domain is actually live).
+The post-submission page is customizable beyond the redirect URL. New form settings: endTitle, endMessage, endButtonLabel, and endButtonUrl. If a redirect URL is set it still wins; otherwise the respondent sees the themed thank-you page with the custom heading, message, and an optional button that links out. The public-form footer now reads built by zetetiq and links to https://zetetiq.pages.dev (note: the current live deploy is zetetiq.pages.dev, so point this at whatever domain is actually live).
 
 ## Branding, sign in, and reports
 
@@ -161,7 +161,7 @@ Workers AI gives 10,000 neurons per day free, and an 8B summary costs roughly 40
 - The D1 Console rejects comments and trailing blank lines. Paste clean SQL only.
 - The public form currently loads the whole app bundle, so a respondent's browser also downloads the admin code. This is acceptable for now. Split the public renderer into its own smaller bundle if respondent load size becomes a concern.
 - Georgia Pro is licensed, so the serif option renders as system Georgia for anyone without the font.
-- Note on names: the product is zetetiq with a q, but the Cloudflare Pages project and existing domains use zetetic with a c (zetetic.pages.dev, zetetic.katr.es), plus forms.katr.es. Renaming the project or adding a zetetiq.katr.es domain is optional and separate from the app.
+- Note on names: the product is zetetiq with a q, but the Cloudflare Pages project and existing domains use zetetiq with a c (zetetiq.pages.dev, zetetiq.katr.es), plus forms.katr.es. Renaming the project or adding a zetetiq.katr.es domain is optional and separate from the app.
 - No real user accounts yet, since Google is stubbed. Admin is the only account.
 
 ## Roadmap, all 23 question types and 11 logic features mapped
@@ -197,3 +197,9 @@ PDF report: Export report (PDF) is themed with the form colors (primary for the 
 Editor: there is a Copy link button next to Preview and Publish (it copies the public form link once the form is published). While the Theme tab is open, the canvas shows a live form preview that updates as you change colors, font, or the header image.
 
 Footer and logo: the public footer now reads powered by zetetiq and links to zetetiq.pages.dev, and it also appears on the thank-you screen. The navbar logo is larger. The favicon now sits on a solid brand-colored rounded square with a white mark so it stays visible on light and dark browser tabs.
+
+## Reorder animation and naming
+
+The question list reorders live while dragging (cards shift to make room) and glides into place with a FLIP animation, which also runs when you use the Move up and Move down menu actions. The dragged card shows as a dashed placeholder, and the grip uses a grab cursor. Touch and keyboard users can reorder with the Move up and Move down actions.
+
+Naming is settled: the product is spelled zetetiq with a q everywhere, and the footer and reports use that spelling. If your live domain currently uses the older spelling, point it at the zetetiq name so the powered by link resolves.

@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  ZETETIC APP SOURCE (editable JSX).
+  ZETETIQ APP SOURCE (editable JSX).
   Do NOT deploy this file. The live file is deploy/index.html, which is COMPILED from this one.
   After editing, recompile to deploy/index.html using the classic-runtime build recipe in docs/HANDOFF.md.
   The automatic JSX runtime emits an unresolvable "react/jsx-runtime" import and blanks the page; always force runtime:classic.
@@ -315,7 +315,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .drag-handle{cursor:grab;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 5px;border-radius:6px;user-select:none}
 .drag-handle:hover{background:var(--paper);color:var(--ink)}
 .drag-handle:active{cursor:grabbing}
-.qccard.dragging,.pbreak.dragging{opacity:.45}
+.qccard.dragging,.pbreak.dragging{opacity:.5;border:1px dashed var(--bo) !important;box-shadow:none !important}
 .qccard.over{box-shadow:0 -3px 0 0 var(--bo);border-color:var(--bo)}
 .pbreak.over{box-shadow:0 -3px 0 0 var(--bo)}
 .form-scope .rankrow .rgrip{cursor:grab;color:var(--ink-soft);user-select:none;font-size:14px}
@@ -377,6 +377,8 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 .exp-row .btn{padding:9px 16px;font-size:14px}
 .b-canvas-live{max-width:680px;margin:26px auto;padding:0 18px}
+.drag-handle{cursor:grab;touch-action:none}
+.drag-handle:active{cursor:grabbing}
 </style>
 </head>
 <body>
@@ -387,7 +389,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext } = React;
+const { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, createContext, useContext } = React;
 
 /* ----------------------------- api client ----------------------------- */
 async function req(url, opts){
@@ -1273,7 +1275,7 @@ function NpsPrev({ q }){
   );
 }
 
-function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, onDown, dnd }){
+function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, onDown, dnd, cardRef }){
   const [menu, setMenu] = useState(false);
   const handle = {
     draggable: true,
@@ -1281,12 +1283,12 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
     onDragEnd: ()=>dnd.end(),
   };
   const dropProps = {
-    onDragOver: (e)=>{ e.preventDefault(); if (dnd.over !== index) dnd.over_(index); },
+    onDragOver: (e)=>{ e.preventDefault(); dnd.over_(index); },
     onDrop: (e)=>{ e.preventDefault(); dnd.drop(index); },
   };
   if (q.type === "page_break"){
     return (
-      <div className={"pbreak" + (selected ? " sel" : "") + (dnd.over === index ? " over" : "")} onClick={onSelect} {...dropProps}>
+      <div ref={cardRef} className={"pbreak" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
         <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
         <span className="pbreak-line"></span>
         <span className="pbreak-label">Page break</span>
@@ -1297,7 +1299,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
   }
   if (q.type === "hidden_field"){
     return (
-      <div className={"qccard" + (selected ? " sel" : "") + (dnd.over === index ? " over" : "") + (dnd.dragging === index ? " dragging" : "")} onClick={onSelect} {...dropProps}>
+      <div ref={cardRef} className={"qccard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
         <div className="qcc-head">
           <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
           <span className="qcc-num">Q{index + 1}</span>
@@ -1313,7 +1315,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
     );
   }
   return (
-    <div className={"qccard" + (selected ? " sel" : "") + (dnd.over === index ? " over" : "") + (dnd.dragging === index ? " dragging" : "")} onClick={onSelect} {...dropProps}>
+    <div ref={cardRef} className={"qccard" + (selected ? " sel" : "") + (dnd.draggingId === q.id ? " dragging" : "")} onClick={onSelect} {...dropProps}>
       <div className="qcc-head">
         <span className="drag-handle" {...handle} title="Drag to reorder">⠿</span>
         <span className="qcc-num">Q{index + 1}</span>
@@ -1822,6 +1824,7 @@ function Builder({ formId }){
   const [trash, setTrash] = useState([]);            // session only, never saved
   const [dragIdx, setDragIdx] = useState(null);
   const [overIdx, setOverIdx] = useState(null);
+  const [dragId, setDragId] = useState(null);
   const [chooser, setChooser] = useState(isNew);
 
   useEffect(()=>{
@@ -1831,6 +1834,29 @@ function Builder({ formId }){
       else setLoadErr(true);
     });
   },[formId, isNew]);
+
+  const cardRefs = useRef({});
+  const prevRects = useRef({});
+  const flipSig = form ? (form.schema.questions || []).map((q)=>q.id).join(",") : "";
+  useLayoutEffect(()=>{
+    const refs = cardRefs.current;
+    Object.keys(refs).forEach((qid)=>{
+      const el = refs[qid]; if (!el) return;
+      const prev = prevRects.current[qid];
+      const rect = el.getBoundingClientRect();
+      if (prev && qid !== dragId){
+        const dy = prev.top - rect.top;
+        if (Math.abs(dy) > 1){
+          el.style.transition = "none";
+          el.style.transform = "translateY(" + dy + "px)";
+          requestAnimationFrame(()=>{ el.style.transition = "transform 210ms cubic-bezier(.2,.8,.2,1)"; el.style.transform = ""; });
+        }
+      }
+    });
+    const next = {};
+    Object.keys(refs).forEach((qid)=>{ const el = refs[qid]; if (el) next[qid] = el.getBoundingClientRect(); });
+    prevRects.current = next;
+  }, [flipSig]);
 
   if (loadErr) return <FullMsg text="Form not found." onBack={()=>navigate("/dashboard")} />;
   if (!form) return <FullMsg text="Loading..." />;
@@ -1848,7 +1874,8 @@ function Builder({ formId }){
   const moveQ = (i, dir)=>{ const qs = questions.slice(); const j = i + dir; if (j < 0 || j >= qs.length) return; const t = qs[i]; qs[i] = qs[j]; qs[j] = t; setQuestions(qs); };
   const dupQ = (qid)=>{ const qs = questions.slice(); const idx = qs.findIndex((q)=>q.id === qid); const copy = { ...qs[idx], id: uid() }; qs.splice(idx + 1, 0, copy); setQuestions(qs); setSel(copy.id); };
   const reorder = (from, to)=>{ if (from === null || from === to) return; const qs = questions.slice(); const [m] = qs.splice(from, 1); qs.splice(to, 0, m); setQuestions(qs); };
-  const dnd = { dragging: dragIdx, over: overIdx, start: (i)=>setDragIdx(i), over_: (i)=>setOverIdx(i), drop: (i)=>{ reorder(dragIdx, i); setDragIdx(null); setOverIdx(null); }, end: ()=>{ setDragIdx(null); setOverIdx(null); } };
+  const moveById = (j)=>{ setQuestions((prev)=>{ const from = prev.findIndex((q)=>q.id === dragId); if (from === -1 || from === j) return prev; const a = prev.slice(); const [m] = a.splice(from, 1); a.splice(j, 0, m); return a; }); };
+  const dnd = { draggingId: dragId, start: (i)=>setDragId(questions[i] ? questions[i].id : null), over_: (j)=>{ if (dragId != null) moveById(j); }, drop: ()=>setDragId(null), end: ()=>setDragId(null) };
 
   const del = ()=>{ if (!id) return; if (!window.confirm("Delete this form and all its responses? This cannot be undone.")) return; api.deleteForm(id).then(()=>{ toast("Form deleted"); navigate("/dashboard"); }); };
 
@@ -1942,7 +1969,7 @@ function Builder({ formId }){
                 <div className="qblock-body">
                   {questions.length === 0 && <div className="muted" style={{padding:"18px 4px"}}>No questions yet. Use Add new question below.</div>}
                   {questions.map((q, i)=>(
-                    <CanvasCard key={q.id} q={q} index={i} selected={sel === q.id} dnd={dnd}
+                    <CanvasCard key={q.id} q={q} index={i} selected={sel === q.id} dnd={dnd} cardRef={(el)=>{ if (el) cardRefs.current[q.id] = el; else delete cardRefs.current[q.id]; }}
                       onSelect={()=>{ setSel(q.id); setMode("edit"); }}
                       update={(p)=>updateQ(q.id, p)}
                       onDup={()=>dupQ(q.id)} onDel={()=>removeQ(q.id)} onUp={()=>moveQ(i, -1)} onDown={()=>moveQ(i, 1)} />

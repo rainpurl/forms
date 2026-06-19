@@ -2,7 +2,7 @@
 
 A self-hosted forms builder on Cloudflare. Build a form, theme it, share a clean link, and read back responses, analytics, and an AI written summary. It runs entirely on Cloudflare free tiers.
 
-The product is named zetetiq, all lowercase. It is live at zetetic.pages.dev, zetetic.katr.es, and forms.katr.es. The Pages project and those domains keep the older zetetic spelling with a c, which is fine and separate from the app name.
+The product is named zetetiq, all lowercase. It is live at zetetiq.pages.dev, zetetiq.katr.es, and forms.katr.es. The Pages project and those domains keep the older zetetiq spelling with a c, which is fine and separate from the app name.
 
 The page loads React from a primary CDN with an automatic fallback to a second one, and if startup ever fails it shows a readable message in the page instead of a blank screen.
 
@@ -45,7 +45,7 @@ Your Cloudflare settings, the database, the bindings, the secrets, and the domai
 - A D1 database named `forms`, bound to the project as `DB`. Schema loaded by pasting `schema.sql` into the D1 Console. The console rejects comments and trailing blank lines, so the SQL must be clean.
 - Workers AI bound to the project as `AI`.
 - Encrypted environment variables: `SESSION_SECRET` (a long random string) and `ADMIN_PASSWORD` (your admin password). Optional `AI_MODEL`.
-- Custom domains zetetic.katr.es and forms.katr.es added to the project.
+- Custom domains zetetiq.katr.es and forms.katr.es added to the project.
 - There is intentionally no `wrangler.toml`. With Git based deploys it would override the dashboard settings and cause conflicts, so all configuration lives in the dashboard.
 
 ## Logging in
@@ -70,8 +70,8 @@ The "Continue with Google" button uses the OAuth 2.0 code flow. Until you set tw
 
 1. In Google Cloud Console, create an OAuth client: APIs and Services, Credentials, Create credentials, OAuth client ID, Application type Web application.
 2. Under Authorized redirect URIs, add one entry per domain you use, each ending in /api/auth/google/callback:
-   - https://zetetic.pages.dev/api/auth/google/callback
-   - https://zetetic.katr.es/api/auth/google/callback
+   - https://zetetiq.pages.dev/api/auth/google/callback
+   - https://zetetiq.katr.es/api/auth/google/callback
    - https://forms.katr.es/api/auth/google/callback
 3. Configure the OAuth consent screen (External). While it is in Testing, add yourself and any early users under Test users, or publish the app.
 4. Copy the Client ID and Client secret.
