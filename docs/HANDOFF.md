@@ -233,3 +233,15 @@ The server returns this as an availability object on the public form load, with 
 The printable report now renders in the form's actual font, not just its colors. When the report is generated it fetches the matching TrueType file and embeds it in the PDF: Figtree for Sans, Roboto Slab for Slab, and Mozilla Text for the zetetiq font (Sans and Slab include a real bold weight; the Mozilla font is a single weight). Serif maps to Times and Monospace to Courier, which are built into PDF. The fonts load from a public CDN at export time and are cached by the browser; if a font cannot be fetched the report falls back to a standard PDF font so export never fails. The header band still uses the theme primary color, bars use the accent color, and body text now follows the theme secondary color.
 
 The theme panel has a Presets row with six one-click looks (Indigo, Forest, Slate, Sunset, Berry, Editorial). Each sets the primary, secondary, accent, and font together, and the live preview, the form, and the PDF all follow.
+
+## Dark mode and navigation
+
+There is a light and dark mode toggle (sun and moon icon) in the top bar. It defaults to the visitor's operating system setting on first load, and once they choose a mode the choice is saved in the browser and used on later visits. Dark mode applies to the app shell (dashboard, builder, landing). The public form and the builder's live preview always stay light, so a respondent sees the form the way the owner designed it regardless of their own system setting.
+
+The top navigation bar now spans the full width of the screen: the zetetiq mark sits in the far left corner, a large New form button sits in the center, and the theme toggle, greeting, and Log out sit at the far right. The duplicate New form button that used to sit above the forms table has been removed since the bar now carries it.
+
+Internally, dark mode is driven by a data-theme attribute on the page root and a set of CSS variable overrides. Form rendering resets those variables back to the light palette on its own container, which is why the form stays light even inside a dark builder.
+
+## Homepage templates
+
+On the dashboard, when the user has fewer than ten forms, a Start from a template section appears with the four starter templates (Customer feedback, Contact form, Event RSVP, Quick poll). Clicking one creates the form on the server and opens it in the builder. The section hides automatically once the user has ten or more forms.

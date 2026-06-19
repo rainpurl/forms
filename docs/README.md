@@ -111,3 +111,7 @@ In a form's settings you can set a response limit (a cap on total responses) and
 ## Report fonts and theme presets
 
 The PDF report matches the form font (Figtree, Roboto Slab, or Mozilla Text), not only the colors, by embedding the real font at export time with a safe fallback. The theme panel also has one-click presets that set the palette and font together.
+
+## Dark mode, navigation, and templates
+
+A light/dark toggle in the top bar defaults to the visitor's system setting and is remembered per browser; the public form always stays light. The top bar spans the full width with the logo at the far left, a large New form button in the center, and account actions at the right. The dashboard shows one-click starter templates when the user has fewer than ten forms.
