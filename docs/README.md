@@ -290,3 +290,24 @@ Turn on Limit to one response per browser in settings and someone who already su
 ## Signing PDFs
 
 When you attach a PDF to a signing question, every page now shows in the form, and you can drop signature, text, date, and checkbox fields right onto any page, just like you already could with images. People filling it in see the fields sitting on the document. If the PDF viewer cannot load (for example with no internet), the form still shows the document and lists the fields beneath it.
+
+## A note on the look
+
+Edges, buttons, boxes, and toggles now have a soft pressed into paper texture instead of plain lines, in both light and dark mode and on your published forms.
+
+
+## Group availability polls
+
+A scheduling question can now be a group availability poll instead of a booking page. Pick that mode in the question editor, choose the dates (or days of the week) and the daily hours you want to poll, and people who open the form drag across a grid to paint when they are free. Everyone sees a color coded heatmap of when the most people are available, and you can hover a slot to see who is free. You can poll whole days only, allow an if needed shade for so so times, and hide individual responses if you want people to only see the combined picture. A few things are not wired up yet: pulling busy times in from Google or Outlook or Apple calendars, booking the final time straight onto everyone's calendars, email alerts when someone responds, and a CSV download of the grid. Those need outside connections and are noted for a later pass.
+
+## More poll tools
+
+The settings gear icon is fixed. A few additions to group polls: duplicate a poll question from its menu to reuse the same dates and hours without rebuilding it; filter the group heatmap to just some people by tapping their name chips; download the whole grid as a CSV from the Responses tab; and let people protect their entry with an optional password so only they can change it, and come back later with the Load mine button to update their availability. Pulling busy times from outside calendars, booking onto everyone's calendars, and email alerts still need outside connections and are noted for later.
+
+## Managing forms and responses
+
+You can now delete a single response from the Responses tab, or clear all of them at once. Each form has a Duplicate button that makes a closed copy you can rename and tweak without touching the original. And for a group poll, the Responses tab shows the most popular time slots with a Set as final button; once you pick one, everyone visiting the form sees a Confirmed banner with that time. Booking the confirmed time onto outside calendars still needs a calendar connection and is noted for later.
+
+## Ranking, drafts, and quizzes
+
+Ranking questions now drag smoothly on phones and tablets, not just with a mouse (the up and down arrows still work too). People filling out a form have their answers saved on their own device as they go, so if they close the tab and come back, their progress is restored with a Start over option. And for quizzes, you can now turn on a setting to show people which answers were right, along with an explanation you write for each question.

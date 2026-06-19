@@ -41,6 +41,9 @@ async function route(seg, method, request, env, context) {
   if (path[0] === "public" && path.length === 3 && path[2] === "followup" && method === "POST") {
     return followup(path[1], request, env);
   }
+  if (path[0] === "public" && path.length === 3 && path[2] === "poll-load" && method === "POST") {
+    return pollLoad(path[1], request, env);
+  }
   if (path[0] === "public" && path.length === 3 && path[2] === "upload" && method === "POST") {
     return uploadFile(path[1], request, env);
   }
@@ -65,6 +68,9 @@ async function route(seg, method, request, env, context) {
     if (path.length === 2 && method === "PUT") return updateForm(user, id, request, env);
     if (path.length === 2 && method === "DELETE") return deleteForm(user, id, env);
     if (path.length === 3 && path[2] === "responses" && method === "GET") return listResponses(user, id, env);
+    if (path.length === 3 && path[2] === "responses" && method === "DELETE") return deleteAllResponses(user, id, env);
+    if (path.length === 4 && path[2] === "responses" && method === "DELETE") return deleteResponse(user, id, path[3], env);
+    if (path.length === 3 && path[2] === "duplicate" && method === "POST") return duplicateForm(user, id, env);
     if (path.length === 3 && path[2] === "analytics" && method === "GET") return analytics(user, id, env);
     if (path.length === 3 && path[2] === "export" && method === "GET") return exportCsv(user, id, env);
     if (path.length === 3 && path[2] === "summary" && method === "GET") return formSummary(user, id, request, env);
@@ -296,6 +302,33 @@ async function deleteForm(user, id, env) {
   return json({ ok: true });
 }
 
+async function deleteResponse(user, id, rid, env) {
+  const own = await env.DB.prepare("SELECT owner_id FROM forms WHERE id = ?").bind(id).first();
+  if (!own || own.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  await env.DB.prepare("DELETE FROM responses WHERE id = ? AND form_id = ?").bind(rid, id).run();
+  return json({ ok: true });
+}
+
+async function deleteAllResponses(user, id, env) {
+  const own = await env.DB.prepare("SELECT owner_id FROM forms WHERE id = ?").bind(id).first();
+  if (!own || own.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  await env.DB.prepare("DELETE FROM responses WHERE form_id = ?").bind(id).run();
+  return json({ ok: true });
+}
+
+async function duplicateForm(user, id, env) {
+  const row = await env.DB.prepare("SELECT * FROM forms WHERE id = ?").bind(id).first();
+  if (!row || row.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  const title = ((row.title || "Untitled form") + " (copy)").slice(0, 200);
+  const slug = await uniqueSlug(env, user.uid, title);
+  const nid = crypto.randomUUID();
+  await env.DB.prepare(
+    `INSERT INTO forms (id, owner_id, slug, title, description, theme, schema, is_open)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 0)`
+  ).bind(nid, user.uid, slug, title, row.description || "", row.theme || "{}", row.schema || "{}").run();
+  return json({ id: nid, slug });
+}
+
 /* ------------------------------------------------------------------ */
 /* public form + responses                                             */
 /* ------------------------------------------------------------------ */
@@ -357,17 +390,20 @@ async function publicForm(username, slug, env) {
   const cap = parseInt(settings.responseCap, 10);
   if (cap > 0) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(row.id).first(); count = (cr && cr.c) || 0; }
   const availability = formAvailability(!!row.is_open, settings, count);
-  let bookings = null, optionCounts = null;
+  let bookings = null, optionCounts = null, poll = null;
   const schedQs = (schema.questions || []).filter((qq)=> qq && qq.type === "scheduling");
   const quotaQs = (schema.questions || []).filter((qq)=> qq && qq.type === "multiple_choice" && qq.quotas && Object.keys(qq.quotas).length);
-  if (schedQs.length || quotaQs.length){
+  const pollQs = (schema.questions || []).filter((qq)=> qq && qq.type === "scheduling" && qq.mode === "poll");
+  if (schedQs.length || quotaQs.length || pollQs.length){
     if (schedQs.length){ bookings = {}; schedQs.forEach((qq)=>{ bookings[qq.id] = {}; }); }
     if (quotaQs.length){ optionCounts = {}; quotaQs.forEach((qq)=>{ optionCounts[qq.id] = {}; }); }
+    if (pollQs.length){ poll = {}; pollQs.forEach((qq)=>{ poll[qq.id] = { total:0, counts:{}, maybeCounts:{}, people: qq.hideResponses ? null : [] }; }); }
     const rsp = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ?").bind(row.id).all();
     (rsp.results || []).forEach((rr)=>{
       const dd = safeParse(rr.data, {});
       schedQs.forEach((qq)=>{ const vv = dd[qq.id]; if (typeof vv === "string" && vv){ bookings[qq.id][vv] = (bookings[qq.id][vv] || 0) + 1; } });
       quotaQs.forEach((qq)=>{ const vv = dd[qq.id]; if (Array.isArray(vv)){ vv.forEach((o)=>{ optionCounts[qq.id][o] = (optionCounts[qq.id][o] || 0) + 1; }); } else if (typeof vv === "string" && vv){ optionCounts[qq.id][vv] = (optionCounts[qq.id][vv] || 0) + 1; } });
+      pollQs.forEach((qq)=>{ const vv = dd[qq.id]; if (vv && typeof vv === "object" && !Array.isArray(vv)){ const p = poll[qq.id]; p.total++; const av = Array.isArray(vv.available) ? vv.available : []; av.forEach((k)=>{ p.counts[k] = (p.counts[k] || 0) + 1; }); const mb = Array.isArray(vv.maybe) ? vv.maybe : []; mb.forEach((k)=>{ p.maybeCounts[k] = (p.maybeCounts[k] || 0) + 1; }); if (p.people) p.people.push({ name: String(vv.name || "").slice(0, 80), available: av, maybe: mb }); } });
     });
   }
   return json({
@@ -383,6 +419,7 @@ async function publicForm(username, slug, env) {
     availability,
     bookings,
     optionCounts,
+    poll,
   });
 }
 
@@ -487,9 +524,36 @@ async function submitResponse(formId, request, env, context) {
     const schemaS = safeParse(form.schema, {});
     if (schemaS.settings && schemaS.settings.scoring){ scoreInfo = scoreResponse(schemaS, data); meta.score = scoreInfo.score; meta.maxScore = scoreInfo.max; }
   } catch (e) {}
-  await env.DB.prepare(
-    "INSERT INTO responses (id, form_id, data, meta) VALUES (?, ?, ?, ?)"
-  ).bind(id, formId, JSON.stringify(data), JSON.stringify(meta)).run();
+  let pollUpsertId = null;
+  try {
+    const schemaP = safeParse(form.schema, { questions: [] });
+    const pollQ = (schemaP.questions || []).find((q)=> q && q.type === "scheduling" && q.mode === "poll");
+    if (pollQ){
+      const ans = data[pollQ.id];
+      if (ans && typeof ans === "object" && !Array.isArray(ans)){
+        const rawPw = String(ans.password || ""); delete ans.password;
+        ans.pw = rawPw ? await sha256hex(rawPw) : "";
+        const nm = String(ans.name || "").trim().toLowerCase();
+        if (nm){
+          const ex = await env.DB.prepare("SELECT id, data FROM responses WHERE form_id = ?").bind(formId).all();
+          for (const row of (ex.results || [])){
+            const dd = safeParse(row.data, {}); const a2 = dd[pollQ.id];
+            if (a2 && typeof a2 === "object" && String(a2.name || "").trim().toLowerCase() === nm){
+              const exPw = String(a2.pw || "");
+              if (exPw && exPw !== ans.pw) return json({ error: "name_locked", question: pollQ.id }, 409);
+              pollUpsertId = row.id; break;
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {}
+  const respId = pollUpsertId || id;
+  if (pollUpsertId){
+    await env.DB.prepare("UPDATE responses SET data = ?, meta = ? WHERE id = ?").bind(JSON.stringify(data), JSON.stringify(meta), pollUpsertId).run();
+  } else {
+    await env.DB.prepare("INSERT INTO responses (id, form_id, data, meta) VALUES (?, ?, ?, ?)").bind(id, formId, JSON.stringify(data), JSON.stringify(meta)).run();
+  }
 
   try {
     const schema = safeParse(form.schema, {});
@@ -499,9 +563,29 @@ async function submitResponse(formId, request, env, context) {
     }
   } catch (e) {}
 
-  return json({ ok: true, id, score: scoreInfo ? scoreInfo.score : null, maxScore: scoreInfo ? scoreInfo.max : null });
+  return json({ ok: true, id: respId, score: scoreInfo ? scoreInfo.score : null, maxScore: scoreInfo ? scoreInfo.max : null });
 }
 
+async function pollLoad(formId, request, env){
+  const form = await env.DB.prepare("SELECT id, schema FROM forms WHERE id = ?").bind(formId).first();
+  if (!form) return json({ error: "not_found" }, 404);
+  const body = await readJson(request) || {};
+  const qid = String(body.questionId || "");
+  const nm = String(body.name || "").trim().toLowerCase();
+  const rawPw = String(body.password || "");
+  if (!qid || !nm) return json({ found: false });
+  const pwHash = rawPw ? await sha256hex(rawPw) : "";
+  const rr = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ?").bind(formId).all();
+  for (const row of (rr.results || [])){
+    const dd = safeParse(row.data, {}); const a = dd[qid];
+    if (a && typeof a === "object" && String(a.name || "").trim().toLowerCase() === nm){
+      const exPw = String(a.pw || "");
+      if (exPw && exPw !== pwHash) return json({ found: true, locked: true });
+      return json({ found: true, available: Array.isArray(a.available) ? a.available : [], maybe: Array.isArray(a.maybe) ? a.maybe : [] });
+    }
+  }
+  return json({ found: false });
+}
 function apiKeyFromReq(request){
   const a = request.headers.get("authorization") || "";
   const m = a.match(/Bearer\s+(.+)/i);
@@ -798,6 +882,10 @@ async function verifyToken(sec, token) {
   }
 }
 
+async function sha256hex(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(str)));
+  return Array.from(new Uint8Array(buf)).map((b)=> b.toString(16).padStart(2, "0")).join("");
+}
 async function hmac(sec, data) {
   const key = await crypto.subtle.importKey(
     "raw", new TextEncoder().encode(sec),

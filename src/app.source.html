@@ -17,6 +17,7 @@
 <style>
 :root{
   color-scheme: light;
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);
   --bo:#5b4fe0;            /* primary blue-purple */
   --bo-dark:#4536c9;
   --ink:#1b1830;
@@ -36,6 +37,7 @@
 }
 html[data-theme="dark"]{
   color-scheme: dark;
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.45);--bevel-press:inset 0 2px 5px rgba(0,0,0,.6);--bevel-inset:inset 0 1px 3px rgba(0,0,0,.55);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.4);
   --bo:#7c72f2; --bo-dark:#6b61e8;
   --ink:#ece9f8; --ink-soft:#a9a4c6;
   --line:#2a2740; --line-strong:#3a3660;
@@ -174,11 +176,11 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 /* form scope (respondent + preview): themed */
 .form-scope{--fp:#5b4fe0;--fs:#1b1830;--fa:#5b4fe0;--ftext:var(--fs);font-family:var(--sans)}
-.form-page,.form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--good:#2f7d52;--bad:#b23b3b;--hover:#f1eefc}
-html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#15132a;--card:#211e3a;--ink:#ece9f8;--ink-soft:#a39ec4;--line:#2f2b4e;--line-strong:#3d3866;--hover:#272343;--ftext:#ece9f8}
+.form-page,.form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--good:#2f7d52;--bad:#b23b3b;--hover:#f1eefc;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);}
+html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#15132a;--card:#211e3a;--ink:#ece9f8;--ink-soft:#a39ec4;--line:#2f2b4e;--line-strong:#3d3866;--hover:#272343;--ftext:#ece9f8;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.45);--bevel-press:inset 0 2px 5px rgba(0,0,0,.6);--bevel-inset:inset 0 1px 3px rgba(0,0,0,.55);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.4);}
 html[data-theme="dark"] .form-scope .finput,html[data-theme="dark"] .form-scope textarea,html[data-theme="dark"] .form-scope select{background:var(--card);color:var(--ink)}
 html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
-.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--hover:#f1eefc;--ftext:var(--fs)}
+.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--hover:#f1eefc;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);}
 .form-embed.form-page{min-height:auto;padding:14px 14px 22px;background:transparent}
 .form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
 .form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--ftext);font-weight:600;line-height:1.2}
@@ -668,6 +670,66 @@ table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
 .pdf-doc{display:flex;flex-direction:column;gap:10px}
 .pdf-page{position:relative;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;line-height:0;background:#fff;max-width:100%}
 .pdf-canvas{display:block;width:100%;height:auto}
+
+/* beveled / imprint theming */
+.btn{box-shadow:var(--bevel-raise)}
+.btn:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.btn.ghost{box-shadow:none}
+.btn.ghost:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.card{box-shadow:var(--bevel-soft)}
+.input,.textarea,.select{box-shadow:var(--bevel-inset)}
+.switch .track{box-shadow:var(--bevel-inset)}
+.switch .knob{box-shadow:var(--bevel-raise),0 1px 2px rgba(0,0,0,.22)}
+.badge{box-shadow:var(--bevel-soft)}
+.qccard{box-shadow:var(--bevel-soft)}
+.cal-chip{box-shadow:var(--bevel-raise)}
+.cal-chip.on{box-shadow:var(--bevel-press)}
+.booking-card,.mt-card,.cj-task,.pdf-page,.slot-edit-row,.cj-attr-edit{box-shadow:var(--bevel-soft)}
+.addq-item{box-shadow:var(--bevel-raise)}
+.addq-item:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.addq-adv-toggle{box-shadow:var(--bevel-inset)}
+.form-scope .finput,.form-scope .input,.form-scope .textarea,.form-scope .select{box-shadow:var(--bevel-inset)}
+.form-scope .submit{box-shadow:var(--bevel-raise)}
+.form-scope .submit:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.form-scope .fbtn-ghost{box-shadow:var(--bevel-raise)}
+.form-scope .fbtn-ghost:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.form-scope .opt{box-shadow:var(--bevel-soft)}
+.form-scope .opt.sel{box-shadow:var(--bevel-press)}
+.form-scope .slot-btn{box-shadow:var(--bevel-raise)}
+.form-scope .slot-btn.sel{box-shadow:var(--bevel-press)}
+.fcta{box-shadow:var(--bevel-raise)}
+.fcta:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;box-shadow:var(--bevel-inset)}
+.seg-btn{appearance:none;border:0;background:transparent;color:var(--ink-soft);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.seg-btn.on{background:var(--bo);color:#fff}
+.poll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.poll-grid{display:grid;gap:2px;min-width:max-content;user-select:none}
+.poll-corner,.poll-colhead,.poll-rowhead{font-size:11px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;padding:2px 4px;font-weight:600}
+.poll-rowhead{justify-content:flex-end;white-space:nowrap}
+.poll-cell{height:26px;min-width:34px;border:1px solid var(--line);border-radius:4px;background:var(--card);cursor:pointer;touch-action:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink-soft)}
+.poll-cell.poll-yes{background:#2f9e63;border-color:#2aa05f}
+.poll-cell.poll-maybe{background:#f6c343;border-color:#eab308}
+.poll-heatcell{cursor:default;color:#14532d}
+.poll-modes{display:flex;gap:6px;margin-bottom:8px}
+.poll-name{margin-bottom:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.poll-name .finput{max-width:200px}
+.poll-subgroup{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.chip-tog{appearance:none;border:1px solid var(--line-strong);background:var(--card);color:var(--ink-soft);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:var(--bevel-raise)}
+.chip-tog.on{background:var(--bo);color:#fff;border-color:var(--bo);box-shadow:var(--bevel-press)}
+.finalize-list{display:flex;flex-direction:column;gap:6px}
+.finalize-row{display:flex;align-items:center;gap:10px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;box-shadow:var(--bevel-soft)}
+.finalize-row .fl-when{font-weight:600;font-size:14px}
+.finalize-row .fl-count{color:var(--ink-soft);font-size:13px;margin-left:auto;margin-right:6px}
+.poll-final{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;border-radius:10px;background:var(--hover);box-shadow:var(--bevel-soft)}
+.resume-note{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--hover);border-radius:10px;padding:9px 13px;margin:4px 0 12px;font-size:13.5px;color:var(--ftext);box-shadow:var(--bevel-soft)}
+.quiz-review{text-align:left;margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.qr-item{border:1px solid var(--line);border-radius:10px;padding:11px 13px;box-shadow:var(--bevel-soft)}
+.qr-item.qr-ok{border-color:#2f9e63}
+.qr-item.qr-no{border-color:var(--bad)}
+.qr-q{font-weight:600;margin-bottom:4px}
+.qr-line{font-size:13.5px;color:var(--ink-soft)}
+.qr-exp{font-size:13px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -707,6 +769,10 @@ const api = {
   formSummary: (id, refresh) => req("/api/forms/" + id + "/summary" + (refresh ? "?refresh=1" : "")),
   publicForm: (username, slug) => req("/api/public/" + encodeURIComponent(username) + "/" + encodeURIComponent(slug)),
   submit: (formId, payload) => req("/api/public/" + formId + "/responses", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
+  pollLoad: (formId, questionId, name, password) => req("/api/public/" + formId + "/poll-load", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ questionId, name, password }) }),
+  deleteResponse: (id, rid) => req("/api/forms/" + id + "/responses/" + rid, { method:"DELETE" }),
+  clearResponses: (id) => req("/api/forms/" + id + "/responses", { method:"DELETE" }),
+  duplicateForm: (id) => req("/api/forms/" + id + "/duplicate", { method:"POST" }),
   uploadFile: (formId, file) => { const fd = new FormData(); fd.append("file", file); return req("/api/public/" + formId + "/upload", { method:"POST", body: fd }); },
 };
 
@@ -818,6 +884,31 @@ function buildICS(q, startISO){
   lines.push("END:VEVENT", "END:VCALENDAR");
   return lines.join("\r\n");
 }
+function quizReview(form, answers){
+  const qs = (form.schema && form.schema.questions) || [];
+  const out = [];
+  qs.forEach((q)=>{ if (q.type !== "multiple_choice" || !q.points || !Object.keys(q.points).length) return;
+    const pts = q.points; const vals = Object.keys(pts).map((k)=> Number(pts[k])).filter((n)=> !isNaN(n)); const max = vals.length ? Math.max.apply(null, vals) : 0;
+    if (max <= 0) return;
+    const correct = (q.options || []).filter((o)=> Number(pts[o]) === max);
+    const ans = answers[q.id]; const given = Array.isArray(ans) ? ans.slice() : (ans != null && ans !== "" ? [ans] : []);
+    const cs = correct.slice().sort().join("\u0001"); const gs = given.slice().sort().join("\u0001");
+    const isCorrect = given.length > 0 && (q.multi ? (cs === gs) : (correct.indexOf(given[0]) >= 0));
+    out.push({ id: q.id, label: q.label || "Question", correct, given, isCorrect, explanation: q.explanation || "" });
+  });
+  return out;
+}
+function fmtPollSlot(key, q){
+  if (!key) return "";
+  const WN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  let datePart = key, time = "";
+  const ti = key.indexOf("T"); if (ti >= 0){ datePart = key.slice(0, ti); time = key.slice(ti + 1); }
+  let dlabel;
+  if (/^d\d$/.test(datePart)){ dlabel = WN[parseInt(datePart.slice(1), 10)] || datePart; }
+  else { const dd = new Date(datePart + "T00:00"); dlabel = isNaN(dd) ? datePart : dd.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" }); }
+  if (time){ const pp = time.split(":"); const hh = parseInt(pp[0], 10), mm = parseInt(pp[1] || "0", 10); const ap = hh < 12 ? "am" : "pm"; const h12 = (hh % 12) || 12; return dlabel + " " + h12 + (mm ? (":" + String(mm).padStart(2, "0")) : "") + ap; }
+  return dlabel;
+}
 function downloadICS(q, startISO){
   try {
     const ics = buildICS(q, startISO); if (!ics) return;
@@ -914,7 +1005,129 @@ function SigPad({ value, onChange, error, height }){
     </>
   );
 }
-function SchedulingRenderer({ q, value, onChange, error, bookings }){
+function pollLayout(q){
+  const dateOnly = !!q.dateOnly;
+  const cols = [];
+  if ((q.pollMode || "dates") === "weekdays"){
+    const names = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    (q.weekdays || []).slice().sort((a,b)=>a-b).forEach((d)=>{ if (names[d]) cols.push({ key:"d"+d, label:names[d] }); });
+  } else {
+    (q.dates || []).slice().sort().forEach((d)=>{ const dd = new Date(d + "T00:00"); cols.push({ key:d, label: isNaN(dd) ? d : dd.toLocaleDateString(undefined, { month:"short", day:"numeric" }) }); });
+  }
+  const rows = [];
+  if (!dateOnly){
+    let sh = (q.startHour == null) ? 9 : q.startHour; let eh = (q.endHour == null) ? 17 : q.endHour; const step = q.slotMinutes || 60;
+    if (eh <= sh) eh = sh + 1;
+    for (let mn = sh*60; mn < eh*60; mn += step){ const hh = Math.floor(mn/60), mm = mn%60; const t = String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0"); const ap = hh < 12 ? "am" : "pm"; const h12 = (hh % 12) || 12; const lbl = h12 + (mm ? (":" + String(mm).padStart(2,"0")) : "") + ap; rows.push({ time:t, label:lbl }); }
+  }
+  return { cols, rows, dateOnly };
+}
+function slotKey(colKey, row, dateOnly){ return dateOnly ? colKey : (colKey + "T" + row.time); }
+function buildPollMatrix(q, rows){
+  const lay = pollLayout(q);
+  const parts = (rows || []).map((r)=> r.data && r.data[q.id]).filter((p)=> p && typeof p === "object").map((p)=>({ name: String(p.name || "Someone"), a: Array.isArray(p.available) ? p.available : [], m: Array.isArray(p.maybe) ? p.maybe : [] }));
+  const slots = [];
+  lay.cols.forEach((c)=>{ if (lay.dateOnly){ slots.push({ key: slotKey(c.key, null, true), label: c.label }); } else { lay.rows.forEach((rw)=>{ slots.push({ key: slotKey(c.key, rw, false), label: c.label + " " + rw.label }); }); } });
+  const cell = (v)=>{ const t = String(v == null ? "" : v); return /[",\r\n]/.test(t) ? ('"' + t.replace(/"/g, '""') + '"') : t; };
+  const header = ["Slot"].concat(parts.map((p)=>p.name)).concat(["Available"]);
+  const lines = [header.map(cell).join(",")];
+  slots.forEach((s)=>{ const row = [s.label]; let cnt = 0; parts.forEach((p)=>{ const yes = p.a.indexOf(s.key) >= 0; const may = p.m.indexOf(s.key) >= 0; if (yes) cnt++; row.push(yes ? "Yes" : (may ? "If needed" : "")); }); row.push(String(cnt)); lines.push(row.map(cell).join(",")); });
+  return lines.join("\r\n");
+}
+function PollRenderer({ q, value, onChange, error, poll, formId, preview }){
+  const [paintMode, setPaintMode] = useState("yes");
+  const [subGroup, setSubGroup] = useState(null);
+  const dragRef = useRef(null);
+  const selRef = useRef({ a:{}, m:{} });
+  const lay = pollLayout(q);
+  const val = value || {};
+  const avail = Array.isArray(val.available) ? val.available : [];
+  const maybe = Array.isArray(val.maybe) ? val.maybe : [];
+  const aset = {}; avail.forEach((k)=>{ aset[k] = 1; });
+  const mset = {}; maybe.forEach((k)=>{ mset[k] = 1; });
+  selRef.current = { a: { ...aset }, m: { ...mset } };
+  let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  const cellState = (k)=> aset[k] ? "yes" : (mset[k] ? "maybe" : "");
+  const commit = ()=>{ onChange({ ...(value || {}), available: Object.keys(selRef.current.a), maybe: Object.keys(selRef.current.m) }); };
+  const apply = (k)=>{ const D = dragRef.current; if (!D) return; const a = { ...selRef.current.a }, m = { ...selRef.current.m }; delete a[k]; delete m[k]; if (D.action === "add"){ if (D.mode === "yes") a[k] = 1; else m[k] = 1; } selRef.current = { a, m }; commit(); };
+  const start = (k)=>{ const cur = cellState(k); const action = (cur === paintMode) ? "erase" : "add"; dragRef.current = { action, mode: paintMode }; apply(k); const up = ()=>{ dragRef.current = null; window.removeEventListener("pointerup", up); }; window.addEventListener("pointerup", up); };
+  const enter = (k)=>{ if (dragRef.current) apply(k); };
+  const setName = (nm)=> onChange({ ...(value || {}), name: nm, available: avail, maybe: maybe });
+  const total = (poll && poll.total) || 0;
+  const people = (poll && poll.people) || null;
+  const useSub = !!(people && subGroup && subGroup.length);
+  const activePeople = useSub ? people.filter((p)=> subGroup.indexOf(p.name) >= 0) : (people || []);
+  const heatDenom = useSub ? activePeople.length : total;
+  const heatCount = (k)=>{ if (useSub) return activePeople.filter((p)=> (p.available || []).indexOf(k) >= 0).length; return (poll && poll.counts && poll.counts[k]) || 0; };
+  const heatTitle = (k)=>{ const src = useSub ? activePeople : people; if (src){ const names = src.filter((p)=> (p.available || []).indexOf(k) >= 0).map((p)=> p.name || "Someone"); return names.length ? names.join(", ") : "No one yet"; } return ((poll && poll.counts && poll.counts[k]) || 0) + " available"; };
+  const loadMine = ()=>{ if (!formId || !String(val.name || "").trim()){ try { window.alert("Enter your name first."); } catch (e) {} return; } api.pollLoad(formId, q.id, val.name, val.password || "").then(({ ok, data })=>{ if (!ok || !data) return; if (data.locked){ try { window.alert("That name is protected. Enter the matching password to load it."); } catch (e) {} return; } if (data.found){ onChange({ ...(value || {}), available: data.available || [], maybe: data.maybe || [] }); } else { try { window.alert("No saved availability found for that name."); } catch (e) {} } }); };
+  const colTemplate = "68px repeat(" + lay.cols.length + ", minmax(34px, 1fr))";
+  const gridBody = (heat)=> (lay.dateOnly
+    ? [<div key="rh" className="poll-rowhead"></div>].concat(lay.cols.map((c)=>{ const k = slotKey(c.key, null, true); if (heat){ const n = heatCount(k); const op = heatDenom ? Math.min(1, n/heatDenom) : 0; return (<div key={k} className="poll-cell poll-heatcell" title={heatTitle(k)} style={{background: n ? ("rgba(47,158,99," + (0.18 + op*0.72) + ")") : "transparent"}}>{n || ""}</div>); } const st = cellState(k); return (<div key={k} className={"poll-cell poll-" + st} onPointerDown={()=>start(k)} onPointerOver={()=>enter(k)} data-key={k}></div>); }))
+    : [].concat.apply([], lay.rows.map((r)=> [<div key={"rh"+r.time} className="poll-rowhead">{r.label}</div>].concat(lay.cols.map((c)=>{ const k = slotKey(c.key, r, false); if (heat){ const n = heatCount(k); const op = heatDenom ? Math.min(1, n/heatDenom) : 0; return (<div key={k} className="poll-cell poll-heatcell" title={heatTitle(k)} style={{background: n ? ("rgba(47,158,99," + (0.18 + op*0.72) + ")") : "transparent"}}>{n || ""}</div>); } const st = cellState(k); return (<div key={k} className={"poll-cell poll-" + st} onPointerDown={()=>start(k)} onPointerOver={()=>enter(k)} data-key={k}></div>); }))))
+  );
+  return (<div className="q">
+    <QLabel q={q} />
+    {q.meetingTitle && <div className="mt-card"><div className="mt-title">{q.meetingTitle}</div></div>}
+    {q.finalSlot && <div className="poll-final"><span className="badge open">Confirmed</span> <strong>{fmtPollSlot(q.finalSlot, q)}</strong></div>}
+    <div className="poll-name"><input className="finput" placeholder="Your name" value={val.name || ""} onChange={(e)=>setName(e.target.value)} /><input className="finput" type="password" placeholder="Password (optional)" value={val.password || ""} onChange={(e)=>onChange({ ...(value || {}), name: val.name || "", available: avail, maybe: maybe, password: e.target.value })} />{formId && !preview && <button type="button" className="btn sm ghost" onClick={loadMine}>Load mine</button>}</div>
+    {tz && <div className="hint" style={{margin:"2px 0 8px"}}>Times shown in your time zone ({tz}).</div>}
+    {q.ifNeeded && <div className="poll-modes"><button type="button" className={"btn sm" + (paintMode === "yes" ? " primary" : " ghost")} onClick={()=>setPaintMode("yes")}>Available</button><button type="button" className={"btn sm" + (paintMode === "maybe" ? " primary" : " ghost")} onClick={()=>setPaintMode("maybe")}>If needed</button></div>}
+    {lay.cols.length === 0 ? <div className="muted" style={{fontSize:13}}>No dates set up for this poll yet.</div> : (<>
+      <div className="hint" style={{marginBottom:6}}>Click and drag to paint when you are free.</div>
+      <div className="poll-wrap"><div className="poll-grid" style={{gridTemplateColumns: colTemplate}}>
+        <div className="poll-corner"></div>
+        {lay.cols.map((c)=>(<div key={c.key} className="poll-colhead">{c.label}</div>))}
+        {gridBody(false)}
+      </div></div>
+    </>)}
+    {poll && !q.hideResponses && lay.cols.length > 0 && (<div className="poll-heat">
+      <div className="label" style={{margin:"16px 0 6px"}}>Group availability{total ? (" (" + total + " responded)") : ""}</div>
+      {people && people.length > 1 && <div className="poll-subgroup"><span className="hint" style={{marginRight:2}}>Show:</span><button type="button" className={"chip-tog" + (!useSub ? " on" : "")} onClick={()=>setSubGroup(null)}>Everyone</button>{people.map((p,i)=>(<button key={i} type="button" className={"chip-tog" + ((subGroup && subGroup.indexOf(p.name) >= 0) ? " on" : "")} onClick={()=>setSubGroup((prev)=>{ const cur = prev || []; return cur.indexOf(p.name) >= 0 ? cur.filter((nm)=>nm !== p.name) : cur.concat([p.name]); })}>{p.name || "Someone"}</button>))}</div>}
+      <div className="poll-wrap"><div className="poll-grid" style={{gridTemplateColumns: colTemplate}}>
+        <div className="poll-corner"></div>
+        {lay.cols.map((c)=>(<div key={c.key} className="poll-colhead">{c.label}</div>))}
+        {gridBody(true)}
+      </div></div>
+      <div className="hint" style={{marginTop:6}}>Darker means more people are free. Hover a slot to see who.</div>
+    </div>)}
+    {error && <div className="ferr">{error}</div>}
+  </div>);
+}
+function PollConfig({ q, update }){
+  const [nd, setNd] = useState("");
+  const pollMode = q.pollMode || "dates";
+  const dates = Array.isArray(q.dates) ? q.dates : [];
+  const wk = Array.isArray(q.weekdays) ? q.weekdays : [];
+  const addDate = ()=>{ if (!nd || dates.indexOf(nd) >= 0){ setNd(""); return; } update({ dates: dates.concat([nd]).sort() }); setNd(""); };
+  const rmDate = (d)=> update({ dates: dates.filter((x)=>x!==d) });
+  const toggleWk = (d)=> update({ weekdays: wk.indexOf(d) >= 0 ? wk.filter((x)=>x!==d) : wk.concat([d]).sort((a,b)=>a-b) });
+  const WN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  return (<div>
+    <div className="panel-section">What to poll</div>
+    <div className="seg">
+      <button type="button" className={"seg-btn" + (pollMode === "dates" ? " on" : "")} onClick={()=>update({ pollMode:"dates" })}>Specific dates</button>
+      <button type="button" className={"seg-btn" + (pollMode === "weekdays" ? " on" : "")} onClick={()=>update({ pollMode:"weekdays" })}>Days of the week</button>
+    </div>
+    {pollMode === "dates" ? (<div style={{marginTop:8}}>
+      <div className="row" style={{gap:8}}><input className="input" type="date" value={nd} onChange={(e)=>setNd(e.target.value)} /><button className="btn sm primary" onClick={addDate} disabled={!nd}>Add date</button></div>
+      <div className="row" style={{gap:6,flexWrap:"wrap",marginTop:8}}>{dates.length === 0 ? <span className="muted" style={{fontSize:13}}>No dates yet.</span> : dates.map((d)=>(<span key={d} className="cal-chip on">{d}<button className="iconbtn" style={{marginLeft:4,padding:"0 4px",minWidth:0}} title="Remove" onClick={()=>rmDate(d)}>×</button></span>))}</div>
+    </div>) : (<div className="row" style={{gap:6,flexWrap:"wrap",marginTop:8}}>{WN.map((n,i)=>(<button key={i} type="button" className={"btn sm" + (wk.indexOf(i) >= 0 ? " primary" : " ghost")} onClick={()=>toggleWk(i)}>{n}</button>))}</div>)}
+    <div className="panel-section">Time window</div>
+    <Toggle checked={!!q.dateOnly} onChange={(c)=>update({ dateOnly:c })} label="Poll days only (no hourly grid)" />
+    {!q.dateOnly && (<div className="row" style={{gap:10,marginTop:8}}>
+      <Field label="From hour" style={{flex:1}}><input className="input" type="number" min="0" max="23" value={q.startHour == null ? 9 : q.startHour} onChange={(e)=>update({ startHour: Math.max(0, Math.min(23, parseInt(e.target.value || "0", 10))) })} /></Field>
+      <Field label="To hour" style={{flex:1}}><input className="input" type="number" min="1" max="24" value={q.endHour == null ? 17 : q.endHour} onChange={(e)=>update({ endHour: Math.max(1, Math.min(24, parseInt(e.target.value || "17", 10))) })} /></Field>
+      <Field label="Slot" style={{flex:1}}><select className="select" value={q.slotMinutes || 60} onChange={(e)=>update({ slotMinutes: parseInt(e.target.value, 10) })}><option value="60">1 hour</option><option value="30">30 min</option></select></Field>
+    </div>)}
+    <div className="panel-section">Poll options</div>
+    <Toggle checked={!!q.ifNeeded} onChange={(c)=>update({ ifNeeded:c })} label="Allow 'if needed' time slots" />
+    <div style={{height:8}}></div>
+    <Toggle checked={!!q.hideResponses} onChange={(c)=>update({ hideResponses:c })} label="Hide individual responses from participants" />
+  </div>);
+}
+function SchedulingRenderer({ q, value, onChange, error, bookings, poll, formId, preview }){
+  if ((q.mode || "booking") === "poll") return <PollRenderer q={q} value={value} onChange={onChange} error={error} poll={poll} formId={formId} preview={preview} />;
   const slots = Array.isArray(q.slots) ? q.slots : [];
   const counts = bookings || {};
   const now = Date.now();
@@ -1042,6 +1255,7 @@ function SchedulingControls({ q, update }){
   const slots = Array.isArray(q.slots) ? q.slots : [];
   const [newSlot, setNewSlot] = useState("");
   const mt = q.meetingType || "one_on_one";
+  const mode = q.mode || "booking";
   const add = ()=>{ if (!newSlot) return; update({ slots: slots.concat([{ id: uid(), start: newSlot, capacity: mt === "group" ? (q.capacity || 1) : 1 }]) }); setNewSlot(""); };
   const remove = (id)=> update({ slots: slots.filter((s)=>s.id !== id) });
   const setCap = (id, c)=> update({ slots: slots.map((s)=> s.id === id ? { ...s, capacity: c } : s) });
@@ -1060,7 +1274,14 @@ function SchedulingControls({ q, update }){
   const CAL = [["google","Google Calendar"],["outlook","Outlook"],["office365","Office 365"],["icloud","Apple iCloud"],["exchange","Exchange"]];
   return (
     <div>
-      <Field label="Meeting title"><input className="input" value={q.meetingTitle || ""} onChange={(e)=>update({meetingTitle:e.target.value})} /></Field>
+      <div className="panel-section" style={{marginTop:0}}>Scheduling type</div>
+      <div className="seg">
+        <button type="button" className={"seg-btn" + (mode === "booking" ? " on" : "")} onClick={()=>update({ mode:"booking" })}>Booking page</button>
+        <button type="button" className={"seg-btn" + (mode === "poll" ? " on" : "")} onClick={()=>update({ mode:"poll" })}>Group availability poll</button>
+      </div>
+      <Field label="Title" style={{marginTop:10}}><input className="input" value={q.meetingTitle || ""} onChange={(e)=>update({meetingTitle:e.target.value})} /></Field>
+      {mode === "poll" && <PollConfig q={q} update={update} />}
+      {mode === "booking" && (<>
       <div className="row" style={{gap:10}}>
         <Field label="Duration (min)" style={{flex:1}}><input className="input" type="number" min="5" value={q.duration || 30} onChange={(e)=>update({duration: parseInt(e.target.value || "0", 10)})} /></Field>
         <Field label="Location / link" style={{flex:2}}><input className="input" placeholder="Video call, address" value={q.location || ""} onChange={(e)=>update({location:e.target.value})} /></Field>
@@ -1076,7 +1297,7 @@ function SchedulingControls({ q, update }){
       {mt === "group" && <Field label="Spots per time slot" style={{marginTop:8}}><input className="input" type="number" min="1" value={q.capacity || 1} onChange={(e)=>update({capacity: Math.max(1, parseInt(e.target.value || "1", 10))})} /></Field>}
       {(mt === "collective" || mt === "round_robin") && (<div style={{marginTop:8}}>
         <div className="label" style={{marginBottom:4}}>Hosts</div>
-        {hosts.map((h)=>(<div key={h.id} className="row" style={{gap:6,marginBottom:6}}><input className="input" placeholder="Name" value={h.name} onChange={(e)=>setHost(h.id,{name:e.target.value})} /><input className="input" placeholder="Email" value={h.email} onChange={(e)=>setHost(h.id,{email:e.target.value})} /><button className="iconbtn" title="Remove" onClick={()=>rmHost(h.id)}>\u00d7</button></div>))}
+        {hosts.map((h)=>(<div key={h.id} className="row" style={{gap:6,marginBottom:6}}><input className="input" placeholder="Name" value={h.name} onChange={(e)=>setHost(h.id,{name:e.target.value})} /><input className="input" placeholder="Email" value={h.email} onChange={(e)=>setHost(h.id,{email:e.target.value})} /><button className="iconbtn" title="Remove" onClick={()=>rmHost(h.id)}>×</button></div>))}
         <button className="btn sm" onClick={addHost}>+ Add host</button>
         <div className="hint" style={{marginTop:4}}>{mt === "collective" ? "A slot is offered only when every host is free." : "Bookings rotate across hosts based on availability."}</div>
       </div>)}
@@ -1103,7 +1324,7 @@ function SchedulingControls({ q, update }){
       </div>
       <div className="slot-edit">
         {slots.length === 0 ? <div className="muted" style={{fontSize:13,marginTop:8}}>No times added yet.</div> :
-          slots.map((s)=>(<div key={s.id} className="slot-edit-row"><span className="slot-edit-when">{fmtSlot(s.start)}</span>{mt === "group" && <label className="slot-cap">spots<input className="input" type="number" min="1" value={s.capacity == null ? (q.capacity || 1) : s.capacity} onChange={(e)=>setCap(s.id, parseInt(e.target.value || "1", 10))} /></label>}<button className="iconbtn" title="Remove" onClick={()=>remove(s.id)}>\u00d7</button></div>))}
+          slots.map((s)=>(<div key={s.id} className="slot-edit-row"><span className="slot-edit-when">{fmtSlot(s.start)}</span>{mt === "group" && <label className="slot-cap">spots<input className="input" type="number" min="1" value={s.capacity == null ? (q.capacity || 1) : s.capacity} onChange={(e)=>setCap(s.id, parseInt(e.target.value || "1", 10))} /></label>}<button className="iconbtn" title="Remove" onClick={()=>remove(s.id)}>×</button></div>))}
       </div>
 
       <div className="panel-section">Reminders</div>
@@ -1111,7 +1332,7 @@ function SchedulingControls({ q, update }){
         <select className="select" style={{flex:"0 0 84px"}} value={r.channel} onChange={(e)=>setRem(r.id,{channel:e.target.value})}><option value="email">Email</option><option value="sms">SMS</option></select>
         <input className="input" type="number" min="0" style={{flex:"0 0 64px"}} value={r.value} onChange={(e)=>setRem(r.id,{value: Math.max(0, parseInt(e.target.value||"0",10))})} />
         <select className="select" style={{flex:1}} value={r.unit} onChange={(e)=>setRem(r.id,{unit:e.target.value})}><option value="minutes">minutes before</option><option value="hours">hours before</option><option value="days">days before</option></select>
-        <button className="iconbtn" title="Remove" onClick={()=>rmRem(r.id)}>\u00d7</button>
+        <button className="iconbtn" title="Remove" onClick={()=>rmRem(r.id)}>×</button>
       </div>))}
       <button className="btn sm" onClick={addRem}>+ Add reminder</button>
 
@@ -1131,6 +1352,7 @@ function SchedulingControls({ q, update }){
         <option value="webex">Webex</option>
       </select>
       {q.video && q.video !== "none" && <div className="hint" style={{marginTop:6}}>A {VL[q.video]} link is generated and included in the confirmation once {VL[q.video]} is connected.</div>}
+      </>)}
 
       <div className="panel-section">Response requirements</div>
       <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
@@ -1228,13 +1450,13 @@ function ImageChoiceControls({ q, update, scoring }){
           {o.image ? <img className="ic-thumb" src={o.image} alt="" /> : <label className="ic-up"><input type="file" accept="image/*" style={{display:"none"}} onChange={(e)=>{ const f = e.target.files && e.target.files[0]; upload(o.id, f); e.target.value = ""; }} /><span>Image</span></label>}
           <input className="input" placeholder={"Caption " + (i + 1) + " (optional)"} value={o.label} onChange={(e)=>setOpt(o.id, { label: e.target.value })} />
           {o.image && <button className="iconbtn" title="Replace image" onClick={()=>setOpt(o.id, { image:"" })}>\u21bb</button>}
-          <button className="iconbtn" title="Remove" disabled={opts.length <= 1} onClick={()=>rmOpt(o.id)}>\u00d7</button>
+          <button className="iconbtn" title="Remove" disabled={opts.length <= 1} onClick={()=>rmOpt(o.id)}>×</button>
         </div>
       ))}
       <button className="btn sm" style={{marginTop:8}} onClick={addOpt}>Add choice</button>
       {scoring && (<><div className="panel-section">Scoring</div>
       <div className="hint" style={{marginBottom:6}}>Points awarded for each choice.</div>
-      {opts.map((o, i)=>(<div key={o.id} className="score-row"><span className="score-opt" title={o.label}>{o.label || ("Choice " + (i + 1))}</span><input className="input score-pts" type="number" value={(q.points && q.points[o.id]) || ""} onChange={(e)=>{ const p = { ...(q.points || {}) }; const n = e.target.value; if (n === "") delete p[o.id]; else p[o.id] = Number(n); update({ points:p }); }} /></div>))}</>)}
+      {opts.map((o, i)=>(<div key={o.id} className="score-row"><span className="score-opt" title={o.label}>{o.label || ("Choice " + (i + 1))}</span><input className="input score-pts" type="number" value={(q.points && q.points[o.id]) || ""} onChange={(e)=>{ const p = { ...(q.points || {}) }; const n = e.target.value; if (n === "") delete p[o.id]; else p[o.id] = Number(n); update({ points:p }); }} /></div>))}<Field label="Explanation (shown after submitting)" style={{marginTop:8}}><textarea className="textarea" style={{minHeight:50}} value={q.explanation || ""} onChange={(e)=>update({explanation:e.target.value})} placeholder="Why this is correct (optional)" /></Field></>)}
       <div className="panel-section">Response requirements</div>
       <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
       <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
@@ -1295,7 +1517,7 @@ function DrillTree({ nodes, onChange, depth }){
           <div className="dd-row">
             <input className="input" placeholder="Option label" value={n.label} onChange={(e)=>set(n.id, { label:e.target.value })} />
             <button className="iconbtn" title="Add sub-option" onClick={()=>set(n.id, { children:(n.children || []).concat([{ id: uid(), label:"", children:[] }]) })}>+</button>
-            <button className="iconbtn" title="Remove" onClick={()=>rm(n.id)}>\u00d7</button>
+            <button className="iconbtn" title="Remove" onClick={()=>rm(n.id)}>×</button>
           </div>
           {(n.children && n.children.length > 0) && <DrillTree nodes={n.children} depth={(depth || 0) + 1} onChange={(ch)=>set(n.id, { children:ch })} />}
         </div>
@@ -1489,9 +1711,9 @@ function ConjointControls({ q, update }){
     <div className="panel-section">Attributes</div>
     <div className="hint" style={{marginBottom:8}}>Each option is built from one level of every attribute.</div>
     {attrs.map((a)=>(<div key={a.id} className="cj-attr-edit">
-      <div className="row" style={{gap:6}}><input className="input" value={a.name} onChange={(e)=>setAttr(a.id, { name:e.target.value })} /><button className="iconbtn" title="Remove attribute" disabled={attrs.length <= 1} onClick={()=>removeAttr(a.id)}>\u00d7</button></div>
+      <div className="row" style={{gap:6}}><input className="input" value={a.name} onChange={(e)=>setAttr(a.id, { name:e.target.value })} /><button className="iconbtn" title="Remove attribute" disabled={attrs.length <= 1} onClick={()=>removeAttr(a.id)}>×</button></div>
       <div className="label" style={{margin:"6px 0 4px"}}>Levels</div>
-      {(a.levels||[]).map((lv,i)=>(<div key={i} className="row" style={{gap:6,marginBottom:4}}><input className="input" value={lv} onChange={(e)=>setLevel(a.id, i, e.target.value)} /><button className="iconbtn" title="Remove level" disabled={(a.levels||[]).length <= 1} onClick={()=>removeLevel(a.id, i)}>\u00d7</button></div>))}
+      {(a.levels||[]).map((lv,i)=>(<div key={i} className="row" style={{gap:6,marginBottom:4}}><input className="input" value={lv} onChange={(e)=>setLevel(a.id, i, e.target.value)} /><button className="iconbtn" title="Remove level" disabled={(a.levels||[]).length <= 1} onClick={()=>removeLevel(a.id, i)}>×</button></div>))}
       <button className="btn sm ghost" onClick={()=>addLevel(a.id)}>+ Add level</button>
     </div>))}
     <button className="btn sm" style={{marginTop:8}} onClick={addAttr} disabled={attrs.length >= 5}>+ Add attribute</button>
@@ -1779,9 +2001,9 @@ const QTYPES = {
     label: "Meeting signup",
     hint: "Let people book one of your time slots",
     isInput: true,
-    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[], meetingType:"one_on_one", capacity:1, hosts:[], calendars:{ google:false, outlook:false, office365:false, icloud:false, exchange:false }, bufferBefore:0, bufferAfter:0, dailyCap:0, minNotice:0, timezoneAuto:true, reminders:[{ id: uid(), channel:"email", value:24, unit:"hours" }], followup:{ enabled:false, message:"", link:"" }, video:"none" }),
-    summary: (q) => (({ one_on_one:"One on one", group:"Group", collective:"Collective", round_robin:"Round robin" }[q.meetingType || "one_on_one"]) + " \u00b7 " + ((q.slots && q.slots.length) || 0) + " time slots"),
-    validate: (q, v) => (q.required && !v) ? "Please choose a time." : null,
+    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[], meetingType:"one_on_one", capacity:1, hosts:[], calendars:{ google:false, outlook:false, office365:false, icloud:false, exchange:false }, bufferBefore:0, bufferAfter:0, dailyCap:0, minNotice:0, timezoneAuto:true, reminders:[{ id: uid(), channel:"email", value:24, unit:"hours" }], followup:{ enabled:false, message:"", link:"" }, video:"none", mode:"booking", pollMode:"dates", dates:[], weekdays:[1,2,3,4,5], dateOnly:false, startHour:9, endHour:17, slotMinutes:60, ifNeeded:false, hideResponses:false }),
+    summary: (q) => ((q.mode || "booking") === "poll") ? ("Group poll \u00b7 " + (((q.pollMode||"dates")==="weekdays") ? (((q.weekdays||[]).length) + " weekdays") : (((q.dates||[]).length) + " dates"))) : (({ one_on_one:"One on one", group:"Group", collective:"Collective", round_robin:"Round robin" }[q.meetingType || "one_on_one"]) + " \u00b7 " + ((q.slots && q.slots.length) || 0) + " time slots"),
+    validate: (q, v) => { if ((q.mode || "booking") === "poll"){ if (!q.required) return null; const av = (v && Array.isArray(v.available)) ? v.available : []; if (!((v && v.name) || "").trim()) return "Please enter your name."; if (!av.length) return "Please mark when you are available."; return null; } return (q.required && !v) ? "Please choose a time." : null; },
     Renderer: SchedulingRenderer,
   },
   payment: {
@@ -2045,19 +2267,22 @@ const QTYPES = {
       const ordered = (Array.isArray(value) && value.length === q.items.length) ? value : q.items;
       useEffect(()=>{ if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice()); }, [q.id, (q.items || []).join("\u0001")]);
       const [drag, setDrag] = useState(null);
-      const [over, setOver] = useState(null);
+      const dragRef = useRef(null);
+      const rowsRef = useRef([]);
+      const orderRef = useRef(ordered); orderRef.current = ordered;
+      const setDragBoth = (v) => { dragRef.current = v; setDrag(v); };
       const move = (i, dir) => { const a = ordered.slice(); const j = i + dir; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; onChange(a); };
-      const reorder = (from, to) => { if (from === null || from === to) return; const a = ordered.slice(); const m = a.splice(from, 1)[0]; a.splice(to, 0, m); onChange(a); };
+      const reorder = (from, to) => { if (from === null || from === to || from == null || to == null) return; const a = orderRef.current.slice(); const m = a.splice(from, 1)[0]; a.splice(to, 0, m); onChange(a); };
+      const onMove = (clientY) => { const cur = dragRef.current; if (cur == null) return; const rects = rowsRef.current.map((el)=> el ? el.getBoundingClientRect() : null); let target = cur; for (let i = 0; i < rects.length; i++){ const r = rects[i]; if (!r) continue; const mid = r.top + r.height / 2; if (clientY < mid){ target = i; break; } target = i; } if (target !== cur){ reorder(cur, target); setDragBoth(target); } };
+      const startDrag = (i) => { setDragBoth(i); const mv = (ev)=> onMove(ev.clientY); const up = ()=>{ setDragBoth(null); window.removeEventListener("pointermove", mv); window.removeEventListener("pointerup", up); }; window.addEventListener("pointermove", mv); window.addEventListener("pointerup", up); };
       if (q.carryFrom && (!q.items || !q.items.length)) return (<div className="q"><QLabel q={q} /><div className="muted" style={{fontSize:13}}>Nothing was carried forward from the earlier question.</div>{error && <div className="ferr">{error}</div>}</div>);
       return (
         <div className="q">
           <QLabel q={q} />
           <div className="ranklist">
             {ordered.map((it,i)=>(
-              <div className={"rankrow" + (drag === i ? " dragging" : "") + (over === i ? " over" : "")} key={it + "-" + i}
-                   onDragOver={(e)=>{ e.preventDefault(); if (over !== i) setOver(i); }}
-                   onDrop={(e)=>{ e.preventDefault(); reorder(drag, i); setDrag(null); setOver(null); }}>
-                <span className="rgrip" draggable onDragStart={(e)=>{ setDrag(i); try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(i)); } catch (_) {} }} onDragEnd={()=>{ setDrag(null); setOver(null); }} title="Drag to reorder">⠿</span>
+              <div className={"rankrow" + (drag === i ? " dragging" : "")} key={it + "-" + i} ref={(el)=>{ rowsRef.current[i] = el; }}>
+                <span className="rgrip" onPointerDown={(e)=>{ e.preventDefault(); startDrag(i); }} title="Drag to reorder" style={{touchAction:"none"}}>⠿</span>
                 <span className="rnum">{i + 1}</span>
                 <span className="rlabel">{it}</span>
                 <span className="rbtns">
@@ -2377,7 +2602,7 @@ function SkipControls({ q, questions, update }){
               <option value="end">End of survey</option>
               <option value="screenout">Disqualify (screen out)</option>
             </select>
-            <button className="iconbtn" title="Remove rule" onClick={()=>remove(r.id)}>\u00d7</button>
+            <button className="iconbtn" title="Remove rule" onClick={()=>remove(r.id)}>×</button>
           </div>
         </div>
       ))}
@@ -2442,7 +2667,7 @@ function formStrings(form){
   out.push({ key:"ui:submit", group:"Buttons", what:"Submit button", original:"Submit" });
   return out;
 }
-function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCounts, ui }){
+function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCounts, ui, poll }){
   const U = ui || {};
   const questions = form.schema.questions || [];
   const settings = form.schema.settings || {};
@@ -2482,10 +2707,12 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
 
   const [page, setPage] = useState(0);
   const [hist, setHist] = useState([]);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState(()=>{ try { if (!preview && form && form.id && typeof window !== "undefined" && window.localStorage){ const raw = window.localStorage.getItem("zq-draft-" + form.id); if (raw){ const d = JSON.parse(raw); if (d && typeof d === "object" && !Array.isArray(d)) return d; } } } catch (e) {} return {}; });
+  const [restored, setRestored] = useState(()=>{ try { return !!(!preview && form && form.id && window.localStorage && window.localStorage.getItem("zq-draft-" + form.id)); } catch (e) { return false; } });
   const [errors, setErrors] = useState({});
   const [followups, setFollowups] = useState({});
   const setA = (qid, v) => setAnswers((a)=>({ ...a, [qid]: v }));
+  const startOver = ()=>{ try { if (window.localStorage && form && form.id) window.localStorage.removeItem("zq-draft-" + form.id); } catch (e) {} const params = new URLSearchParams(window.location.search); const init = {}; questions.forEach((q)=>{ if (q.type === "hidden_field"){ init[q.id] = q.source === "fixed" ? (q.value || "") : (params.get(q.key) || q.value || ""); } }); setAnswers(init); setRestored(false); };
   const vis = (q) => qVisible(q, answers) && (!experiment || !q.variant || q.variant === variant);
 
   useEffect(()=>{
@@ -2494,6 +2721,8 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
     questions.forEach((q)=>{ if (q.type === "hidden_field"){ init[q.id] = q.source === "fixed" ? (q.value || "") : (params.get(q.key) || q.value || ""); } });
     if (Object.keys(init).length) setAnswers((a)=>({ ...init, ...a }));
   }, [form.id]);
+
+  useEffect(()=>{ if (preview || !form || !form.id) return; try { if (window.localStorage){ if (Object.keys(answers).length) window.localStorage.setItem("zq-draft-" + form.id, JSON.stringify(answers)); } } catch (e) {} }, [answers]);
 
   const theme = form.theme || {};
   const scopeStyle = { "--fp": theme.primary || "#5b4fe0", "--fs": theme.secondary || "#1b1830", "--fa": theme.accent || theme.primary || "#5b4fe0", fontFamily: (theme.customFont ? ("'" + theme.customFont + "', ") : "") + (FORM_FONTS[theme.font] || FORM_FONTS.sans) };
@@ -2585,10 +2814,11 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
         {settings.headerImage && <img className="fheader-img" src={settings.headerImage} alt="" />}
         <div className="ftitle">{form.title}</div>
         {form.description && <div className="fdesc">{form.description}</div>}
+        {restored && <div className="resume-note"><span>We restored your answers from last time.</span><button type="button" className="fbtn-ghost" onClick={startOver}>Start over</button></div>}
         {multi && <div className="fprogress"><div className="fprogress-bar" style={{width:((pos / total) * 100) + "%"}}></div></div>}
         <div className="fpage" key={cur} style={{marginTop:12}}>
           {sec && sec.title ? (<div className="form-section"><div className="form-section-title">{pipeText(sec.title, answers, questions)}</div>{sec.desc ? <div className="form-section-desc">{pipeText(sec.desc, answers, questions)}</div> : null}</div>) : null}
-          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; const _pq0 = pipeQuestion(q, answers, questions); const _ci = carryItems(q, answers, questions); const pq = _ci ? (q.type === "rank_order" ? { ..._pq0, items: _ci } : { ..._pq0, options: _ci }) : _pq0; return (<div key={q.id}><R q={pq} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} counts={optionCounts && optionCounts[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
+          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; const _pq0 = pipeQuestion(q, answers, questions); const _ci = carryItems(q, answers, questions); const pq = _ci ? (q.type === "rank_order" ? { ..._pq0, items: _ci } : { ..._pq0, options: _ci }) : _pq0; return (<div key={q.id}><R q={pq} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} counts={optionCounts && optionCounts[q.id]} poll={poll && poll[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
           {shown.length === 0 && <div className="muted" style={{fontSize:13}}>Nothing to show on this step.</div>}
         </div>
         <div className="fnav" style={{marginTop:18}}>
@@ -2630,7 +2860,7 @@ function PublicForm({ username, slug }){
     api.publicForm(username, slug).then(({ok,data})=>{
       if (!m) return;
       if (!ok || !data || data.error || !data.form) setSt({ loading:false, notFound:true });
-      else { setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings, optionCounts:data.optionCounts }); try { loadGoogleFont(data.form.theme && data.form.theme.customFont); } catch (e) {} }
+      else { setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings, optionCounts:data.optionCounts, poll:data.poll }); try { loadGoogleFont(data.form.theme && data.form.theme.customFont); } catch (e) {} }
     });
     return ()=>{ m = false; };
   },[username, slug]);
@@ -2659,7 +2889,8 @@ function PublicForm({ username, slug }){
     const set = (lform.schema && lform.schema.settings) || {};
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
     const bookedSched = !disq ? (((form.schema && form.schema.questions) || []).filter((q)=> q.type === "scheduling" && typeof doneAnswers[q.id] === "string" && doneAnswers[q.id])) : [];
-    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
+    const review = (!disq && set.reviewAnswers) ? quizReview(form, doneAnswers) : [];
+    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}{review.length > 0 && <div className="quiz-review">{review.map((r)=>(<div key={r.id} className={"qr-item " + (r.isCorrect ? "qr-ok" : "qr-no")}><div className="qr-q">{(r.isCorrect ? "✓ " : "✗ ") + r.label}</div><div className="qr-line">Your answer: {r.given.length ? r.given.join(", ") : "(none)"}</div>{!r.isCorrect && <div className="qr-line">Correct: {r.correct.join(", ")}</div>}{r.explanation && <div className="qr-exp">{r.explanation}</div>}</div>))}</div>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
   if (already && !done){
     const set2 = (lform.schema && lform.schema.settings) || {};
@@ -2674,14 +2905,15 @@ function PublicForm({ username, slug }){
         const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
         if (r && !extra.disqualified){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
         const _one = form.schema && form.schema.settings && form.schema.settings.oneResponse; if (_one && !extra.disqualified){ try { if (window.localStorage) window.localStorage.setItem("zq-done-" + form.id, "1"); } catch (e) {} }
+        try { if (window.localStorage && form.id) window.localStorage.removeItem("zq-draft-" + form.id); } catch (e) {}
         setDoneAnswers(answers); if (data.score != null) setDoneScore({ score: data.score, max: data.maxScore }); setDisq(!!extra.disqualified); setDone(true);
       }
-      else { const code = data && data.error; const msg = code === "form_closed" ? "This form just closed." : code === "slot_full" ? "That time was just booked. Please choose another." : (code === "slot_too_soon" || code === "slot_past") ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : "Something went wrong. Please try again."; window.alert(msg); }
+      else { const code = data && data.error; const msg = code === "form_closed" ? "This form just closed." : code === "slot_full" ? "That time was just booked. Please choose another." : (code === "slot_too_soon" || code === "slot_past") ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : code === "name_locked" ? "That name is protected. Enter the matching password to update your response." : "Something went wrong. Please try again."; window.alert(msg); }
     });
   };
   return (
     <div className={pageCls}><div className="form-page-inner">
-      <FormRenderer form={lform} ui={uiLabels} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} />
+      <FormRenderer form={lform} ui={uiLabels} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} poll={st.poll} />
       {!(form.schema && form.schema.settings && form.schema.settings.hideBranding) && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}
     </div></div>
   );
@@ -3006,7 +3238,7 @@ function ColorPick({ label, value, onChange }){
 }
 function IconList(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor" stroke="none"/></svg>); }
 function IconTheme(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><path d="M12 3a9 9 0 0 0 0 18c1.66 0 2.02-1.17 1.2-2.08-.74-.83-.5-2.02.62-2.32l1.66-.28A4 4 0 0 0 21 12.2 9 9 0 0 0 12 3z"/><circle cx="7.5" cy="11" r="1.05" fill="currentColor" stroke="none"/><circle cx="9.8" cy="7.4" r="1.05" fill="currentColor" stroke="none"/><circle cx="14.4" cy="7.4" r="1.05" fill="currentColor" stroke="none"/></svg>); }
-function IconCog(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M19.4 13a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V19a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.5 17.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H2a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 3.65 8.5a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H8a1.7 1.7 0 0 0 1-1.56V2a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V8a1.7 1.7 0 0 0 1.56 1H22a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/><circle cx="12" cy="12" r="3"/></svg>); }
+function IconCog(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>); }
 
 function FullMsg({ text, onBack }){
   return (<div className="center-screen"><div>{text}</div>{onBack && <button className="btn" onClick={onBack}>Back to dashboard</button>}</div>);
@@ -3656,6 +3888,8 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Toggle checked={!!form.schema.settings.scoring} onChange={(c)=>setSettings({scoring:c})} label="Enable scoring (quiz mode)" />
       <div style={{height:8}}></div>
       <Toggle checked={!!form.schema.settings.showScore} onChange={(c)=>setSettings({showScore:c})} label="Show the score on the thank-you screen" />
+      <div style={{height:8}}></div>
+      <Toggle checked={!!form.schema.settings.reviewAnswers} onChange={(c)=>setSettings({reviewAnswers:c})} label="Show correct answers and explanations after submitting" />
       <div className="hint">Turn this on, then set points per choice on multiple choice and image choice questions. The score is calculated when the form is submitted, and appears in exports and analytics.</div>
       <div className="panel-section">Availability and limits</div>
       <Field label="Response limit (0 for unlimited)"><input className="input" type="number" min="0" value={form.schema.settings.responseCap || 0} onChange={(e)=>setSettings({responseCap: parseInt(e.target.value || "0", 10)})} /></Field>
@@ -3915,7 +4149,7 @@ function Builder({ formId }){
   const removeQ = (qid)=>{ const q = questions.find((x)=>x.id === qid); if (q) setTrash((t)=>[q, ...t]); setQuestions(questions.filter((x)=>x.id !== qid)); if (sel === qid) setSel(null); };
   const restoreQ = (tid)=>{ const q = trash.find((x)=>x.id === tid); if (!q) return; setTrash((t)=>t.filter((x)=>x.id !== tid)); setQuestions(questions.concat([q])); setSel(q.id); setMode("edit"); };
   const moveQ = (i, dir)=>{ const qs = questions.slice(); const j = i + dir; if (j < 0 || j >= qs.length) return; const t = qs[i]; qs[i] = qs[j]; qs[j] = t; setQuestions(qs); };
-  const dupQ = (qid)=>{ const qs = questions.slice(); const idx = qs.findIndex((q)=>q.id === qid); const copy = { ...qs[idx], id: uid() }; qs.splice(idx + 1, 0, copy); setQuestions(qs); setSel(copy.id); };
+  const dupQ = (qid)=>{ const qs = questions.slice(); const idx = qs.findIndex((q)=>q.id === qid); if (idx < 0) return; let copy; try { copy = JSON.parse(JSON.stringify(qs[idx])); } catch (e) { copy = { ...qs[idx] }; } copy.id = uid(); ["fields","slots","hosts","reminders","attributes","options"].forEach((kk)=>{ if (Array.isArray(copy[kk])) copy[kk] = copy[kk].map((it)=> (it && typeof it === "object" && ("id" in it)) ? { ...it, id: uid() } : it); }); qs.splice(idx + 1, 0, copy); setQuestions(qs); setSel(copy.id); };
   const reorder = (from, to)=>{ if (from === null || from === to) return; const qs = questions.slice(); const [m] = qs.splice(from, 1); qs.splice(to, 0, m); setQuestions(qs); };
   const applyShifts = (D, dropTo)=>{
     const H = D.height;
@@ -4118,6 +4352,7 @@ function FormDashboard({ id }){
   const url = form.username === "admin" ? window.location.origin + "/" + form.slug : window.location.origin + "/" + form.username + "/" + form.slug;
   const toggleOpen = ()=>{ const next = !form.is_open; setForm(f=>({...f, is_open: next})); api.updateForm(id, { is_open: next }).then(()=>toast(next ? "Form reopened" : "Form closed")); };
   const del = ()=>{ if (!window.confirm("Delete this form and all its responses? This cannot be undone.")) return; api.deleteForm(id).then(()=>{ toast("Form deleted"); navigate("/dashboard"); }); };
+  const duplicate = ()=>{ api.duplicateForm(id).then(({ ok, data })=>{ if (ok && data && data.id){ toast("Form duplicated as a draft"); navigate("/dashboard/" + data.id); } else toast("Could not duplicate this form."); }); };
 
   return (
     <div>
@@ -4126,7 +4361,7 @@ function FormDashboard({ id }){
         <button className="btn ghost sm" style={{marginBottom:14}} onClick={()=>navigate("/dashboard")}>← All forms</button>
         <div className="between" style={{marginBottom:6,flexWrap:"wrap",gap:10}}>
           <div className="row" style={{gap:12}}><h1 style={{fontSize:25}}>{form.title}</h1><span className={"badge "+(form.is_open?"open":"closed")}>{form.is_open?"Open":"Closed"}</span></div>
-          <div className="row"><a className="btn sm" href={url} target="_blank" rel="noopener">View form</a><button className="btn sm" onClick={()=>navigate("/builder/"+id)}>Edit</button></div>
+          <div className="row"><a className="btn sm" href={url} target="_blank" rel="noopener">View form</a><button className="btn sm" onClick={()=>navigate("/builder/"+id)}>Edit</button><button className="btn sm" onClick={duplicate}>Duplicate</button></div>
         </div>
         <div className="copyfield" style={{marginBottom:20,maxWidth:520}}><code>{url}</code><button className="btn sm" onClick={()=>{ if(navigator.clipboard) navigator.clipboard.writeText(url); toast("Link copied"); }}>Copy</button></div>
 
@@ -4134,7 +4369,7 @@ function FormDashboard({ id }){
 
         <div className="tabs">{["responses","analytics","settings"].map(t=>(<button key={t} className={"tab"+(tab===t?" active":"")} onClick={()=>setTab(t)}>{t[0].toUpperCase()+t.slice(1)}</button>))}</div>
 
-        {tab==="responses" && <ResponsesTab id={id} form={form} />}
+        {tab==="responses" && <ResponsesTab id={id} form={form} setForm={setForm} />}
         {tab==="analytics" && <AnalyticsTab id={id} form={form} />}
         {tab==="settings" && (
           <div className="card pad-lg" style={{maxWidth:560}}>
@@ -4487,7 +4722,7 @@ function ExportButtons({ id, form, rows }){
   );
 }
 
-function ResponsesTab({ id, form }){
+function ResponsesTab({ id, form, setForm }){
   const { toast } = useApp();
   const [rows, setRows] = useState(null);
   const [open, setOpen] = useState(null);
@@ -4499,6 +4734,12 @@ function ResponsesTab({ id, form }){
   const labels = useMemo(()=>{ const m={}; (form.schema.questions||[]).forEach(q=>{ if (QTYPES[q.type] && QTYPES[q.type].isInput) m[q.id]=q.label||q.id; }); return m; },[form]);
   const previewCols = useMemo(()=> Object.keys(labels).slice(0,2), [labels]);
   const experiment = !!(form.schema && form.schema.settings && form.schema.settings.experiment);
+  const pollQ = useMemo(()=> (form.schema.questions || []).find((q)=> q && q.type === "scheduling" && q.mode === "poll"), [form]);
+  const pollCounts = useMemo(()=>{ if (!pollQ) return null; const c = {}; (rows || []).forEach((r)=>{ const a = r.data && r.data[pollQ.id]; if (a && typeof a === "object" && Array.isArray(a.available)){ a.available.forEach((k)=>{ c[k] = (c[k] || 0) + 1; }); } }); return c; }, [rows, pollQ]);
+  const topSlots = useMemo(()=>{ if (!pollCounts) return []; return Object.keys(pollCounts).map((k)=>({ key:k, n:pollCounts[k] })).sort((a,b)=> (b.n - a.n) || (a.key < b.key ? -1 : 1)).slice(0, 6); }, [pollCounts]);
+  const setFinal = (key)=>{ if (!pollQ || !setForm) return; const qs = (form.schema.questions || []).map((q)=> q.id === pollQ.id ? { ...q, finalSlot: key } : q); const newSchema = { ...form.schema, questions: qs }; setForm((f)=>({ ...f, schema: newSchema })); api.updateForm(id, { schema: newSchema }).then(({ ok })=>{ if (ok) toast(key ? "Final time set" : "Final time cleared"); }); };
+  const clearAll = ()=>{ if (!window.confirm("Delete ALL responses for this form? This cannot be undone.")) return; api.clearResponses(id).then(({ ok })=>{ if (ok){ setRows([]); toast("All responses deleted"); } else toast("Could not clear responses."); }); };
+  const downloadPollCsv = ()=>{ try { const csv = buildPollMatrix(pollQ, rows || []); const blob = new Blob(["\ufeff" + csv], { type:"text/csv" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = ((form.title || "poll").replace(/[^a-z0-9]+/gi, "-").toLowerCase()) + "-availability.csv"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); } catch (e) { toast("Could not build the CSV."); } };
   const variants = useMemo(()=>{ const set = {}; (rows||[]).forEach((r)=>{ const v = r.meta && r.meta.variant; if (v) set[v] = true; }); return Object.keys(set).sort(); }, [rows]);
   const cell = (v)=>{ if (v===null||v===undefined) return ""; if (Array.isArray(v)) return v.join(", "); if (typeof v==="object") return Object.keys(v).map(k=>k+": "+(Array.isArray(v[k])?v[k].join("/"):v[k])).join(" | "); return String(v); };
   const rowText = (r)=>{ const parts = []; const d = r.data || {}; Object.keys(d).forEach((k)=>{ parts.push(cell(d[k])); }); const mm = r.meta || {}; parts.push(mm.city || "", mm.country || "", mm.browser || "", mm.os || ""); return parts.join(" ").toLowerCase(); };
@@ -4507,12 +4748,17 @@ function ResponsesTab({ id, form }){
   if (rows.length === 0) return <div className="card empty"><p>No responses yet.</p></div>;
   return (
     <div>
+      {pollQ && (<div className="card pad-lg" style={{marginBottom:14}}>
+        <div className="label" style={{marginBottom:8}}>Group poll</div>
+        {pollQ.finalSlot ? (<div className="row" style={{gap:10,alignItems:"center",marginBottom:8}}><span className="badge open">Confirmed</span><strong>{fmtPollSlot(pollQ.finalSlot, pollQ)}</strong><button className="btn sm ghost" onClick={()=>setFinal(null)}>Clear</button></div>) : <div className="hint" style={{marginBottom:8}}>Pick the time that works for the most people. It will show on the form for everyone.</div>}
+        <div className="finalize-list">{topSlots.length === 0 ? <span className="muted" style={{fontSize:13}}>No availability submitted yet.</span> : topSlots.map((sl)=>(<div key={sl.key} className="finalize-row"><span className="fl-when">{fmtPollSlot(sl.key, pollQ)}</span><span className="fl-count">{sl.n} free</span>{pollQ.finalSlot === sl.key ? <span className="badge open">Final</span> : <button className="btn sm" onClick={()=>setFinal(sl.key)}>Set as final</button>}</div>))}</div>
+      </div>)}
       <div className="resp-filter" style={{marginBottom:10,display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
         <input className="input" style={{flex:1,minWidth:160}} placeholder="Search responses" value={query} onChange={(e)=>setQuery(e.target.value)} />
         <select className="select" style={{width:"auto",flex:"none"}} value={statusF} onChange={(e)=>setStatusF(e.target.value)}><option value="all">All responses</option><option value="completed">Completed</option><option value="screenout">Screened out</option></select>
         {experiment && variants.length > 0 && <select className="select" style={{width:"auto",flex:"none"}} value={variantF} onChange={(e)=>setVariantF(e.target.value)}><option value="all">All variants</option>{variants.map((v)=>(<option key={v} value={v}>Variant {v}</option>))}</select>}
       </div>
-      <div className="between" style={{marginBottom:12}}><span className="muted">{filtered.length === rows.length ? (rows.length + " response" + (rows.length===1?"":"s")) : (filtered.length + " of " + rows.length + " shown")}</span><ExportButtons id={id} form={form} rows={rows} /></div>
+      <div className="between" style={{marginBottom:12}}><span className="muted">{filtered.length === rows.length ? (rows.length + " response" + (rows.length===1?"":"s")) : (filtered.length + " of " + rows.length + " shown")}</span><span style={{display:"flex",gap:8,flexWrap:"wrap"}}><ExportButtons id={id} form={form} rows={rows} />{pollQ && <button className="btn sm" onClick={downloadPollCsv}>Availability grid CSV</button>}<button className="btn sm danger" onClick={clearAll}>Clear all</button></span></div>
       <div className="card" style={{overflowX:"auto"}}>
         <table className="table">
           <thead><tr><th>Submitted</th><th className="hide-sm">Location</th><th className="hide-sm">Device</th>{previewCols.map(c=>(<th key={c}>{labels[c]}</th>))}<th></th></tr></thead>
@@ -4523,7 +4769,7 @@ function ResponsesTab({ id, form }){
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.city, r.meta.country].filter(Boolean).join(", ") || "-"}</td>
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.browser, r.meta.os].filter(Boolean).join(" / ") || "-"}</td>
                 {previewCols.map(c=>(<td key={c} style={{fontSize:13,maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cell(r.data[c])}</td>))}
-                <td onClick={(e)=>e.stopPropagation()} style={{whiteSpace:"nowrap"}}><button className="btn sm" disabled={pdfBusy} onClick={async ()=>{ setPdfBusy(true); try { await exportResponsePdf(form, r); } catch (e) { toast("Could not build the PDF."); } setPdfBusy(false); }}>PDF</button></td>
+                <td onClick={(e)=>e.stopPropagation()} style={{whiteSpace:"nowrap"}}><button className="btn sm" disabled={pdfBusy} onClick={async ()=>{ setPdfBusy(true); try { await exportResponsePdf(form, r); } catch (e) { toast("Could not build the PDF."); } setPdfBusy(false); }}>PDF</button> <button className="btn sm danger" onClick={async ()=>{ if (!window.confirm("Delete this response?")) return; const { ok } = await api.deleteResponse(id, r.id); if (ok) setRows((prev)=> prev.filter((x)=> x.id !== r.id)); else toast("Could not delete this response."); }}>Delete</button></td>
               </tr>
             ))}
           </tbody>

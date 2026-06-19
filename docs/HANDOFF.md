@@ -555,3 +555,65 @@ A new setting, oneResponse, makes the public form remember that this browser alr
 Signed documents that are PDFs now render page by page instead of in a bare iframe. A PdfDoc component lazy-loads PDF.js from cdnjs (pdf.min.js plus the matching worker), opens the data URL with getDocument, and draws each page onto its own canvas stacked vertically. Fields can be positioned directly on any page: the field model gained an optional page index (defaulting to page zero, which keeps image placement unchanged), and DocumentControls renders the PDF pages with click-to-place, storing page plus x and y percent per field. On the public form, placed fields overlay the correct page using the same percent coordinates, and unplaced fields still list below.
 
 PDF.js is loaded from a CDN at view time, so it needs network access. If the library fails to load or a PDF cannot be parsed, PdfDoc reports an error and the renderer falls back to the previous iframe with every field shown in the list below, and the builder shows a short notice instead of inline placement. Canvas rendering itself is exercised in real browsers; the structure, paging, overlays, positioning, placement math, and fallback were verified in tests with PDF.js mocked.
+
+## Beveled / imprint theming
+
+The flat one pixel lines were replaced with a soft beveled, pressed into paper look. Four CSS variables (bevel raise, press, inset, soft) hold layered box shadows and are themed per context: light values at the app root and inside the form scope and embed, darker values under the dark theme for both the app and the form. Raised elements (buttons, cards, calendar chips, the add question items, slot rows) carry a top highlight with a faint drop; pressed elements (inputs, selects, textareas, toggle tracks, segment groups) carry an inner shadow. Buttons and the form submit and call to action depress on click. Selected options and slot buttons read as pushed in. Toggle knobs sit raised in their inset groove. Because the variables are defined for light, dark, and embedded contexts, the texture follows the theme everywhere.
+
+## Group availability poll
+
+Scheduling now has two modes, chosen with a segmented control at the top of the question editor. Booking page is the existing one host picks a slot flow. Group availability poll is a When2meet style overlap finder. The model rides in the question JSON, so no schema change: mode, pollMode (specific dates or repeating weekdays), dates, weekdays, dateOnly, startHour, endHour, slotMinutes, ifNeeded, hideResponses.
+
+Editor (PollConfig): pick specific calendar dates (add and remove chips) or days of the week; set a daily time window with a start hour, end hour, and a one hour or thirty minute slot size; turn the hourly grid off entirely with days only polling; allow an if needed paint state; and hide individual responses from participants.
+
+Public form (PollRenderer): the participant enters their name, then clicks and drags to paint when they are free across a grid of time rows by date or weekday columns. The drag uses pointer events with touch action disabled, so it paints on touchscreens as well as with a mouse, and the grid scrolls horizontally when there are many columns. When if needed is enabled, a second paint mode marks suboptimal but acceptable times. Times are labelled in the visitor's own time zone and the zone is named under the grid. Below the grid, unless responses are hidden, a color coded heatmap shows the same layout with cell shading by how many people are free; hovering a cell lists exactly who is free. The heatmap reflects everyone who has responded as of page load.
+
+Backend: the public form GET aggregates poll responses per poll question into total, per slot counts, per slot if needed counts, and a people list of names with their picks; when responses are hidden the people list is omitted but the counts remain so the heatmap still works. A poll answer is stored like any other response in the response JSON as name, available slot keys, and maybe slot keys. Slot keys are the date (or d plus weekday index) optionally followed by T and the time, so date only polls collapse to one key per column.
+
+Verified in tests: the paint grid renders the right rows by columns, drag paints multiple cells, the heatmap renders with correct density and counts, the editor switches modes and shows the weekday picker, and the backend returns correct totals and counts and respects hidden responses.
+
+Deferred and honestly out of scope this round. External connections (not built, would need credentials wired in Cloudflare): two way calendar autofill and multiple account overlay from Google, Outlook, or Apple; direct calendar booking that injects the final event onto everyone's calendars; automated email alerts when a participant responds. Live behavior: the heatmap refreshes on page load and after a submit rather than updating in real time across other open tabs. Advanced poll features not yet built: per participant local password plus self service editing of a prior submission, sub group filtering of the heatmap, poll duplication, and CSV export of the raw availability matrix. The core poll (config, paint grid, heatmap, time zone, if needed, hidden responses, dates and weekdays and days only) is complete.
+
+## Settings cog icon
+
+The gear icon in the builder toolbar was a malformed transcription with uneven teeth. It was replaced with the clean Feather settings path (one path plus a center circle), so it renders as a proper symmetric cog.
+
+## Advanced poll features
+
+Four self contained additions on top of the group availability poll, all verified in tests:
+
+Question duplication (already wired through the card menu Duplicate action) was hardened: it now deep copies the question with a JSON round trip and regenerates the ids of nested items (fields, slots, hosts, reminders, attributes), so a duplicated poll, signing document, or scheduling block is fully independent of the original and no longer shares child ids. This covers poll duplication (clone the grid parameters into a fresh question).
+
+Sub group filtering on the heatmap: when individual responses are shown and more than one person has responded, a row of name chips appears above the group heatmap. Selecting one or more names recomputes the heatmap density and the hover lists from just that subset; an Everyone chip clears the filter. This is computed on the client from the people list the public endpoint returns.
+
+CSV availability matrix: on the form dashboard Responses tab, when the form has a poll question, an Availability grid CSV button downloads a matrix built client side. Rows are the poll slots, columns are participants, cells are Yes or If needed or blank, and a final column counts how many are available per slot. Built by a pure buildPollMatrix helper that was unit tested.
+
+Password protected entry and self service editing: a participant may set an optional password with their name. On submit the password is hashed (SHA-256) before storage; the plaintext is never persisted. A submission with the same name updates the existing response in place rather than adding a duplicate, but only when the password matches; a mismatch is rejected with name_locked and the public form shows a clear message. A poll-load endpoint lets a participant pull their previous availability back into the grid to edit it (the Load mine button), returning a locked flag if the password does not match. Identity is keyed on the first poll question's name within the form.
+
+Backend surface added: POST /api/public/:formId/poll-load, a sha256hex helper, and an upsert path in submitResponse (UPDATE existing row vs INSERT new) that also strips the raw password and stores only its hash under pw inside the answer. The poll aggregation already omits pw from the people list, so hashes never leak to participants.
+
+Still deferred (need external connections): two way calendar autofill and multi account overlay, direct calendar booking, and email alerts. The password is a local poll password to stop others overwriting a name; it is not account authentication and is intentionally low stakes.
+
+## Response management and form duplication
+
+Three data management additions, all verified in tests.
+
+Response deletion: the Responses tab now has a Delete button on every row (with a confirm) and a Clear all button next to the export controls. They call DELETE /api/forms/:id/responses/:rid and DELETE /api/forms/:id/responses, both owner checked. The row list updates in place after a single delete, and Clear all empties the list.
+
+Form duplication: the form view has a Duplicate button that calls POST /api/forms/:id/duplicate. The copy gets a fresh id and a unique slug, the title gains a (copy) suffix, the theme and full schema are carried over, and it is created closed (a draft) so it does not go live on a half ready duplicate. After duplicating, the app navigates to the new form.
+
+Poll finalize: for a group poll, the Responses tab shows a Group poll panel listing the most available time slots (counted from the submitted availability) with a Set as final button on each. Choosing one writes finalSlot onto the poll question through the normal form update, and a Clear option removes it. The public poll then shows a Confirmed banner with the chosen time at the top of the grid. A fmtPollSlot helper renders any slot key shape (specific date with or without time, repeating weekday with or without time). This is the in app half of finalizing a poll; pushing the confirmed event onto external calendars still needs calendar connections and remains deferred.
+
+Backend surface added: DELETE /api/forms/:id/responses/:rid, DELETE /api/forms/:id/responses, and POST /api/forms/:id/duplicate.
+
+## Touch ranking, saved drafts, and quiz review
+
+Three additions this round, all verified in tests.
+
+Rank order on the public form is now pointer based instead of HTML5 drag, so it works on touchscreens. The grip uses onPointerDown with touch action disabled; a window pointermove finds the target row by comparing the pointer Y to each row midpoint (via a refs array and getBoundingClientRect) and reorders live, committing on pointerup. The up and down arrow buttons remain for keyboard and click reordering. The builder reorder was already pointer based; this brings the respondent side in line.
+
+Save and resume: in progress answers are now saved to the visitor's own device (localStorage, keyed zq-draft plus the form id) as they type, and restored automatically on return with a small banner and a Start over button that clears the draft and resets hidden field defaults. The draft is cleared on a successful submit. It is off in preview and only runs on the live form. This is local to the device and not synced to the server.
+
+Quiz answer review: a new setting, shown with scoring, reveals correct answers and explanations on the thank you screen. Multiple choice questions gained an optional explanation field in the scoring section. After submitting, each scored question shows the respondent's answer, a correct or incorrect mark, the correct option(s), and the explanation. Correctness is computed by quizReview: the correct options are those carrying the maximum positive points; a single select answer is correct when it earns the max, and a multi select answer must match the full set of top options.
+
+No backend changes this round; all three are client side.

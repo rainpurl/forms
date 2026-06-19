@@ -11,6 +11,7 @@
 <style>
 :root{
   color-scheme: light;
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);
   --bo:#5b4fe0;            /* primary blue-purple */
   --bo-dark:#4536c9;
   --ink:#1b1830;
@@ -30,6 +31,7 @@
 }
 html[data-theme="dark"]{
   color-scheme: dark;
+  --bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.45);--bevel-press:inset 0 2px 5px rgba(0,0,0,.6);--bevel-inset:inset 0 1px 3px rgba(0,0,0,.55);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.4);
   --bo:#7c72f2; --bo-dark:#6b61e8;
   --ink:#ece9f8; --ink-soft:#a9a4c6;
   --line:#2a2740; --line-strong:#3a3660;
@@ -168,11 +170,11 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 /* form scope (respondent + preview): themed */
 .form-scope{--fp:#5b4fe0;--fs:#1b1830;--fa:#5b4fe0;--ftext:var(--fs);font-family:var(--sans)}
-.form-page,.form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--good:#2f7d52;--bad:#b23b3b;--hover:#f1eefc}
-html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#15132a;--card:#211e3a;--ink:#ece9f8;--ink-soft:#a39ec4;--line:#2f2b4e;--line-strong:#3d3866;--hover:#272343;--ftext:#ece9f8}
+.form-page,.form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--good:#2f7d52;--bad:#b23b3b;--hover:#f1eefc;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);}
+html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--paper:#15132a;--card:#211e3a;--ink:#ece9f8;--ink-soft:#a39ec4;--line:#2f2b4e;--line-strong:#3d3866;--hover:#272343;--ftext:#ece9f8;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.45);--bevel-press:inset 0 2px 5px rgba(0,0,0,.6);--bevel-inset:inset 0 1px 3px rgba(0,0,0,.55);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.4);}
 html[data-theme="dark"] .form-scope .finput,html[data-theme="dark"] .form-scope textarea,html[data-theme="dark"] .form-scope select{background:var(--card);color:var(--ink)}
 html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
-.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--hover:#f1eefc;--ftext:var(--fs)}
+.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--paper:#f6f5fc;--card:#ffffff;--ink:#1b1830;--ink-soft:#6a6580;--line:#e7e4f3;--line-strong:#d6d1ea;--hover:#f1eefc;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,110,170,.12),0 1px 1.5px rgba(40,30,90,.1);--bevel-press:inset 0 2px 4px rgba(40,30,90,.18),inset 0 -1px 0 rgba(255,255,255,.4);--bevel-inset:inset 0 1px 3px rgba(40,30,90,.14),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(40,30,90,.08);}
 .form-embed.form-page{min-height:auto;padding:14px 14px 22px;background:transparent}
 .form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
 .form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--ftext);font-weight:600;line-height:1.2}
@@ -662,6 +664,66 @@ table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
 .pdf-doc{display:flex;flex-direction:column;gap:10px}
 .pdf-page{position:relative;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;line-height:0;background:#fff;max-width:100%}
 .pdf-canvas{display:block;width:100%;height:auto}
+
+/* beveled / imprint theming */
+.btn{box-shadow:var(--bevel-raise)}
+.btn:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.btn.ghost{box-shadow:none}
+.btn.ghost:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.card{box-shadow:var(--bevel-soft)}
+.input,.textarea,.select{box-shadow:var(--bevel-inset)}
+.switch .track{box-shadow:var(--bevel-inset)}
+.switch .knob{box-shadow:var(--bevel-raise),0 1px 2px rgba(0,0,0,.22)}
+.badge{box-shadow:var(--bevel-soft)}
+.qccard{box-shadow:var(--bevel-soft)}
+.cal-chip{box-shadow:var(--bevel-raise)}
+.cal-chip.on{box-shadow:var(--bevel-press)}
+.booking-card,.mt-card,.cj-task,.pdf-page,.slot-edit-row,.cj-attr-edit{box-shadow:var(--bevel-soft)}
+.addq-item{box-shadow:var(--bevel-raise)}
+.addq-item:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.addq-adv-toggle{box-shadow:var(--bevel-inset)}
+.form-scope .finput,.form-scope .input,.form-scope .textarea,.form-scope .select{box-shadow:var(--bevel-inset)}
+.form-scope .submit{box-shadow:var(--bevel-raise)}
+.form-scope .submit:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.form-scope .fbtn-ghost{box-shadow:var(--bevel-raise)}
+.form-scope .fbtn-ghost:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.form-scope .opt{box-shadow:var(--bevel-soft)}
+.form-scope .opt.sel{box-shadow:var(--bevel-press)}
+.form-scope .slot-btn{box-shadow:var(--bevel-raise)}
+.form-scope .slot-btn.sel{box-shadow:var(--bevel-press)}
+.fcta{box-shadow:var(--bevel-raise)}
+.fcta:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;box-shadow:var(--bevel-inset)}
+.seg-btn{appearance:none;border:0;background:transparent;color:var(--ink-soft);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.seg-btn.on{background:var(--bo);color:#fff}
+.poll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.poll-grid{display:grid;gap:2px;min-width:max-content;user-select:none}
+.poll-corner,.poll-colhead,.poll-rowhead{font-size:11px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;padding:2px 4px;font-weight:600}
+.poll-rowhead{justify-content:flex-end;white-space:nowrap}
+.poll-cell{height:26px;min-width:34px;border:1px solid var(--line);border-radius:4px;background:var(--card);cursor:pointer;touch-action:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink-soft)}
+.poll-cell.poll-yes{background:#2f9e63;border-color:#2aa05f}
+.poll-cell.poll-maybe{background:#f6c343;border-color:#eab308}
+.poll-heatcell{cursor:default;color:#14532d}
+.poll-modes{display:flex;gap:6px;margin-bottom:8px}
+.poll-name{margin-bottom:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.poll-name .finput{max-width:200px}
+.poll-subgroup{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.chip-tog{appearance:none;border:1px solid var(--line-strong);background:var(--card);color:var(--ink-soft);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:var(--bevel-raise)}
+.chip-tog.on{background:var(--bo);color:#fff;border-color:var(--bo);box-shadow:var(--bevel-press)}
+.finalize-list{display:flex;flex-direction:column;gap:6px}
+.finalize-row{display:flex;align-items:center;gap:10px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;box-shadow:var(--bevel-soft)}
+.finalize-row .fl-when{font-weight:600;font-size:14px}
+.finalize-row .fl-count{color:var(--ink-soft);font-size:13px;margin-left:auto;margin-right:6px}
+.poll-final{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;border-radius:10px;background:var(--hover);box-shadow:var(--bevel-soft)}
+.resume-note{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--hover);border-radius:10px;padding:9px 13px;margin:4px 0 12px;font-size:13.5px;color:var(--ftext);box-shadow:var(--bevel-soft)}
+.quiz-review{text-align:left;margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.qr-item{border:1px solid var(--line);border-radius:10px;padding:11px 13px;box-shadow:var(--bevel-soft)}
+.qr-item.qr-ok{border-color:#2f9e63}
+.qr-item.qr-no{border-color:var(--bad)}
+.qr-q{font-weight:600;margin-bottom:4px}
+.qr-line{font-size:13.5px;color:var(--ink-soft)}
+.qr-exp{font-size:13px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -764,6 +826,26 @@ const api = {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(payload)
+  }),
+  pollLoad: (formId, questionId, name, password) => req("/api/public/" + formId + "/poll-load", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      questionId,
+      name,
+      password
+    })
+  }),
+  deleteResponse: (id, rid) => req("/api/forms/" + id + "/responses/" + rid, {
+    method: "DELETE"
+  }),
+  clearResponses: id => req("/api/forms/" + id + "/responses", {
+    method: "DELETE"
+  }),
+  duplicateForm: id => req("/api/forms/" + id + "/duplicate", {
+    method: "POST"
   }),
   uploadFile: (formId, file) => {
     const fd = new FormData();
@@ -926,6 +1008,63 @@ function buildICS(q, startISO) {
   if (q.video && q.video !== "none") lines.push("DESCRIPTION:" + esc((vl[q.video] || "Video") + " link will be provided."));
   lines.push("END:VEVENT", "END:VCALENDAR");
   return lines.join("\r\n");
+}
+function quizReview(form, answers) {
+  const qs = form.schema && form.schema.questions || [];
+  const out = [];
+  qs.forEach(q => {
+    if (q.type !== "multiple_choice" || !q.points || !Object.keys(q.points).length) return;
+    const pts = q.points;
+    const vals = Object.keys(pts).map(k => Number(pts[k])).filter(n => !isNaN(n));
+    const max = vals.length ? Math.max.apply(null, vals) : 0;
+    if (max <= 0) return;
+    const correct = (q.options || []).filter(o => Number(pts[o]) === max);
+    const ans = answers[q.id];
+    const given = Array.isArray(ans) ? ans.slice() : ans != null && ans !== "" ? [ans] : [];
+    const cs = correct.slice().sort().join("\u0001");
+    const gs = given.slice().sort().join("\u0001");
+    const isCorrect = given.length > 0 && (q.multi ? cs === gs : correct.indexOf(given[0]) >= 0);
+    out.push({
+      id: q.id,
+      label: q.label || "Question",
+      correct,
+      given,
+      isCorrect,
+      explanation: q.explanation || ""
+    });
+  });
+  return out;
+}
+function fmtPollSlot(key, q) {
+  if (!key) return "";
+  const WN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  let datePart = key,
+    time = "";
+  const ti = key.indexOf("T");
+  if (ti >= 0) {
+    datePart = key.slice(0, ti);
+    time = key.slice(ti + 1);
+  }
+  let dlabel;
+  if (/^d\d$/.test(datePart)) {
+    dlabel = WN[parseInt(datePart.slice(1), 10)] || datePart;
+  } else {
+    const dd = new Date(datePart + "T00:00");
+    dlabel = isNaN(dd) ? datePart : dd.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric"
+    });
+  }
+  if (time) {
+    const pp = time.split(":");
+    const hh = parseInt(pp[0], 10),
+      mm = parseInt(pp[1] || "0", 10);
+    const ap = hh < 12 ? "am" : "pm";
+    const h12 = hh % 12 || 12;
+    return dlabel + " " + h12 + (mm ? ":" + String(mm).padStart(2, "0") : "") + ap;
+  }
+  return dlabel;
 }
 function downloadICS(q, startISO) {
   try {
@@ -1247,13 +1386,601 @@ function SigPad({
     onClick: clear
   }, "Clear")));
 }
+function pollLayout(q) {
+  const dateOnly = !!q.dateOnly;
+  const cols = [];
+  if ((q.pollMode || "dates") === "weekdays") {
+    const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    (q.weekdays || []).slice().sort((a, b) => a - b).forEach(d => {
+      if (names[d]) cols.push({
+        key: "d" + d,
+        label: names[d]
+      });
+    });
+  } else {
+    (q.dates || []).slice().sort().forEach(d => {
+      const dd = new Date(d + "T00:00");
+      cols.push({
+        key: d,
+        label: isNaN(dd) ? d : dd.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric"
+        })
+      });
+    });
+  }
+  const rows = [];
+  if (!dateOnly) {
+    let sh = q.startHour == null ? 9 : q.startHour;
+    let eh = q.endHour == null ? 17 : q.endHour;
+    const step = q.slotMinutes || 60;
+    if (eh <= sh) eh = sh + 1;
+    for (let mn = sh * 60; mn < eh * 60; mn += step) {
+      const hh = Math.floor(mn / 60),
+        mm = mn % 60;
+      const t = String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+      const ap = hh < 12 ? "am" : "pm";
+      const h12 = hh % 12 || 12;
+      const lbl = h12 + (mm ? ":" + String(mm).padStart(2, "0") : "") + ap;
+      rows.push({
+        time: t,
+        label: lbl
+      });
+    }
+  }
+  return {
+    cols,
+    rows,
+    dateOnly
+  };
+}
+function slotKey(colKey, row, dateOnly) {
+  return dateOnly ? colKey : colKey + "T" + row.time;
+}
+function buildPollMatrix(q, rows) {
+  const lay = pollLayout(q);
+  const parts = (rows || []).map(r => r.data && r.data[q.id]).filter(p => p && typeof p === "object").map(p => ({
+    name: String(p.name || "Someone"),
+    a: Array.isArray(p.available) ? p.available : [],
+    m: Array.isArray(p.maybe) ? p.maybe : []
+  }));
+  const slots = [];
+  lay.cols.forEach(c => {
+    if (lay.dateOnly) {
+      slots.push({
+        key: slotKey(c.key, null, true),
+        label: c.label
+      });
+    } else {
+      lay.rows.forEach(rw => {
+        slots.push({
+          key: slotKey(c.key, rw, false),
+          label: c.label + " " + rw.label
+        });
+      });
+    }
+  });
+  const cell = v => {
+    const t = String(v == null ? "" : v);
+    return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  };
+  const header = ["Slot"].concat(parts.map(p => p.name)).concat(["Available"]);
+  const lines = [header.map(cell).join(",")];
+  slots.forEach(s => {
+    const row = [s.label];
+    let cnt = 0;
+    parts.forEach(p => {
+      const yes = p.a.indexOf(s.key) >= 0;
+      const may = p.m.indexOf(s.key) >= 0;
+      if (yes) cnt++;
+      row.push(yes ? "Yes" : may ? "If needed" : "");
+    });
+    row.push(String(cnt));
+    lines.push(row.map(cell).join(","));
+  });
+  return lines.join("\r\n");
+}
+function PollRenderer({
+  q,
+  value,
+  onChange,
+  error,
+  poll,
+  formId,
+  preview
+}) {
+  const [paintMode, setPaintMode] = useState("yes");
+  const [subGroup, setSubGroup] = useState(null);
+  const dragRef = useRef(null);
+  const selRef = useRef({
+    a: {},
+    m: {}
+  });
+  const lay = pollLayout(q);
+  const val = value || {};
+  const avail = Array.isArray(val.available) ? val.available : [];
+  const maybe = Array.isArray(val.maybe) ? val.maybe : [];
+  const aset = {};
+  avail.forEach(k => {
+    aset[k] = 1;
+  });
+  const mset = {};
+  maybe.forEach(k => {
+    mset[k] = 1;
+  });
+  selRef.current = {
+    a: {
+      ...aset
+    },
+    m: {
+      ...mset
+    }
+  };
+  let tz = "";
+  try {
+    tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+  } catch (e) {}
+  const cellState = k => aset[k] ? "yes" : mset[k] ? "maybe" : "";
+  const commit = () => {
+    onChange({
+      ...(value || {}),
+      available: Object.keys(selRef.current.a),
+      maybe: Object.keys(selRef.current.m)
+    });
+  };
+  const apply = k => {
+    const D = dragRef.current;
+    if (!D) return;
+    const a = {
+        ...selRef.current.a
+      },
+      m = {
+        ...selRef.current.m
+      };
+    delete a[k];
+    delete m[k];
+    if (D.action === "add") {
+      if (D.mode === "yes") a[k] = 1;else m[k] = 1;
+    }
+    selRef.current = {
+      a,
+      m
+    };
+    commit();
+  };
+  const start = k => {
+    const cur = cellState(k);
+    const action = cur === paintMode ? "erase" : "add";
+    dragRef.current = {
+      action,
+      mode: paintMode
+    };
+    apply(k);
+    const up = () => {
+      dragRef.current = null;
+      window.removeEventListener("pointerup", up);
+    };
+    window.addEventListener("pointerup", up);
+  };
+  const enter = k => {
+    if (dragRef.current) apply(k);
+  };
+  const setName = nm => onChange({
+    ...(value || {}),
+    name: nm,
+    available: avail,
+    maybe: maybe
+  });
+  const total = poll && poll.total || 0;
+  const people = poll && poll.people || null;
+  const useSub = !!(people && subGroup && subGroup.length);
+  const activePeople = useSub ? people.filter(p => subGroup.indexOf(p.name) >= 0) : people || [];
+  const heatDenom = useSub ? activePeople.length : total;
+  const heatCount = k => {
+    if (useSub) return activePeople.filter(p => (p.available || []).indexOf(k) >= 0).length;
+    return poll && poll.counts && poll.counts[k] || 0;
+  };
+  const heatTitle = k => {
+    const src = useSub ? activePeople : people;
+    if (src) {
+      const names = src.filter(p => (p.available || []).indexOf(k) >= 0).map(p => p.name || "Someone");
+      return names.length ? names.join(", ") : "No one yet";
+    }
+    return (poll && poll.counts && poll.counts[k] || 0) + " available";
+  };
+  const loadMine = () => {
+    if (!formId || !String(val.name || "").trim()) {
+      try {
+        window.alert("Enter your name first.");
+      } catch (e) {}
+      return;
+    }
+    api.pollLoad(formId, q.id, val.name, val.password || "").then(({
+      ok,
+      data
+    }) => {
+      if (!ok || !data) return;
+      if (data.locked) {
+        try {
+          window.alert("That name is protected. Enter the matching password to load it.");
+        } catch (e) {}
+        return;
+      }
+      if (data.found) {
+        onChange({
+          ...(value || {}),
+          available: data.available || [],
+          maybe: data.maybe || []
+        });
+      } else {
+        try {
+          window.alert("No saved availability found for that name.");
+        } catch (e) {}
+      }
+    });
+  };
+  const colTemplate = "68px repeat(" + lay.cols.length + ", minmax(34px, 1fr))";
+  const gridBody = heat => lay.dateOnly ? [/*#__PURE__*/React.createElement("div", {
+    key: "rh",
+    className: "poll-rowhead"
+  })].concat(lay.cols.map(c => {
+    const k = slotKey(c.key, null, true);
+    if (heat) {
+      const n = heatCount(k);
+      const op = heatDenom ? Math.min(1, n / heatDenom) : 0;
+      return /*#__PURE__*/React.createElement("div", {
+        key: k,
+        className: "poll-cell poll-heatcell",
+        title: heatTitle(k),
+        style: {
+          background: n ? "rgba(47,158,99," + (0.18 + op * 0.72) + ")" : "transparent"
+        }
+      }, n || "");
+    }
+    const st = cellState(k);
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      className: "poll-cell poll-" + st,
+      onPointerDown: () => start(k),
+      onPointerOver: () => enter(k),
+      "data-key": k
+    });
+  })) : [].concat.apply([], lay.rows.map(r => [/*#__PURE__*/React.createElement("div", {
+    key: "rh" + r.time,
+    className: "poll-rowhead"
+  }, r.label)].concat(lay.cols.map(c => {
+    const k = slotKey(c.key, r, false);
+    if (heat) {
+      const n = heatCount(k);
+      const op = heatDenom ? Math.min(1, n / heatDenom) : 0;
+      return /*#__PURE__*/React.createElement("div", {
+        key: k,
+        className: "poll-cell poll-heatcell",
+        title: heatTitle(k),
+        style: {
+          background: n ? "rgba(47,158,99," + (0.18 + op * 0.72) + ")" : "transparent"
+        }
+      }, n || "");
+    }
+    const st = cellState(k);
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      className: "poll-cell poll-" + st,
+      onPointerDown: () => start(k),
+      onPointerOver: () => enter(k),
+      "data-key": k
+    });
+  }))));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q"
+  }, /*#__PURE__*/React.createElement(QLabel, {
+    q: q
+  }), q.meetingTitle && /*#__PURE__*/React.createElement("div", {
+    className: "mt-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mt-title"
+  }, q.meetingTitle)), q.finalSlot && /*#__PURE__*/React.createElement("div", {
+    className: "poll-final"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "badge open"
+  }, "Confirmed"), " ", /*#__PURE__*/React.createElement("strong", null, fmtPollSlot(q.finalSlot, q))), /*#__PURE__*/React.createElement("div", {
+    className: "poll-name"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "finput",
+    placeholder: "Your name",
+    value: val.name || "",
+    onChange: e => setName(e.target.value)
+  }), /*#__PURE__*/React.createElement("input", {
+    className: "finput",
+    type: "password",
+    placeholder: "Password (optional)",
+    value: val.password || "",
+    onChange: e => onChange({
+      ...(value || {}),
+      name: val.name || "",
+      available: avail,
+      maybe: maybe,
+      password: e.target.value
+    })
+  }), formId && !preview && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn sm ghost",
+    onClick: loadMine
+  }, "Load mine")), tz && /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      margin: "2px 0 8px"
+    }
+  }, "Times shown in your time zone (", tz, ")."), q.ifNeeded && /*#__PURE__*/React.createElement("div", {
+    className: "poll-modes"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn sm" + (paintMode === "yes" ? " primary" : " ghost"),
+    onClick: () => setPaintMode("yes")
+  }, "Available"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn sm" + (paintMode === "maybe" ? " primary" : " ghost"),
+    onClick: () => setPaintMode("maybe")
+  }, "If needed")), lay.cols.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No dates set up for this poll yet.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 6
+    }
+  }, "Click and drag to paint when you are free."), /*#__PURE__*/React.createElement("div", {
+    className: "poll-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "poll-grid",
+    style: {
+      gridTemplateColumns: colTemplate
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "poll-corner"
+  }), lay.cols.map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.key,
+    className: "poll-colhead"
+  }, c.label)), gridBody(false)))), poll && !q.hideResponses && lay.cols.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "poll-heat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label",
+    style: {
+      margin: "16px 0 6px"
+    }
+  }, "Group availability", total ? " (" + total + " responded)" : ""), people && people.length > 1 && /*#__PURE__*/React.createElement("div", {
+    className: "poll-subgroup"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "hint",
+    style: {
+      marginRight: 2
+    }
+  }, "Show:"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "chip-tog" + (!useSub ? " on" : ""),
+    onClick: () => setSubGroup(null)
+  }, "Everyone"), people.map((p, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    type: "button",
+    className: "chip-tog" + (subGroup && subGroup.indexOf(p.name) >= 0 ? " on" : ""),
+    onClick: () => setSubGroup(prev => {
+      const cur = prev || [];
+      return cur.indexOf(p.name) >= 0 ? cur.filter(nm => nm !== p.name) : cur.concat([p.name]);
+    })
+  }, p.name || "Someone"))), /*#__PURE__*/React.createElement("div", {
+    className: "poll-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "poll-grid",
+    style: {
+      gridTemplateColumns: colTemplate
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "poll-corner"
+  }), lay.cols.map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.key,
+    className: "poll-colhead"
+  }, c.label)), gridBody(true))), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "Darker means more people are free. Hover a slot to see who.")), error && /*#__PURE__*/React.createElement("div", {
+    className: "ferr"
+  }, error));
+}
+function PollConfig({
+  q,
+  update
+}) {
+  const [nd, setNd] = useState("");
+  const pollMode = q.pollMode || "dates";
+  const dates = Array.isArray(q.dates) ? q.dates : [];
+  const wk = Array.isArray(q.weekdays) ? q.weekdays : [];
+  const addDate = () => {
+    if (!nd || dates.indexOf(nd) >= 0) {
+      setNd("");
+      return;
+    }
+    update({
+      dates: dates.concat([nd]).sort()
+    });
+    setNd("");
+  };
+  const rmDate = d => update({
+    dates: dates.filter(x => x !== d)
+  });
+  const toggleWk = d => update({
+    weekdays: wk.indexOf(d) >= 0 ? wk.filter(x => x !== d) : wk.concat([d]).sort((a, b) => a - b)
+  });
+  const WN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "What to poll"), /*#__PURE__*/React.createElement("div", {
+    className: "seg"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "seg-btn" + (pollMode === "dates" ? " on" : ""),
+    onClick: () => update({
+      pollMode: "dates"
+    })
+  }, "Specific dates"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "seg-btn" + (pollMode === "weekdays" ? " on" : ""),
+    onClick: () => update({
+      pollMode: "weekdays"
+    })
+  }, "Days of the week")), pollMode === "dates" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "date",
+    value: nd,
+    onChange: e => setNd(e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
+    onClick: addDate,
+    disabled: !nd
+  }, "Add date")), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      flexWrap: "wrap",
+      marginTop: 8
+    }
+  }, dates.length === 0 ? /*#__PURE__*/React.createElement("span", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No dates yet.") : dates.map(d => /*#__PURE__*/React.createElement("span", {
+    key: d,
+    className: "cal-chip on"
+  }, d, /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    style: {
+      marginLeft: 4,
+      padding: "0 4px",
+      minWidth: 0
+    },
+    title: "Remove",
+    onClick: () => rmDate(d)
+  }, "×"))))) : /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      flexWrap: "wrap",
+      marginTop: 8
+    }
+  }, WN.map((n, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    type: "button",
+    className: "btn sm" + (wk.indexOf(i) >= 0 ? " primary" : " ghost"),
+    onClick: () => toggleWk(i)
+  }, n))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Time window"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.dateOnly,
+    onChange: c => update({
+      dateOnly: c
+    }),
+    label: "Poll days only (no hourly grid)"
+  }), !q.dateOnly && /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 10,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "From hour",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "0",
+    max: "23",
+    value: q.startHour == null ? 9 : q.startHour,
+    onChange: e => update({
+      startHour: Math.max(0, Math.min(23, parseInt(e.target.value || "0", 10)))
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "To hour",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "1",
+    max: "24",
+    value: q.endHour == null ? 17 : q.endHour,
+    onChange: e => update({
+      endHour: Math.max(1, Math.min(24, parseInt(e.target.value || "17", 10)))
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Slot",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: q.slotMinutes || 60,
+    onChange: e => update({
+      slotMinutes: parseInt(e.target.value, 10)
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "60"
+  }, "1 hour"), /*#__PURE__*/React.createElement("option", {
+    value: "30"
+  }, "30 min")))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Poll options"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.ifNeeded,
+    onChange: c => update({
+      ifNeeded: c
+    }),
+    label: "Allow 'if needed' time slots"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.hideResponses,
+    onChange: c => update({
+      hideResponses: c
+    }),
+    label: "Hide individual responses from participants"
+  }));
+}
 function SchedulingRenderer({
   q,
   value,
   onChange,
   error,
-  bookings
+  bookings,
+  poll,
+  formId,
+  preview
 }) {
+  if ((q.mode || "booking") === "poll") return /*#__PURE__*/React.createElement(PollRenderer, {
+    q: q,
+    value: value,
+    onChange: onChange,
+    error: error,
+    poll: poll,
+    formId: formId,
+    preview: preview
+  });
   const slots = Array.isArray(q.slots) ? q.slots : [];
   const counts = bookings || {};
   const now = Date.now();
@@ -1640,6 +2367,7 @@ function SchedulingControls({
   const slots = Array.isArray(q.slots) ? q.slots : [];
   const [newSlot, setNewSlot] = useState("");
   const mt = q.meetingType || "one_on_one";
+  const mode = q.mode || "booking";
   const add = () => {
     if (!newSlot) return;
     update({
@@ -1710,15 +2438,40 @@ function SchedulingControls({
     webex: "Webex"
   };
   const CAL = [["google", "Google Calendar"], ["outlook", "Outlook"], ["office365", "Office 365"], ["icloud", "Apple iCloud"], ["exchange", "Exchange"]];
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Field, {
-    label: "Meeting title"
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section",
+    style: {
+      marginTop: 0
+    }
+  }, "Scheduling type"), /*#__PURE__*/React.createElement("div", {
+    className: "seg"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "seg-btn" + (mode === "booking" ? " on" : ""),
+    onClick: () => update({
+      mode: "booking"
+    })
+  }, "Booking page"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "seg-btn" + (mode === "poll" ? " on" : ""),
+    onClick: () => update({
+      mode: "poll"
+    })
+  }, "Group availability poll")), /*#__PURE__*/React.createElement(Field, {
+    label: "Title",
+    style: {
+      marginTop: 10
+    }
   }, /*#__PURE__*/React.createElement("input", {
     className: "input",
     value: q.meetingTitle || "",
     onChange: e => update({
       meetingTitle: e.target.value
     })
-  })), /*#__PURE__*/React.createElement("div", {
+  })), mode === "poll" && /*#__PURE__*/React.createElement(PollConfig, {
+    q: q,
+    update: update
+  }), mode === "booking" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 10
@@ -1811,7 +2564,7 @@ function SchedulingControls({
     className: "iconbtn",
     title: "Remove",
     onClick: () => rmHost(h.id)
-  }, "\\u00d7"))), /*#__PURE__*/React.createElement("button", {
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
     onClick: addHost
   }, "+ Add host"), /*#__PURE__*/React.createElement("div", {
@@ -1946,7 +2699,7 @@ function SchedulingControls({
     className: "iconbtn",
     title: "Remove",
     onClick: () => remove(s.id)
-  }, "\\u00d7")))), /*#__PURE__*/React.createElement("div", {
+  }, "×")))), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Reminders"), reminders.map(r => /*#__PURE__*/React.createElement("div", {
     key: r.id,
@@ -1999,7 +2752,7 @@ function SchedulingControls({
     className: "iconbtn",
     title: "Remove",
     onClick: () => rmRem(r.id)
-  }, "\\u00d7"))), /*#__PURE__*/React.createElement("button", {
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
     onClick: addRem
   }, "+ Add reminder"), /*#__PURE__*/React.createElement("div", {
@@ -2067,7 +2820,7 @@ function SchedulingControls({
     style: {
       marginTop: 6
     }
-  }, "A ", VL[q.video], " link is generated and included in the confirmation once ", VL[q.video], " is connected."), /*#__PURE__*/React.createElement("div", {
+  }, "A ", VL[q.video], " link is generated and included in the confirmation once ", VL[q.video], " is connected.")), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.required,
@@ -2538,7 +3291,7 @@ function ImageChoiceControls({
     title: "Remove",
     disabled: opts.length <= 1,
     onClick: () => rmOpt(o.id)
-  }, "\\u00d7"))), /*#__PURE__*/React.createElement("button", {
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
     style: {
       marginTop: 8
@@ -2571,7 +3324,22 @@ function ImageChoiceControls({
         points: p
       });
     }
-  })))), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Explanation (shown after submitting)",
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("textarea", {
+    className: "textarea",
+    style: {
+      minHeight: 50
+    },
+    value: q.explanation || "",
+    onChange: e => update({
+      explanation: e.target.value
+    }),
+    placeholder: "Why this is correct (optional)"
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.required,
@@ -2780,7 +3548,7 @@ function DrillTree({
     className: "iconbtn",
     title: "Remove",
     onClick: () => rm(n.id)
-  }, "\\u00d7")), n.children && n.children.length > 0 && /*#__PURE__*/React.createElement(DrillTree, {
+  }, "×")), n.children && n.children.length > 0 && /*#__PURE__*/React.createElement(DrillTree, {
     nodes: n.children,
     depth: (depth || 0) + 1,
     onChange: ch => set(n.id, {
@@ -3308,7 +4076,7 @@ function ConjointControls({
     title: "Remove attribute",
     disabled: attrs.length <= 1,
     onClick: () => removeAttr(a.id)
-  }, "\\u00d7")), /*#__PURE__*/React.createElement("div", {
+  }, "×")), /*#__PURE__*/React.createElement("div", {
     className: "label",
     style: {
       margin: "6px 0 4px"
@@ -3329,7 +4097,7 @@ function ConjointControls({
     title: "Remove level",
     disabled: (a.levels || []).length <= 1,
     onClick: () => removeLevel(a.id, i)
-  }, "\\u00d7"))), /*#__PURE__*/React.createElement("button", {
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
     className: "btn sm ghost",
     onClick: () => addLevel(a.id)
   }, "+ Add level"))), /*#__PURE__*/React.createElement("button", {
@@ -4172,15 +4940,34 @@ const QTYPES = {
         message: "",
         link: ""
       },
-      video: "none"
+      video: "none",
+      mode: "booking",
+      pollMode: "dates",
+      dates: [],
+      weekdays: [1, 2, 3, 4, 5],
+      dateOnly: false,
+      startHour: 9,
+      endHour: 17,
+      slotMinutes: 60,
+      ifNeeded: false,
+      hideResponses: false
     }),
-    summary: q => ({
+    summary: q => (q.mode || "booking") === "poll" ? "Group poll \u00b7 " + ((q.pollMode || "dates") === "weekdays" ? (q.weekdays || []).length + " weekdays" : (q.dates || []).length + " dates") : {
       one_on_one: "One on one",
       group: "Group",
       collective: "Collective",
       round_robin: "Round robin"
-    })[q.meetingType || "one_on_one"] + " \u00b7 " + (q.slots && q.slots.length || 0) + " time slots",
-    validate: (q, v) => q.required && !v ? "Please choose a time." : null,
+    }[q.meetingType || "one_on_one"] + " \u00b7 " + (q.slots && q.slots.length || 0) + " time slots",
+    validate: (q, v) => {
+      if ((q.mode || "booking") === "poll") {
+        if (!q.required) return null;
+        const av = v && Array.isArray(v.available) ? v.available : [];
+        if (!(v && v.name || "").trim()) return "Please enter your name.";
+        if (!av.length) return "Please mark when you are available.";
+        return null;
+      }
+      return q.required && !v ? "Please choose a time." : null;
+    },
     Renderer: SchedulingRenderer
   },
   payment: {
@@ -4847,7 +5634,14 @@ const QTYPES = {
         if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice());
       }, [q.id, (q.items || []).join("\u0001")]);
       const [drag, setDrag] = useState(null);
-      const [over, setOver] = useState(null);
+      const dragRef = useRef(null);
+      const rowsRef = useRef([]);
+      const orderRef = useRef(ordered);
+      orderRef.current = ordered;
+      const setDragBoth = v => {
+        dragRef.current = v;
+        setDrag(v);
+      };
       const move = (i, dir) => {
         const a = ordered.slice();
         const j = i + dir;
@@ -4858,11 +5652,42 @@ const QTYPES = {
         onChange(a);
       };
       const reorder = (from, to) => {
-        if (from === null || from === to) return;
-        const a = ordered.slice();
+        if (from === null || from === to || from == null || to == null) return;
+        const a = orderRef.current.slice();
         const m = a.splice(from, 1)[0];
         a.splice(to, 0, m);
         onChange(a);
+      };
+      const onMove = clientY => {
+        const cur = dragRef.current;
+        if (cur == null) return;
+        const rects = rowsRef.current.map(el => el ? el.getBoundingClientRect() : null);
+        let target = cur;
+        for (let i = 0; i < rects.length; i++) {
+          const r = rects[i];
+          if (!r) continue;
+          const mid = r.top + r.height / 2;
+          if (clientY < mid) {
+            target = i;
+            break;
+          }
+          target = i;
+        }
+        if (target !== cur) {
+          reorder(cur, target);
+          setDragBoth(target);
+        }
+      };
+      const startDrag = i => {
+        setDragBoth(i);
+        const mv = ev => onMove(ev.clientY);
+        const up = () => {
+          setDragBoth(null);
+          window.removeEventListener("pointermove", mv);
+          window.removeEventListener("pointerup", up);
+        };
+        window.addEventListener("pointermove", mv);
+        window.addEventListener("pointerup", up);
       };
       if (q.carryFrom && (!q.items || !q.items.length)) return /*#__PURE__*/React.createElement("div", {
         className: "q"
@@ -4883,33 +5708,21 @@ const QTYPES = {
       }), /*#__PURE__*/React.createElement("div", {
         className: "ranklist"
       }, ordered.map((it, i) => /*#__PURE__*/React.createElement("div", {
-        className: "rankrow" + (drag === i ? " dragging" : "") + (over === i ? " over" : ""),
+        className: "rankrow" + (drag === i ? " dragging" : ""),
         key: it + "-" + i,
-        onDragOver: e => {
-          e.preventDefault();
-          if (over !== i) setOver(i);
-        },
-        onDrop: e => {
-          e.preventDefault();
-          reorder(drag, i);
-          setDrag(null);
-          setOver(null);
+        ref: el => {
+          rowsRef.current[i] = el;
         }
       }, /*#__PURE__*/React.createElement("span", {
         className: "rgrip",
-        draggable: true,
-        onDragStart: e => {
-          setDrag(i);
-          try {
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/plain", String(i));
-          } catch (_) {}
+        onPointerDown: e => {
+          e.preventDefault();
+          startDrag(i);
         },
-        onDragEnd: () => {
-          setDrag(null);
-          setOver(null);
-        },
-        title: "Drag to reorder"
+        title: "Drag to reorder",
+        style: {
+          touchAction: "none"
+        }
       }, "⠿"), /*#__PURE__*/React.createElement("span", {
         className: "rnum"
       }, i + 1), /*#__PURE__*/React.createElement("span", {
@@ -5564,7 +6377,7 @@ function SkipControls({
     className: "iconbtn",
     title: "Remove rule",
     onClick: () => remove(r.id)
-  }, "\\u00d7")))), /*#__PURE__*/React.createElement("button", {
+  }, "×")))), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
     style: {
       marginTop: 8
@@ -5729,7 +6542,8 @@ function FormRenderer({
   submitting,
   bookings,
   optionCounts,
-  ui
+  ui,
+  poll
 }) {
   const U = ui || {};
   const questions = form.schema.questions || [];
@@ -5832,13 +6646,45 @@ function FormRenderer({
   }, [form.id, questions.length, blockSig, contentSig, settings.randomizeQuestions, settings.randomizeBlocks, conversational]);
   const [page, setPage] = useState(0);
   const [hist, setHist] = useState([]);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState(() => {
+    try {
+      if (!preview && form && form.id && typeof window !== "undefined" && window.localStorage) {
+        const raw = window.localStorage.getItem("zq-draft-" + form.id);
+        if (raw) {
+          const d = JSON.parse(raw);
+          if (d && typeof d === "object" && !Array.isArray(d)) return d;
+        }
+      }
+    } catch (e) {}
+    return {};
+  });
+  const [restored, setRestored] = useState(() => {
+    try {
+      return !!(!preview && form && form.id && window.localStorage && window.localStorage.getItem("zq-draft-" + form.id));
+    } catch (e) {
+      return false;
+    }
+  });
   const [errors, setErrors] = useState({});
   const [followups, setFollowups] = useState({});
   const setA = (qid, v) => setAnswers(a => ({
     ...a,
     [qid]: v
   }));
+  const startOver = () => {
+    try {
+      if (window.localStorage && form && form.id) window.localStorage.removeItem("zq-draft-" + form.id);
+    } catch (e) {}
+    const params = new URLSearchParams(window.location.search);
+    const init = {};
+    questions.forEach(q => {
+      if (q.type === "hidden_field") {
+        init[q.id] = q.source === "fixed" ? q.value || "" : params.get(q.key) || q.value || "";
+      }
+    });
+    setAnswers(init);
+    setRestored(false);
+  };
   const vis = q => qVisible(q, answers) && (!experiment || !q.variant || q.variant === variant);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -5853,6 +6699,14 @@ function FormRenderer({
       ...a
     }));
   }, [form.id]);
+  useEffect(() => {
+    if (preview || !form || !form.id) return;
+    try {
+      if (window.localStorage) {
+        if (Object.keys(answers).length) window.localStorage.setItem("zq-draft-" + form.id, JSON.stringify(answers));
+      }
+    } catch (e) {}
+  }, [answers]);
   const theme = form.theme || {};
   const scopeStyle = {
     "--fp": theme.primary || "#5b4fe0",
@@ -6080,7 +6934,13 @@ function FormRenderer({
     className: "ftitle"
   }, form.title), form.description && /*#__PURE__*/React.createElement("div", {
     className: "fdesc"
-  }, form.description), multi && /*#__PURE__*/React.createElement("div", {
+  }, form.description), restored && /*#__PURE__*/React.createElement("div", {
+    className: "resume-note"
+  }, /*#__PURE__*/React.createElement("span", null, "We restored your answers from last time."), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "fbtn-ghost",
+    onClick: startOver
+  }, "Start over")), multi && /*#__PURE__*/React.createElement("div", {
     className: "fprogress"
   }, /*#__PURE__*/React.createElement("div", {
     className: "fprogress-bar",
@@ -6121,6 +6981,7 @@ function FormRenderer({
       error: errors[q.id],
       bookings: bookings && bookings[q.id],
       counts: optionCounts && optionCounts[q.id],
+      poll: poll && poll[q.id],
       formId: form.id,
       preview: preview
     }), renderFollowup(q));
@@ -6226,7 +7087,8 @@ function PublicForm({
           form: data.form,
           availability: data.availability,
           bookings: data.bookings,
-          optionCounts: data.optionCounts
+          optionCounts: data.optionCounts,
+          poll: data.poll
         });
         try {
           loadGoogleFont(data.form.theme && data.form.theme.customFont);
@@ -6306,6 +7168,7 @@ function PublicForm({
     const set = lform.schema && lform.schema.settings || {};
     const btnUrl = set.endButtonUrl ? /^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : "https://" + set.endButtonUrl : null;
     const bookedSched = !disq ? (form.schema && form.schema.questions || []).filter(q => q.type === "scheduling" && typeof doneAnswers[q.id] === "string" && doneAnswers[q.id]) : [];
+    const review = !disq && set.reviewAnswers ? quizReview(form, doneAnswers) : [];
     return /*#__PURE__*/React.createElement("div", {
       className: pageCls
     }, /*#__PURE__*/React.createElement("div", {
@@ -6370,7 +7233,20 @@ function PublicForm({
         className: "booking-add",
         onClick: () => downloadICS(q, startISO)
       }, "Add to calendar"));
-    }))), !set.hideBranding && !embed && /*#__PURE__*/React.createElement("div", {
+    }), review.length > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "quiz-review"
+    }, review.map(r => /*#__PURE__*/React.createElement("div", {
+      key: r.id,
+      className: "qr-item " + (r.isCorrect ? "qr-ok" : "qr-no")
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qr-q"
+    }, (r.isCorrect ? "✓ " : "✗ ") + r.label), /*#__PURE__*/React.createElement("div", {
+      className: "qr-line"
+    }, "Your answer: ", r.given.length ? r.given.join(", ") : "(none)"), !r.isCorrect && /*#__PURE__*/React.createElement("div", {
+      className: "qr-line"
+    }, "Correct: ", r.correct.join(", ")), r.explanation && /*#__PURE__*/React.createElement("div", {
+      className: "qr-exp"
+    }, r.explanation)))))), !set.hideBranding && !embed && /*#__PURE__*/React.createElement("div", {
       style: {
         textAlign: "center",
         marginTop: 18
@@ -6443,6 +7319,9 @@ function PublicForm({
             if (window.localStorage) window.localStorage.setItem("zq-done-" + form.id, "1");
           } catch (e) {}
         }
+        try {
+          if (window.localStorage && form.id) window.localStorage.removeItem("zq-draft-" + form.id);
+        } catch (e) {}
         setDoneAnswers(answers);
         if (data.score != null) setDoneScore({
           score: data.score,
@@ -6452,7 +7331,7 @@ function PublicForm({
         setDone(true);
       } else {
         const code = data && data.error;
-        const msg = code === "form_closed" ? "This form just closed." : code === "slot_full" ? "That time was just booked. Please choose another." : code === "slot_too_soon" || code === "slot_past" ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : "Something went wrong. Please try again.";
+        const msg = code === "form_closed" ? "This form just closed." : code === "slot_full" ? "That time was just booked. Please choose another." : code === "slot_too_soon" || code === "slot_past" ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : code === "name_locked" ? "That name is protected. Enter the matching password to update your response." : "Something went wrong. Please try again.";
         window.alert(msg);
       }
     });
@@ -6467,7 +7346,8 @@ function PublicForm({
     onSubmit: submit,
     submitting: submitting,
     bookings: st.bookings,
-    optionCounts: st.optionCounts
+    optionCounts: st.optionCounts,
+    poll: st.poll
   }), !(form.schema && form.schema.settings && form.schema.settings.hideBranding) && !embed && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
@@ -7488,11 +8368,11 @@ function IconCog() {
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: "1.6",
+    strokeWidth: "1.7",
     strokeLinecap: "round",
     strokeLinejoin: "round"
   }, /*#__PURE__*/React.createElement("path", {
-    d: "M19.4 13a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V19a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.5 17.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H2a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 3.65 8.5a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H8a1.7 1.7 0 0 0 1-1.56V2a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V8a1.7 1.7 0 0 0 1.56 1H22a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"
+    d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
   }), /*#__PURE__*/React.createElement("circle", {
     cx: "12",
     cy: "12",
@@ -9504,6 +10384,16 @@ function SettingsPanel({
     }),
     label: "Show the score on the thank-you screen"
   }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!form.schema.settings.reviewAnswers,
+    onChange: c => setSettings({
+      reviewAnswers: c
+    }),
+    label: "Show correct answers and explanations after submitting"
+  }), /*#__PURE__*/React.createElement("div", {
     className: "hint"
   }, "Turn this on, then set points per choice on multiple choice and image choice questions. The score is calculated when the form is submitted, and appears in exports and analytics."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
@@ -10433,10 +11323,22 @@ function Builder({
   const dupQ = qid => {
     const qs = questions.slice();
     const idx = qs.findIndex(q => q.id === qid);
-    const copy = {
-      ...qs[idx],
-      id: uid()
-    };
+    if (idx < 0) return;
+    let copy;
+    try {
+      copy = JSON.parse(JSON.stringify(qs[idx]));
+    } catch (e) {
+      copy = {
+        ...qs[idx]
+      };
+    }
+    copy.id = uid();
+    ["fields", "slots", "hosts", "reminders", "attributes", "options"].forEach(kk => {
+      if (Array.isArray(copy[kk])) copy[kk] = copy[kk].map(it => it && typeof it === "object" && "id" in it ? {
+        ...it,
+        id: uid()
+      } : it);
+    });
     qs.splice(idx + 1, 0, copy);
     setQuestions(qs);
     setSel(copy.id);
@@ -10998,6 +11900,17 @@ function FormDashboard({
       navigate("/dashboard");
     });
   };
+  const duplicate = () => {
+    api.duplicateForm(id).then(({
+      ok,
+      data
+    }) => {
+      if (ok && data && data.id) {
+        toast("Form duplicated as a draft");
+        navigate("/dashboard/" + data.id);
+      } else toast("Could not duplicate this form.");
+    });
+  };
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
     className: "wrap page"
   }, /*#__PURE__*/React.createElement("button", {
@@ -11034,7 +11947,10 @@ function FormDashboard({
   }, "View form"), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
     onClick: () => navigate("/builder/" + id)
-  }, "Edit"))), /*#__PURE__*/React.createElement("div", {
+  }, "Edit"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: duplicate
+  }, "Duplicate"))), /*#__PURE__*/React.createElement("div", {
     className: "copyfield",
     style: {
       marginBottom: 20,
@@ -11056,7 +11972,8 @@ function FormDashboard({
     onClick: () => setTab(t)
   }, t[0].toUpperCase() + t.slice(1)))), tab === "responses" && /*#__PURE__*/React.createElement(ResponsesTab, {
     id: id,
-    form: form
+    form: form,
+    setForm: setForm
   }), tab === "analytics" && /*#__PURE__*/React.createElement(AnalyticsTab, {
     id: id,
     form: form
@@ -11947,7 +12864,8 @@ function ExportButtons({
 }
 function ResponsesTab({
   id,
-  form
+  form,
+  setForm
 }) {
   const {
     toast
@@ -11972,6 +12890,78 @@ function ResponsesTab({
   }, [form]);
   const previewCols = useMemo(() => Object.keys(labels).slice(0, 2), [labels]);
   const experiment = !!(form.schema && form.schema.settings && form.schema.settings.experiment);
+  const pollQ = useMemo(() => (form.schema.questions || []).find(q => q && q.type === "scheduling" && q.mode === "poll"), [form]);
+  const pollCounts = useMemo(() => {
+    if (!pollQ) return null;
+    const c = {};
+    (rows || []).forEach(r => {
+      const a = r.data && r.data[pollQ.id];
+      if (a && typeof a === "object" && Array.isArray(a.available)) {
+        a.available.forEach(k => {
+          c[k] = (c[k] || 0) + 1;
+        });
+      }
+    });
+    return c;
+  }, [rows, pollQ]);
+  const topSlots = useMemo(() => {
+    if (!pollCounts) return [];
+    return Object.keys(pollCounts).map(k => ({
+      key: k,
+      n: pollCounts[k]
+    })).sort((a, b) => b.n - a.n || (a.key < b.key ? -1 : 1)).slice(0, 6);
+  }, [pollCounts]);
+  const setFinal = key => {
+    if (!pollQ || !setForm) return;
+    const qs = (form.schema.questions || []).map(q => q.id === pollQ.id ? {
+      ...q,
+      finalSlot: key
+    } : q);
+    const newSchema = {
+      ...form.schema,
+      questions: qs
+    };
+    setForm(f => ({
+      ...f,
+      schema: newSchema
+    }));
+    api.updateForm(id, {
+      schema: newSchema
+    }).then(({
+      ok
+    }) => {
+      if (ok) toast(key ? "Final time set" : "Final time cleared");
+    });
+  };
+  const clearAll = () => {
+    if (!window.confirm("Delete ALL responses for this form? This cannot be undone.")) return;
+    api.clearResponses(id).then(({
+      ok
+    }) => {
+      if (ok) {
+        setRows([]);
+        toast("All responses deleted");
+      } else toast("Could not clear responses.");
+    });
+  };
+  const downloadPollCsv = () => {
+    try {
+      const csv = buildPollMatrix(pollQ, rows || []);
+      const blob = new Blob(["\ufeff" + csv], {
+        type: "text/csv"
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (form.title || "poll").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-availability.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast("Could not build the CSV.");
+    }
+  };
   const variants = useMemo(() => {
     const set = {};
     (rows || []).forEach(r => {
@@ -12011,7 +13001,53 @@ function ResponsesTab({
   if (rows.length === 0) return /*#__PURE__*/React.createElement("div", {
     className: "card empty"
   }, /*#__PURE__*/React.createElement("p", null, "No responses yet."));
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement("div", null, pollQ && /*#__PURE__*/React.createElement("div", {
+    className: "card pad-lg",
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label",
+    style: {
+      marginBottom: 8
+    }
+  }, "Group poll"), pollQ.finalSlot ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 10,
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "badge open"
+  }, "Confirmed"), /*#__PURE__*/React.createElement("strong", null, fmtPollSlot(pollQ.finalSlot, pollQ)), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => setFinal(null)
+  }, "Clear")) : /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 8
+    }
+  }, "Pick the time that works for the most people. It will show on the form for everyone."), /*#__PURE__*/React.createElement("div", {
+    className: "finalize-list"
+  }, topSlots.length === 0 ? /*#__PURE__*/React.createElement("span", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No availability submitted yet.") : topSlots.map(sl => /*#__PURE__*/React.createElement("div", {
+    key: sl.key,
+    className: "finalize-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "fl-when"
+  }, fmtPollSlot(sl.key, pollQ)), /*#__PURE__*/React.createElement("span", {
+    className: "fl-count"
+  }, sl.n, " free"), pollQ.finalSlot === sl.key ? /*#__PURE__*/React.createElement("span", {
+    className: "badge open"
+  }, "Final") : /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: () => setFinal(sl.key)
+  }, "Set as final"))))), /*#__PURE__*/React.createElement("div", {
     className: "resp-filter",
     style: {
       marginBottom: 10,
@@ -12063,11 +13099,23 @@ function ResponsesTab({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
-  }, filtered.length === rows.length ? rows.length + " response" + (rows.length === 1 ? "" : "s") : filtered.length + " of " + rows.length + " shown"), /*#__PURE__*/React.createElement(ExportButtons, {
+  }, filtered.length === rows.length ? rows.length + " response" + (rows.length === 1 ? "" : "s") : filtered.length + " of " + rows.length + " shown"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(ExportButtons, {
     id: id,
     form: form,
     rows: rows
-  })), /*#__PURE__*/React.createElement("div", {
+  }), pollQ && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: downloadPollCsv
+  }, "Availability grid CSV"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm danger",
+    onClick: clearAll
+  }, "Clear all"))), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       overflowX: "auto"
@@ -12124,7 +13172,16 @@ function ResponsesTab({
       }
       setPdfBusy(false);
     }
-  }, "PDF"))))))), filtered.length === 0 && /*#__PURE__*/React.createElement("div", {
+  }, "PDF"), " ", /*#__PURE__*/React.createElement("button", {
+    className: "btn sm danger",
+    onClick: async () => {
+      if (!window.confirm("Delete this response?")) return;
+      const {
+        ok
+      } = await api.deleteResponse(id, r.id);
+      if (ok) setRows(prev => prev.filter(x => x.id !== r.id));else toast("Could not delete this response.");
+    }
+  }, "Delete"))))))), filtered.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "muted",
     style: {
       marginTop: 10,
