@@ -177,3 +177,23 @@ Phase 2 logic needs a small rules engine evaluated inside `FormRenderer`. Phase 
 ## How to continue in a new chat
 
 Attach the zip and paste this file. Tell the assistant to read `docs/HANDOFF.md` first, then `src/app.source.html` and `functions/api/[[path]].js`. Make changes in the source, recompile to `index.html` with the classic runtime recipe, return the updated `index.html`, and return an updated copy of this handoff document.
+
+## Smart flow, integrations, and templates
+
+Display logic: any input question can be shown only when an earlier answer matches. Set it in the question editor under Display logic (choose the earlier question, is / is not / contains, and a value). Hidden questions are skipped and not validated. The evaluator is qVisible in the source.
+
+Conversational mode: a form setting that presents one question at a time. It reuses the paginated renderer, one step per question, and skips steps whose only question is hidden by logic.
+
+Hidden fields: a question type that is never shown to the person. It captures a value from a URL parameter (for example utm_source) or a fixed value, and is stored with the response. Configure the field name and source in the editor.
+
+Metadata and webhook: on submit the form also records time to complete (seconds) and any utm_* parameters from the URL. If a webhook URL is set in Form settings, the backend POSTs a JSON payload on each submission with event, the survey id, a respondent block (email and nps when present), the responses, and metadata (utm_source, time_to_complete_seconds, country, browser, and captured hidden fields). It is fire and forget, so a failing webhook never blocks a submission.
+
+Starter templates: new forms open with a chooser offering Blank plus Customer feedback, Contact form, Event RSVP, and Quick poll, so no one starts on an empty canvas.
+
+## Reporting, branding, and editor polish
+
+PDF report: Export report (PDF) is themed with the form colors (primary for the header band, accent for the bars) and maps the form font to the closest PDF face. The zetetiq logo is rasterized in white and placed in the header band. The export buttons live in both the Responses and Analytics tabs and are full sized.
+
+Editor: there is a Copy link button next to Preview and Publish (it copies the public form link once the form is published). While the Theme tab is open, the canvas shows a live form preview that updates as you change colors, font, or the header image.
+
+Footer and logo: the public footer now reads powered by zetetiq and links to zetetiq.pages.dev, and it also appears on the thank-you screen. The navbar logo is larger. The favicon now sits on a solid brand-colored rounded square with a white mark so it stays visible on light and dark browser tabs.

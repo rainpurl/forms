@@ -91,3 +91,7 @@ A recolorable inline-SVG Logo component stands in for the wordmark everywhere it
 ## Logo, favicon, fonts, and after-submission options
 
 The provided logo and favicon are built in. The logo recolors via currentColor and is stored in one place (the LOGO_SVG constant in the source); the favicon is set in the page head. Form font choices read Sans (default, Figtree), Serif, Monospace, Slab, and zetetiq (the Mozilla font) without showing the underlying font names. In the builder Theme panel you can upload a header image (shown at the top of the form, downscaled and stored with the form). In Form settings, After submission lets you set the thank-you heading, message, and an optional button, in addition to the redirect URL. The public footer reads built by zetetiq and links to zetetiq.pages.dev; change that link if your live domain differs.
+
+## Latest additions
+
+This build adds conditional display logic, a one-question-at-a-time conversational mode, hidden fields that capture URL values, automatic UTM and time-to-complete capture, an outbound webhook that posts a clean JSON payload on each submission, and starter templates for new forms. It also themes the PDF report with the form colors, fonts, and logo, adds a Copy link button and a live theme preview in the editor, shows powered by zetetiq on the thank-you screen, enlarges the navbar logo, and gives the favicon a high-contrast background. Export buttons appear in both the Responses and Analytics tabs.

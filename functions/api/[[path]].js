@@ -297,7 +297,7 @@ async function publicForm(username, slug, env) {
 }
 
 async function submitResponse(formId, request, env, context) {
-  const form = await env.DB.prepare("SELECT id, is_open FROM forms WHERE id = ?").bind(formId).first();
+  const form = await env.DB.prepare("SELECT id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
   if (!form) return json({ error: "not_found" }, 404);
   if (!form.is_open) return json({ error: "form_closed" }, 403);
 
@@ -317,6 +317,8 @@ async function submitResponse(formId, request, env, context) {
     viewport: body.viewport || null,
     referrer: body.referrer || null,
     submittedAt: new Date().toISOString(),
+    seconds: typeof body.seconds === "number" ? body.seconds : null,
+    utm: body.utm && typeof body.utm === "object" ? body.utm : null,
   };
 
   const id = crypto.randomUUID();
@@ -324,7 +326,46 @@ async function submitResponse(formId, request, env, context) {
     "INSERT INTO responses (id, form_id, data, meta) VALUES (?, ?, ?, ?)"
   ).bind(id, formId, JSON.stringify(data), JSON.stringify(meta)).run();
 
+  try {
+    const schema = safeParse(form.schema, {});
+    const settings = (schema && schema.settings) || {};
+    if (settings.webhookUrl && context && context.waitUntil) {
+      context.waitUntil(fireWebhook(settings.webhookUrl, formId, data, meta, (schema && schema.questions) || []));
+    }
+  } catch (e) {}
+
   return json({ ok: true, id });
+}
+
+async function fireWebhook(url, formId, data, meta, questions){
+  try {
+    const inputs = (questions || []).filter((q)=> q && q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "hidden_field");
+    const responses = inputs.map((q)=>({ question: q.label || q.id, answer: formatAnswer(data[q.id]) }));
+    const emailQ = inputs.find((q)=> q.type === "text_entry" && q.validation === "email" && data[q.id]);
+    const npsQ = inputs.find((q)=> q.type === "nps" && data[q.id] !== undefined && data[q.id] !== null);
+    const hidden = (questions || []).filter((q)=> q && q.type === "hidden_field");
+    const fields = {};
+    hidden.forEach((q)=>{ if (q.key) fields[q.key] = data[q.id]; });
+    const payload = {
+      event: "form_submission",
+      data: {
+        survey_id: formId,
+        respondent: {
+          email: emailQ ? data[emailQ.id] : null,
+          nps_score: npsQ ? data[npsQ.id] : null,
+        },
+        responses,
+        metadata: {
+          utm_source: (meta.utm && meta.utm.source) || null,
+          time_to_complete_seconds: typeof meta.seconds === "number" ? meta.seconds : null,
+          country: meta.country || null,
+          browser: meta.browser || null,
+          fields,
+        },
+      },
+    };
+    await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  } catch (e) { /* webhook failures never block a submission */ }
 }
 
 /* ------------------------------------------------------------------ */
