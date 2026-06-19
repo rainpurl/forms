@@ -227,7 +227,7 @@ async function googleCallback(request, env) {
 async function listForms(user, env) {
   const { results } = await env.DB.prepare(
     `SELECT f.id, f.slug, f.title, f.is_open, f.created_at, u.username,
-            json_extract(f.theme,'$.font') AS font, json_extract(f.theme,'$.customFont') AS customFont,
+            json_extract(f.theme,'$.font') AS font, json_extract(f.theme,'$.customFont') AS customFont, json_extract(f.schema,'$.settings.kind') AS kind,
             (SELECT COUNT(*) FROM responses r WHERE r.form_id = f.id) AS responses,
             (SELECT MAX(r.created_at) FROM responses r WHERE r.form_id = f.id) AS last_response
      FROM forms f JOIN users u ON u.id = f.owner_id
@@ -462,7 +462,7 @@ async function submitResponse(formId, request, env, context) {
 
 async function fireWebhook(url, formId, data, meta, questions){
   try {
-    const inputs = (questions || []).filter((q)=> q && q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "hidden_field" && q.type !== "block");
+    const inputs = (questions || []).filter((q)=> q && q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "hidden_field" && q.type !== "block" && q.type !== "embed");
     const responses = inputs.map((q)=>({ question: q.label || q.id, answer: formatAnswer(data[q.id]) }));
     const emailQ = inputs.find((q)=> q.type === "text_entry" && q.validation === "email" && data[q.id]);
     const npsQ = inputs.find((q)=> q.type === "nps" && data[q.id] !== undefined && data[q.id] !== null);
@@ -543,7 +543,7 @@ async function exportCsv(user, id, env) {
   if (!form || form.owner_id !== user.uid) return json({ error: "not_found" }, 404);
 
   const schema = safeParse(form.schema, { questions: [] });
-  const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "block");
+  const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "block" && q.type !== "embed");
   const scoring = !!(schema.settings && schema.settings.scoring);
 
   const { results } = await env.DB.prepare(

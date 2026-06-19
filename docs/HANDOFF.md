@@ -385,3 +385,23 @@ Forms can now be scored, turning them into quizzes or assessments. Enable it und
 Once scoring is on, a Scoring panel appears in the editor for multiple choice and image choice questions, with a points box for each choice. Set the points a choice is worth (they can be negative). For a single-answer question the most a respondent can earn is the highest single choice; for a multiple-answer question it is the sum of all the positive choices, so a respondent earns points for each correct pick.
 
 The score is calculated on the server when the form is submitted, so it cannot be tampered with from the browser. It is stored with the response, returned to the thank-you screen when that option is on (shown as You scored X out of Y), added to the CSV export as score and max_score columns, and summarized in analytics as a Quiz scores card with the average, the highest, and the number of scored responses. Renaming a multiple choice option keeps its points (and its quota) attached. Only multiple choice and image choice are scored for now; other types contribute nothing to the total.
+
+## Dark mode on forms
+
+The light and dark theme now extends to the form: both the builder preview and the public form follow the theme (the toggle in the top bar, which also remembers a visitor's choice and respects their system setting). Previously the form area was always light. The form keeps its own accent color in either mode; only the surfaces and text switch.
+
+The one exception is embedded forms. When a form is opened in embed mode (the URL carries embed=1, which is how the embed question loads it) it always renders light with a transparent background and no footer, so it blends into whatever page is hosting it.
+
+## Schedulers, e-sign documents, and embedding
+
+The top bar now has two buttons next to New form: New schedule and New esign. New schedule creates a form pre-built as a meeting scheduler (a time-slot question); New esign creates one pre-built as a signable document (an upload-and-sign question). These are ordinary forms tagged with a kind, so they are shareable on their own, show a small Scheduler or E-sign badge on the dashboard, and collect their own responses.
+
+Once you have made one, you can drop it into any other form with the new Embedded item question. In the question editor, pick one of your schedulers or e-sign documents from the list (only those two kinds appear, not regular forms), and optionally give it a heading. On the public form it renders inline in an iframe that loads the chosen item in embed mode. Because it is a real embed, the booking or signature is recorded on the embedded item, not on the host form. The Embedded item question is not counted in the host form's analytics, export, or webhook.
+
+Technically: kind lives in schema.settings.kind (schedule or esign), so no database change was needed. listForms now also returns kind (via json_extract) for the dashboard badge and the embed picker. The embed question stores embedUser, embedSlug, embedTitle, and embedKind, and the renderer builds the iframe src as /{embedUser}/{embedSlug}?embed=1.
+
+## Landing page
+
+The pre-sign-in page is now a full marketing landing page rather than a bare login card. It has a top bar (wordmark, theme toggle, sign in), a hero with a headline, subtext, the Continue with Google and Admin login actions, and a small themed mock of a form. Below that are a twelve-card feature grid, a row of all twenty-three question type names (pulled live from the type registry so it never drifts), a what-makes-it-different band (self-hosted, your data, no buzzwords, free for early users), a three-step how-it-works, a closing call to action, and a footer linking to zetetiq.pages.dev.
+
+It is built from the existing app design tokens, so it themes for light and dark automatically and uses the Mozilla fonts like the rest of the app chrome. When someone is already signed in, the login actions are replaced with Go to dashboard. The admin login modal and the Google sign-in flow are unchanged. The component lives in the Landing function with a small LIcon helper for the feature icons; copy avoids em dashes and the word for machine intelligence per the brand rules.

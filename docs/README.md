@@ -173,3 +173,10 @@ Cascading dropdowns where each pick reveals the next level (for example Country 
 ## Scoring and quiz mode
 
 Enable scoring in Form settings to turn a form into a quiz. A points box then appears for each choice on multiple choice and image choice questions. The score is computed server-side on submit, optionally shown on the thank-you screen (You scored X out of Y), exported as score and max_score columns, and summarized in analytics (average, highest, count). Per question, the maximum is the best single choice for single-answer questions and the sum of positive choices for multiple-answer ones. Renaming an option keeps its points.
+## Schedulers, e-sign, and embedding
+
+New schedule and New esign in the top bar create a standalone meeting scheduler or signable document (real forms, tagged and shareable, with a dashboard badge). Drop one into any form with the Embedded item question: pick a scheduler or e-sign document and it embeds inline. The booking or signature is recorded on the embedded item, and the embed is excluded from the host form's analytics, export, and webhook.
+
+## Landing page
+
+Signed-out visitors now see a full landing page: a hero with a form mock, a feature grid, the full list of question types, a differentiators band, a how-it-works, and calls to action, all themed for light and dark. Continue with Google and Admin login work as before; signed-in visitors get a Go to dashboard button instead.
