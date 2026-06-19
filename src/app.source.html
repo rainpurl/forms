@@ -1195,9 +1195,10 @@ const QTYPES = {
       );
     },
     Renderer: ({ q, value, onChange, error, counts }) => {
-      const opts = useMemo(()=> q.randomize ? shuffle(q.options) : q.options, [q.id]);
+      const opts = useMemo(()=> q.randomize ? shuffle(q.options) : q.options, [q.id, (q.options || []).join("\u0001")]);
       const quotas = q.quotas || {}; const cnt = counts || {};
       const isFull = (o) => { const lim = parseInt(quotas[o], 10); return lim > 0 && (cnt[o] || 0) >= lim; };
+      if (q.carryFrom && (!opts || !opts.length)) return (<div className="q"><QLabel q={q} /><div className="muted" style={{fontSize:13}}>Nothing was carried forward from the earlier question.</div>{error && <div className="ferr">{error}</div>}</div>);
       if (q.display === "dropdown"){
         return (
           <div className="q">
@@ -1543,11 +1544,12 @@ const QTYPES = {
     validate: (q, v) => (q.required && !(Array.isArray(v) && v.length === q.items.length)) ? "Please rank the items." : null,
     Renderer: ({ q, value, onChange, error }) => {
       const ordered = (Array.isArray(value) && value.length === q.items.length) ? value : q.items;
-      useEffect(()=>{ if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice()); }, [q.id]);
+      useEffect(()=>{ if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice()); }, [q.id, (q.items || []).join("\u0001")]);
       const [drag, setDrag] = useState(null);
       const [over, setOver] = useState(null);
       const move = (i, dir) => { const a = ordered.slice(); const j = i + dir; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; onChange(a); };
       const reorder = (from, to) => { if (from === null || from === to) return; const a = ordered.slice(); const m = a.splice(from, 1)[0]; a.splice(to, 0, m); onChange(a); };
+      if (q.carryFrom && (!q.items || !q.items.length)) return (<div className="q"><QLabel q={q} /><div className="muted" style={{fontSize:13}}>Nothing was carried forward from the earlier question.</div>{error && <div className="ferr">{error}</div>}</div>);
       return (
         <div className="q">
           <QLabel q={q} />
@@ -1770,6 +1772,19 @@ function pipeQuestion(q, answers, questions){
   if (has(q.content)) out.content = pipeText(q.content, answers, questions);
   return out;
 }
+
+function carryItems(q, answers, questions){
+  if (!q || !q.carryFrom) return null;
+  const src = (questions || []).find((x)=> x.id === q.carryFrom);
+  if (!src) return [];
+  const opts = (src.options || []).slice();
+  const v = answers ? answers[q.carryFrom] : null;
+  const sel = Array.isArray(v) ? v : (v === undefined || v === null || v === "" ? [] : [v]);
+  const mode = q.carryMode || "selected";
+  if (mode === "all") return opts;
+  if (mode === "unselected") return opts.filter((o)=> sel.indexOf(o) === -1);
+  return opts.filter((o)=> sel.indexOf(o) !== -1);
+}
 function PipeInput({ value, onChange, placeholder, textarea, questions }){
   const ref = useRef(null);
   const inputs = (questions || []).filter((x)=> QTYPES[x.type] && QTYPES[x.type].isInput && x.type !== "hidden_field" && (x.label || "").trim());
@@ -1931,7 +1946,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
 
   const validateList = (list) => {
     const errs = {};
-    for (const q of list){ const def = QTYPES[q.type]; if (!def || !def.isInput) continue; if (!qVisible(q, answers)) continue; const e = def.validate(q, answers[q.id]); if (e) errs[q.id] = e; }
+    for (const q of list){ const def = QTYPES[q.type]; if (!def || !def.isInput) continue; if (!qVisible(q, answers)) continue; if (q.carryFrom){ const _ci = carryItems(q, answers, questions); if (!_ci || !_ci.length) continue; } const e = def.validate(q, answers[q.id]); if (e) errs[q.id] = e; }
     return errs;
   };
   const fuList = () => Object.keys(followups).filter((k)=>followups[k] && followups[k].question).map((k)=>({ questionId:k, question:followups[k].question, answer:followups[k].answer || "" }));
@@ -1969,7 +1984,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
   const goBack = () => { setErrors({}); if (hist.length){ const to = hist[hist.length - 1]; setHist(hist.slice(0, -1)); setPage(to); window.scrollTo(0, 0); } else if (prevIdx !== undefined){ setPage(prevIdx); window.scrollTo(0, 0); } };
   const doSubmit = () => {
     const visited = {}; hist.concat([cur]).forEach((i)=> ((steps[i] && steps[i].qs) || []).forEach((q)=>{ visited[q.id] = true; }));
-    const skipped = questions.filter((q)=> visited[q.id] && QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]));
+    const skipped = questions.filter((q)=> visited[q.id] && QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]) && !(q.carryFrom && !(carryItems(q, answers, questions) || []).length));
     if (skipped.length){ const names = skipped.map((q)=>q.label || "a question").join(", "); if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return; }
     setErrors({});
     const params = new URLSearchParams(window.location.search);
@@ -2005,7 +2020,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCou
         {multi && <div className="fprogress"><div className="fprogress-bar" style={{width:((pos / total) * 100) + "%"}}></div></div>}
         <div className="fpage" key={cur} style={{marginTop:12}}>
           {sec && sec.title ? (<div className="form-section"><div className="form-section-title">{pipeText(sec.title, answers, questions)}</div>{sec.desc ? <div className="form-section-desc">{pipeText(sec.desc, answers, questions)}</div> : null}</div>) : null}
-          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; const pq = pipeQuestion(q, answers, questions); return (<div key={q.id}><R q={pq} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} counts={optionCounts && optionCounts[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
+          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; const _pq0 = pipeQuestion(q, answers, questions); const _ci = carryItems(q, answers, questions); const pq = _ci ? (q.type === "rank_order" ? { ..._pq0, items: _ci } : { ..._pq0, options: _ci }) : _pq0; return (<div key={q.id}><R q={pq} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} counts={optionCounts && optionCounts[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
           {shown.length === 0 && <div className="muted" style={{fontSize:13}}>Nothing to show on this step.</div>}
         </div>
         <div className="fnav" style={{marginTop:18}}>
@@ -2043,7 +2058,7 @@ function PublicForm({ username, slug }){
     api.publicForm(username, slug).then(({ok,data})=>{
       if (!m) return;
       if (!ok || !data || data.error || !data.form) setSt({ loading:false, notFound:true });
-      else setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings, optionCounts:data.optionCounts });
+      else { setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings, optionCounts:data.optionCounts }); try { loadGoogleFont(data.form.theme && data.form.theme.customFont); } catch (e) {} }
     });
     return ()=>{ m = false; };
   },[username, slug]);
@@ -2051,7 +2066,7 @@ function PublicForm({ username, slug }){
   if (st.loading) return <div className="center-screen"><div className="muted">Loading...</div></div>;
   if (st.notFound) return <div className="center-screen"><h2>Form not found</h2><p className="muted">This link may be wrong, or the form was removed.</p></div>;
   const form = st.form;
-  const scope = { "--fa": (form.theme && form.theme.accent) || "#5b4fe0", fontFamily: FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans };
+  const scope = { "--fa": (form.theme && form.theme.accent) || "#5b4fe0", fontFamily: ((form.theme && form.theme.customFont) ? ("\u0027" + form.theme.customFont + "\u0027, ") : "") + (FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans) };
   const embed = (()=>{ try { return new URLSearchParams(window.location.search).get("embed") === "1"; } catch (e) { return false; } })();
   const pageCls = "form-page" + (embed ? " form-embed" : "");
 
@@ -2708,6 +2723,26 @@ function RankControls({ q, update }){
   return (<div><div className="hint">Edit and add items directly on the question. Respondents order them with the up and down buttons.</div><ReqToggles q={q} update={update} /></div>);
 }
 
+function CarryControls({ q, update, questions }){
+  const idx = (questions || []).findIndex((x)=> x.id === q.id);
+  const sources = (questions || []).slice(0, idx < 0 ? 0 : idx).filter((x)=> x.type === "multiple_choice");
+  const on = !!q.carryFrom;
+  if (!sources.length && !on) return null;
+  return (
+    <div>
+      <div className="panel-section">Carry forward</div>
+      {sources.length === 0 ? <div className="hint">Add a multiple choice question before this one to carry its choices here.</div> : (<>
+        <Toggle checked={on} onChange={(c)=> update(c ? { carryFrom: sources[sources.length - 1].id, carryMode: q.carryMode || "selected" } : { carryFrom: "", carryMode: "" })} label="Use choices from an earlier question" />
+        {on && (<>
+          <Field label="From question"><select className="select" value={q.carryFrom} onChange={(e)=>update({ carryFrom: e.target.value })}>{sources.map((sq)=>(<option key={sq.id} value={sq.id}>{sq.label || ("Question " + (questions.indexOf(sq) + 1))}</option>))}</select></Field>
+          <Field label="Which choices"><select className="select" value={q.carryMode || "selected"} onChange={(e)=>update({ carryMode: e.target.value })}><option value="selected">The ones they selected</option><option value="unselected">The ones they did not select</option><option value="all">All choices shown</option></select></Field>
+          <div className="hint">The choices for this question come from the earlier question, so the options set on it directly are ignored.</div>
+        </>)}
+      </>)}
+    </div>
+  );
+}
+
 function FormFieldControls({ q, update }){
   return (<div><div className="hint">Edit and add field labels directly on the question.</div><ReqToggles q={q} update={update} /></div>);
 }
@@ -2932,6 +2967,7 @@ function LeftEditor({ q, update, questions, setQuestions, scoring }){
       {q.type === "number_entry" && <NumberControls q={q} update={update} />}
       {q.type === "drill_down" && <DrillControls q={q} update={update} />}
       {q.type === "embed" && <EmbedControls q={q} update={update} />}
+      {(q.type === "multiple_choice" || q.type === "rank_order") && <CarryControls q={q} update={update} questions={questions} />}
       {q.type === "hidden_field" && <HiddenControls q={q} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <LogicControls q={q} questions={questions} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <SkipControls q={q} questions={questions} update={update} />}
@@ -2974,6 +3010,7 @@ function ThemePanel({ form, setTheme, setSettings }){
             <option value="slab">Slab</option>
             <option value="zetetiq">zetetiq</option>
           </select>
+          <div style={{marginTop:10}}><div className="label">Custom font (Google Fonts name, optional)</div><input className="input" value={form.theme.customFont || ""} onChange={(e)=>{ const v = e.target.value; setTheme({ customFont: v }); loadGoogleFont(v); }} placeholder="e.g. Poppins" /></div>
         </div>
         <div>
           <div className="label">Header image</div>

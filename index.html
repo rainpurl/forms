@@ -2428,13 +2428,25 @@ const QTYPES = {
       error,
       counts
     }) => {
-      const opts = useMemo(() => q.randomize ? shuffle(q.options) : q.options, [q.id]);
+      const opts = useMemo(() => q.randomize ? shuffle(q.options) : q.options, [q.id, (q.options || []).join("\u0001")]);
       const quotas = q.quotas || {};
       const cnt = counts || {};
       const isFull = o => {
         const lim = parseInt(quotas[o], 10);
         return lim > 0 && (cnt[o] || 0) >= lim;
       };
+      if (q.carryFrom && (!opts || !opts.length)) return /*#__PURE__*/React.createElement("div", {
+        className: "q"
+      }, /*#__PURE__*/React.createElement(QLabel, {
+        q: q
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "muted",
+        style: {
+          fontSize: 13
+        }
+      }, "Nothing was carried forward from the earlier question."), error && /*#__PURE__*/React.createElement("div", {
+        className: "ferr"
+      }, error));
       if (q.display === "dropdown") {
         return /*#__PURE__*/React.createElement("div", {
           className: "q"
@@ -3264,7 +3276,7 @@ const QTYPES = {
       const ordered = Array.isArray(value) && value.length === q.items.length ? value : q.items;
       useEffect(() => {
         if (!(Array.isArray(value) && value.length === q.items.length)) onChange(q.items.slice());
-      }, [q.id]);
+      }, [q.id, (q.items || []).join("\u0001")]);
       const [drag, setDrag] = useState(null);
       const [over, setOver] = useState(null);
       const move = (i, dir) => {
@@ -3283,6 +3295,18 @@ const QTYPES = {
         a.splice(to, 0, m);
         onChange(a);
       };
+      if (q.carryFrom && (!q.items || !q.items.length)) return /*#__PURE__*/React.createElement("div", {
+        className: "q"
+      }, /*#__PURE__*/React.createElement(QLabel, {
+        q: q
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "muted",
+        style: {
+          fontSize: 13
+        }
+      }, "Nothing was carried forward from the earlier question."), error && /*#__PURE__*/React.createElement("div", {
+        className: "ferr"
+      }, error));
       return /*#__PURE__*/React.createElement("div", {
         className: "q"
       }, /*#__PURE__*/React.createElement(QLabel, {
@@ -3721,6 +3745,18 @@ function pipeQuestion(q, answers, questions) {
   if (has(q.content)) out.content = pipeText(q.content, answers, questions);
   return out;
 }
+function carryItems(q, answers, questions) {
+  if (!q || !q.carryFrom) return null;
+  const src = (questions || []).find(x => x.id === q.carryFrom);
+  if (!src) return [];
+  const opts = (src.options || []).slice();
+  const v = answers ? answers[q.carryFrom] : null;
+  const sel = Array.isArray(v) ? v : v === undefined || v === null || v === "" ? [] : [v];
+  const mode = q.carryMode || "selected";
+  if (mode === "all") return opts;
+  if (mode === "unselected") return opts.filter(o => sel.indexOf(o) === -1);
+  return opts.filter(o => sel.indexOf(o) !== -1);
+}
 function PipeInput({
   value,
   onChange,
@@ -4056,6 +4092,10 @@ function FormRenderer({
       const def = QTYPES[q.type];
       if (!def || !def.isInput) continue;
       if (!qVisible(q, answers)) continue;
+      if (q.carryFrom) {
+        const _ci = carryItems(q, answers, questions);
+        if (!_ci || !_ci.length) continue;
+      }
       const e = def.validate(q, answers[q.id]);
       if (e) errs[q.id] = e;
     }
@@ -4170,7 +4210,7 @@ function FormRenderer({
     hist.concat([cur]).forEach(i => (steps[i] && steps[i].qs || []).forEach(q => {
       visited[q.id] = true;
     }));
-    const skipped = questions.filter(q => visited[q.id] && QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]));
+    const skipped = questions.filter(q => visited[q.id] && QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]) && !(q.carryFrom && !(carryItems(q, answers, questions) || []).length));
     if (skipped.length) {
       const names = skipped.map(q => q.label || "a question").join(", ");
       if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return;
@@ -4270,7 +4310,15 @@ function FormRenderer({
     const def = QTYPES[q.type];
     if (!def) return null;
     const R = def.Renderer;
-    const pq = pipeQuestion(q, answers, questions);
+    const _pq0 = pipeQuestion(q, answers, questions);
+    const _ci = carryItems(q, answers, questions);
+    const pq = _ci ? q.type === "rank_order" ? {
+      ..._pq0,
+      items: _ci
+    } : {
+      ..._pq0,
+      options: _ci
+    } : _pq0;
     return /*#__PURE__*/React.createElement("div", {
       key: q.id
     }, /*#__PURE__*/React.createElement(R, {
@@ -4366,13 +4414,18 @@ function PublicForm({
       if (!ok || !data || data.error || !data.form) setSt({
         loading: false,
         notFound: true
-      });else setSt({
-        loading: false,
-        form: data.form,
-        availability: data.availability,
-        bookings: data.bookings,
-        optionCounts: data.optionCounts
-      });
+      });else {
+        setSt({
+          loading: false,
+          form: data.form,
+          availability: data.availability,
+          bookings: data.bookings,
+          optionCounts: data.optionCounts
+        });
+        try {
+          loadGoogleFont(data.form.theme && data.form.theme.customFont);
+        } catch (e) {}
+      }
     });
     return () => {
       m = false;
@@ -4391,7 +4444,7 @@ function PublicForm({
   const form = st.form;
   const scope = {
     "--fa": form.theme && form.theme.accent || "#5b4fe0",
-    fontFamily: FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans
+    fontFamily: (form.theme && form.theme.customFont ? "\u0027" + form.theme.customFont + "\u0027, " : "") + (FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans)
   };
   const embed = (() => {
     try {
@@ -6429,6 +6482,58 @@ function RankControls({
     update: update
   }));
 }
+function CarryControls({
+  q,
+  update,
+  questions
+}) {
+  const idx = (questions || []).findIndex(x => x.id === q.id);
+  const sources = (questions || []).slice(0, idx < 0 ? 0 : idx).filter(x => x.type === "multiple_choice");
+  const on = !!q.carryFrom;
+  if (!sources.length && !on) return null;
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Carry forward"), sources.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Add a multiple choice question before this one to carry its choices here.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Toggle, {
+    checked: on,
+    onChange: c => update(c ? {
+      carryFrom: sources[sources.length - 1].id,
+      carryMode: q.carryMode || "selected"
+    } : {
+      carryFrom: "",
+      carryMode: ""
+    }),
+    label: "Use choices from an earlier question"
+  }), on && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
+    label: "From question"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: q.carryFrom,
+    onChange: e => update({
+      carryFrom: e.target.value
+    })
+  }, sources.map(sq => /*#__PURE__*/React.createElement("option", {
+    key: sq.id,
+    value: sq.id
+  }, sq.label || "Question " + (questions.indexOf(sq) + 1))))), /*#__PURE__*/React.createElement(Field, {
+    label: "Which choices"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: q.carryMode || "selected",
+    onChange: e => update({
+      carryMode: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "selected"
+  }, "The ones they selected"), /*#__PURE__*/React.createElement("option", {
+    value: "unselected"
+  }, "The ones they did not select"), /*#__PURE__*/React.createElement("option", {
+    value: "all"
+  }, "All choices shown"))), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "The choices for this question come from the earlier question, so the options set on it directly are ignored."))));
+}
 function FormFieldControls({
   q,
   update
@@ -7011,6 +7116,10 @@ function LeftEditor({
   }), q.type === "embed" && /*#__PURE__*/React.createElement(EmbedControls, {
     q: q,
     update: update
+  }), (q.type === "multiple_choice" || q.type === "rank_order") && /*#__PURE__*/React.createElement(CarryControls, {
+    q: q,
+    update: update,
+    questions: questions
   }), q.type === "hidden_field" && /*#__PURE__*/React.createElement(HiddenControls, {
     q: q,
     update: update
@@ -7134,7 +7243,24 @@ function ThemePanel({
     value: "slab"
   }, "Slab"), /*#__PURE__*/React.createElement("option", {
     value: "zetetiq"
-  }, "zetetiq"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "zetetiq")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Custom font (Google Fonts name, optional)"), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: form.theme.customFont || "",
+    onChange: e => {
+      const v = e.target.value;
+      setTheme({
+        customFont: v
+      });
+      loadGoogleFont(v);
+    },
+    placeholder: "e.g. Poppins"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "label"
   }, "Header image"), headerImage ? /*#__PURE__*/React.createElement("div", {
     className: "himg-preview"

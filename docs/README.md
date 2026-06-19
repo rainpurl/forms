@@ -180,3 +180,11 @@ New schedule and New esign in the top bar create a standalone meeting scheduler 
 ## Landing page
 
 Signed-out visitors now see a full landing page: a hero with a form mock, a feature grid, the full list of question types, a differentiators band, a how-it-works, and calls to action, all themed for light and dark. Continue with Google and Admin login work as before; signed-in visitors get a Go to dashboard button instead.
+
+## Carry forward
+
+On a multiple choice or rank order question, open Carry forward and reuse an earlier multiple choice question's choices: carry the ones the respondent selected, the ones they did not, or all of them. The later question's choices are built from that earlier answer. If nothing carries over, the question shows a note and does not block submission.
+
+## Custom font
+
+The Theme panel takes a Google Fonts name (for example Poppins). It now applies on the live form as well as the builder preview.
