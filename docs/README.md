@@ -141,3 +141,7 @@ A File upload question type lets forms collect attachments. Files are stored in 
 ## Multi-section surveys
 
 Organize a form into sections. Add a Section from the question menu; it starts a new page with a title and optional description shown to respondents. Questions after a section card belong to it, up to the next section. Reorder or remove sections like questions. A Randomize section order setting presents sections in random order per respondent. Sections are organizational only and never appear in CSV, analytics, or webhooks.
+
+## Skip logic and branching
+
+Input questions can branch the respondent forward. In the question editor, the Skip logic panel adds rules: if the answer is / is not / contains / is answered / is empty, then go to a later section or end the survey. Rules are checked top to bottom; targets are later sections only (forward, no loops). Back follows the real path, and questions on skipped pages are not required. Works together with display logic and sections.

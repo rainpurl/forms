@@ -323,3 +323,13 @@ In the builder a section appears as a labeled card with editable title and descr
 On the public form each section is its own page (page breaks still work to split a long section into several pages), and the section title and description appear above its questions. There is a Randomize section order setting in Form settings that presents the sections in a random order for each respondent, which is useful for reducing order effects.
 
 Sections are purely organizational: they never appear as columns in the CSV, as questions in the analytics, or in webhook payloads. One thing to know: dragging a section card moves the section boundary, it does not carry the questions under it along with it, so to move a whole group you move the section marker and then the questions as needed.
+
+## Skip logic and branching
+
+Any input question can now branch the respondent forward based on their answer. In the question editor there is a Skip logic panel where you add rules of the form: if the answer is, is not, contains, is answered, or is empty, then go to a later section or end the survey. Rules are checked from top to bottom and the first match wins.
+
+When the respondent moves on from a page, the rules on that page are evaluated. A matching rule either jumps ahead to the chosen section (skipping everything in between) or finishes the survey early. Targets are limited to sections that come later in the form, so branches always move forward and cannot loop.
+
+Navigation stays sane: the Back button follows the actual path the respondent took, so it returns to the page they came from rather than re-showing a section that was skipped. Questions on skipped pages are treated as not required, so a branch that jumps past required questions still lets the respondent submit. This pairs with display logic (show or hide a single question) and with sections, giving both question level and section level control over the flow.
+
+Note: the page counter shows linear position and does not try to predict the shortened path a branch produces.

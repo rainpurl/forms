@@ -492,6 +492,9 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .form-scope .form-section{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .form-scope .form-section-title{font-size:21px;font-weight:600;font-family:inherit;color:var(--ink)}
 .form-scope .form-section-desc{font-size:14px;color:var(--ink-soft);margin-top:4px;white-space:pre-wrap}
+
+.skip-rule{border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:8px}
+.mini-label{font-size:12px;color:var(--ink-soft);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -2850,6 +2853,137 @@ function answerToText(v) {
   if (typeof v === "object") return Object.keys(v).map(k => k + ":" + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(",");
   return String(v);
 }
+function skipMatch(a, rule) {
+  const empty = a === undefined || a === null || a === "" || Array.isArray(a) && a.length === 0;
+  if (rule.op === "answered") return !empty;
+  if (rule.op === "empty") return empty;
+  const val = String(rule.value || "").toLowerCase();
+  const arr = Array.isArray(a) ? a.map(x => String(x).toLowerCase()) : null;
+  const txt = answerToText(a).toLowerCase();
+  if (rule.op === "ne") return arr ? !arr.includes(val) : txt !== val;
+  if (rule.op === "contains") return arr ? arr.some(x => x.includes(val)) : txt.includes(val);
+  return arr ? arr.includes(val) : txt === val;
+}
+function SkipControls({
+  q,
+  questions,
+  update
+}) {
+  const idx = questions.findIndex(x => x.id === q.id);
+  const laterBlocks = questions.slice(idx < 0 ? 0 : idx + 1).filter(x => x.type === "block");
+  const rules = Array.isArray(q.skip) ? q.skip : [];
+  const opts = q.type === "multiple_choice" ? q.options : q.type === "matrix" ? q.cols : null;
+  const add = () => update({
+    skip: rules.concat([{
+      id: uid(),
+      op: "eq",
+      value: "",
+      target: laterBlocks[0] && laterBlocks[0].id || "end"
+    }])
+  });
+  const setR = (id, patch) => update({
+    skip: rules.map(r => r.id === id ? {
+      ...r,
+      ...patch
+    } : r)
+  });
+  const remove = id => update({
+    skip: rules.filter(r => r.id !== id)
+  });
+  const needsValue = op => op === "eq" || op === "ne" || op === "contains";
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Skip logic"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 8
+    }
+  }, "When the answer matches, jump ahead to a later section or end the survey. Rules are checked top to bottom."), rules.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No skip rules yet."), rules.map(r => /*#__PURE__*/React.createElement("div", {
+    key: r.id,
+    className: "skip-rule"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mini-label"
+  }, "if answer"), /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: r.op,
+    onChange: e => setR(r.id, {
+      op: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "eq"
+  }, "is"), /*#__PURE__*/React.createElement("option", {
+    value: "ne"
+  }, "is not"), /*#__PURE__*/React.createElement("option", {
+    value: "contains"
+  }, "contains"), /*#__PURE__*/React.createElement("option", {
+    value: "answered"
+  }, "is answered"), /*#__PURE__*/React.createElement("option", {
+    value: "empty"
+  }, "is empty"))), needsValue(r.op) && (opts ? /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    style: {
+      marginTop: 6
+    },
+    value: r.value || "",
+    onChange: e => setR(r.id, {
+      value: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Choose a value"), opts.map((o, i) => /*#__PURE__*/React.createElement("option", {
+    key: i,
+    value: o
+  }, o))) : /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    style: {
+      marginTop: 6
+    },
+    placeholder: "value",
+    value: r.value || "",
+    onChange: e => setR(r.id, {
+      value: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mini-label"
+  }, "go to"), /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: r.target,
+    onChange: e => setR(r.id, {
+      target: e.target.value
+    })
+  }, laterBlocks.map(b => /*#__PURE__*/React.createElement("option", {
+    key: b.id,
+    value: b.id
+  }, b.title || "Section")), /*#__PURE__*/React.createElement("option", {
+    value: "end"
+  }, "End of survey")), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "Remove rule",
+    onClick: () => remove(r.id)
+  }, "\\u00d7")))), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    style: {
+      marginTop: 8
+    },
+    onClick: add
+  }, "Add skip rule"));
+}
 function qVisible(q, answers) {
   const lg = q.logic;
   if (!lg || !lg.q) return true;
@@ -2879,6 +3013,7 @@ function FormRenderer({
     const real = questions.filter(q => q.type !== "hidden_field");
     const blocks = [];
     let curB = {
+      id: "",
       title: "",
       desc: "",
       items: []
@@ -2887,6 +3022,7 @@ function FormRenderer({
       if (q.type === "block") {
         if (curB.items.length || curB.title || curB.desc) blocks.push(curB);
         curB = {
+          id: q.id,
           title: q.title || "",
           desc: q.description || "",
           items: []
@@ -2895,6 +3031,7 @@ function FormRenderer({
     }
     if (curB.items.length || curB.title || curB.desc) blocks.push(curB);
     let blk = blocks.length ? blocks.slice() : [{
+      id: "",
       title: "",
       desc: "",
       items: []
@@ -2909,12 +3046,14 @@ function FormRenderer({
           if (b.title || b.desc) out.push({
             qs: [],
             title: b.title,
-            desc: b.desc
+            desc: b.desc,
+            bid: b.id
           });
         } else list.forEach((q, i) => out.push({
           qs: [q],
           title: i === 0 ? b.title : "",
-          desc: i === 0 ? b.desc : ""
+          desc: i === 0 ? b.desc : "",
+          bid: b.id
         }));
       } else {
         const pages = [[]];
@@ -2926,14 +3065,16 @@ function FormRenderer({
           if (b.title || b.desc) out.push({
             qs: [],
             title: b.title,
-            desc: b.desc
+            desc: b.desc,
+            bid: b.id
           });
         } else {
           if (settings.randomizeQuestions) pgs = pgs.map(p => shuffle(p.slice()));
           pgs.forEach((p, i) => out.push({
             qs: p,
             title: i === 0 ? b.title : "",
-            desc: i === 0 ? b.desc : ""
+            desc: i === 0 ? b.desc : "",
+            bid: b.id
           }));
         }
       }
@@ -2941,10 +3082,12 @@ function FormRenderer({
     return out.length ? out : [{
       qs: [],
       title: "",
-      desc: ""
+      desc: "",
+      bid: ""
     }];
   }, [form.id, questions.length, blockSig, settings.randomizeQuestions, settings.randomizeBlocks, conversational]);
   const [page, setPage] = useState(0);
+  const [hist, setHist] = useState([]);
   const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
   const [followups, setFollowups] = useState({});
@@ -3040,9 +3183,34 @@ function FormRenderer({
       if (after) after();
     });
   };
+  const skipTarget = qs => {
+    for (const q of qs || []) {
+      if (!qVisible(q, answers)) continue;
+      const rules = Array.isArray(q.skip) ? q.skip : [];
+      for (const r of rules) {
+        if (skipMatch(answers[q.id], r)) return r.target;
+      }
+    }
+    return null;
+  };
   const doNext = () => {
     setErrors({});
+    const t = skipTarget(steps[cur] && steps[cur].qs || []);
+    if (t === "end") {
+      doSubmit();
+      return;
+    }
+    if (t) {
+      const j = steps.findIndex(st => st.bid && st.bid === t);
+      if (j >= 0 && j > cur) {
+        setHist(h => h.concat([cur]));
+        setPage(j);
+        window.scrollTo(0, 0);
+        return;
+      }
+    }
     if (nextIdx !== undefined) {
+      setHist(h => h.concat([cur]));
       setPage(nextIdx);
       window.scrollTo(0, 0);
     }
@@ -3065,13 +3233,22 @@ function FormRenderer({
   };
   const goBack = () => {
     setErrors({});
-    if (prevIdx !== undefined) {
+    if (hist.length) {
+      const to = hist[hist.length - 1];
+      setHist(hist.slice(0, -1));
+      setPage(to);
+      window.scrollTo(0, 0);
+    } else if (prevIdx !== undefined) {
       setPage(prevIdx);
       window.scrollTo(0, 0);
     }
   };
   const doSubmit = () => {
-    const skipped = questions.filter(q => QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]));
+    const visited = {};
+    hist.concat([cur]).forEach(i => (steps[i] && steps[i].qs || []).forEach(q => {
+      visited[q.id] = true;
+    }));
+    const skipped = questions.filter(q => visited[q.id] && QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && qVisible(q, answers) && q.request && isEmpty(answers[q.id]));
     if (skipped.length) {
       const names = skipped.map(q => q.label || "a question").join(", ");
       if (!window.confirm("You skipped: " + names + ". Submit anyway?")) return;
@@ -3092,18 +3269,9 @@ function FormRenderer({
   };
   const handleSubmit = () => {
     if (preview) return;
-    const allErrs = {};
-    for (const q of questions) {
-      const def = QTYPES[q.type];
-      if (!def || !def.isInput) continue;
-      if (!qVisible(q, answers)) continue;
-      const e = def.validate(q, answers[q.id]);
-      if (e) allErrs[q.id] = e;
-    }
-    if (Object.keys(allErrs).length) {
-      setErrors(allErrs);
-      const bad = steps.findIndex(st => (st.qs || []).some(q => allErrs[q.id]));
-      if (bad >= 0) setPage(bad);
+    const errs = validateList(steps[cur] && steps[cur].qs || []);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
       return;
     }
     const fq = pendingFollowupQ(steps[cur] && steps[cur].qs || []);
@@ -3201,7 +3369,7 @@ function FormRenderer({
     style: {
       marginTop: 18
     }
-  }, multi && prevIdx !== undefined && /*#__PURE__*/React.createElement("button", {
+  }, multi && (hist.length || prevIdx !== undefined) && /*#__PURE__*/React.createElement("button", {
     className: "fbtn-ghost",
     onClick: goBack,
     disabled: submitting
@@ -5506,6 +5674,10 @@ function LeftEditor({
     q: q,
     update: update
   }), QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && /*#__PURE__*/React.createElement(LogicControls, {
+    q: q,
+    questions: questions,
+    update: update
+  }), QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && /*#__PURE__*/React.createElement(SkipControls, {
     q: q,
     questions: questions,
     update: update
