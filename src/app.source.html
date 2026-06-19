@@ -389,6 +389,12 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .tonebar .t-pos{background:var(--good)}
 .tonebar .t-neu{background:var(--line-strong)}
 .tonebar .t-neg{background:var(--bad)}
+
+.sigpad{border:1px solid var(--line-strong);border-radius:10px;background:#fff;overflow:hidden}
+.sigpad.err{border-color:var(--bad)}
+.sigcanvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.sigrow{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.sighint{font-size:12px;color:var(--ink-soft)}
 </style>
 </head>
 <body>
@@ -480,7 +486,31 @@ const Ctx = createContext(null);
 const useApp = () => useContext(Ctx);
 
 /* ----------------------------- question registry ----------------------------- */
+function SignatureRenderer({ q, value, onChange, error }){
+  const ref = useRef(null);
+  const drawing = useRef(false);
+  const last = useRef(null);
+  const ctxOf = () => { try { const c = ref.current; return c && c.getContext ? c.getContext("2d") : null; } catch (e) { return null; } };
+  const pos = (e) => { const c = ref.current; const r = c.getBoundingClientRect(); const t = (e.touches && e.touches[0]) ? e.touches[0] : e; const sx = r.width ? c.width / r.width : 1; const sy = r.height ? c.height / r.height : 1; return { x: (t.clientX - r.left) * sx, y: (t.clientY - r.top) * sy }; };
+  const start = (e) => { const ctx = ctxOf(); if (!ctx) return; drawing.current = true; last.current = pos(e); };
+  const move = (e) => { if (!drawing.current) return; const ctx = ctxOf(); if (!ctx) return; if (e.cancelable && e.preventDefault) e.preventDefault(); const p = pos(e); ctx.strokeStyle = "#1b1830"; ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(last.current.x, last.current.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last.current = p; };
+  const end = () => { if (!drawing.current) return; drawing.current = false; const c = ref.current; if (c && c.toDataURL) onChange(c.toDataURL("image/png")); };
+  const clear = () => { const c = ref.current; const ctx = ctxOf(); if (c && ctx) ctx.clearRect(0, 0, c.width, c.height); onChange(""); };
+  useEffect(()=>{ const c = ref.current; const ctx = ctxOf(); if (!c || !ctx || !value || typeof value !== "string" || value.indexOf("data:") !== 0) return; const img = new window.Image(); img.onload = ()=>{ try { ctx.drawImage(img, 0, 0, c.width, c.height); } catch (e) {} }; img.src = value; }, []);
+  return (
+    <div className="q">
+      <QLabel q={q} />
+      <div className={"sigpad" + (error ? " err" : "")}>
+        <canvas ref={ref} width={520} height={160} className="sigcanvas" onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end} onTouchStart={start} onTouchMove={move} onTouchEnd={end}></canvas>
+      </div>
+      <div className="sigrow"><span className="sighint">Draw your signature above</span><button type="button" className="fbtn-ghost sm" onClick={clear}>Clear</button></div>
+      {error && <div className="ferr">{error}</div>}
+    </div>
+  );
+}
+
 const QTYPES = {
+  signature: { label: "Signature", hint: "Sign with a finger or mouse", isInput: true, make: () => ({ type:"signature", id: uid(), label:"Signature", required:false, request:false }), summary: (q) => "signature", validate: (q, v) => (q.required && !(typeof v === "string" && v.indexOf("data:") === 0)) ? "Please add your signature." : null, Renderer: SignatureRenderer },
   multiple_choice: {
     label: "Multiple choice",
     hint: "Single, multi-select, or dropdown",
@@ -913,7 +943,7 @@ const QTYPES = {
     Renderer: () => null,
   },
 };
-const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","text_graphic","hidden_field","page_break"];
+const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","text_graphic","hidden_field","page_break"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -1394,6 +1424,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         {q.type === "constant_sum" && <ConstantSumCanvas q={q} update={update} />}
         {q.type === "form_field" && <FormFieldCanvas q={q} update={update} />}
         {q.type === "date" && <div className="wq-prev-input" style={{maxWidth:220}}>yyyy-mm-dd</div>}
+        {q.type === "signature" && <div className="wq-prev-input" style={{height:54,maxWidth:340}}>Signature pad</div>}
         {q.type === "star_rating" && <div className="stars prev">{Array.from({length:q.max}).map((_,i)=>(<span key={i} className="star">★</span>))}</div>}
       </div>
     </div>
@@ -1733,6 +1764,7 @@ function LeftEditor({ q, update, questions, setQuestions }){
       {q.type === "form_field" && <FormFieldControls q={q} update={update} />}
       {q.type === "date" && <DateControls q={q} update={update} />}
       {q.type === "star_rating" && <StarControls q={q} update={update} />}
+      {q.type === "signature" && <ReqToggles q={q} update={update} />}
       {q.type === "text_graphic" && <div className="hint" style={{marginTop:6}}>Edit the heading, text, and image directly on the question in the canvas.</div>}
       {q.type === "hidden_field" && <HiddenControls q={q} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <LogicControls q={q} questions={questions} update={update} />}
@@ -2154,6 +2186,7 @@ function statLines(q, rows){
     const ds = vals.map(String).filter(Boolean).sort();
     return { title, type, bars: [], lines: ds.length ? ["Earliest " + ds[0] + ", latest " + ds[ds.length-1]] : ["No data"] };
   }
+  if (q.type === "signature") return { title, type, bars: [], lines: [vals.length + " signed"] };
   return { title, type, bars: [], lines: [vals.length + " text response" + (vals.length === 1 ? "" : "s")] };
 }
 
@@ -2286,7 +2319,7 @@ function ResponsesTab({ id, form }){
         <Modal title={"Response · " + fmtDate(open.created_at)} onClose={()=>setOpen(null)}>
           <div className="pad-lg">
             {(form.schema.questions||[]).filter(q=>QTYPES[q.type] && QTYPES[q.type].isInput).map(q=>(
-              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{cell(open.data[q.id]) || <span className="muted">No answer</span>}</div></div>
+              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#fff"}} /> : <span className="muted">Not signed</span>) : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
             ))}
             {open.meta && Array.isArray(open.meta.followups) && open.meta.followups.length > 0 && (
               <div style={{marginBottom:14}}><div className="label">Follow-ups</div>{open.meta.followups.map((fu, i)=>(<div key={i} style={{marginBottom:8}}><div style={{fontSize:13,fontWeight:600}}>{fu.question}</div><div>{fu.answer || <span className="muted">No answer</span>}</div></div>))}</div>

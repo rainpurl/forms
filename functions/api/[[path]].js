@@ -459,6 +459,7 @@ async function exportCsv(user, id, env) {
 
 function formatAnswer(v) {
   if (v === null || v === undefined) return "";
+  if (typeof v === "string" && v.indexOf("data:image") === 0) return "[signature]";
   if (Array.isArray(v)) return v.join("; ");
   if (typeof v === "object") return Object.keys(v).map((k) => k + ": " + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(" | ");
   return String(v);

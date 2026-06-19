@@ -383,6 +383,12 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .tonebar .t-pos{background:var(--good)}
 .tonebar .t-neu{background:var(--line-strong)}
 .tonebar .t-neg{background:var(--bad)}
+
+.sigpad{border:1px solid var(--line-strong);border-radius:10px;background:#fff;overflow:hidden}
+.sigpad.err{border-color:var(--bad)}
+.sigcanvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.sigrow{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.sighint{font-size:12px;color:var(--ink-soft)}
 </style>
 </head>
 <body>
@@ -550,7 +556,126 @@ const Ctx = createContext(null);
 const useApp = () => useContext(Ctx);
 
 /* ----------------------------- question registry ----------------------------- */
+function SignatureRenderer({
+  q,
+  value,
+  onChange,
+  error
+}) {
+  const ref = useRef(null);
+  const drawing = useRef(false);
+  const last = useRef(null);
+  const ctxOf = () => {
+    try {
+      const c = ref.current;
+      return c && c.getContext ? c.getContext("2d") : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const pos = e => {
+    const c = ref.current;
+    const r = c.getBoundingClientRect();
+    const t = e.touches && e.touches[0] ? e.touches[0] : e;
+    const sx = r.width ? c.width / r.width : 1;
+    const sy = r.height ? c.height / r.height : 1;
+    return {
+      x: (t.clientX - r.left) * sx,
+      y: (t.clientY - r.top) * sy
+    };
+  };
+  const start = e => {
+    const ctx = ctxOf();
+    if (!ctx) return;
+    drawing.current = true;
+    last.current = pos(e);
+  };
+  const move = e => {
+    if (!drawing.current) return;
+    const ctx = ctxOf();
+    if (!ctx) return;
+    if (e.cancelable && e.preventDefault) e.preventDefault();
+    const p = pos(e);
+    ctx.strokeStyle = "#1b1830";
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(last.current.x, last.current.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    last.current = p;
+  };
+  const end = () => {
+    if (!drawing.current) return;
+    drawing.current = false;
+    const c = ref.current;
+    if (c && c.toDataURL) onChange(c.toDataURL("image/png"));
+  };
+  const clear = () => {
+    const c = ref.current;
+    const ctx = ctxOf();
+    if (c && ctx) ctx.clearRect(0, 0, c.width, c.height);
+    onChange("");
+  };
+  useEffect(() => {
+    const c = ref.current;
+    const ctx = ctxOf();
+    if (!c || !ctx || !value || typeof value !== "string" || value.indexOf("data:") !== 0) return;
+    const img = new window.Image();
+    img.onload = () => {
+      try {
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+      } catch (e) {}
+    };
+    img.src = value;
+  }, []);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q"
+  }, /*#__PURE__*/React.createElement(QLabel, {
+    q: q
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "sigpad" + (error ? " err" : "")
+  }, /*#__PURE__*/React.createElement("canvas", {
+    ref: ref,
+    width: 520,
+    height: 160,
+    className: "sigcanvas",
+    onMouseDown: start,
+    onMouseMove: move,
+    onMouseUp: end,
+    onMouseLeave: end,
+    onTouchStart: start,
+    onTouchMove: move,
+    onTouchEnd: end
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "sigrow"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sighint"
+  }, "Draw your signature above"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "fbtn-ghost sm",
+    onClick: clear
+  }, "Clear")), error && /*#__PURE__*/React.createElement("div", {
+    className: "ferr"
+  }, error));
+}
 const QTYPES = {
+  signature: {
+    label: "Signature",
+    hint: "Sign with a finger or mouse",
+    isInput: true,
+    make: () => ({
+      type: "signature",
+      id: uid(),
+      label: "Signature",
+      required: false,
+      request: false
+    }),
+    summary: q => "signature",
+    validate: (q, v) => q.required && !(typeof v === "string" && v.indexOf("data:") === 0) ? "Please add your signature." : null,
+    Renderer: SignatureRenderer
+  },
   multiple_choice: {
     label: "Multiple choice",
     hint: "Single, multi-select, or dropdown",
@@ -1530,7 +1655,7 @@ const QTYPES = {
     Renderer: () => null
   }
 };
-const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "text_graphic", "hidden_field", "page_break"];
+const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "signature", "text_graphic", "hidden_field", "page_break"];
 
 /* small shared bits */
 function Field({
@@ -2886,7 +3011,13 @@ function CanvasCard({
     style: {
       maxWidth: 220
     }
-  }, "yyyy-mm-dd"), q.type === "star_rating" && /*#__PURE__*/React.createElement("div", {
+  }, "yyyy-mm-dd"), q.type === "signature" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input",
+    style: {
+      height: 54,
+      maxWidth: 340
+    }
+  }, "Signature pad"), q.type === "star_rating" && /*#__PURE__*/React.createElement("div", {
     className: "stars prev"
   }, Array.from({
     length: q.max
@@ -3778,6 +3909,9 @@ function LeftEditor({
     q: q,
     update: update
   }), q.type === "star_rating" && /*#__PURE__*/React.createElement(StarControls, {
+    q: q,
+    update: update
+  }), q.type === "signature" && /*#__PURE__*/React.createElement(ReqToggles, {
     q: q,
     update: update
   }), q.type === "text_graphic" && /*#__PURE__*/React.createElement("div", {
@@ -4987,6 +5121,12 @@ function statLines(q, rows) {
       lines: ds.length ? ["Earliest " + ds[0] + ", latest " + ds[ds.length - 1]] : ["No data"]
     };
   }
+  if (q.type === "signature") return {
+    title,
+    type,
+    bars: [],
+    lines: [vals.length + " signed"]
+  };
   return {
     title,
     type,
@@ -5293,7 +5433,18 @@ function ResponsesTab({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "label"
-  }, q.label || q.id), /*#__PURE__*/React.createElement("div", null, cell(open.data[q.id]) || /*#__PURE__*/React.createElement("span", {
+  }, q.label || q.id), /*#__PURE__*/React.createElement("div", null, q.type === "signature" ? open.data[q.id] ? /*#__PURE__*/React.createElement("img", {
+    src: open.data[q.id],
+    alt: "signature",
+    style: {
+      maxWidth: 280,
+      border: "1px solid var(--line)",
+      borderRadius: 8,
+      background: "#fff"
+    }
+  }) : /*#__PURE__*/React.createElement("span", {
+    className: "muted"
+  }, "Not signed") : cell(open.data[q.id]) || /*#__PURE__*/React.createElement("span", {
     className: "muted"
   }, "No answer")))), open.meta && Array.isArray(open.meta.followups) && open.meta.followups.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {

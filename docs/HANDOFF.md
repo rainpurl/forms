@@ -215,3 +215,9 @@ Follow-up questions: a per-text-question toggle in the question editor (Conversa
 Tone: a card in the Analytics tab that reads the open-text answers and shows an overall split of positive, neutral, and negative plus a one-line read. Cached per form (key tone:formId). Only appears when the form has text questions and at least one response.
 
 All three require the Workers AI binding named AI on the Pages project. The model is configurable with the AI_MODEL variable and defaults to a small Llama model.
+
+## Signature question type
+
+A new question type, Signature, lets a respondent sign with a finger or mouse on a small canvas. The drawing is saved as a PNG data URL inside the response data, so it needs no external file storage (unlike a general file upload, which would require object storage such as R2). It validates like any other question when set to force a response. In the responses table the signature shows as an image in the response detail. In CSV exports and webhook payloads it is written as the placeholder [signature] rather than the long data string, and the printable report counts how many responses were signed. There are now fourteen question types.
+
+Note: very large or high-resolution signatures are unlikely since the pad is small, but the image still lives in the response row in D1, which is fine at normal volume.

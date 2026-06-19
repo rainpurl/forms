@@ -99,3 +99,7 @@ This build adds conditional display logic, a one-question-at-a-time conversation
 ## Response intelligence
 
 Adaptive follow-up questions (a per-question toggle that asks one clarifying question based on a text answer and saves it with the response), an open-text Tone read in the Analytics tab, and the existing Overview summary. These use the Workers AI binding and are shown with plain names, never labeled AI. They need the AI binding on the Pages project and degrade gracefully when it is absent.
+
+## Signature
+
+The Signature question type lets people sign with a finger or mouse. Signatures are saved with the response as an image and need no external storage. They appear as an image in the response detail, as [signature] in CSV and webhook output, and are counted in the report.
