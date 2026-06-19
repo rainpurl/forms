@@ -658,6 +658,10 @@ table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
 .form-scope .booking-meta{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
 .form-scope .booking-add{appearance:none;border:1px solid var(--fa);background:transparent;color:var(--fa);padding:8px 14px;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;transition:.12s}
 .form-scope .booking-add:hover{background:var(--fa);color:#fff}
+
+.pdf-doc{display:flex;flex-direction:column;gap:10px}
+.pdf-page{position:relative;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;line-height:0;background:#fff;max-width:100%}
+.pdf-canvas{display:block;width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -1348,6 +1352,125 @@ function SchedulingRenderer({
     className: "ferr"
   }, error));
 }
+var PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+var PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+function loadPdfJs() {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (window.pdfjsLib) {
+    try {
+      if (window.pdfjsLib.GlobalWorkerOptions && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+    } catch (e) {}
+    return Promise.resolve(window.pdfjsLib);
+  }
+  if (window.__pdfjsPromise) return window.__pdfjsPromise;
+  window.__pdfjsPromise = new Promise((resolve, reject) => {
+    const sc = document.createElement("script");
+    sc.src = PDFJS_URL;
+    sc.onload = () => {
+      try {
+        if (window.pdfjsLib) {
+          try {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+          } catch (e) {}
+          resolve(window.pdfjsLib);
+        } else reject(new Error("pdfjs missing"));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    sc.onerror = () => {
+      window.__pdfjsPromise = null;
+      reject(new Error("pdfjs load failed"));
+    };
+    document.head.appendChild(sc);
+  });
+  return window.__pdfjsPromise;
+}
+function PdfDoc({
+  src,
+  renderOverlay,
+  onPageClick,
+  fallback,
+  onError
+}) {
+  const [pdf, setPdf] = useState(null);
+  const [n, setN] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const canvasRefs = useRef({});
+  useEffect(() => {
+    let c = false;
+    if (!src) return;
+    setFailed(false);
+    setPdf(null);
+    setN(0);
+    canvasRefs.current = {};
+    loadPdfJs().then(lib => lib.getDocument(src).promise).then(doc => {
+      if (c) return;
+      setPdf(doc);
+      setN(doc.numPages || 0);
+    }).catch(e => {
+      if (!c) {
+        setFailed(true);
+        if (onError) onError();
+      }
+    });
+    return () => {
+      c = true;
+    };
+  }, [src]);
+  useEffect(() => {
+    let c = false;
+    if (!pdf) return;
+    (async () => {
+      for (let i = 1; i <= (pdf.numPages || 0); i++) {
+        if (c) return;
+        const canvas = canvasRefs.current[i];
+        if (!canvas) continue;
+        try {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({
+            scale: 1.5
+          });
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext && canvas.getContext("2d");
+          if (ctx) await page.render({
+            canvasContext: ctx,
+            viewport
+          }).promise;
+        } catch (e) {}
+      }
+    })();
+    return () => {
+      c = true;
+    };
+  }, [pdf]);
+  if (failed) return fallback || null;
+  if (!n) return /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13,
+      padding: "10px 0"
+    }
+  }, "Loading document...");
+  return /*#__PURE__*/React.createElement("div", {
+    className: "pdf-doc"
+  }, Array.from({
+    length: n
+  }).map((_, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "pdf-page",
+    onClick: onPageClick ? e => onPageClick(i, e, e.currentTarget) : undefined,
+    style: onPageClick ? {
+      cursor: "crosshair"
+    } : undefined
+  }, /*#__PURE__*/React.createElement("canvas", {
+    className: "pdf-canvas",
+    ref: el => {
+      if (el) canvasRefs.current[i + 1] = el;
+    }
+  }), renderOverlay ? renderOverlay(i) : null)));
+}
 function DocumentSignRenderer({
   q,
   value,
@@ -1362,13 +1485,17 @@ function DocumentSignRenderer({
       [fid]: v
     }
   });
+  const [pdfFailed, setPdfFailed] = useState(false);
   const isImg = q.documentKind === "image" && q.document;
-  const placed = isImg ? fields.filter(f => f.placed && typeof f.x === "number" && typeof f.y === "number") : [];
+  const isPdf = q.documentKind === "pdf" && q.document;
+  const usePdfOverlay = isPdf && !pdfFailed;
+  const placed = isImg || usePdfOverlay ? fields.filter(f => f.placed && typeof f.x === "number" && typeof f.y === "number") : [];
   const placedIds = {};
   placed.forEach(f => {
     placedIds[f.id] = true;
   });
   const listFields = fields.filter(f => !placedIds[f.id]);
+  const pageFields = i => placed.filter(f => isPdf ? (f.page || 0) === i : i === 0);
   const overlay = f => f.kind === "check" ? /*#__PURE__*/React.createElement("label", {
     className: "opt-radio",
     style: {
@@ -1415,16 +1542,28 @@ function DocumentSignRenderer({
     className: "q"
   }, /*#__PURE__*/React.createElement(QLabel, {
     q: q
-  }), q.document ? q.documentKind === "pdf" ? /*#__PURE__*/React.createElement("iframe", {
-    className: "doc-view",
+  }), q.document ? isPdf ? /*#__PURE__*/React.createElement(PdfDoc, {
     src: q.document,
-    title: q.documentName || "Document",
-    style: {
-      width: "100%",
-      height: 520,
-      border: "1px solid var(--line-strong)",
-      borderRadius: 10
-    }
+    onError: () => setPdfFailed(true),
+    fallback: /*#__PURE__*/React.createElement("iframe", {
+      className: "doc-view",
+      src: q.document,
+      title: q.documentName || "Document",
+      style: {
+        width: "100%",
+        height: 520,
+        border: "1px solid var(--line-strong)",
+        borderRadius: 10
+      }
+    }),
+    renderOverlay: i => pageFields(i).map(f => /*#__PURE__*/React.createElement("div", {
+      key: f.id,
+      className: "doc-place-field doc-place-" + f.kind,
+      style: {
+        left: f.x + "%",
+        top: f.y + "%"
+      }
+    }, overlay(f)))
   }) : /*#__PURE__*/React.createElement("div", {
     className: "doc-canvas"
   }, /*#__PURE__*/React.createElement("img", {
@@ -1953,6 +2092,7 @@ function DocumentControls({
   } = useApp();
   const fields = Array.isArray(q.fields) ? q.fields : [];
   const [placing, setPlacing] = useState(null);
+  const [pdfFailed, setPdfFailed] = useState(false);
   const onUpload = file => {
     if (!file) return;
     if (file.type === "application/pdf") {
@@ -2133,7 +2273,65 @@ function DocumentControls({
       });
       if (placing === f.id) setPlacing(null);
     }
-  }, f.label)))), /*#__PURE__*/React.createElement("div", {
+  }, f.label)))), q.documentKind === "pdf" && q.document && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Position on the document"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 8
+    }
+  }, pdfFailed ? "Inline placement is unavailable here. Fields will appear in a list below the document." : placing ? "Click a page to drop the field." : "Pick a field, then click a page to place it. Click a pin to remove it. Unplaced fields show below the document."), !pdfFailed && fields.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      flexWrap: "wrap",
+      marginBottom: 8
+    }
+  }, fields.map(f => /*#__PURE__*/React.createElement("button", {
+    key: f.id,
+    type: "button",
+    className: "btn sm" + (placing === f.id ? " primary" : f.placed ? "" : " ghost"),
+    onClick: () => setPlacing(placing === f.id ? null : f.id)
+  }, f.placed ? "\u25c9 " : "", f.label))), /*#__PURE__*/React.createElement(PdfDoc, {
+    src: q.document,
+    onError: () => setPdfFailed(true),
+    fallback: /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Could not render the PDF for inline placement."),
+    onPageClick: (i, e, pageEl) => {
+      if (!placing) return;
+      const r = pageEl.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const x = Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100));
+      const y = Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100));
+      setField(placing, {
+        page: i,
+        x: Math.round(x * 10) / 10,
+        y: Math.round(y * 10) / 10,
+        placed: true
+      });
+      setPlacing(null);
+    },
+    renderOverlay: i => fields.filter(f => f.placed && typeof f.x === "number" && (f.page || 0) === i).map(f => /*#__PURE__*/React.createElement("span", {
+      key: f.id,
+      className: "doc-pin",
+      style: {
+        left: f.x + "%",
+        top: f.y + "%"
+      },
+      title: "Click to remove",
+      onClick: e => {
+        e.stopPropagation();
+        setField(f.id, {
+          x: undefined,
+          y: undefined,
+          page: undefined,
+          placed: false
+        });
+        if (placing === f.id) setPlacing(null);
+      }
+    }, f.label))
+  })), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.required,
@@ -5972,6 +6170,17 @@ function PublicForm({
   const [doneScore, setDoneScore] = useState(null);
   const [disq, setDisq] = useState(false);
   const [lang, setLang] = useState("");
+  const [already, setAlready] = useState(false);
+  useEffect(() => {
+    const f = st.form;
+    if (!f) return;
+    const ss = f.schema && f.schema.settings || {};
+    if (ss.oneResponse) {
+      try {
+        if (window.localStorage && window.localStorage.getItem("zq-done-" + f.id) === "1") setAlready(true);
+      } catch (e) {}
+    }
+  }, [st.form]);
   useEffect(() => {
     const wl = st.form && st.form.schema && st.form.schema.settings || null;
     if (!wl) return;
@@ -6175,6 +6384,33 @@ function PublicForm({
       size: 13
     })))));
   }
+  if (already && !done) {
+    const set2 = lform.schema && lform.schema.settings || {};
+    return /*#__PURE__*/React.createElement("div", {
+      className: pageCls
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "form-page-inner"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "form-scope",
+      style: scope
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "fcard",
+      style: {
+        textAlign: "center"
+      }
+    }, set2.headerImage && /*#__PURE__*/React.createElement("img", {
+      className: "fheader-img",
+      src: set2.headerImage,
+      alt: ""
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "ftitle",
+      style: {
+        marginTop: 6
+      }
+    }, "You already responded"), /*#__PURE__*/React.createElement("p", {
+      className: "fdesc"
+    }, "It looks like you already submitted this form from this browser. Thanks again.")))));
+  }
   const submit = (answers, extra) => {
     extra = extra || {};
     setSubmitting(true);
@@ -6200,6 +6436,12 @@ function PublicForm({
         if (r && !extra.disqualified) {
           window.location.href = /^https?:\/\//i.test(r) ? r : "https://" + r;
           return;
+        }
+        const _one = form.schema && form.schema.settings && form.schema.settings.oneResponse;
+        if (_one && !extra.disqualified) {
+          try {
+            if (window.localStorage) window.localStorage.setItem("zq-done-" + form.id, "1");
+          } catch (e) {}
         }
         setDoneAnswers(answers);
         if (data.score != null) setDoneScore({
@@ -9295,7 +9537,15 @@ function SettingsPanel({
     })
   })), /*#__PURE__*/React.createElement("div", {
     className: "hint"
-  }, "The form stops accepting responses when the limit is reached or after the close time. Times use this browser's timezone."), /*#__PURE__*/React.createElement("div", {
+  }, "The form stops accepting responses when the limit is reached or after the close time. Times use this browser's timezone."), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!form.schema.settings.oneResponse,
+    onChange: c => setSettings({
+      oneResponse: c
+    }),
+    label: "Limit to one response per browser"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "A visitor who already submitted from this browser sees a short message instead of the form. This is a light check and can be bypassed by clearing browser data."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "After submission"), /*#__PURE__*/React.createElement("div", {
     className: "hint",
@@ -11705,6 +11955,9 @@ function ResponsesTab({
   const [rows, setRows] = useState(null);
   const [open, setOpen] = useState(null);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [query, setQuery] = useState("");
+  const [statusF, setStatusF] = useState("all");
+  const [variantF, setVariantF] = useState("all");
   useEffect(() => {
     api.responses(id).then(({
       data
@@ -11718,12 +11971,40 @@ function ResponsesTab({
     return m;
   }, [form]);
   const previewCols = useMemo(() => Object.keys(labels).slice(0, 2), [labels]);
+  const experiment = !!(form.schema && form.schema.settings && form.schema.settings.experiment);
+  const variants = useMemo(() => {
+    const set = {};
+    (rows || []).forEach(r => {
+      const v = r.meta && r.meta.variant;
+      if (v) set[v] = true;
+    });
+    return Object.keys(set).sort();
+  }, [rows]);
   const cell = v => {
     if (v === null || v === undefined) return "";
     if (Array.isArray(v)) return v.join(", ");
     if (typeof v === "object") return Object.keys(v).map(k => k + ": " + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join(" | ");
     return String(v);
   };
+  const rowText = r => {
+    const parts = [];
+    const d = r.data || {};
+    Object.keys(d).forEach(k => {
+      parts.push(cell(d[k]));
+    });
+    const mm = r.meta || {};
+    parts.push(mm.city || "", mm.country || "", mm.browser || "", mm.os || "");
+    return parts.join(" ").toLowerCase();
+  };
+  const filtered = (rows || []).filter(r => {
+    const mm = r.meta || {};
+    if (statusF === "completed" && mm.disqualified) return false;
+    if (statusF === "screenout" && !mm.disqualified) return false;
+    if (experiment && variantF !== "all" && mm.variant !== variantF) return false;
+    const qq = query.trim().toLowerCase();
+    if (qq && rowText(r).indexOf(qq) === -1) return false;
+    return true;
+  });
   if (rows === null) return /*#__PURE__*/React.createElement("div", {
     className: "muted"
   }, "Loading...");
@@ -11731,13 +12012,58 @@ function ResponsesTab({
     className: "card empty"
   }, /*#__PURE__*/React.createElement("p", null, "No responses yet."));
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "resp-filter",
+    style: {
+      marginBottom: 10,
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    style: {
+      flex: 1,
+      minWidth: 160
+    },
+    placeholder: "Search responses",
+    value: query,
+    onChange: e => setQuery(e.target.value)
+  }), /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    style: {
+      width: "auto",
+      flex: "none"
+    },
+    value: statusF,
+    onChange: e => setStatusF(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "all"
+  }, "All responses"), /*#__PURE__*/React.createElement("option", {
+    value: "completed"
+  }, "Completed"), /*#__PURE__*/React.createElement("option", {
+    value: "screenout"
+  }, "Screened out")), experiment && variants.length > 0 && /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    style: {
+      width: "auto",
+      flex: "none"
+    },
+    value: variantF,
+    onChange: e => setVariantF(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "all"
+  }, "All variants"), variants.map(v => /*#__PURE__*/React.createElement("option", {
+    key: v,
+    value: v
+  }, "Variant ", v)))), /*#__PURE__*/React.createElement("div", {
     className: "between",
     style: {
       marginBottom: 12
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
-  }, rows.length, " response", rows.length === 1 ? "" : "s"), /*#__PURE__*/React.createElement(ExportButtons, {
+  }, filtered.length === rows.length ? rows.length + " response" + (rows.length === 1 ? "" : "s") : filtered.length + " of " + rows.length + " shown"), /*#__PURE__*/React.createElement(ExportButtons, {
     id: id,
     form: form,
     rows: rows
@@ -11754,7 +12080,7 @@ function ResponsesTab({
     className: "hide-sm"
   }, "Device"), previewCols.map(c => /*#__PURE__*/React.createElement("th", {
     key: c
-  }, labels[c])), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, rows.map(r => /*#__PURE__*/React.createElement("tr", {
+  }, labels[c])), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, filtered.map(r => /*#__PURE__*/React.createElement("tr", {
     key: r.id,
     className: "clickable",
     onClick: () => setOpen(r)
@@ -11798,7 +12124,13 @@ function ResponsesTab({
       }
       setPdfBusy(false);
     }
-  }, "PDF"))))))), open && /*#__PURE__*/React.createElement(Modal, {
+  }, "PDF"))))))), filtered.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      marginTop: 10,
+      fontSize: 13
+    }
+  }, "No responses match your filters."), open && /*#__PURE__*/React.createElement(Modal, {
     title: "Response · " + fmtDate(open.created_at),
     onClose: () => setOpen(null)
   }, /*#__PURE__*/React.createElement("div", {
@@ -12665,7 +12997,43 @@ function AnalyticsTab({
       fontWeight: 600,
       lineHeight: 1
     }
-  }, a.total || 0)), tone && /*#__PURE__*/React.createElement(ToneCard, {
+  }, a.total || 0)), (() => {
+    const secs = rows.map(r => r.meta && typeof r.meta.seconds === "number" ? r.meta.seconds : null).filter(x => x != null && x > 0);
+    if (!secs.length) return null;
+    const avg = secs.reduce((x, y) => x + y, 0) / secs.length;
+    const sorted = secs.slice().sort((x, y) => x - y);
+    const mid = Math.floor(sorted.length / 2);
+    const med = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    const fmt = v => {
+      v = Math.round(v);
+      if (v < 60) return v + "s";
+      const m = Math.floor(v / 60);
+      const r2 = v % 60;
+      return m + "m" + (r2 ? " " + r2 + "s" : "");
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "label",
+      style: {
+        marginBottom: 10
+      }
+    }, "Time to complete"), /*#__PURE__*/React.createElement("div", {
+      className: "statgrid"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, fmt(avg)), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Average")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, fmt(med)), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Median")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, secs.length), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Timed"))));
+  })(), tone && /*#__PURE__*/React.createElement(ToneCard, {
     tone: tone
   }), inputQs.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "label",

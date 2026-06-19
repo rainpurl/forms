@@ -274,3 +274,19 @@ Once someone books a time, the confirmation screen shows the details and an Add 
 ## Bookings that hold up
 
 Time slots are now checked on the server when someone books, so a slot that is full, in the past, or inside your minimum notice window is turned away with a clear message instead of slipping through.
+
+## How long forms take
+
+The analytics tab now shows the average and median time people spend completing your form.
+
+## Finding responses
+
+In the responses tab you can search across answers and filter by completed or screened-out, plus by A/B variant when testing is on.
+
+## One response per person
+
+Turn on Limit to one response per browser in settings and someone who already submitted from a browser will see a short note instead of the form. It is a light check, so it can be bypassed by clearing browser data, but it cuts down on accidental duplicates.
+
+## Signing PDFs
+
+When you attach a PDF to a signing question, every page now shows in the form, and you can drop signature, text, date, and checkbox fields right onto any page, just like you already could with images. People filling it in see the fields sitting on the document. If the PDF viewer cannot load (for example with no internet), the form still shows the document and lists the fields beneath it.

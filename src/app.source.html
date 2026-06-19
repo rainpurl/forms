@@ -664,6 +664,10 @@ table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
 .form-scope .booking-meta{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
 .form-scope .booking-add{appearance:none;border:1px solid var(--fa);background:transparent;color:var(--fa);padding:8px 14px;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;transition:.12s}
 .form-scope .booking-add:hover{background:var(--fa);color:#fff}
+
+.pdf-doc{display:flex;flex-direction:column;gap:10px}
+.pdf-page{position:relative;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;line-height:0;background:#fff;max-width:100%}
+.pdf-canvas{display:block;width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -951,14 +955,54 @@ function SchedulingRenderer({ q, value, onChange, error, bookings }){
   );
 }
 
+var PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+var PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+function loadPdfJs(){
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (window.pdfjsLib){ try { if (window.pdfjsLib.GlobalWorkerOptions && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; } catch (e) {} return Promise.resolve(window.pdfjsLib); }
+  if (window.__pdfjsPromise) return window.__pdfjsPromise;
+  window.__pdfjsPromise = new Promise((resolve, reject)=>{
+    const sc = document.createElement("script"); sc.src = PDFJS_URL;
+    sc.onload = ()=>{ try { if (window.pdfjsLib){ try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; } catch (e) {} resolve(window.pdfjsLib); } else reject(new Error("pdfjs missing")); } catch (e) { reject(e); } };
+    sc.onerror = ()=>{ window.__pdfjsPromise = null; reject(new Error("pdfjs load failed")); };
+    document.head.appendChild(sc);
+  });
+  return window.__pdfjsPromise;
+}
+function PdfDoc({ src, renderOverlay, onPageClick, fallback, onError }){
+  const [pdf, setPdf] = useState(null);
+  const [n, setN] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const canvasRefs = useRef({});
+  useEffect(()=>{ let c = false; if (!src) return; setFailed(false); setPdf(null); setN(0); canvasRefs.current = {};
+    loadPdfJs().then((lib)=> lib.getDocument(src).promise).then((doc)=>{ if (c) return; setPdf(doc); setN(doc.numPages || 0); }).catch((e)=>{ if (!c){ setFailed(true); if (onError) onError(); } });
+    return ()=>{ c = true; };
+  }, [src]);
+  useEffect(()=>{ let c = false; if (!pdf) return;
+    (async ()=>{ for (let i = 1; i <= (pdf.numPages || 0); i++){ if (c) return; const canvas = canvasRefs.current[i]; if (!canvas) continue; try { const page = await pdf.getPage(i); const viewport = page.getViewport({ scale: 1.5 }); canvas.width = viewport.width; canvas.height = viewport.height; const ctx = canvas.getContext && canvas.getContext("2d"); if (ctx) await page.render({ canvasContext: ctx, viewport }).promise; } catch (e) {} } })();
+    return ()=>{ c = true; };
+  }, [pdf]);
+  if (failed) return fallback || null;
+  if (!n) return <div className="muted" style={{fontSize:13,padding:"10px 0"}}>Loading document...</div>;
+  return (<div className="pdf-doc">{Array.from({ length: n }).map((_, i)=>(
+    <div key={i} className="pdf-page" onClick={onPageClick ? (e)=>onPageClick(i, e, e.currentTarget) : undefined} style={onPageClick ? { cursor:"crosshair" } : undefined}>
+      <canvas className="pdf-canvas" ref={(el)=>{ if (el) canvasRefs.current[i+1] = el; }} />
+      {renderOverlay ? renderOverlay(i) : null}
+    </div>
+  ))}</div>);
+}
 function DocumentSignRenderer({ q, value, onChange, error }){
   const fields = Array.isArray(q.fields) ? q.fields : [];
   const data = (value && value.fields) || {};
   const setField = (fid, v)=> onChange({ fields: { ...data, [fid]: v } });
+  const [pdfFailed, setPdfFailed] = useState(false);
   const isImg = q.documentKind === "image" && q.document;
-  const placed = isImg ? fields.filter((f)=> f.placed && typeof f.x === "number" && typeof f.y === "number") : [];
+  const isPdf = q.documentKind === "pdf" && q.document;
+  const usePdfOverlay = isPdf && !pdfFailed;
+  const placed = (isImg || usePdfOverlay) ? fields.filter((f)=> f.placed && typeof f.x === "number" && typeof f.y === "number") : [];
   const placedIds = {}; placed.forEach((f)=>{ placedIds[f.id] = true; });
   const listFields = fields.filter((f)=> !placedIds[f.id]);
+  const pageFields = (i)=> placed.filter((f)=> isPdf ? ((f.page || 0) === i) : (i === 0));
   const overlay = (f) => (
     f.kind === "check"
       ? <label className="opt-radio" style={{margin:0}}><input type="checkbox" checked={!!data[f.id]} onChange={(e)=>setField(f.id, e.target.checked)} /><span>{f.label}</span></label>
@@ -971,8 +1015,8 @@ function DocumentSignRenderer({ q, value, onChange, error }){
     <div className="q">
       <QLabel q={q} />
       {q.document ? (
-        q.documentKind === "pdf"
-          ? <iframe className="doc-view" src={q.document} title={q.documentName || "Document"} style={{width:"100%",height:520,border:"1px solid var(--line-strong)",borderRadius:10}}></iframe>
+        isPdf
+          ? <PdfDoc src={q.document} onError={()=>setPdfFailed(true)} fallback={<iframe className="doc-view" src={q.document} title={q.documentName || "Document"} style={{width:"100%",height:520,border:"1px solid var(--line-strong)",borderRadius:10}}></iframe>} renderOverlay={(i)=> pageFields(i).map((f)=>(<div key={f.id} className={"doc-place-field doc-place-" + f.kind} style={{left:f.x + "%", top:f.y + "%"}}>{overlay(f)}</div>))} />
           : <div className="doc-canvas"><img className="doc-view" src={q.document} alt={q.documentName || "Document"} style={{maxWidth:"100%",display:"block",border:"1px solid var(--line-strong)",borderRadius:10}} />{placed.map((f)=>(<div key={f.id} className={"doc-place-field doc-place-" + f.kind} style={{left:f.x + "%", top:f.y + "%"}}>{overlay(f)}</div>))}</div>
       ) : <div className="muted" style={{fontSize:13}}>No document attached.</div>}
       {q.documentName && <div className="hint" style={{marginTop:6}}>{q.documentName}</div>}
@@ -1099,6 +1143,7 @@ function DocumentControls({ q, update }){
   const { toast } = useApp();
   const fields = Array.isArray(q.fields) ? q.fields : [];
   const [placing, setPlacing] = useState(null);
+  const [pdfFailed, setPdfFailed] = useState(false);
   const onUpload = (file)=>{ if (!file) return; if (file.type === "application/pdf"){ readFileDataUrl(file, 2000000, (url)=>{ if (!url){ toast("That PDF is too large (2MB max) or could not be read."); return; } update({ document: url, documentName: file.name, documentKind: "pdf" }); }); } else { readImageScaled(file, 1400, (url)=>{ if (!url){ toast("Could not read that image."); return; } if (url.length > 1300000){ toast("That image is too large."); return; } update({ document: url, documentName: file.name, documentKind: "image" }); }); } };
   const addField = ()=> update({ fields: fields.concat([{ id: uid(), label: "New field", kind: "text" }]) });
   const setField = (id, patch)=> update({ fields: fields.map((f)=> f.id === id ? { ...f, ...patch } : f) });
@@ -1120,6 +1165,12 @@ function DocumentControls({ q, update }){
           <img src={q.document} alt="" style={{width:"100%",display:"block"}} />
           {fields.filter((f)=> f.placed && typeof f.x === "number").map((f)=>(<span key={f.id} className="doc-pin" style={{left:f.x + "%", top:f.y + "%"}} title="Click to remove" onClick={(e)=>{ e.stopPropagation(); setField(f.id, { x:undefined, y:undefined, placed:false }); if (placing === f.id) setPlacing(null); }}>{f.label}</span>))}
         </div>
+      </>)}
+      {q.documentKind === "pdf" && q.document && (<>
+        <div className="panel-section">Position on the document</div>
+        <div className="hint" style={{marginBottom:8}}>{pdfFailed ? "Inline placement is unavailable here. Fields will appear in a list below the document." : (placing ? "Click a page to drop the field." : "Pick a field, then click a page to place it. Click a pin to remove it. Unplaced fields show below the document.")}</div>
+        {!pdfFailed && fields.length > 0 && <div className="row" style={{gap:6,flexWrap:"wrap",marginBottom:8}}>{fields.map((f)=>(<button key={f.id} type="button" className={"btn sm" + (placing === f.id ? " primary" : (f.placed ? "" : " ghost"))} onClick={()=>setPlacing(placing === f.id ? null : f.id)}>{f.placed ? "\u25c9 " : ""}{f.label}</button>))}</div>}
+        <PdfDoc src={q.document} onError={()=>setPdfFailed(true)} fallback={<div className="hint">Could not render the PDF for inline placement.</div>} onPageClick={(i, e, pageEl)=>{ if (!placing) return; const r = pageEl.getBoundingClientRect(); if (!r.width || !r.height) return; const x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)); const y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)); setField(placing, { page: i, x: Math.round(x*10)/10, y: Math.round(y*10)/10, placed: true }); setPlacing(null); }} renderOverlay={(i)=> fields.filter((f)=> f.placed && typeof f.x === "number" && (f.page || 0) === i).map((f)=>(<span key={f.id} className="doc-pin" style={{left:f.x + "%", top:f.y + "%"}} title="Click to remove" onClick={(e)=>{ e.stopPropagation(); setField(f.id, { x:undefined, y:undefined, page:undefined, placed:false }); if (placing === f.id) setPlacing(null); }}>{f.label}</span>))} />
       </>)}
       <div className="panel-section">Response requirements</div>
       <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
@@ -2562,6 +2613,8 @@ function PublicForm({ username, slug }){
   const [doneScore, setDoneScore] = useState(null);
   const [disq, setDisq] = useState(false);
   const [lang, setLang] = useState("");
+  const [already, setAlready] = useState(false);
+  useEffect(()=>{ const f = st.form; if (!f) return; const ss = (f.schema && f.schema.settings) || {}; if (ss.oneResponse){ try { if (window.localStorage && window.localStorage.getItem("zq-done-" + f.id) === "1") setAlready(true); } catch (e) {} } }, [st.form]);
   useEffect(()=>{
     const wl = (st.form && st.form.schema && st.form.schema.settings) || null;
     if (!wl) return;
@@ -2608,6 +2661,10 @@ function PublicForm({ username, slug }){
     const bookedSched = !disq ? (((form.schema && form.schema.questions) || []).filter((q)=> q.type === "scheduling" && typeof doneAnswers[q.id] === "string" && doneAnswers[q.id])) : [];
     return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
+  if (already && !done){
+    const set2 = (lform.schema && lform.schema.settings) || {};
+    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set2.headerImage && <img className="fheader-img" src={set2.headerImage} alt="" />}<div className="ftitle" style={{marginTop:6}}>You already responded</div><p className="fdesc">It looks like you already submitted this form from this browser. Thanks again.</p></div></div></div></div>);
+  }
   const submit = (answers, extra) => {
     extra = extra || {};
     setSubmitting(true);
@@ -2616,6 +2673,7 @@ function PublicForm({ username, slug }){
       if (ok && data && data.ok){
         const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
         if (r && !extra.disqualified){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
+        const _one = form.schema && form.schema.settings && form.schema.settings.oneResponse; if (_one && !extra.disqualified){ try { if (window.localStorage) window.localStorage.setItem("zq-done-" + form.id, "1"); } catch (e) {} }
         setDoneAnswers(answers); if (data.score != null) setDoneScore({ score: data.score, max: data.maxScore }); setDisq(!!extra.disqualified); setDone(true);
       }
       else { const code = data && data.error; const msg = code === "form_closed" ? "This form just closed." : code === "slot_full" ? "That time was just booked. Please choose another." : (code === "slot_too_soon" || code === "slot_past") ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : "Something went wrong. Please try again."; window.alert(msg); }
@@ -3604,6 +3662,8 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Field label="Opens at (optional)"><input className="input" type="datetime-local" value={toLocalInput(form.schema.settings.opensAt)} onChange={(e)=>setSettings({opensAt: fromLocalInput(e.target.value)})} /></Field>
       <Field label="Closes at (optional)"><input className="input" type="datetime-local" value={toLocalInput(form.schema.settings.closesAt)} onChange={(e)=>setSettings({closesAt: fromLocalInput(e.target.value)})} /></Field>
       <div className="hint">The form stops accepting responses when the limit is reached or after the close time. Times use this browser's timezone.</div>
+      <Toggle checked={!!form.schema.settings.oneResponse} onChange={(c)=>setSettings({oneResponse:c})} label="Limit to one response per browser" />
+      <div className="hint">A visitor who already submitted from this browser sees a short message instead of the form. This is a light check and can be bypassed by clearing browser data.</div>
       <div className="panel-section">After submission</div>
       <div className="hint" style={{marginBottom:8}}>Tip: insert an answer with the picker, or type a reference like {"{{Your name}}"} to greet people by their answer.</div>
       <Field label="Thank-you heading"><PipeInput value={form.schema.settings.endTitle} onChange={(v)=>setSettings({endTitle:v})} placeholder="Thank you" questions={form.schema.questions} /></Field>
@@ -4432,20 +4492,32 @@ function ResponsesTab({ id, form }){
   const [rows, setRows] = useState(null);
   const [open, setOpen] = useState(null);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [query, setQuery] = useState("");
+  const [statusF, setStatusF] = useState("all");
+  const [variantF, setVariantF] = useState("all");
   useEffect(()=>{ api.responses(id).then(({data})=> setRows((data && data.responses) || [])); },[id]);
   const labels = useMemo(()=>{ const m={}; (form.schema.questions||[]).forEach(q=>{ if (QTYPES[q.type] && QTYPES[q.type].isInput) m[q.id]=q.label||q.id; }); return m; },[form]);
   const previewCols = useMemo(()=> Object.keys(labels).slice(0,2), [labels]);
+  const experiment = !!(form.schema && form.schema.settings && form.schema.settings.experiment);
+  const variants = useMemo(()=>{ const set = {}; (rows||[]).forEach((r)=>{ const v = r.meta && r.meta.variant; if (v) set[v] = true; }); return Object.keys(set).sort(); }, [rows]);
   const cell = (v)=>{ if (v===null||v===undefined) return ""; if (Array.isArray(v)) return v.join(", "); if (typeof v==="object") return Object.keys(v).map(k=>k+": "+(Array.isArray(v[k])?v[k].join("/"):v[k])).join(" | "); return String(v); };
+  const rowText = (r)=>{ const parts = []; const d = r.data || {}; Object.keys(d).forEach((k)=>{ parts.push(cell(d[k])); }); const mm = r.meta || {}; parts.push(mm.city || "", mm.country || "", mm.browser || "", mm.os || ""); return parts.join(" ").toLowerCase(); };
+  const filtered = (rows || []).filter((r)=>{ const mm = r.meta || {}; if (statusF === "completed" && mm.disqualified) return false; if (statusF === "screenout" && !mm.disqualified) return false; if (experiment && variantF !== "all" && mm.variant !== variantF) return false; const qq = query.trim().toLowerCase(); if (qq && rowText(r).indexOf(qq) === -1) return false; return true; });
   if (rows === null) return <div className="muted">Loading...</div>;
   if (rows.length === 0) return <div className="card empty"><p>No responses yet.</p></div>;
   return (
     <div>
-      <div className="between" style={{marginBottom:12}}><span className="muted">{rows.length} response{rows.length===1?"":"s"}</span><ExportButtons id={id} form={form} rows={rows} /></div>
+      <div className="resp-filter" style={{marginBottom:10,display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <input className="input" style={{flex:1,minWidth:160}} placeholder="Search responses" value={query} onChange={(e)=>setQuery(e.target.value)} />
+        <select className="select" style={{width:"auto",flex:"none"}} value={statusF} onChange={(e)=>setStatusF(e.target.value)}><option value="all">All responses</option><option value="completed">Completed</option><option value="screenout">Screened out</option></select>
+        {experiment && variants.length > 0 && <select className="select" style={{width:"auto",flex:"none"}} value={variantF} onChange={(e)=>setVariantF(e.target.value)}><option value="all">All variants</option>{variants.map((v)=>(<option key={v} value={v}>Variant {v}</option>))}</select>}
+      </div>
+      <div className="between" style={{marginBottom:12}}><span className="muted">{filtered.length === rows.length ? (rows.length + " response" + (rows.length===1?"":"s")) : (filtered.length + " of " + rows.length + " shown")}</span><ExportButtons id={id} form={form} rows={rows} /></div>
       <div className="card" style={{overflowX:"auto"}}>
         <table className="table">
           <thead><tr><th>Submitted</th><th className="hide-sm">Location</th><th className="hide-sm">Device</th>{previewCols.map(c=>(<th key={c}>{labels[c]}</th>))}<th></th></tr></thead>
           <tbody>
-            {rows.map(r=>(
+            {filtered.map(r=>(
               <tr key={r.id} className="clickable" onClick={()=>setOpen(r)}>
                 <td style={{fontSize:13}}>{fmtDate(r.created_at)}</td>
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.city, r.meta.country].filter(Boolean).join(", ") || "-"}</td>
@@ -4457,6 +4529,7 @@ function ResponsesTab({ id, form }){
           </tbody>
         </table>
       </div>
+      {filtered.length === 0 && <div className="muted" style={{marginTop:10,fontSize:13}}>No responses match your filters.</div>}
       {open && (
         <Modal title={"Response · " + fmtDate(open.created_at)} onClose={()=>setOpen(null)}>
           <div className="pad-lg">
@@ -4683,6 +4756,7 @@ function AnalyticsTab({ id, form }){
       {(()=>{ const st = (form.schema && form.schema.settings) || {}; if (!st.experiment) return null; const c = {}; rows.forEach((r)=>{ const v = (r.meta && r.meta.variant) || "Unassigned"; c[v] = (c[v] || 0) + 1; }); const entries = Object.entries(c).sort((a,b)=> a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0)); const mx = Math.max(1, ...entries.map((e)=>e[1])); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>A/B variants</div>{entries.map(([k,n],i)=>(<div className="bar-row" key={i}><span className="k">{k === "Unassigned" ? k : ("Variant " + k)}</span><span className="track2"><span className="fill" style={{width:((n / mx) * 100) + "%"}}></span></span><span className="v">{n}</span></div>))}<div className="hint" style={{marginTop:8}}>How responses split across variants.</div></div>); })()}
       {(()=>{ const dq = rows.filter((r)=> r.meta && r.meta.disqualified).length; if (!dq) return null; const total = rows.length || 1; return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>Screen-outs</div><div className="statgrid"><div><div className="bignum">{dq}</div><div className="hint">Disqualified</div></div><div><div className="bignum">{Math.round((dq / total) * 100)}%</div><div className="hint">Of responses</div></div></div></div>); })()}
       <div className="card pad-lg"><div className="label">Total responses</div><div style={{fontFamily:"var(--display)",fontSize:46,fontWeight:600,lineHeight:1}}>{a.total || 0}</div></div>
+      {(()=>{ const secs = rows.map((r)=> r.meta && typeof r.meta.seconds === "number" ? r.meta.seconds : null).filter((x)=> x != null && x > 0); if (!secs.length) return null; const avg = secs.reduce((x,y)=>x+y,0) / secs.length; const sorted = secs.slice().sort((x,y)=>x-y); const mid = Math.floor(sorted.length / 2); const med = sorted.length % 2 ? sorted[mid] : (sorted[mid-1] + sorted[mid]) / 2; const fmt = (v)=>{ v = Math.round(v); if (v < 60) return v + "s"; const m = Math.floor(v/60); const r2 = v % 60; return m + "m" + (r2 ? (" " + r2 + "s") : ""); }; return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>Time to complete</div><div className="statgrid"><div><div className="bignum">{fmt(avg)}</div><div className="hint">Average</div></div><div><div className="bignum">{fmt(med)}</div><div className="hint">Median</div></div><div><div className="bignum">{secs.length}</div><div className="hint">Timed</div></div></div></div>); })()}
       {tone && <ToneCard tone={tone} />}
       {inputQs.length > 0 && <div className="label" style={{marginTop:4}}>Question breakdown</div>}
       {inputQs.map((q)=><QuestionStat key={q.id} q={q} rows={rows} />)}

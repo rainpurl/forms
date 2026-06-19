@@ -537,3 +537,21 @@ After someone books a time, the thank-you screen shows a booking card with the c
 ## Server-side scheduling enforcement
 
 submitResponse now validates scheduling answers on the server before recording, so the booking page checks are no longer only advisory. For each scheduling question that was answered it confirms the chosen start matches a defined slot (otherwise slot_invalid), rejects a time in the past (slot_past), rejects a time inside the minimum notice window (slot_too_soon), and counts existing bookings for that slot to reject one that is at or over capacity (slot_full), using the per-slot capacity or the group capacity default. Each rejection returns HTTP 409 with the error code, and the public form turns these into clear messages such as asking the visitor to choose another time. The capacity count is read at submit time, so under heavy concurrency it is still close to but not a hard atomic guarantee.
+
+## Completion time analytics
+
+The analytics tab shows a Time to complete card with the average and median seconds taken to finish, plus how many responses were timed. It reads meta.seconds, which the renderer records as the elapsed time from first paint to submit, and skips responses without a timing. Values are formatted as seconds under a minute and minutes and seconds above.
+
+## Search and filter responses
+
+The responses tab has a search box plus a status filter and, when A/B testing is on, a variant filter. Search matches the query against every answer in a response and against the location and device, all lowercased. Status filters to completed or screened-out using meta.disqualified. The variant filter matches meta.variant. The count line shows how many of the total are visible, and the table shows a short message when nothing matches. Export still covers the full set, not just the filtered view.
+
+## Limit to one response per browser
+
+A new setting, oneResponse, makes the public form remember that this browser already submitted. On a successful non-screened-out submit the form writes a per-form key into localStorage (zq-done-<formId>), and on load it shows a short You already responded screen instead of the form when that key is present. It is a light client-side check that a visitor can bypass by clearing browser data, which is stated in the setting hint, and it never blocks anyone who has not submitted.
+
+## PDF rendering for signed documents
+
+Signed documents that are PDFs now render page by page instead of in a bare iframe. A PdfDoc component lazy-loads PDF.js from cdnjs (pdf.min.js plus the matching worker), opens the data URL with getDocument, and draws each page onto its own canvas stacked vertically. Fields can be positioned directly on any page: the field model gained an optional page index (defaulting to page zero, which keeps image placement unchanged), and DocumentControls renders the PDF pages with click-to-place, storing page plus x and y percent per field. On the public form, placed fields overlay the correct page using the same percent coordinates, and unplaced fields still list below.
+
+PDF.js is loaded from a CDN at view time, so it needs network access. If the library fails to load or a PDF cannot be parsed, PdfDoc reports an error and the renderer falls back to the previous iframe with every field shown in the list below, and the builder shows a short notice instead of inline placement. Canvas rendering itself is exercised in real browsers; the structure, paging, overlays, positioning, placement math, and fallback were verified in tests with PDF.js mocked.
