@@ -341,3 +341,13 @@ You can now weave an earlier answer into text shown later in the same response, 
 References work in question text, section titles and descriptions, text and graphic blocks, and the thank-you screen. On the thank-you settings there is an insert answer picker that drops the right reference in for you, and you can also type a reference by hand anywhere. References resolve by the question label, or by its internal id, and a reference to a question that has not been answered yet simply shows nothing.
 
 This pairs naturally with branching: you can route someone to a section and greet them there using an answer they already gave.
+
+## Per-option quotas
+
+Multiple choice questions can now cap how many people pick a given choice. On the question card, each choice has a small number box next to it: set a number to limit that choice, or leave it blank for no limit.
+
+On the public form, a choice that has reached its limit is shown but cannot be selected. In a list it is dimmed and marked Full; in a dropdown it reads (full) and is disabled. The counts are live, computed from the responses received so far, so choices close automatically as they fill.
+
+Renaming a choice keeps its limit attached to it. This works for both single and multiple selection and for the dropdown display.
+
+Two things to know. Enforcement is soft, like the overall response cap and the meeting slot capacity: the count and the new submission are not a single atomic step, so a burst of simultaneous submissions could push a choice slightly over its limit. And if every choice on a required question fills up, respondents cannot complete that question, so for tightly capped forms it is worth pairing option limits with the overall response cap in Form settings or watching the totals.

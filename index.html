@@ -498,6 +498,12 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 .pipe-row{display:flex;align-items:center;gap:6px;margin-top:6px}
 .pipe-select{flex:1;font-size:12px;padding:6px 8px}
+
+.wq-quota{width:48px;flex:none;text-align:center;border:1px solid var(--line-strong);border-radius:8px;padding:6px 4px;font-size:13px;background:var(--card);color:var(--ink)}
+.wq-quota::placeholder{color:var(--ink-soft)}
+.wq-quota-hint{font-size:11px;color:var(--ink-soft);margin-top:6px}
+.form-scope .opt.full{opacity:.55}
+.form-scope .opt .opt-full{display:inline-block;margin-left:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:5px;padding:1px 5px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -1710,9 +1716,16 @@ const QTYPES = {
       q,
       value,
       onChange,
-      error
+      error,
+      counts
     }) => {
       const opts = useMemo(() => q.randomize ? shuffle(q.options) : q.options, [q.id]);
+      const quotas = q.quotas || {};
+      const cnt = counts || {};
+      const isFull = o => {
+        const lim = parseInt(quotas[o], 10);
+        return lim > 0 && (cnt[o] || 0) >= lim;
+      };
       if (q.display === "dropdown") {
         return /*#__PURE__*/React.createElement("div", {
           className: "q"
@@ -1724,10 +1737,14 @@ const QTYPES = {
           onChange: ev => onChange(ev.target.value)
         }, /*#__PURE__*/React.createElement("option", {
           value: ""
-        }, "Select..."), opts.map((o, i) => /*#__PURE__*/React.createElement("option", {
-          key: i,
-          value: o
-        }, o))), error && /*#__PURE__*/React.createElement("div", {
+        }, "Select..."), opts.map((o, i) => {
+          const full = isFull(o) && value !== o;
+          return /*#__PURE__*/React.createElement("option", {
+            key: i,
+            value: o,
+            disabled: full
+          }, o, full ? " (full)" : "");
+        })), error && /*#__PURE__*/React.createElement("div", {
           className: "ferr"
         }, error));
       }
@@ -1742,14 +1759,18 @@ const QTYPES = {
         q: q
       }), opts.map((o, i) => {
         const sel = multi ? arr.includes(o) : value === o;
+        const full = isFull(o) && !sel;
         return /*#__PURE__*/React.createElement("label", {
-          className: "opt" + (sel ? " sel" : ""),
+          className: "opt" + (sel ? " sel" : "") + (full ? " full" : ""),
           key: i
         }, /*#__PURE__*/React.createElement("input", {
           type: multi ? "checkbox" : "radio",
           checked: sel,
+          disabled: full,
           onChange: () => toggle(o)
-        }), /*#__PURE__*/React.createElement("span", null, o));
+        }), /*#__PURE__*/React.createElement("span", null, o, full ? /*#__PURE__*/React.createElement("span", {
+          className: "opt-full"
+        }, "Full") : null));
       }), error && /*#__PURE__*/React.createElement("div", {
         className: "ferr"
       }, error));
@@ -3080,7 +3101,8 @@ function FormRenderer({
   preview,
   onSubmit,
   submitting,
-  bookings
+  bookings,
+  optionCounts
 }) {
   const questions = form.schema.questions || [];
   const settings = form.schema.settings || {};
@@ -3435,6 +3457,7 @@ function FormRenderer({
       onChange: v => setA(q.id, v),
       error: errors[q.id],
       bookings: bookings && bookings[q.id],
+      counts: optionCounts && optionCounts[q.id],
       formId: form.id,
       preview: preview
     }), renderFollowup(q));
@@ -3495,7 +3518,8 @@ function PublicForm({
         loading: false,
         form: data.form,
         availability: data.availability,
-        bookings: data.bookings
+        bookings: data.bookings,
+        optionCounts: data.optionCounts
       });
     });
     return () => {
@@ -3625,7 +3649,8 @@ function PublicForm({
     form: form,
     onSubmit: submit,
     submitting: submitting,
-    bookings: st.bookings
+    bookings: st.bookings,
+    optionCounts: st.optionCounts
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
@@ -4413,19 +4438,48 @@ function MCCanvas({
   update
 }) {
   const marker = q.multi ? "sq" : "rd";
+  const quotas = q.quotas || {};
   const setOpt = (i, v) => {
     const o = q.options.slice();
+    const old = o[i];
     o[i] = v;
+    let qz = q.quotas;
+    if (qz && old !== v && Object.prototype.hasOwnProperty.call(qz, old)) {
+      qz = {
+        ...qz
+      };
+      qz[v] = qz[old];
+      delete qz[old];
+    }
     update({
-      options: o
+      options: o,
+      quotas: qz
+    });
+  };
+  const setQuota = (o, val) => {
+    const qz = {
+      ...(q.quotas || {})
+    };
+    const n = parseInt(val, 10);
+    if (n > 0) qz[o] = n;else delete qz[o];
+    update({
+      quotas: qz
     });
   };
   const add = () => update({
     options: q.options.concat(["Option " + (q.options.length + 1)])
   });
-  const rm = i => update({
-    options: q.options.filter((_, k) => k !== i)
-  });
+  const rm = i => {
+    const removed = q.options[i];
+    const qz = {
+      ...(q.quotas || {})
+    };
+    delete qz[removed];
+    update({
+      options: q.options.filter((_, k) => k !== i),
+      quotas: qz
+    });
+  };
   return /*#__PURE__*/React.createElement("div", null, q.display === "dropdown" && /*#__PURE__*/React.createElement("div", {
     className: "mono",
     style: {
@@ -4443,6 +4497,14 @@ function MCCanvas({
     placeholder: "Click to write Choice " + (i + 1),
     value: o,
     onChange: e => setOpt(i, e.target.value)
+  }), /*#__PURE__*/React.createElement("input", {
+    className: "wq-quota",
+    type: "number",
+    min: "0",
+    placeholder: "∞",
+    title: "Limit how many can pick this (blank for no limit)",
+    value: quotas[o] || "",
+    onChange: e => setQuota(o, e.target.value)
   }), /*#__PURE__*/React.createElement("button", {
     className: "iconbtn",
     style: {
@@ -4455,7 +4517,9 @@ function MCCanvas({
   }, "×"))), /*#__PURE__*/React.createElement("button", {
     className: "wq-addchoice",
     onClick: add
-  }, "+ Add choice"));
+  }, "+ Add choice"), /*#__PURE__*/React.createElement("div", {
+    className: "wq-quota-hint"
+  }, "Numbers cap how many people can pick each choice. Blank means no limit."));
 }
 function SliderPrev({
   q

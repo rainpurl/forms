@@ -504,6 +504,12 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 
 .pipe-row{display:flex;align-items:center;gap:6px;margin-top:6px}
 .pipe-select{flex:1;font-size:12px;padding:6px 8px}
+
+.wq-quota{width:48px;flex:none;text-align:center;border:1px solid var(--line-strong);border-radius:8px;padding:6px 4px;font-size:13px;background:var(--card);color:var(--ink)}
+.wq-quota::placeholder{color:var(--ink-soft)}
+.wq-quota-hint{font-size:11px;color:var(--ink-soft);margin-top:6px}
+.form-scope .opt.full{opacity:.55}
+.form-scope .opt .opt-full{display:inline-block;margin-left:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:5px;padding:1px 5px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -891,15 +897,17 @@ const QTYPES = {
         </div>
       );
     },
-    Renderer: ({ q, value, onChange, error }) => {
+    Renderer: ({ q, value, onChange, error, counts }) => {
       const opts = useMemo(()=> q.randomize ? shuffle(q.options) : q.options, [q.id]);
+      const quotas = q.quotas || {}; const cnt = counts || {};
+      const isFull = (o) => { const lim = parseInt(quotas[o], 10); return lim > 0 && (cnt[o] || 0) >= lim; };
       if (q.display === "dropdown"){
         return (
           <div className="q">
             <QLabel q={q} />
             <select className="finput" value={value || ""} onChange={(ev)=>onChange(ev.target.value)}>
               <option value="">Select...</option>
-              {opts.map((o,i)=>(<option key={i} value={o}>{o}</option>))}
+              {opts.map((o,i)=>{ const full = isFull(o) && value !== o; return (<option key={i} value={o} disabled={full}>{o}{full ? " (full)" : ""}</option>); })}
             </select>
             {error && <div className="ferr">{error}</div>}
           </div>
@@ -916,10 +924,11 @@ const QTYPES = {
           <QLabel q={q} />
           {opts.map((o,i)=>{
             const sel = multi ? arr.includes(o) : value === o;
+            const full = isFull(o) && !sel;
             return (
-              <label className={"opt" + (sel ? " sel" : "")} key={i}>
-                <input type={multi ? "checkbox" : "radio"} checked={sel} onChange={()=>toggle(o)} />
-                <span>{o}</span>
+              <label className={"opt" + (sel ? " sel" : "") + (full ? " full" : "")} key={i}>
+                <input type={multi ? "checkbox" : "radio"} checked={sel} disabled={full} onChange={()=>toggle(o)} />
+                <span>{o}{full ? <span className="opt-full">Full</span> : null}</span>
               </label>
             );
           })}
@@ -1506,7 +1515,7 @@ function qVisible(q, answers){
   return arr ? arr.includes(val) : (txt === val);
 }
 
-function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
+function FormRenderer({ form, preview, onSubmit, submitting, bookings, optionCounts }){
   const questions = form.schema.questions || [];
   const settings = form.schema.settings || {};
   const conversational = !!settings.conversational;
@@ -1645,7 +1654,7 @@ function FormRenderer({ form, preview, onSubmit, submitting, bookings }){
         {multi && <div className="fprogress"><div className="fprogress-bar" style={{width:((pos / total) * 100) + "%"}}></div></div>}
         <div className="fpage" key={cur} style={{marginTop:12}}>
           {sec && sec.title ? (<div className="form-section"><div className="form-section-title">{pipeText(sec.title, answers, questions)}</div>{sec.desc ? <div className="form-section-desc">{pipeText(sec.desc, answers, questions)}</div> : null}</div>) : null}
-          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; const pq = pipeQuestion(q, answers, questions); return (<div key={q.id}><R q={pq} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
+          {shown.map((q)=>{ const def = QTYPES[q.type]; if (!def) return null; const R = def.Renderer; const pq = pipeQuestion(q, answers, questions); return (<div key={q.id}><R q={pq} value={answers[q.id]} onChange={(v)=>setA(q.id, v)} error={errors[q.id]} bookings={bookings && bookings[q.id]} counts={optionCounts && optionCounts[q.id]} formId={form.id} preview={preview} />{renderFollowup(q)}</div>); })}
           {shown.length === 0 && <div className="muted" style={{fontSize:13}}>Nothing to show on this step.</div>}
         </div>
         <div className="fnav" style={{marginTop:18}}>
@@ -1672,7 +1681,7 @@ function PublicForm({ username, slug }){
     api.publicForm(username, slug).then(({ok,data})=>{
       if (!m) return;
       if (!ok || !data || data.error || !data.form) setSt({ loading:false, notFound:true });
-      else setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings });
+      else setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings, optionCounts:data.optionCounts });
     });
     return ()=>{ m = false; };
   },[username, slug]);
@@ -1707,7 +1716,7 @@ function PublicForm({ username, slug }){
   };
   return (
     <div className="form-page"><div className="form-page-inner">
-      <FormRenderer form={form} onSubmit={submit} submitting={submitting} bookings={st.bookings} />
+      <FormRenderer form={form} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} />
       <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>
     </div></div>
   );
@@ -1921,9 +1930,16 @@ function FullMsg({ text, onBack }){
 
 function MCCanvas({ q, update }){
   const marker = q.multi ? "sq" : "rd";
-  const setOpt = (i, v) => { const o = q.options.slice(); o[i] = v; update({ options: o }); };
+  const quotas = q.quotas || {};
+  const setOpt = (i, v) => {
+    const o = q.options.slice(); const old = o[i]; o[i] = v;
+    let qz = q.quotas;
+    if (qz && old !== v && Object.prototype.hasOwnProperty.call(qz, old)){ qz = { ...qz }; qz[v] = qz[old]; delete qz[old]; }
+    update({ options: o, quotas: qz });
+  };
+  const setQuota = (o, val) => { const qz = { ...(q.quotas || {}) }; const n = parseInt(val, 10); if (n > 0) qz[o] = n; else delete qz[o]; update({ quotas: qz }); };
   const add = () => update({ options: q.options.concat(["Option " + (q.options.length + 1)]) });
-  const rm = (i) => update({ options: q.options.filter((_, k) => k !== i) });
+  const rm = (i) => { const removed = q.options[i]; const qz = { ...(q.quotas || {}) }; delete qz[removed]; update({ options: q.options.filter((_, k) => k !== i), quotas: qz }); };
   return (
     <div>
       {q.display === "dropdown" && <div className="mono" style={{fontSize:11,color:"var(--ink-soft)",marginBottom:6}}>Shown as a dropdown</div>}
@@ -1931,10 +1947,12 @@ function MCCanvas({ q, update }){
         <div className="wq-choice" key={i}>
           <span className={"wq-mark " + marker}></span>
           <input className="wq-choice-input" placeholder={"Click to write Choice " + (i + 1)} value={o} onChange={(e)=>setOpt(i, e.target.value)} />
+          <input className="wq-quota" type="number" min="0" placeholder="∞" title="Limit how many can pick this (blank for no limit)" value={quotas[o] || ""} onChange={(e)=>setQuota(o, e.target.value)} />
           <button className="iconbtn" style={{width:26,height:26}} title="Remove choice" disabled={q.options.length <= 1} onClick={()=>rm(i)}>×</button>
         </div>
       ))}
       <button className="wq-addchoice" onClick={add}>+ Add choice</button>
+      <div className="wq-quota-hint">Numbers cap how many people can pick each choice. Blank means no limit.</div>
     </div>
   );
 }

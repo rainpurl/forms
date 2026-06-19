@@ -350,12 +350,18 @@ async function publicForm(username, slug, env) {
   const cap = parseInt(settings.responseCap, 10);
   if (cap > 0) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(row.id).first(); count = (cr && cr.c) || 0; }
   const availability = formAvailability(!!row.is_open, settings, count);
-  let bookings = null;
+  let bookings = null, optionCounts = null;
   const schedQs = (schema.questions || []).filter((qq)=> qq && qq.type === "scheduling");
-  if (schedQs.length){
-    bookings = {}; schedQs.forEach((qq)=>{ bookings[qq.id] = {}; });
-    const br = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ?").bind(row.id).all();
-    (br.results || []).forEach((rr)=>{ const dd = safeParse(rr.data, {}); schedQs.forEach((qq)=>{ const vv = dd[qq.id]; if (typeof vv === "string" && vv){ bookings[qq.id][vv] = (bookings[qq.id][vv] || 0) + 1; } }); });
+  const quotaQs = (schema.questions || []).filter((qq)=> qq && qq.type === "multiple_choice" && qq.quotas && Object.keys(qq.quotas).length);
+  if (schedQs.length || quotaQs.length){
+    if (schedQs.length){ bookings = {}; schedQs.forEach((qq)=>{ bookings[qq.id] = {}; }); }
+    if (quotaQs.length){ optionCounts = {}; quotaQs.forEach((qq)=>{ optionCounts[qq.id] = {}; }); }
+    const rsp = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ?").bind(row.id).all();
+    (rsp.results || []).forEach((rr)=>{
+      const dd = safeParse(rr.data, {});
+      schedQs.forEach((qq)=>{ const vv = dd[qq.id]; if (typeof vv === "string" && vv){ bookings[qq.id][vv] = (bookings[qq.id][vv] || 0) + 1; } });
+      quotaQs.forEach((qq)=>{ const vv = dd[qq.id]; if (Array.isArray(vv)){ vv.forEach((o)=>{ optionCounts[qq.id][o] = (optionCounts[qq.id][o] || 0) + 1; }); } else if (typeof vv === "string" && vv){ optionCounts[qq.id][vv] = (optionCounts[qq.id][vv] || 0) + 1; } });
+    });
   }
   return json({
     form: {
@@ -369,6 +375,7 @@ async function publicForm(username, slug, env) {
     },
     availability,
     bookings,
+    optionCounts,
   });
 }
 

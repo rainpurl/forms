@@ -149,3 +149,7 @@ Input questions can branch the respondent forward. In the question editor, the S
 ## Piped text
 
 Weave an earlier answer into later text. Write a reference like a question label in double braces, for example Thanks, {{Your name}}. References work in question text, section titles and descriptions, text and graphic blocks, and the thank-you screen, and the thank-you settings include an insert answer picker. References resolve by question label or id, and an unanswered reference shows nothing.
+
+## Per-option quotas
+
+Cap how many people can pick a multiple choice option. Each choice on the question card has a number box; set a limit or leave it blank for none. On the public form a full choice is shown but not selectable (dimmed and marked Full in a list, (full) in a dropdown), with counts computed live from responses. Renaming a choice keeps its limit. Enforcement is soft (like the response cap), and if every choice on a required question fills, respondents cannot finish it.
