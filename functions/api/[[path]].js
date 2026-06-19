@@ -379,6 +379,32 @@ async function publicForm(username, slug, env) {
   });
 }
 
+function scoreQuestionPoints(q, data){
+  const pts = q.points || {};
+  const vals = Array.isArray(data) ? data : (data === undefined || data === null || data === "" ? [] : [data]);
+  if (q.type === "multiple_choice"){
+    let score = 0; vals.forEach((v)=>{ const p = Number(pts[v]); if (!isNaN(p)) score += p; });
+    const all = (q.options || []).map((o)=> Number(pts[o]) || 0);
+    const max = q.multi ? all.filter((p)=> p > 0).reduce((a,b)=> a + b, 0) : Math.max(0, ...all);
+    return { score, max };
+  }
+  if (q.type === "image_choice"){
+    const opts = q.options || [];
+    const vp = {}; opts.forEach((opt, i)=>{ vp[opt.label || ("Choice " + (i + 1))] = Number(pts[opt.id]) || 0; });
+    let score = 0; vals.forEach((v)=>{ const p = vp[v]; if (typeof p === "number" && !isNaN(p)) score += p; });
+    const all = opts.map((opt)=> Number(pts[opt.id]) || 0);
+    const max = q.multi ? all.filter((p)=> p > 0).reduce((a,b)=> a + b, 0) : Math.max(0, ...all);
+    return { score, max };
+  }
+  return { score: 0, max: 0 };
+}
+function scoreResponse(schema, data){
+  const qs = (schema.questions || []).filter((q)=> q && (q.type === "multiple_choice" || q.type === "image_choice") && q.points && Object.keys(q.points).length);
+  let score = 0, max = 0;
+  qs.forEach((q)=>{ const r = scoreQuestionPoints(q, data[q.id]); score += r.score; max += r.max; });
+  return { score: Math.round(score * 100) / 100, max: Math.round(max * 100) / 100, scored: qs.length };
+}
+
 async function submitResponse(formId, request, env, context) {
   const form = await env.DB.prepare("SELECT id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
   if (!form) return json({ error: "not_found" }, 404);
@@ -414,6 +440,11 @@ async function submitResponse(formId, request, env, context) {
   };
 
   const id = crypto.randomUUID();
+  let scoreInfo = null;
+  try {
+    const schemaS = safeParse(form.schema, {});
+    if (schemaS.settings && schemaS.settings.scoring){ scoreInfo = scoreResponse(schemaS, data); meta.score = scoreInfo.score; meta.maxScore = scoreInfo.max; }
+  } catch (e) {}
   await env.DB.prepare(
     "INSERT INTO responses (id, form_id, data, meta) VALUES (?, ?, ?, ?)"
   ).bind(id, formId, JSON.stringify(data), JSON.stringify(meta)).run();
@@ -426,7 +457,7 @@ async function submitResponse(formId, request, env, context) {
     }
   } catch (e) {}
 
-  return json({ ok: true, id });
+  return json({ ok: true, id, score: scoreInfo ? scoreInfo.score : null, maxScore: scoreInfo ? scoreInfo.max : null });
 }
 
 async function fireWebhook(url, formId, data, meta, questions){
@@ -513,6 +544,7 @@ async function exportCsv(user, id, env) {
 
   const schema = safeParse(form.schema, { questions: [] });
   const questions = (schema.questions || []).filter((q) => q.type !== "text_graphic" && q.type !== "page_break" && q.type !== "block");
+  const scoring = !!(schema.settings && schema.settings.scoring);
 
   const { results } = await env.DB.prepare(
     "SELECT id, data, meta, created_at FROM responses WHERE form_id = ? ORDER BY created_at ASC"
@@ -520,6 +552,7 @@ async function exportCsv(user, id, env) {
 
   const header = ["response_id", "submitted_at", "country", "city", "region", "browser", "os"];
   questions.forEach((q) => header.push(q.label || q.heading || q.id));
+  if (scoring) { header.push("score"); header.push("max_score"); }
 
   const lines = [header.map(csvCell).join(",")];
   for (const r of (results || [])) {
@@ -530,6 +563,7 @@ async function exportCsv(user, id, env) {
       meta.region || "", meta.browser || "", meta.os || "",
     ];
     questions.forEach((q) => row.push(formatAnswer(data[q.id])));
+    if (scoring) { row.push(meta.score != null ? meta.score : ""); row.push(meta.maxScore != null ? meta.maxScore : ""); }
     lines.push(row.map(csvCell).join(","));
   }
 

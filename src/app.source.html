@@ -536,6 +536,11 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .dd-add{margin-top:4px}
 .dd-selects{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 .dd-sel-label{font-size:12px;font-weight:600;color:var(--fa);margin-bottom:4px}
+
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.score-opt{flex:1;min-width:0;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-pts{width:74px;flex:none;text-align:center}
+.fscore{margin-top:10px;font-size:18px;font-weight:700;color:var(--fa)}
 </style>
 </head>
 <body>
@@ -883,7 +888,7 @@ function ImageChoiceRenderer({ q, value, onChange, error }){
     </div>
   );
 }
-function ImageChoiceControls({ q, update }){
+function ImageChoiceControls({ q, update, scoring }){
   const { toast } = useApp();
   const opts = Array.isArray(q.options) ? q.options : [];
   const setOpt = (id, patch)=> update({ options: opts.map((o)=> o.id === id ? { ...o, ...patch } : o) });
@@ -906,6 +911,9 @@ function ImageChoiceControls({ q, update }){
         </div>
       ))}
       <button className="btn sm" style={{marginTop:8}} onClick={addOpt}>Add choice</button>
+      {scoring && (<><div className="panel-section">Scoring</div>
+      <div className="hint" style={{marginBottom:6}}>Points awarded for each choice.</div>
+      {opts.map((o, i)=>(<div key={o.id} className="score-row"><span className="score-opt" title={o.label}>{o.label || ("Choice " + (i + 1))}</span><input className="input score-pts" type="number" value={(q.points && q.points[o.id]) || ""} onChange={(e)=>{ const p = { ...(q.points || {}) }; const n = e.target.value; if (n === "") delete p[o.id]; else p[o.id] = Number(n); update({ points:p }); }} /></div>))}</>)}
       <div className="panel-section">Response requirements</div>
       <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
       <Toggle checked={!!q.request} onChange={(c)=>update({request:c})} label="Request response" />
@@ -1912,6 +1920,7 @@ function PublicForm({ username, slug }){
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [doneAnswers, setDoneAnswers] = useState({});
+  const [doneScore, setDoneScore] = useState(null);
   useEffect(()=>{
     const wl = (st.form && st.form.schema && st.form.schema.settings) || null;
     if (!wl) return;
@@ -1945,7 +1954,7 @@ function PublicForm({ username, slug }){
   if (done){
     const set = (form.schema && form.schema.settings) || {};
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
-    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}<div style={{fontSize:38,color:"var(--fa)"}}>✓</div><div className="ftitle" style={{marginTop:6}}>{pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you"}</div><p className="fdesc">{pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded."}</p>{set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div>{!set.hideBranding && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
+    return (<div className="form-page"><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}<div style={{fontSize:38,color:"var(--fa)"}}>✓</div><div className="ftitle" style={{marginTop:6}}>{pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you"}</div><p className="fdesc">{pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded."}</p>{set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div>{!set.hideBranding && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
   const submit = (answers, extra) => {
     extra = extra || {};
@@ -1955,7 +1964,7 @@ function PublicForm({ username, slug }){
       if (ok && data && data.ok){
         const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
         if (r){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
-        setDoneAnswers(answers); setDone(true);
+        setDoneAnswers(answers); if (data.score != null) setDoneScore({ score: data.score, max: data.maxScore }); setDone(true);
       }
       else window.alert((data && data.error === "form_closed") ? "This form just closed." : "Something went wrong. Please try again.");
     });
@@ -2179,9 +2188,10 @@ function MCCanvas({ q, update }){
   const quotas = q.quotas || {};
   const setOpt = (i, v) => {
     const o = q.options.slice(); const old = o[i]; o[i] = v;
-    let qz = q.quotas;
-    if (qz && old !== v && Object.prototype.hasOwnProperty.call(qz, old)){ qz = { ...qz }; qz[v] = qz[old]; delete qz[old]; }
-    update({ options: o, quotas: qz });
+    const patch = { options: o };
+    if (q.quotas && old !== v && Object.prototype.hasOwnProperty.call(q.quotas, old)){ const qz = { ...q.quotas }; qz[v] = qz[old]; delete qz[old]; patch.quotas = qz; }
+    if (q.points && old !== v && Object.prototype.hasOwnProperty.call(q.points, old)){ const pp = { ...q.points }; pp[v] = pp[old]; delete pp[old]; patch.points = pp; }
+    update(patch);
   };
   const setQuota = (o, val) => { const qz = { ...(q.quotas || {}) }; const n = parseInt(val, 10); if (n > 0) qz[o] = n; else delete qz[o]; update({ quotas: qz }); };
   const add = () => update({ options: q.options.concat(["Option " + (q.options.length + 1)]) });
@@ -2331,7 +2341,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
   );
 }
 
-function MCControls({ q, update }){
+function MCControls({ q, update, scoring }){
   const setCount = (n) => {
     n = Math.max(1, Math.min(20, n));
     let o = q.options.slice();
@@ -2360,6 +2370,9 @@ function MCControls({ q, update }){
         </select>
       </Field>
       <Toggle checked={!!q.randomize} onChange={(c)=>update({randomize:c})} label="Randomize choice order" />
+      {scoring && (<><div className="panel-section">Scoring</div>
+      <div className="hint" style={{marginBottom:6}}>Points awarded for each choice.</div>
+      {q.options.map((o, i)=>(<div key={i} className="score-row"><span className="score-opt" title={o}>{o || ("Choice " + (i + 1))}</span><input className="input score-pts" type="number" value={(q.points && q.points[o]) || ""} onChange={(e)=>{ const p = { ...(q.points || {}) }; const n = e.target.value; if (n === "") delete p[o]; else p[o] = Number(n); update({ points:p }); }} /></div>))}</>)}
       <div className="panel-section">Response requirements</div>
       <Toggle checked={!!q.required} onChange={(c)=>update({required:c})} label="Force response" />
       <div style={{height:8}}></div>
@@ -2648,7 +2661,7 @@ function ActionControls({ q, update }){
   );
 }
 
-function LeftEditor({ q, update, questions, setQuestions }){
+function LeftEditor({ q, update, questions, setQuestions, scoring }){
   const changeType = (type) => {
     if (type === q.type) return;
     const made = QTYPES[type].make();
@@ -2666,7 +2679,7 @@ function LeftEditor({ q, update, questions, setQuestions }){
           {QTYPE_ORDER.map((t)=>(<option key={t} value={t}>{QTYPES[t].label}</option>))}
         </select>
       </Field>
-      {q.type === "multiple_choice" && <MCControls q={q} update={update} />}
+      {q.type === "multiple_choice" && <MCControls q={q} update={update} scoring={scoring} />}
       {q.type === "text_entry" && <TextControls q={q} update={update} />}
       {q.type === "slider" && <SliderControls q={q} update={update} />}
       {q.type === "nps" && <NpsControls q={q} update={update} />}
@@ -2682,7 +2695,7 @@ function LeftEditor({ q, update, questions, setQuestions }){
       {q.type === "scheduling" && <SchedulingControls q={q} update={update} />}
       {q.type === "document_sign" && <DocumentControls q={q} update={update} />}
       {q.type === "file_upload" && <FileUploadControls q={q} update={update} />}
-      {q.type === "image_choice" && <ImageChoiceControls q={q} update={update} />}
+      {q.type === "image_choice" && <ImageChoiceControls q={q} update={update} scoring={scoring} />}
       {q.type === "number_entry" && <NumberControls q={q} update={update} />}
       {q.type === "drill_down" && <DrillControls q={q} update={update} />}
       {q.type === "hidden_field" && <HiddenControls q={q} update={update} />}
@@ -2754,6 +2767,11 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <Toggle checked={!!form.schema.settings.randomizeBlocks} onChange={(c)=>setSettings({randomizeBlocks:c})} label="Randomize section order" />
       <div style={{height:8}}></div>
       <Toggle checked={!!form.schema.settings.conversational} onChange={(c)=>setSettings({conversational:c})} label="Conversational mode (one question at a time)" />
+      <div className="panel-section">Scoring</div>
+      <Toggle checked={!!form.schema.settings.scoring} onChange={(c)=>setSettings({scoring:c})} label="Enable scoring (quiz mode)" />
+      <div style={{height:8}}></div>
+      <Toggle checked={!!form.schema.settings.showScore} onChange={(c)=>setSettings({showScore:c})} label="Show the score on the thank-you screen" />
+      <div className="hint">Turn this on, then set points per choice on multiple choice and image choice questions. The score is calculated when the form is submitted, and appears in exports and analytics.</div>
       <div className="panel-section">Availability and limits</div>
       <Field label="Response limit (0 for unlimited)"><input className="input" type="number" min="0" value={form.schema.settings.responseCap || 0} onChange={(e)=>setSettings({responseCap: parseInt(e.target.value || "0", 10)})} /></Field>
       <Field label="Opens at (optional)"><input className="input" type="datetime-local" value={toLocalInput(form.schema.settings.opensAt)} onChange={(e)=>setSettings({opensAt: fromLocalInput(e.target.value)})} /></Field>
@@ -2995,7 +3013,7 @@ function Builder({ formId }){
 
           <div className="b-panel">
             {mode === "edit" && (selQ
-              ? <LeftEditor q={selQ} update={(p)=>updateQ(selQ.id, p)} questions={questions} setQuestions={setQuestions} />
+              ? <LeftEditor q={selQ} update={(p)=>updateQ(selQ.id, p)} questions={questions} setQuestions={setQuestions} scoring={!!(form.schema.settings && form.schema.settings.scoring)} />
               : <div><div className="panel-title">Edit question</div><div className="muted" style={{fontSize:14}}>Select a question in the canvas to edit it here, or add a new question.</div></div>)}
             {mode === "theme" && <ThemePanel form={form} setTheme={setTheme} setSettings={setSettings} />}
             {mode === "brand" && <BrandStudio form={form} setTheme={setTheme} setSettings={setSettings} />}
@@ -3629,6 +3647,7 @@ function AnalyticsTab({ id, form }){
   return (
     <div style={{display:"grid",gridTemplateColumns:"1fr",gap:18,maxWidth:680}}>
       <ExportButtons id={id} form={form} rows={rows} />
+      {(()=>{ const sc = rows.filter((r)=> r.meta && typeof r.meta.score === "number"); if (!sc.length) return null; const avg = sc.reduce((a,r)=> a + r.meta.score, 0) / sc.length; const mx = sc.reduce((a,r)=> Math.max(a, r.meta.maxScore || 0), 0); const best = sc.reduce((a,r)=> Math.max(a, r.meta.score), -Infinity); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>Quiz scores</div><div className="statgrid"><div><div className="bignum">{Math.round(avg * 100) / 100}{mx ? (" / " + mx) : ""}</div><div className="hint">Average</div></div><div><div className="bignum">{best}</div><div className="hint">Highest</div></div><div><div className="bignum">{sc.length}</div><div className="hint">Scored</div></div></div></div>); })()}
       <div className="card pad-lg"><div className="label">Total responses</div><div style={{fontFamily:"var(--display)",fontSize:46,fontWeight:600,lineHeight:1}}>{a.total || 0}</div></div>
       {tone && <ToneCard tone={tone} />}
       {inputQs.length > 0 && <div className="label" style={{marginTop:4}}>Question breakdown</div>}

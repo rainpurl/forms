@@ -169,3 +169,7 @@ A numeric input with a minimum, maximum, step, optional decimals, and a prefix o
 ## Drill-down
 
 Cascading dropdowns where each pick reveals the next level (for example Country then State then City). Build the choices as a tree and name each level. Changing a parent clears its children, and a required question must be drilled to a leaf. The answer is stored as the full path (Europe / France).
+
+## Scoring and quiz mode
+
+Enable scoring in Form settings to turn a form into a quiz. A points box then appears for each choice on multiple choice and image choice questions. The score is computed server-side on submit, optionally shown on the thank-you screen (You scored X out of Y), exported as score and max_score columns, and summarized in analytics (average, highest, count). Per question, the maximum is the best single choice for single-answer questions and the sum of positive choices for multiple-answer ones. Renaming an option keeps its points.

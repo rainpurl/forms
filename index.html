@@ -530,6 +530,11 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .dd-add{margin-top:4px}
 .dd-selects{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 .dd-sel-label{font-size:12px;font-weight:600;color:var(--fa);margin-bottom:4px}
+
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.score-opt{flex:1;min-width:0;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-pts{width:74px;flex:none;text-align:center}
+.fscore{margin-top:10px;font-size:18px;font-weight:700;color:var(--fa)}
 </style>
 </head>
 <body>
@@ -1559,7 +1564,8 @@ function ImageChoiceRenderer({
 }
 function ImageChoiceControls({
   q,
-  update
+  update,
+  scoring
 }) {
   const {
     toast
@@ -1674,7 +1680,34 @@ function ImageChoiceControls({
       marginTop: 8
     },
     onClick: addOpt
-  }, "Add choice"), /*#__PURE__*/React.createElement("div", {
+  }, "Add choice"), scoring && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Scoring"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 6
+    }
+  }, "Points awarded for each choice."), opts.map((o, i) => /*#__PURE__*/React.createElement("div", {
+    key: o.id,
+    className: "score-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "score-opt",
+    title: o.label
+  }, o.label || "Choice " + (i + 1)), /*#__PURE__*/React.createElement("input", {
+    className: "input score-pts",
+    type: "number",
+    value: q.points && q.points[o.id] || "",
+    onChange: e => {
+      const p = {
+        ...(q.points || {})
+      };
+      const n = e.target.value;
+      if (n === "") delete p[o.id];else p[o.id] = Number(n);
+      update({
+        points: p
+      });
+    }
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.required,
@@ -4114,6 +4147,7 @@ function PublicForm({
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [doneAnswers, setDoneAnswers] = useState({});
+  const [doneScore, setDoneScore] = useState(null);
   useEffect(() => {
     const wl = st.form && st.form.schema && st.form.schema.settings || null;
     if (!wl) return;
@@ -4232,7 +4266,9 @@ function PublicForm({
       }
     }, pipeText(set.endTitle, doneAnswers, form.schema && form.schema.questions || []) || "Thank you"), /*#__PURE__*/React.createElement("p", {
       className: "fdesc"
-    }, pipeText(set.endMessage, doneAnswers, form.schema && form.schema.questions || []) || "Your response has been recorded."), set.endButtonLabel && btnUrl && /*#__PURE__*/React.createElement("a", {
+    }, pipeText(set.endMessage, doneAnswers, form.schema && form.schema.questions || []) || "Your response has been recorded."), set.showScore && doneScore && /*#__PURE__*/React.createElement("div", {
+      className: "fscore"
+    }, "You scored ", doneScore.score, " out of ", doneScore.max), set.endButtonLabel && btnUrl && /*#__PURE__*/React.createElement("a", {
       className: "fcta",
       href: btnUrl,
       target: "_blank",
@@ -4276,6 +4312,10 @@ function PublicForm({
           return;
         }
         setDoneAnswers(answers);
+        if (data.score != null) setDoneScore({
+          score: data.score,
+          max: data.maxScore
+        });
         setDone(true);
       } else window.alert(data && data.error === "form_closed" ? "This form just closed." : "Something went wrong. Please try again.");
     });
@@ -5082,18 +5122,26 @@ function MCCanvas({
     const o = q.options.slice();
     const old = o[i];
     o[i] = v;
-    let qz = q.quotas;
-    if (qz && old !== v && Object.prototype.hasOwnProperty.call(qz, old)) {
-      qz = {
-        ...qz
+    const patch = {
+      options: o
+    };
+    if (q.quotas && old !== v && Object.prototype.hasOwnProperty.call(q.quotas, old)) {
+      const qz = {
+        ...q.quotas
       };
       qz[v] = qz[old];
       delete qz[old];
+      patch.quotas = qz;
     }
-    update({
-      options: o,
-      quotas: qz
-    });
+    if (q.points && old !== v && Object.prototype.hasOwnProperty.call(q.points, old)) {
+      const pp = {
+        ...q.points
+      };
+      pp[v] = pp[old];
+      delete pp[old];
+      patch.points = pp;
+    }
+    update(patch);
   };
   const setQuota = (o, val) => {
     const qz = {
@@ -5518,7 +5566,8 @@ function CanvasCard({
 }
 function MCControls({
   q,
-  update
+  update,
+  scoring
 }) {
   const setCount = n => {
     n = Math.max(1, Math.min(20, n));
@@ -5590,7 +5639,34 @@ function MCControls({
       randomize: c
     }),
     label: "Randomize choice order"
-  }), /*#__PURE__*/React.createElement("div", {
+  }), scoring && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Scoring"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 6
+    }
+  }, "Points awarded for each choice."), q.options.map((o, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "score-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "score-opt",
+    title: o
+  }, o || "Choice " + (i + 1)), /*#__PURE__*/React.createElement("input", {
+    className: "input score-pts",
+    type: "number",
+    value: q.points && q.points[o] || "",
+    onChange: e => {
+      const p = {
+        ...(q.points || {})
+      };
+      const n = e.target.value;
+      if (n === "") delete p[o];else p[o] = Number(n);
+      update({
+        points: p
+      });
+    }
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.required,
@@ -6391,7 +6467,8 @@ function LeftEditor({
   q,
   update,
   questions,
-  setQuestions
+  setQuestions,
+  scoring
 }) {
   const changeType = type => {
     if (type === q.type) return;
@@ -6415,7 +6492,8 @@ function LeftEditor({
     value: t
   }, QTYPES[t].label)))), q.type === "multiple_choice" && /*#__PURE__*/React.createElement(MCControls, {
     q: q,
-    update: update
+    update: update,
+    scoring: scoring
   }), q.type === "text_entry" && /*#__PURE__*/React.createElement(TextControls, {
     q: q,
     update: update
@@ -6465,7 +6543,8 @@ function LeftEditor({
     update: update
   }), q.type === "image_choice" && /*#__PURE__*/React.createElement(ImageChoiceControls, {
     q: q,
-    update: update
+    update: update,
+    scoring: scoring
   }), q.type === "number_entry" && /*#__PURE__*/React.createElement(NumberControls, {
     q: q,
     update: update
@@ -6703,6 +6782,26 @@ function SettingsPanel({
     }),
     label: "Conversational mode (one question at a time)"
   }), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Scoring"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!form.schema.settings.scoring,
+    onChange: c => setSettings({
+      scoring: c
+    }),
+    label: "Enable scoring (quiz mode)"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8
+    }
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!form.schema.settings.showScore,
+    onChange: c => setSettings({
+      showScore: c
+    }),
+    label: "Show the score on the thank-you screen"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Turn this on, then set points per choice on multiple choice and image choice questions. The score is calculated when the form is submitted, and appears in exports and analytics."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Availability and limits"), /*#__PURE__*/React.createElement(Field, {
     label: "Response limit (0 for unlimited)"
@@ -7446,7 +7545,8 @@ function Builder({
     q: selQ,
     update: p => updateQ(selQ.id, p),
     questions: questions,
-    setQuestions: setQuestions
+    setQuestions: setQuestions,
+    scoring: !!(form.schema.settings && form.schema.settings.scoring)
   }) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "panel-title"
   }, "Edit question"), /*#__PURE__*/React.createElement("div", {
@@ -9162,7 +9262,35 @@ function AnalyticsTab({
     id: id,
     form: form,
     rows: rows
-  }), /*#__PURE__*/React.createElement("div", {
+  }), (() => {
+    const sc = rows.filter(r => r.meta && typeof r.meta.score === "number");
+    if (!sc.length) return null;
+    const avg = sc.reduce((a, r) => a + r.meta.score, 0) / sc.length;
+    const mx = sc.reduce((a, r) => Math.max(a, r.meta.maxScore || 0), 0);
+    const best = sc.reduce((a, r) => Math.max(a, r.meta.score), -Infinity);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card pad-lg"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "label",
+      style: {
+        marginBottom: 10
+      }
+    }, "Quiz scores"), /*#__PURE__*/React.createElement("div", {
+      className: "statgrid"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, Math.round(avg * 100) / 100, mx ? " / " + mx : ""), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Average")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, best), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Highest")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "bignum"
+    }, sc.length), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Scored"))));
+  })(), /*#__PURE__*/React.createElement("div", {
     className: "card pad-lg"
   }, /*#__PURE__*/React.createElement("div", {
     className: "label"

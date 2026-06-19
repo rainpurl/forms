@@ -377,3 +377,11 @@ On submit it checks that the value is a valid number, is within the range, and i
 Cascading dropdowns, where each choice reveals the next level. A common use is Country then State then City. You build the choices as a tree in the left panel: type a top-level option, then use the plus button on its row to add the options that appear once it is picked, and so on to any depth. Each level can be given a name (such as Country or State) that labels its dropdown.
 
 On the form, picking an option reveals the next dropdown; changing a higher-level choice clears the lower ones. When the question is required, the respondent must drill all the way to a final option with no further choices. The stored answer is the full path (for example Europe / France), which is what appears in exports, and analytics shows a bar chart of the most common full paths.
+
+## Scoring and quiz mode
+
+Forms can now be scored, turning them into quizzes or assessments. Enable it under Form settings in the Scoring section. There is a second toggle to show the score on the thank-you screen.
+
+Once scoring is on, a Scoring panel appears in the editor for multiple choice and image choice questions, with a points box for each choice. Set the points a choice is worth (they can be negative). For a single-answer question the most a respondent can earn is the highest single choice; for a multiple-answer question it is the sum of all the positive choices, so a respondent earns points for each correct pick.
+
+The score is calculated on the server when the form is submitted, so it cannot be tampered with from the browser. It is stored with the response, returned to the thank-you screen when that option is on (shown as You scored X out of Y), added to the CSV export as score and max_score columns, and summarized in analytics as a Quiz scores card with the average, the highest, and the number of scored responses. Renaming a multiple choice option keeps its points (and its quota) attached. Only multiple choice and image choice are scored for now; other types contribute nothing to the total.
