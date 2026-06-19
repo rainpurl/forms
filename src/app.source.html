@@ -658,6 +658,12 @@ table.cj-table td.cj-pickcell{padding:8px 6px;text-align:center}
 .cal-chip input{margin:0}
 .mt-tag{display:inline-block;margin-top:6px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
 .form-scope .slot-btn .slot-spots{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px}
+
+.form-scope .booking-card{margin-top:16px;border:1px solid var(--line-strong);border-radius:12px;padding:14px 16px;text-align:left;background:var(--card)}
+.form-scope .booking-when{font-weight:600;font-size:15px;margin-bottom:2px}
+.form-scope .booking-meta{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+.form-scope .booking-add{appearance:none;border:1px solid var(--fa);background:transparent;color:var(--fa);padding:8px 14px;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;transition:.12s}
+.form-scope .booking-add:hover{background:var(--fa);color:#fff}
 </style>
 </head>
 <body>
@@ -788,6 +794,35 @@ function fmtSlot(s){
   const d = new Date(s);
   if (isNaN(d)) return s;
   return d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+}
+function _icsPad(n){ return String(n).padStart(2, "0"); }
+function _icsStamp(d){ return d.getUTCFullYear() + _icsPad(d.getUTCMonth() + 1) + _icsPad(d.getUTCDate()) + "T" + _icsPad(d.getUTCHours()) + _icsPad(d.getUTCMinutes()) + _icsPad(d.getUTCSeconds()) + "Z"; }
+function buildICS(q, startISO){
+  const start = new Date(startISO); if (isNaN(start)) return "";
+  const dur = (q.duration && q.duration > 0) ? q.duration : 30;
+  const end = new Date(start.getTime() + dur * 60000);
+  const esc = (t)=> String(t == null ? "" : t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" };
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//zetetiq//booking//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "BEGIN:VEVENT",
+    "UID:" + (q.id || "evt") + "-" + start.getTime() + "@zetetiq",
+    "DTSTAMP:" + _icsStamp(new Date()),
+    "DTSTART:" + _icsStamp(start),
+    "DTEND:" + _icsStamp(end),
+    "SUMMARY:" + esc(q.meetingTitle || q.label || "Meeting")];
+  if (q.location) lines.push("LOCATION:" + esc(q.location));
+  if (q.video && q.video !== "none") lines.push("DESCRIPTION:" + esc((vl[q.video] || "Video") + " link will be provided."));
+  lines.push("END:VEVENT", "END:VCALENDAR");
+  return lines.join("\r\n");
+}
+function downloadICS(q, startISO){
+  try {
+    const ics = buildICS(q, startISO); if (!ics) return;
+    const blob = new Blob([ics], { type:"text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = (q.meetingTitle || "meeting").replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-|-$/g, "") + ".ics";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>{ try { URL.revokeObjectURL(url); } catch (e) {} }, 1000);
+  } catch (e) {}
 }
 function readFileDataUrl(file, maxBytes, cb){
   if (!file){ cb(null); return; }
@@ -2570,7 +2605,8 @@ function PublicForm({ username, slug }){
   if (done){
     const set = (lform.schema && lform.schema.settings) || {};
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
-    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
+    const bookedSched = !disq ? (((form.schema && form.schema.questions) || []).filter((q)=> q.type === "scheduling" && typeof doneAnswers[q.id] === "string" && doneAnswers[q.id])) : [];
+    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
   const submit = (answers, extra) => {
     extra = extra || {};
@@ -2582,7 +2618,7 @@ function PublicForm({ username, slug }){
         if (r && !extra.disqualified){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
         setDoneAnswers(answers); if (data.score != null) setDoneScore({ score: data.score, max: data.maxScore }); setDisq(!!extra.disqualified); setDone(true);
       }
-      else window.alert((data && data.error === "form_closed") ? "This form just closed." : "Something went wrong. Please try again.");
+      else { const code = data && data.error; const msg = code === "form_closed" ? "This form just closed." : code === "slot_full" ? "That time was just booked. Please choose another." : (code === "slot_too_soon" || code === "slot_past") ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : "Something went wrong. Please try again."; window.alert(msg); }
     });
   };
   return (

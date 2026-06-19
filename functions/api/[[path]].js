@@ -428,6 +428,39 @@ async function submitResponse(formId, request, env, context) {
   const body = await readJson(request) || {};
   const data = body.data && typeof body.data === "object" ? body.data : {};
 
+  {
+    const schemaV = safeParse(form.schema, { questions: [] });
+    const schedV = (schemaV.questions || []).filter((q) => q && q.type === "scheduling");
+    if (schedV.length) {
+      const nowV = Date.now();
+      let bookedCounts = null;
+      for (const q of schedV) {
+        const chosen = data[q.id];
+        if (typeof chosen !== "string" || !chosen) continue;
+        const slots = Array.isArray(q.slots) ? q.slots : [];
+        const slot = slots.find((sl) => sl.start === chosen);
+        if (!slot) return json({ error: "slot_invalid", question: q.id }, 409);
+        const start = new Date(chosen).getTime();
+        if (!isNaN(start)) {
+          if (start < nowV) return json({ error: "slot_past", question: q.id }, 409);
+          const minMs = (q.minNotice || 0) * 3600000;
+          if (start < nowV + minMs) return json({ error: "slot_too_soon", question: q.id }, 409);
+        }
+        const mt = q.meetingType || "one_on_one";
+        const cap = (slot.capacity == null) ? (mt === "group" ? (q.capacity || 1) : 1) : slot.capacity;
+        if (cap > 0) {
+          if (bookedCounts === null) {
+            const rr = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ?").bind(formId).all();
+            bookedCounts = {};
+            (rr.results || []).forEach((row) => { const dd = safeParse(row.data, {}); schedV.forEach((qq) => { const vv = dd[qq.id]; if (typeof vv === "string" && vv) { const k = qq.id + "\u0001" + vv; bookedCounts[k] = (bookedCounts[k] || 0) + 1; } }); });
+          }
+          const used = bookedCounts[q.id + "\u0001" + chosen] || 0;
+          if (used >= cap) return json({ error: "slot_full", question: q.id }, 409);
+        }
+      }
+    }
+  }
+
   const cf = request.cf || {};
   const ua = request.headers.get("user-agent") || "";
   const meta = {
