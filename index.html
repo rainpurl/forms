@@ -447,6 +447,30 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .bk-actions{display:flex;gap:8px;margin-top:10px}
 .embed-frame{margin-top:6px}
 .form-scope .embed-frame iframe{display:block}
+
+.mt-card{border:1px solid var(--line-strong);border-radius:10px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
+.mt-title{font-weight:600;font-size:15px;color:var(--fs)}
+.mt-meta{font-size:13px;color:var(--ink-soft);margin-top:2px}
+.slot-wrap{display:flex;flex-direction:column;gap:14px}
+.slot-day .slot-date{font-size:13px;font-weight:600;color:var(--fs);margin-bottom:7px}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.slot-btn{position:relative;border:1px solid var(--line-strong);background:var(--card);border-radius:9px;padding:10px 8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--fs)}
+.slot-btn:hover:not(:disabled){border-color:var(--fa)}
+.slot-btn.sel{background:var(--fa);color:#fff;border-color:var(--fa)}
+.slot-btn:disabled{opacity:.5;cursor:not-allowed}
+.slot-full{display:block;font-size:9px;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.doc-view{display:block;margin-bottom:6px}
+.doc-fields{margin-top:14px;display:flex;flex-direction:column;gap:14px}
+.himg-preview{display:flex;align-items:center;gap:10px;margin-top:4px}
+.himg-preview img{max-height:40px;border:1px solid var(--line);border-radius:6px}
+.slot-edit{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.slot-edit-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.slot-edit-when{flex:1;font-size:13px}
+.slot-cap{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-soft)}
+.slot-cap input{width:50px;padding:5px 6px}
+.doc-field-edit{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.doc-field-edit input{flex:1;min-width:0}
+.doc-field-edit select{width:118px;flex:none}
 </style>
 </head>
 <body>
@@ -650,6 +674,600 @@ const Ctx = createContext(null);
 const useApp = () => useContext(Ctx);
 
 /* ----------------------------- question registry ----------------------------- */
+function fmtSlot(s) {
+  if (!s) return "";
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  }) + " at " + d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+function readFileDataUrl(file, maxBytes, cb) {
+  if (!file) {
+    cb(null);
+    return;
+  }
+  if (file.size && maxBytes && file.size > maxBytes) {
+    cb(null);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onerror = () => cb(null);
+  reader.onload = () => {
+    const r = reader.result;
+    if (typeof r === "string" && maxBytes && r.length > maxBytes * 1.4) {
+      cb(null);
+      return;
+    }
+    cb(r);
+  };
+  reader.readAsDataURL(file);
+}
+function SigPad({
+  value,
+  onChange,
+  error,
+  height
+}) {
+  const ref = useRef(null);
+  const drawing = useRef(false);
+  const last = useRef(null);
+  const ctxOf = () => {
+    try {
+      const c = ref.current;
+      return c && c.getContext ? c.getContext("2d") : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const pos = e => {
+    const c = ref.current;
+    const r = c.getBoundingClientRect();
+    const t = e.touches && e.touches[0] ? e.touches[0] : e;
+    const sx = r.width ? c.width / r.width : 1;
+    const sy = r.height ? c.height / r.height : 1;
+    return {
+      x: (t.clientX - r.left) * sx,
+      y: (t.clientY - r.top) * sy
+    };
+  };
+  const start = e => {
+    const ctx = ctxOf();
+    if (!ctx) return;
+    drawing.current = true;
+    last.current = pos(e);
+  };
+  const move = e => {
+    if (!drawing.current) return;
+    const ctx = ctxOf();
+    if (!ctx) return;
+    if (e.cancelable && e.preventDefault) e.preventDefault();
+    const p = pos(e);
+    ctx.strokeStyle = "#1b1830";
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(last.current.x, last.current.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    last.current = p;
+  };
+  const end = () => {
+    if (!drawing.current) return;
+    drawing.current = false;
+    const c = ref.current;
+    if (c && c.toDataURL) onChange(c.toDataURL("image/png"));
+  };
+  const clear = () => {
+    const c = ref.current;
+    const ctx = ctxOf();
+    if (c && ctx) ctx.clearRect(0, 0, c.width, c.height);
+    onChange("");
+  };
+  useEffect(() => {
+    const c = ref.current;
+    const ctx = ctxOf();
+    if (!c || !ctx || !value || typeof value !== "string" || value.indexOf("data:") !== 0) return;
+    const img = new window.Image();
+    img.onload = () => {
+      try {
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+      } catch (e) {}
+    };
+    img.src = value;
+  }, []);
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "sigpad" + (error ? " err" : "")
+  }, /*#__PURE__*/React.createElement("canvas", {
+    ref: ref,
+    width: 520,
+    height: height || 160,
+    className: "sigcanvas",
+    onMouseDown: start,
+    onMouseMove: move,
+    onMouseUp: end,
+    onMouseLeave: end,
+    onTouchStart: start,
+    onTouchMove: move,
+    onTouchEnd: end
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "sigrow"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sighint"
+  }, "Draw your signature above"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "fbtn-ghost sm",
+    onClick: clear
+  }, "Clear")));
+}
+function SchedulingRenderer({
+  q,
+  value,
+  onChange,
+  error,
+  bookings
+}) {
+  const slots = Array.isArray(q.slots) ? q.slots : [];
+  const counts = bookings || {};
+  const now = Date.now();
+  const groups = {};
+  const order = [];
+  slots.forEach(s => {
+    const d = new Date(s.start);
+    const key = isNaN(d) ? "Other" : d.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric"
+    });
+    if (!groups[key]) {
+      groups[key] = [];
+      order.push(key);
+    }
+    groups[key].push(s);
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q"
+  }, /*#__PURE__*/React.createElement(QLabel, {
+    q: q
+  }), (q.meetingTitle || q.duration || q.location) && /*#__PURE__*/React.createElement("div", {
+    className: "mt-card"
+  }, q.meetingTitle && /*#__PURE__*/React.createElement("div", {
+    className: "mt-title"
+  }, q.meetingTitle), /*#__PURE__*/React.createElement("div", {
+    className: "mt-meta"
+  }, [q.duration ? q.duration + " min" : "", q.location || ""].filter(Boolean).join(" \u00b7 "))), slots.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No times have been added yet.") : /*#__PURE__*/React.createElement("div", {
+    className: "slot-wrap"
+  }, order.map(day => /*#__PURE__*/React.createElement("div", {
+    key: day,
+    className: "slot-day"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "slot-date"
+  }, day), /*#__PURE__*/React.createElement("div", {
+    className: "slot-grid"
+  }, groups[day].map(s => {
+    const d = new Date(s.start);
+    const tlabel = isNaN(d) ? s.start : d.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit"
+    });
+    const cap = s.capacity == null ? 1 : s.capacity;
+    const used = counts[s.start] || 0;
+    const full = cap > 0 && used >= cap;
+    const past = !isNaN(d) && d.getTime() < now;
+    const disabled = full || past;
+    const isSel = value === s.start;
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: s.id || s.start,
+      className: "slot-btn" + (isSel ? " sel" : ""),
+      disabled: disabled && !isSel,
+      onClick: () => onChange(s.start)
+    }, tlabel, full ? /*#__PURE__*/React.createElement("span", {
+      className: "slot-full"
+    }, "Full") : null);
+  }))))), error && /*#__PURE__*/React.createElement("div", {
+    className: "ferr"
+  }, error));
+}
+function DocumentSignRenderer({
+  q,
+  value,
+  onChange,
+  error
+}) {
+  const fields = Array.isArray(q.fields) ? q.fields : [];
+  const data = value && value.fields || {};
+  const setField = (fid, v) => onChange({
+    fields: {
+      ...data,
+      [fid]: v
+    }
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q"
+  }, /*#__PURE__*/React.createElement(QLabel, {
+    q: q
+  }), q.document ? q.documentKind === "pdf" ? /*#__PURE__*/React.createElement("iframe", {
+    className: "doc-view",
+    src: q.document,
+    title: q.documentName || "Document",
+    style: {
+      width: "100%",
+      height: 520,
+      border: "1px solid var(--line-strong)",
+      borderRadius: 10
+    }
+  }) : /*#__PURE__*/React.createElement("img", {
+    className: "doc-view",
+    src: q.document,
+    alt: q.documentName || "Document",
+    style: {
+      maxWidth: "100%",
+      border: "1px solid var(--line-strong)",
+      borderRadius: 10
+    }
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No document attached."), q.documentName && /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, q.documentName), /*#__PURE__*/React.createElement("div", {
+    className: "doc-fields"
+  }, fields.map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.id,
+    className: "doc-field"
+  }, f.kind === "check" ? /*#__PURE__*/React.createElement("label", {
+    className: "opt-radio"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!data[f.id],
+    onChange: e => setField(f.id, e.target.checked)
+  }), /*#__PURE__*/React.createElement("span", null, f.label)) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, f.label), f.kind === "signature" ? /*#__PURE__*/React.createElement(SigPad, {
+    value: data[f.id],
+    onChange: v => setField(f.id, v),
+    height: 120
+  }) : f.kind === "date" ? /*#__PURE__*/React.createElement("input", {
+    className: "finput",
+    type: "date",
+    value: data[f.id] || "",
+    onChange: e => setField(f.id, e.target.value),
+    style: {
+      maxWidth: 220
+    }
+  }) : f.kind === "long" ? /*#__PURE__*/React.createElement("textarea", {
+    className: "finput",
+    value: data[f.id] || "",
+    onChange: e => setField(f.id, e.target.value),
+    style: {
+      minHeight: 80
+    }
+  }) : /*#__PURE__*/React.createElement("input", {
+    className: "finput",
+    value: data[f.id] || "",
+    onChange: e => setField(f.id, e.target.value)
+  }))))), error && /*#__PURE__*/React.createElement("div", {
+    className: "ferr"
+  }, error));
+}
+function SchedulingControls({
+  q,
+  update
+}) {
+  const slots = Array.isArray(q.slots) ? q.slots : [];
+  const [newSlot, setNewSlot] = useState("");
+  const add = () => {
+    if (!newSlot) return;
+    update({
+      slots: slots.concat([{
+        id: uid(),
+        start: newSlot,
+        capacity: 1
+      }])
+    });
+    setNewSlot("");
+  };
+  const remove = id => update({
+    slots: slots.filter(s => s.id !== id)
+  });
+  const setCap = (id, c) => update({
+    slots: slots.map(s => s.id === id ? {
+      ...s,
+      capacity: c
+    } : s)
+  });
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Field, {
+    label: "Meeting title"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.meetingTitle || "",
+    onChange: e => update({
+      meetingTitle: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Duration (min)",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "5",
+    value: q.duration || 30,
+    onChange: e => update({
+      duration: parseInt(e.target.value || "0", 10)
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Location / link",
+    style: {
+      flex: 2
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "Video call, address",
+    value: q.location || "",
+    onChange: e => update({
+      location: e.target.value
+    })
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Available times"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "datetime-local",
+    value: newSlot,
+    onChange: e => setNewSlot(e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
+    onClick: add,
+    disabled: !newSlot
+  }, "Add")), /*#__PURE__*/React.createElement("div", {
+    className: "slot-edit"
+  }, slots.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13,
+      marginTop: 8
+    }
+  }, "No times added yet.") : slots.map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.id,
+    className: "slot-edit-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "slot-edit-when"
+  }, fmtSlot(s.start)), /*#__PURE__*/React.createElement("label", {
+    className: "slot-cap"
+  }, "cap", /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "1",
+    value: s.capacity == null ? 1 : s.capacity,
+    onChange: e => setCap(s.id, parseInt(e.target.value || "1", 10))
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "Remove",
+    onClick: () => remove(s.id)
+  }, "×")))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function DocumentControls({
+  q,
+  update
+}) {
+  const {
+    toast
+  } = useApp();
+  const fields = Array.isArray(q.fields) ? q.fields : [];
+  const onUpload = file => {
+    if (!file) return;
+    if (file.type === "application/pdf") {
+      readFileDataUrl(file, 2000000, url => {
+        if (!url) {
+          toast("That PDF is too large (2MB max) or could not be read.");
+          return;
+        }
+        update({
+          document: url,
+          documentName: file.name,
+          documentKind: "pdf"
+        });
+      });
+    } else {
+      readImageScaled(file, 1400, url => {
+        if (!url) {
+          toast("Could not read that image.");
+          return;
+        }
+        if (url.length > 1300000) {
+          toast("That image is too large.");
+          return;
+        }
+        update({
+          document: url,
+          documentName: file.name,
+          documentKind: "image"
+        });
+      });
+    }
+  };
+  const addField = () => update({
+    fields: fields.concat([{
+      id: uid(),
+      label: "New field",
+      kind: "text"
+    }])
+  });
+  const setField = (id, patch) => update({
+    fields: fields.map(f => f.id === id ? {
+      ...f,
+      ...patch
+    } : f)
+  });
+  const removeField = id => update({
+    fields: fields.filter(f => f.id !== id)
+  });
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Document"), q.document ? /*#__PURE__*/React.createElement("div", {
+    className: "himg-preview"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mono",
+    style: {
+      fontSize: 12
+    }
+  }, q.documentName || "Document attached"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => update({
+      document: "",
+      documentName: "",
+      documentKind: "image"
+    })
+  }, "Remove")) : /*#__PURE__*/React.createElement("label", {
+    className: "himg-upload"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*,application/pdf",
+    style: {
+      display: "none"
+    },
+    onChange: e => {
+      const f = e.target.files && e.target.files[0];
+      onUpload(f);
+      e.target.value = "";
+    }
+  }), /*#__PURE__*/React.createElement("span", null, "Upload a document (image or PDF)")), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "People review this document, then fill in the fields below it. Images and PDFs are supported."), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Fields to fill"), fields.map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.id,
+    className: "doc-field-edit"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: f.label,
+    onChange: e => setField(f.id, {
+      label: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("select", {
+    className: "select",
+    value: f.kind,
+    onChange: e => setField(f.id, {
+      kind: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "text"
+  }, "Short text"), /*#__PURE__*/React.createElement("option", {
+    value: "long"
+  }, "Long text"), /*#__PURE__*/React.createElement("option", {
+    value: "date"
+  }, "Date"), /*#__PURE__*/React.createElement("option", {
+    value: "signature"
+  }, "Signature"), /*#__PURE__*/React.createElement("option", {
+    value: "check"
+  }, "Checkbox")), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    title: "Remove",
+    onClick: () => removeField(f.id)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    style: {
+      marginTop: 8
+    },
+    onClick: addField
+  }, "Add field"), /*#__PURE__*/React.createElement("div", {
+    className: "panel-section"
+  }, "Response requirements"), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.required,
+    onChange: c => update({
+      required: c
+    }),
+    label: "Force response"
+  }), /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.request,
+    onChange: c => update({
+      request: c
+    }),
+    label: "Request response"
+  }));
+}
+function DocSignAnswer({
+  q,
+  val
+}) {
+  const fields = q.fields || [];
+  const data = val && val.fields || {};
+  if (!fields.length) return /*#__PURE__*/React.createElement("span", {
+    className: "muted"
+  }, "No fields");
+  return /*#__PURE__*/React.createElement("div", null, fields.map(f => {
+    const v = data[f.id];
+    return /*#__PURE__*/React.createElement("div", {
+      key: f.id,
+      style: {
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "var(--ink-soft)"
+      }
+    }, f.label), f.kind === "signature" ? typeof v === "string" && v.indexOf("data:") === 0 ? /*#__PURE__*/React.createElement("img", {
+      src: v,
+      alt: "signature",
+      style: {
+        maxWidth: 240,
+        border: "1px solid var(--line)",
+        borderRadius: 8,
+        background: "#fff"
+      }
+    }) : /*#__PURE__*/React.createElement("span", {
+      className: "muted"
+    }, "Not signed") : f.kind === "check" ? v ? "Yes" : "No" : v || /*#__PURE__*/React.createElement("span", {
+      className: "muted"
+    }, "No answer"));
+  }));
+}
 function SignatureRenderer({
   q,
   value,
@@ -1056,58 +1674,23 @@ const QTYPES = {
     }, error))
   },
   scheduling: {
-    label: "Scheduling",
-    hint: "Let people book a time (Calendly and similar)",
-    isInput: false,
+    label: "Meeting signup",
+    hint: "Let people book one of your time slots",
+    isInput: true,
     make: () => ({
       type: "scheduling",
       id: uid(),
-      heading: "Book a time",
-      content: "Pick a slot that works for you.",
-      url: "",
-      embed: true
+      label: "Pick a meeting time",
+      required: false,
+      request: false,
+      meetingTitle: "Meeting",
+      duration: 30,
+      location: "",
+      slots: []
     }),
-    summary: q => q.heading || "scheduling",
-    validate: () => null,
-    Renderer: ({
-      q
-    }) => /*#__PURE__*/React.createElement("div", {
-      className: "q"
-    }, q.heading && /*#__PURE__*/React.createElement("div", {
-      className: "qlabel",
-      style: {
-        fontSize: 18
-      }
-    }, q.heading), q.content && /*#__PURE__*/React.createElement("div", {
-      style: {
-        color: "var(--ink-soft)",
-        whiteSpace: "pre-wrap",
-        marginBottom: 10
-      }
-    }, q.content), q.url ? q.embed !== false ? /*#__PURE__*/React.createElement("div", {
-      className: "embed-frame"
-    }, /*#__PURE__*/React.createElement("iframe", {
-      src: q.url,
-      title: "Scheduling",
-      loading: "lazy",
-      style: {
-        width: "100%",
-        height: 640,
-        border: 0,
-        borderRadius: 10,
-        background: "#fff"
-      }
-    })) : /*#__PURE__*/React.createElement("a", {
-      className: "fcta",
-      href: q.url,
-      target: "_blank",
-      rel: "noopener noreferrer"
-    }, "Open scheduler") : /*#__PURE__*/React.createElement("div", {
-      className: "muted",
-      style: {
-        fontSize: 13
-      }
-    }, "Add a scheduling link to show the booking widget."))
+    summary: q => (q.slots && q.slots.length || 0) + " time slots",
+    validate: (q, v) => q.required && !v ? "Please choose a time." : null,
+    Renderer: SchedulingRenderer
   },
   payment: {
     label: "Payment",
@@ -1151,46 +1734,52 @@ const QTYPES = {
       }
     }, "Add a payment link to show the payment button."))
   },
-  esign: {
-    label: "E-signature (DocuSign)",
-    hint: "Send people to a document to review and sign",
-    isInput: false,
+  document_sign: {
+    label: "Document to sign",
+    hint: "Upload a document and collect a signature",
+    isInput: true,
     make: () => ({
-      type: "esign",
+      type: "document_sign",
       id: uid(),
-      heading: "Review and sign",
-      content: "Please review and sign the document.",
-      url: "",
-      buttonText: "Review and sign"
+      label: "Review and sign",
+      required: false,
+      request: false,
+      document: "",
+      documentName: "",
+      documentKind: "image",
+      fields: [{
+        id: uid(),
+        label: "Full name",
+        kind: "text"
+      }, {
+        id: uid(),
+        label: "Signature",
+        kind: "signature"
+      }, {
+        id: uid(),
+        label: "Date",
+        kind: "date"
+      }]
     }),
-    summary: q => q.heading || "e-signature",
-    validate: () => null,
-    Renderer: ({
-      q
-    }) => /*#__PURE__*/React.createElement("div", {
-      className: "q"
-    }, q.heading && /*#__PURE__*/React.createElement("div", {
-      className: "qlabel",
-      style: {
-        fontSize: 18
+    summary: q => "document, " + (q.fields && q.fields.length || 0) + " fields",
+    validate: (q, v) => {
+      if (!q.required) return null;
+      const data = v && v.fields || {};
+      const fields = q.fields || [];
+      for (let i = 0; i < fields.length; i++) {
+        const f = fields[i];
+        const val = data[f.id];
+        if (f.kind === "check") {
+          if (!val) return "Please complete all fields.";
+        } else if (f.kind === "signature") {
+          if (!(typeof val === "string" && val.indexOf("data:") === 0)) return "Please sign the document.";
+        } else if (!val) {
+          return "Please complete all fields.";
+        }
       }
-    }, q.heading), q.content && /*#__PURE__*/React.createElement("div", {
-      style: {
-        color: "var(--ink-soft)",
-        whiteSpace: "pre-wrap",
-        marginBottom: 10
-      }
-    }, q.content), q.url ? /*#__PURE__*/React.createElement("a", {
-      className: "fcta",
-      href: q.url,
-      target: "_blank",
-      rel: "noopener noreferrer"
-    }, q.buttonText || "Review and sign") : /*#__PURE__*/React.createElement("div", {
-      className: "muted",
-      style: {
-        fontSize: 13
-      }
-    }, "Add a signing link to show the sign button."))
+      return null;
+    },
+    Renderer: DocumentSignRenderer
   },
   text_graphic: {
     label: "Text / graphic",
@@ -1886,7 +2475,7 @@ const QTYPES = {
     Renderer: () => null
   }
 };
-const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "signature", "scheduling", "payment", "esign", "text_graphic", "hidden_field", "page_break"];
+const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "signature", "scheduling", "payment", "document_sign", "text_graphic", "hidden_field", "page_break"];
 
 /* small shared bits */
 function Field({
@@ -2033,7 +2622,8 @@ function FormRenderer({
   form,
   preview,
   onSubmit,
-  submitting
+  submitting,
+  bookings
 }) {
   const questions = form.schema.questions || [];
   const settings = form.schema.settings || {};
@@ -2290,7 +2880,8 @@ function FormRenderer({
       q: q,
       value: answers[q.id],
       onChange: v => setA(q.id, v),
-      error: errors[q.id]
+      error: errors[q.id],
+      bookings: bookings && bookings[q.id]
     }), renderFollowup(q));
   }), shown.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "muted",
@@ -2347,7 +2938,8 @@ function PublicForm({
       });else setSt({
         loading: false,
         form: data.form,
-        availability: data.availability
+        availability: data.availability,
+        bookings: data.bookings
       });
     });
     return () => {
@@ -2475,7 +3067,8 @@ function PublicForm({
   }, /*#__PURE__*/React.createElement(FormRenderer, {
     form: form,
     onSubmit: submit,
-    submitting: submitting
+    submitting: submitting,
+    bookings: st.bookings
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
@@ -3541,7 +4134,7 @@ function CanvasCard({
       onDel();
       setMenu(false);
     }
-  }, "Move to trash")))), q.type === "text_graphic" || q.type === "scheduling" || q.type === "payment" || q.type === "esign" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+  }, "Move to trash")))), q.type === "text_graphic" || q.type === "payment" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     className: "wq-title",
     placeholder: "Heading",
     value: q.heading || "",
@@ -3607,11 +4200,11 @@ function CanvasCard({
     className: "star"
   }, "★"))), q.type === "scheduling" && /*#__PURE__*/React.createElement("div", {
     className: "wq-prev-input"
-  }, q.url ? "Scheduler embed" : "Add a scheduling link in the left panel"), q.type === "payment" && /*#__PURE__*/React.createElement("div", {
+  }, q.slots && q.slots.length ? q.slots.length + " time slot" + (q.slots.length === 1 ? "" : "s") : "Add time slots in the left panel"), q.type === "payment" && /*#__PURE__*/React.createElement("div", {
     className: "wq-prev-input"
-  }, q.url ? (q.buttonText || "Pay now") + (q.amount ? " \u00b7 " + q.amount : "") : "Add a payment link in the left panel"), q.type === "esign" && /*#__PURE__*/React.createElement("div", {
+  }, q.url ? (q.buttonText || "Pay now") + (q.amount ? " \u00b7 " + q.amount : "") : "Add a payment link in the left panel"), q.type === "document_sign" && /*#__PURE__*/React.createElement("div", {
     className: "wq-prev-input"
-  }, q.url ? q.buttonText || "Review and sign" : "Add a signing link in the left panel")));
+  }, q.document ? "Document attached · " + (q.fields && q.fields.length || 0) + " field" + ((q.fields && q.fields.length || 0) === 1 ? "" : "s") : "Upload a document in the left panel")));
 }
 function MCControls({
   q,
@@ -4451,27 +5044,7 @@ function ActionControls({
     style: {
       marginBottom: 10
     }
-  }, "Edit the heading and description on the question card. Set the link and options here."), q.type === "scheduling" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
-    label: "Scheduling link"
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
-    placeholder: "https://calendly.com/you/intro",
-    value: q.url || "",
-    onChange: e => update({
-      url: e.target.value
-    })
-  })), /*#__PURE__*/React.createElement(Toggle, {
-    checked: q.embed !== false,
-    onChange: c => update({
-      embed: c
-    }),
-    label: "Show the scheduler inline"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "hint",
-    style: {
-      marginTop: 6
-    }
-  }, "Inline embedding works with Calendly. Turn it off to show a button for schedulers that block embedding.")), q.type === "payment" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
+  }, "Edit the heading and description on the question card. Set the payment options here."), /*#__PURE__*/React.createElement(Field, {
     label: "Payment link"
   }, /*#__PURE__*/React.createElement("input", {
     className: "input",
@@ -4502,29 +5075,7 @@ function ActionControls({
     style: {
       marginTop: 6
     }
-  }, "Create a payment link in Stripe, PayPal, or similar. Payment is handled securely by that provider.")), q.type === "esign" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
-    label: "Signing link (DocuSign PowerForm or similar)"
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
-    placeholder: "https://...docusign.net/...",
-    value: q.url || "",
-    onChange: e => update({
-      url: e.target.value
-    })
-  })), /*#__PURE__*/React.createElement(Field, {
-    label: "Button text"
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
-    value: q.buttonText || "",
-    onChange: e => update({
-      buttonText: e.target.value
-    })
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "hint",
-    style: {
-      marginTop: 6
-    }
-  }, "In DocuSign, create a PowerForm and paste its URL. Signing happens securely on DocuSign.")));
+  }, "Create a payment link in Stripe, PayPal, or similar. Payment is handled securely by that provider."));
 }
 function LeftEditor({
   q,
@@ -4590,7 +5141,13 @@ function LeftEditor({
     style: {
       marginTop: 6
     }
-  }, "Edit the heading, text, and image directly on the question in the canvas."), (q.type === "scheduling" || q.type === "payment" || q.type === "esign") && /*#__PURE__*/React.createElement(ActionControls, {
+  }, "Edit the heading, text, and image directly on the question in the canvas."), q.type === "payment" && /*#__PURE__*/React.createElement(ActionControls, {
+    q: q,
+    update: update
+  }), q.type === "scheduling" && /*#__PURE__*/React.createElement(SchedulingControls, {
+    q: q,
+    update: update
+  }), q.type === "document_sign" && /*#__PURE__*/React.createElement(DocumentControls, {
     q: q,
     update: update
   }), q.type === "hidden_field" && /*#__PURE__*/React.createElement(HiddenControls, {
@@ -6359,6 +6916,55 @@ async function exportResponsePdf(form, r) {
         doc.text("[signature]", M, y + 4);
         y += 18;
       }
+    } else if (q.type === "scheduling") {
+      const text = v ? fmtSlot(v) : "Not booked";
+      doc.setFont(ff, "normal");
+      doc.setFontSize(10);
+      doc.setTextColor.apply(doc, v ? ink : soft);
+      wrap(text, 10).forEach(ln => {
+        y = ensure(y, 13);
+        doc.text(ln, M, y);
+        y += 13;
+      });
+      y += 6;
+    } else if (q.type === "document_sign") {
+      const fields = q.fields || [];
+      const fdata = v && v.fields || {};
+      fields.forEach(f => {
+        const fv = fdata[f.id];
+        y = ensure(y, 16);
+        doc.setFont(ff, "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor.apply(doc, ink);
+        doc.text(String(f.label || "Field").slice(0, 80), M, y);
+        y += 12;
+        if (f.kind === "signature" && typeof fv === "string" && fv.indexOf("data:") === 0) {
+          try {
+            const iw = 150,
+              ih = iw * 0.31;
+            y = ensure(y, ih + 8);
+            doc.addImage(fv, "PNG", M, y, iw, ih);
+            y += ih + 10;
+          } catch (e) {
+            doc.setFont(ff, "normal");
+            doc.setFontSize(9.5);
+            doc.setTextColor.apply(doc, soft);
+            doc.text("[signature]", M, y);
+            y += 14;
+          }
+        } else {
+          const tv = f.kind === "check" ? fv ? "Yes" : "No" : fv || "No answer";
+          doc.setFont(ff, "normal");
+          doc.setFontSize(9.5);
+          doc.setTextColor.apply(doc, fv || f.kind === "check" ? ink : soft);
+          wrap(tv, 9.5).forEach(ln => {
+            y = ensure(y, 12);
+            doc.text(ln, M, y);
+            y += 12;
+          });
+        }
+      });
+      y += 6;
     } else {
       const text = answerText(v);
       doc.setFont(ff, "normal");
@@ -6592,7 +7198,12 @@ function ResponsesTab({
     }
   }) : /*#__PURE__*/React.createElement("span", {
     className: "muted"
-  }, "Not signed") : cell(open.data[q.id]) || /*#__PURE__*/React.createElement("span", {
+  }, "Not signed") : q.type === "scheduling" ? open.data[q.id] ? fmtSlot(open.data[q.id]) : /*#__PURE__*/React.createElement("span", {
+    className: "muted"
+  }, "Not booked") : q.type === "document_sign" ? /*#__PURE__*/React.createElement(DocSignAnswer, {
+    q: q,
+    val: open.data[q.id]
+  }) : cell(open.data[q.id]) || /*#__PURE__*/React.createElement("span", {
     className: "muted"
   }, "No answer")))), open.meta && Array.isArray(open.meta.followups) && open.meta.followups.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {

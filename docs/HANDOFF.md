@@ -291,3 +291,13 @@ The form settings icon in the builder rail is now a clear gear instead of the pr
 The homepage cards are ordered by most recent response, so the forms getting activity rise to the top. Each card shows when its latest response arrived, for example Latest response on Jun 10 at 3:24 PM, or No responses yet for forms that have not been filled in.
 
 Exports are now branded to the form. If a form has an uploaded logo (set as the header image, including from a brand kit), that logo replaces the zetetiq mark in the top corner of the PDF report and the per-response PDFs, shown on a clean white chip so it reads well on the colored header. Forms without an uploaded logo keep the zetetiq mark. The export footer now reads powered by zetetiq.
+
+## Native scheduling and document signing (built into zetetiq)
+
+Two question types are now real zetetiq features rather than links out to other services. There is nothing to connect, no third party account, and respondents never leave your form.
+
+Meeting signup. Add a Meeting signup question to let people book one of your time slots, similar to a Calendly link but hosted by zetetiq. In the builder you set a meeting title, a duration, and a location or video link, then add the times you are available (a date and time picker with an Add button). Each time can hold a set number of people (the capacity field), so popular slots fill up. On the public form the respondent sees the meeting details and your open times grouped by day, and taps one to book it. Times that are full or in the past are shown but cannot be picked. The booked time is saved with the response, shown in the responses table, and printed on the per-response PDF.
+
+Document to sign. Add a Document to sign question to upload a document and have people fill it out and sign it inside zetetiq, instead of sending them to DocuSign. Upload an image or a PDF; the respondent views it and then completes the fields you define below it. Fields can be short text, long text, a date, a checkbox, or a signature drawn with a finger or mouse. The default fields are full name, signature, and date, and you can add or remove fields. Everything the respondent enters, including the drawn signature, is saved with the response, shown in the responses view, and included on the per-response PDF.
+
+Payments stay as an embed. Collecting money still uses a payment link (Stripe, PayPal, or similar) opened from a button, because handling card details directly carries security and compliance burden that is better left to the payment provider. The owner sets the link, an amount label, and the button text.

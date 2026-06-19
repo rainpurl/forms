@@ -346,6 +346,13 @@ async function publicForm(username, slug, env) {
   const cap = parseInt(settings.responseCap, 10);
   if (cap > 0) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(row.id).first(); count = (cr && cr.c) || 0; }
   const availability = formAvailability(!!row.is_open, settings, count);
+  let bookings = null;
+  const schedQs = (schema.questions || []).filter((qq)=> qq && qq.type === "scheduling");
+  if (schedQs.length){
+    bookings = {}; schedQs.forEach((qq)=>{ bookings[qq.id] = {}; });
+    const br = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ?").bind(row.id).all();
+    (br.results || []).forEach((rr)=>{ const dd = safeParse(rr.data, {}); schedQs.forEach((qq)=>{ const vv = dd[qq.id]; if (typeof vv === "string" && vv){ bookings[qq.id][vv] = (bookings[qq.id][vv] || 0) + 1; } }); });
+  }
   return json({
     form: {
       id: row.id,
@@ -357,6 +364,7 @@ async function publicForm(username, slug, env) {
       owner: { username: row.username, name: row.name },
     },
     availability,
+    bookings,
   });
 }
 

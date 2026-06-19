@@ -129,3 +129,7 @@ The builder has new question types for Scheduling (Calendly), Payment (Stripe, P
 ## Dark mode polish, toggle, fonts, and export branding
 
 Dark mode now themes the Overview card and the builder. The light/dark toggle sits next to the logo and appears in both the top bar and the builder. App chrome (including homepage card titles) uses the Mozilla font; only the form preview and public form use the form's chosen font. The settings icon is a proper gear. Homepage cards are ordered by most recent response and show when the latest response arrived. In PDF exports, an uploaded form logo replaces the zetetiq mark, and the footer reads powered by zetetiq.
+
+## Native scheduling and document signing
+
+Meeting signup and Document to sign are now native question types. Meeting signup lets people book one of your time slots (with per slot capacity) without leaving the form, like a built in Calendly. Document to sign lets you upload an image or PDF and have people fill in fields and draw a signature inside zetetiq, instead of using DocuSign. Both save everything with the response and on the per-response PDF. Payments remain a payment link opened from a button, since card handling is best left to the payment provider.
