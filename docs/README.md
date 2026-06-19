@@ -121,3 +121,7 @@ A light/dark toggle in the top bar defaults to the visitor's system setting and 
 The homepage shows forms as a grid of cards, each previewing the form's title in its own font. Inside a form, the title now matches the form's chosen font. The builder has a new Brand studio panel (swatch icon) for saving a logo, font, and colors as a reusable kit you can apply to any form in one click, including an optional custom Google font. The drag to reorder crash is fixed, and the side panel now uses a palette icon for Theme and a gear icon for Form settings.
 
 One time setup: brand kits need a new brand_kits table. Paste the new CREATE TABLE at the bottom of schema.sql into your D1 console once.
+
+## Scheduling, payments, e-signature, embedding, and per-response PDFs
+
+The builder has new question types for Scheduling (Calendly), Payment (Stripe, PayPal, or any payment link), and E-signature (DocuSign PowerForm). Each works by pasting a provider link; scheduling can embed inline, while payment and e-signature open the provider, which handles the transaction or signing securely. The Share button now also gives a copyable iframe embed code so the form can be placed on any web page. In a form's Responses tab, each response can be exported individually as a themed PDF (per row and from the response detail), in addition to the existing aggregate report.

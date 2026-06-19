@@ -439,6 +439,8 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .bk-sw span{width:16px;height:18px;display:inline-block}
 .bk-logo{display:block;max-height:42px;max-width:150px;margin-top:8px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:3px;object-fit:contain}
 .bk-actions{display:flex;gap:8px;margin-top:10px}
+.embed-frame{margin-top:6px}
+.form-scope .embed-frame iframe{display:block}
 </style>
 </head>
 <body>
@@ -1034,6 +1036,143 @@ const QTYPES = {
     }), error && /*#__PURE__*/React.createElement("div", {
       className: "ferr"
     }, error))
+  },
+  scheduling: {
+    label: "Scheduling",
+    hint: "Let people book a time (Calendly and similar)",
+    isInput: false,
+    make: () => ({
+      type: "scheduling",
+      id: uid(),
+      heading: "Book a time",
+      content: "Pick a slot that works for you.",
+      url: "",
+      embed: true
+    }),
+    summary: q => q.heading || "scheduling",
+    validate: () => null,
+    Renderer: ({
+      q
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "q"
+    }, q.heading && /*#__PURE__*/React.createElement("div", {
+      className: "qlabel",
+      style: {
+        fontSize: 18
+      }
+    }, q.heading), q.content && /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "var(--ink-soft)",
+        whiteSpace: "pre-wrap",
+        marginBottom: 10
+      }
+    }, q.content), q.url ? q.embed !== false ? /*#__PURE__*/React.createElement("div", {
+      className: "embed-frame"
+    }, /*#__PURE__*/React.createElement("iframe", {
+      src: q.url,
+      title: "Scheduling",
+      loading: "lazy",
+      style: {
+        width: "100%",
+        height: 640,
+        border: 0,
+        borderRadius: 10,
+        background: "#fff"
+      }
+    })) : /*#__PURE__*/React.createElement("a", {
+      className: "fcta",
+      href: q.url,
+      target: "_blank",
+      rel: "noopener noreferrer"
+    }, "Open scheduler") : /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13
+      }
+    }, "Add a scheduling link to show the booking widget."))
+  },
+  payment: {
+    label: "Payment",
+    hint: "Collect a payment with a payment link",
+    isInput: false,
+    make: () => ({
+      type: "payment",
+      id: uid(),
+      heading: "Payment",
+      content: "Complete your payment to finish.",
+      url: "",
+      amount: "",
+      buttonText: "Pay now"
+    }),
+    summary: q => q.heading || "payment",
+    validate: () => null,
+    Renderer: ({
+      q
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "q"
+    }, q.heading && /*#__PURE__*/React.createElement("div", {
+      className: "qlabel",
+      style: {
+        fontSize: 18
+      }
+    }, q.heading), q.content && /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "var(--ink-soft)",
+        whiteSpace: "pre-wrap",
+        marginBottom: 10
+      }
+    }, q.content), q.url ? /*#__PURE__*/React.createElement("a", {
+      className: "fcta",
+      href: q.url,
+      target: "_blank",
+      rel: "noopener noreferrer"
+    }, (q.buttonText || "Pay now") + (q.amount ? " \u00b7 " + q.amount : "")) : /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13
+      }
+    }, "Add a payment link to show the payment button."))
+  },
+  esign: {
+    label: "E-signature (DocuSign)",
+    hint: "Send people to a document to review and sign",
+    isInput: false,
+    make: () => ({
+      type: "esign",
+      id: uid(),
+      heading: "Review and sign",
+      content: "Please review and sign the document.",
+      url: "",
+      buttonText: "Review and sign"
+    }),
+    summary: q => q.heading || "e-signature",
+    validate: () => null,
+    Renderer: ({
+      q
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "q"
+    }, q.heading && /*#__PURE__*/React.createElement("div", {
+      className: "qlabel",
+      style: {
+        fontSize: 18
+      }
+    }, q.heading), q.content && /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "var(--ink-soft)",
+        whiteSpace: "pre-wrap",
+        marginBottom: 10
+      }
+    }, q.content), q.url ? /*#__PURE__*/React.createElement("a", {
+      className: "fcta",
+      href: q.url,
+      target: "_blank",
+      rel: "noopener noreferrer"
+    }, q.buttonText || "Review and sign") : /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13
+      }
+    }, "Add a signing link to show the sign button."))
   },
   text_graphic: {
     label: "Text / graphic",
@@ -1729,7 +1868,7 @@ const QTYPES = {
     Renderer: () => null
   }
 };
-const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "signature", "text_graphic", "hidden_field", "page_break"];
+const QTYPE_ORDER = ["multiple_choice", "text_entry", "matrix", "rank_order", "constant_sum", "form_field", "slider", "nps", "star_rating", "date", "signature", "scheduling", "payment", "esign", "text_graphic", "hidden_field", "page_break"];
 
 /* small shared bits */
 function Field({
@@ -3390,7 +3529,7 @@ function CanvasCard({
       onDel();
       setMenu(false);
     }
-  }, "Move to trash")))), q.type === "text_graphic" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+  }, "Move to trash")))), q.type === "text_graphic" || q.type === "scheduling" || q.type === "payment" || q.type === "esign" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     className: "wq-title",
     placeholder: "Heading",
     value: q.heading || "",
@@ -3454,7 +3593,13 @@ function CanvasCard({
   }).map((_, i) => /*#__PURE__*/React.createElement("span", {
     key: i,
     className: "star"
-  }, "★")))));
+  }, "★"))), q.type === "scheduling" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, q.url ? "Scheduler embed" : "Add a scheduling link in the left panel"), q.type === "payment" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, q.url ? (q.buttonText || "Pay now") + (q.amount ? " \u00b7 " + q.amount : "") : "Add a payment link in the left panel"), q.type === "esign" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, q.url ? q.buttonText || "Review and sign" : "Add a signing link in the left panel")));
 }
 function MCControls({
   q,
@@ -4285,6 +4430,90 @@ function LogicControls({
     className: "hint"
   }, "This question appears only when the answer above matches."))));
 }
+function ActionControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 10
+    }
+  }, "Edit the heading and description on the question card. Set the link and options here."), q.type === "scheduling" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
+    label: "Scheduling link"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "https://calendly.com/you/intro",
+    value: q.url || "",
+    onChange: e => update({
+      url: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Toggle, {
+    checked: q.embed !== false,
+    onChange: c => update({
+      embed: c
+    }),
+    label: "Show the scheduler inline"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "Inline embedding works with Calendly. Turn it off to show a button for schedulers that block embedding.")), q.type === "payment" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
+    label: "Payment link"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "https://buy.stripe.com/... or PayPal",
+    value: q.url || "",
+    onChange: e => update({
+      url: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Amount label (optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "$25.00",
+    value: q.amount || "",
+    onChange: e => update({
+      amount: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Button text"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.buttonText || "",
+    onChange: e => update({
+      buttonText: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "Create a payment link in Stripe, PayPal, or similar. Payment is handled securely by that provider.")), q.type === "esign" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Field, {
+    label: "Signing link (DocuSign PowerForm or similar)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    placeholder: "https://...docusign.net/...",
+    value: q.url || "",
+    onChange: e => update({
+      url: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Button text"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.buttonText || "",
+    onChange: e => update({
+      buttonText: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "In DocuSign, create a PowerForm and paste its URL. Signing happens securely on DocuSign.")));
+}
 function LeftEditor({
   q,
   update,
@@ -4349,7 +4578,10 @@ function LeftEditor({
     style: {
       marginTop: 6
     }
-  }, "Edit the heading, text, and image directly on the question in the canvas."), q.type === "hidden_field" && /*#__PURE__*/React.createElement(HiddenControls, {
+  }, "Edit the heading, text, and image directly on the question in the canvas."), (q.type === "scheduling" || q.type === "payment" || q.type === "esign") && /*#__PURE__*/React.createElement(ActionControls, {
+    q: q,
+    update: update
+  }), q.type === "hidden_field" && /*#__PURE__*/React.createElement(HiddenControls, {
     q: q,
     update: update
   }), QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && /*#__PURE__*/React.createElement(LogicControls, {
@@ -4842,6 +5074,7 @@ function Builder({
   const [overIdx, setOverIdx] = useState(null);
   const [dragId, setDragId] = useState(null);
   const [chooser, setChooser] = useState(isNew);
+  const [share, setShare] = useState(null);
   useEffect(() => {
     if (isNew) return;
     api.getForm(formId).then(({
@@ -5063,6 +5296,19 @@ function Builder({
     } catch (e) {}
     toast("Link copied");
   };
+  const openShare = () => {
+    if (!id) {
+      toast("Publish your form first to share it.");
+      return;
+    }
+    const slug = form.slug;
+    if (!slug) {
+      toast("Reopen this form from your dashboard to share it.");
+      return;
+    }
+    const uname = form.username || user && user.username || "admin";
+    setShare(window.location.origin + "/" + (uname === "admin" ? "" : uname + "/") + slug);
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "builder"
   }, chooser && /*#__PURE__*/React.createElement("div", {
@@ -5155,12 +5401,16 @@ function Builder({
     onClick: () => setPreview(p => !p)
   }, preview ? "Edit" : "Preview"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
-    onClick: copyLink
-  }, "Copy link"), /*#__PURE__*/React.createElement("button", {
+    onClick: openShare
+  }, "Share"), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     disabled: saving,
     onClick: save
-  }, saving ? "Saving..." : "Publish"))), preview ? /*#__PURE__*/React.createElement("div", {
+  }, saving ? "Saving..." : "Publish"))), share && /*#__PURE__*/React.createElement(ShareModal, {
+    link: share,
+    title: form.title,
+    onClose: () => setShare(null)
+  }), preview ? /*#__PURE__*/React.createElement("div", {
     className: "b-preview"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5892,6 +6142,207 @@ async function exportReport(form, rows) {
   doc.text("Generated by zetetiq", M, H - 24);
   doc.save((form.title || "form").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-report.pdf");
 }
+function answerText(v) {
+  if (v === null || v === undefined || v === "") return "No answer";
+  if (Array.isArray(v)) return v.length ? v.join(", ") : "No answer";
+  if (typeof v === "object") return Object.keys(v).map(k => k + ": " + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join("; ");
+  return String(v);
+}
+function ShareModal({
+  link,
+  title,
+  onClose
+}) {
+  const {
+    toast
+  } = useApp();
+  const embed = '<iframe src="' + link + '" width="100%" height="800" style="border:0;max-width:680px" title="' + String(title || "Form").replace(/"/g, "&quot;") + '"></iframe>';
+  const copy = (text, what) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+    } catch (e) {}
+    toast(what + " copied");
+  };
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: "Share this form",
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pad-lg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Public link"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input mono",
+    readOnly: true,
+    value: link,
+    onFocus: e => e.target.select(),
+    style: {
+      fontSize: 13
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => copy(link, "Link")
+  }, "Copy")), /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Embed code"), /*#__PURE__*/React.createElement("textarea", {
+    className: "textarea mono",
+    readOnly: true,
+    value: embed,
+    onFocus: e => e.target.select(),
+    style: {
+      fontSize: 12,
+      height: 88
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "flex-end",
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => copy(embed, "Embed code")
+  }, "Copy embed code")), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 10
+    }
+  }, "Paste the embed code into any web page to show this form inline.")));
+}
+async function exportResponsePdf(form, r) {
+  await ensureJsPDF();
+  const {
+    jsPDF
+  } = window.jspdf;
+  const doc = new jsPDF({
+    unit: "pt",
+    format: "a4"
+  });
+  const W = doc.internal.pageSize.getWidth(),
+    H = doc.internal.pageSize.getHeight();
+  const M = 42;
+  const theme = form.theme || {};
+  const [pr, pg, pb] = hexRgb(theme.primary || "#5b4fe0");
+  const pf = await loadPdfFonts(doc, theme.font);
+  const ff = pf.family;
+  const ink = hexRgb(theme.secondary || "#1b1830"),
+    soft = [120, 116, 140];
+  const ensure = (y, need) => {
+    if (y + need > H - 40) {
+      doc.addPage();
+      return 56;
+    }
+    return y;
+  };
+  const wrap = (text, size) => {
+    doc.setFontSize(size);
+    return doc.splitTextToSize(String(text), W - 2 * M);
+  };
+  doc.setFillColor(pr, pg, pb);
+  doc.rect(0, 0, W, 82, "F");
+  let logo = null;
+  try {
+    logo = await svgToPng(LOGO_SVG, "#ffffff", 150);
+  } catch (e) {}
+  if (logo && logo.data) {
+    const lw = 92,
+      lh = lw * (logo.h / logo.w);
+    doc.addImage(logo.data, "PNG", W - M - lw, 22, lw, lh);
+  }
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(ff, "bold");
+  doc.setFontSize(20);
+  doc.text((form.title || "Form").slice(0, 42), M, 40);
+  doc.setFont(ff, "normal");
+  doc.setFontSize(11);
+  doc.text("Response", M, 60);
+  doc.setFontSize(10);
+  doc.text(fmtDate(r.created_at), M, 74);
+  let y = 112;
+  const inputQs = (form.schema.questions || []).filter(q => QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field");
+  inputQs.forEach(q => {
+    const v = r.data ? r.data[q.id] : undefined;
+    y = ensure(y, 40);
+    doc.setFont(ff, "bold");
+    doc.setFontSize(11);
+    doc.setTextColor.apply(doc, ink);
+    wrap(q.label || q.id, 11).forEach(ln => {
+      y = ensure(y, 14);
+      doc.text(ln, M, y);
+      y += 14;
+    });
+    if (q.type === "signature" && typeof v === "string" && v.indexOf("data:") === 0) {
+      try {
+        const iw = 180,
+          ih = iw * 0.31;
+        y = ensure(y, ih + 10);
+        doc.addImage(v, "PNG", M, y, iw, ih);
+        y += ih + 12;
+      } catch (e) {
+        doc.setFont(ff, "normal");
+        doc.setFontSize(10);
+        doc.setTextColor.apply(doc, soft);
+        doc.text("[signature]", M, y + 4);
+        y += 18;
+      }
+    } else {
+      const text = answerText(v);
+      doc.setFont(ff, "normal");
+      doc.setFontSize(10);
+      doc.setTextColor.apply(doc, text === "No answer" ? soft : ink);
+      wrap(text, 10).forEach(ln => {
+        y = ensure(y, 13);
+        doc.text(ln, M, y);
+        y += 13;
+      });
+      y += 6;
+    }
+    y += 4;
+  });
+  if (r.meta && Array.isArray(r.meta.followups) && r.meta.followups.length) {
+    y = ensure(y, 24);
+    doc.setFont(ff, "bold");
+    doc.setFontSize(11);
+    doc.setTextColor.apply(doc, ink);
+    doc.text("Follow-ups", M, y);
+    y += 16;
+    r.meta.followups.forEach(fu => {
+      doc.setFont(ff, "bold");
+      doc.setFontSize(9.5);
+      wrap(fu.question || "", 9.5).forEach(ln => {
+        y = ensure(y, 12);
+        doc.setTextColor.apply(doc, ink);
+        doc.text(ln, M, y);
+        y += 12;
+      });
+      doc.setFont(ff, "normal");
+      wrap(fu.answer || "No answer", 9.5).forEach(ln => {
+        y = ensure(y, 12);
+        doc.setTextColor.apply(doc, soft);
+        doc.text(ln, M, y);
+        y += 12;
+      });
+      y += 6;
+    });
+  }
+  y = ensure(y, 30);
+  doc.setFont(ff, "normal");
+  doc.setFontSize(9);
+  doc.setTextColor.apply(doc, soft);
+  const meta = [[r.meta && r.meta.city, r.meta && r.meta.region, r.meta && r.meta.country].filter(Boolean).join(", "), [r.meta && r.meta.browser, r.meta && r.meta.os].filter(Boolean).join(" / ")].filter(Boolean).join(" \u00b7 ");
+  if (meta) {
+    doc.text(meta, M, y);
+    y += 14;
+  }
+  doc.text("Generated by zetetiq", M, H - 24);
+  const stamp = String(r.created_at || "").replace(/[^0-9]/g, "").slice(0, 12) || "response";
+  doc.save((form.title || "form").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-response-" + stamp + ".pdf");
+}
 function ExportButtons({
   id,
   form,
@@ -6011,16 +6462,50 @@ function ResponsesTab({
       whiteSpace: "nowrap"
     }
   }, cell(r.data[c]))), /*#__PURE__*/React.createElement("td", {
-    className: "muted",
+    onClick: e => e.stopPropagation(),
     style: {
-      fontSize: 18
+      whiteSpace: "nowrap"
     }
-  }, "›")))))), open && /*#__PURE__*/React.createElement(Modal, {
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    disabled: pdfBusy,
+    onClick: async () => {
+      setPdfBusy(true);
+      try {
+        await exportResponsePdf(form, r);
+      } catch (e) {
+        toast("Could not build the PDF.");
+      }
+      setPdfBusy(false);
+    }
+  }, "PDF"))))))), open && /*#__PURE__*/React.createElement(Modal, {
     title: "Response · " + fmtDate(open.created_at),
     onClose: () => setOpen(null)
   }, /*#__PURE__*/React.createElement("div", {
     className: "pad-lg"
-  }, (form.schema.questions || []).filter(q => QTYPES[q.type] && QTYPES[q.type].isInput).map(q => /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "between",
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "Response detail"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
+    disabled: pdfBusy,
+    onClick: async () => {
+      setPdfBusy(true);
+      try {
+        await exportResponsePdf(form, open);
+      } catch (e) {
+        toast("Could not build the PDF.");
+      }
+      setPdfBusy(false);
+    }
+  }, pdfBusy ? "Preparing..." : "Export PDF")), (form.schema.questions || []).filter(q => QTYPES[q.type] && QTYPES[q.type].isInput).map(q => /*#__PURE__*/React.createElement("div", {
     key: q.id,
     style: {
       marginBottom: 14

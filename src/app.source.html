@@ -445,6 +445,8 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .bk-sw span{width:16px;height:18px;display:inline-block}
 .bk-logo{display:block;max-height:42px;max-width:150px;margin-top:8px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:3px;object-fit:contain}
 .bk-actions{display:flex;gap:8px;margin-top:10px}
+.embed-frame{margin-top:6px}
+.form-scope .embed-frame iframe{display:block}
 </style>
 </head>
 <body>
@@ -706,6 +708,56 @@ const QTYPES = {
     ),
   },
 
+  scheduling: {
+    label: "Scheduling",
+    hint: "Let people book a time (Calendly and similar)",
+    isInput: false,
+    make: () => ({ type:"scheduling", id: uid(), heading:"Book a time", content:"Pick a slot that works for you.", url:"", embed:true }),
+    summary: (q) => q.heading || "scheduling",
+    validate: () => null,
+    Renderer: ({ q }) => (
+      <div className="q">
+        {q.heading && <div className="qlabel" style={{fontSize:18}}>{q.heading}</div>}
+        {q.content && <div style={{color:"var(--ink-soft)",whiteSpace:"pre-wrap",marginBottom:10}}>{q.content}</div>}
+        {q.url ? (q.embed !== false
+          ? <div className="embed-frame"><iframe src={q.url} title="Scheduling" loading="lazy" style={{width:"100%",height:640,border:0,borderRadius:10,background:"#fff"}}></iframe></div>
+          : <a className="fcta" href={q.url} target="_blank" rel="noopener noreferrer">Open scheduler</a>)
+          : <div className="muted" style={{fontSize:13}}>Add a scheduling link to show the booking widget.</div>}
+      </div>
+    ),
+  },
+  payment: {
+    label: "Payment",
+    hint: "Collect a payment with a payment link",
+    isInput: false,
+    make: () => ({ type:"payment", id: uid(), heading:"Payment", content:"Complete your payment to finish.", url:"", amount:"", buttonText:"Pay now" }),
+    summary: (q) => q.heading || "payment",
+    validate: () => null,
+    Renderer: ({ q }) => (
+      <div className="q">
+        {q.heading && <div className="qlabel" style={{fontSize:18}}>{q.heading}</div>}
+        {q.content && <div style={{color:"var(--ink-soft)",whiteSpace:"pre-wrap",marginBottom:10}}>{q.content}</div>}
+        {q.url ? <a className="fcta" href={q.url} target="_blank" rel="noopener noreferrer">{(q.buttonText || "Pay now") + (q.amount ? (" \u00b7 " + q.amount) : "")}</a>
+          : <div className="muted" style={{fontSize:13}}>Add a payment link to show the payment button.</div>}
+      </div>
+    ),
+  },
+  esign: {
+    label: "E-signature (DocuSign)",
+    hint: "Send people to a document to review and sign",
+    isInput: false,
+    make: () => ({ type:"esign", id: uid(), heading:"Review and sign", content:"Please review and sign the document.", url:"", buttonText:"Review and sign" }),
+    summary: (q) => q.heading || "e-signature",
+    validate: () => null,
+    Renderer: ({ q }) => (
+      <div className="q">
+        {q.heading && <div className="qlabel" style={{fontSize:18}}>{q.heading}</div>}
+        {q.content && <div style={{color:"var(--ink-soft)",whiteSpace:"pre-wrap",marginBottom:10}}>{q.content}</div>}
+        {q.url ? <a className="fcta" href={q.url} target="_blank" rel="noopener noreferrer">{q.buttonText || "Review and sign"}</a>
+          : <div className="muted" style={{fontSize:13}}>Add a signing link to show the sign button.</div>}
+      </div>
+    ),
+  },
   text_graphic: {
     label: "Text / graphic",
     hint: "Static heading, text, or image",
@@ -1007,7 +1059,7 @@ const QTYPES = {
     Renderer: () => null,
   },
 };
-const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","text_graphic","hidden_field","page_break"];
+const QTYPE_ORDER = ["multiple_choice","text_entry","matrix","rank_order","constant_sum","form_field","slider","nps","star_rating","date","signature","scheduling","payment","esign","text_graphic","hidden_field","page_break"];
 
 /* small shared bits */
 function Field({ label, children, style }){ return (<label className="field" style={style}><span className="label">{label}</span>{children}</label>); }
@@ -1551,7 +1603,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
           )}
         </div>
       </div>
-      {q.type === "text_graphic" ? (
+      {(q.type === "text_graphic" || q.type === "scheduling" || q.type === "payment" || q.type === "esign") ? (
         <div>
           <input className="wq-title" placeholder="Heading" value={q.heading || ""} onChange={(e)=>update({heading:e.target.value})} />
           <textarea className="wq-textarea" placeholder="Add text or instructions" value={q.content || ""} onChange={(e)=>update({content:e.target.value})} />
@@ -1573,6 +1625,9 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         {q.type === "date" && <div className="wq-prev-input" style={{maxWidth:220}}>yyyy-mm-dd</div>}
         {q.type === "signature" && <div className="wq-prev-input" style={{height:54,maxWidth:340}}>Signature pad</div>}
         {q.type === "star_rating" && <div className="stars prev">{Array.from({length:q.max}).map((_,i)=>(<span key={i} className="star">★</span>))}</div>}
+        {q.type === "scheduling" && <div className="wq-prev-input">{q.url ? "Scheduler embed" : "Add a scheduling link in the left panel"}</div>}
+        {q.type === "payment" && <div className="wq-prev-input">{q.url ? ((q.buttonText||"Pay now") + (q.amount?(" \u00b7 "+q.amount):"")) : "Add a payment link in the left panel"}</div>}
+        {q.type === "esign" && <div className="wq-prev-input">{q.url ? (q.buttonText||"Review and sign") : "Add a signing link in the left panel"}</div>}
       </div>
     </div>
   );
@@ -1883,6 +1938,30 @@ function LogicControls({ q, questions, update }){
   );
 }
 
+function ActionControls({ q, update }){
+  return (
+    <div>
+      <div className="hint" style={{marginBottom:10}}>Edit the heading and description on the question card. Set the link and options here.</div>
+      {q.type === "scheduling" && (<>
+        <Field label="Scheduling link"><input className="input" placeholder="https://calendly.com/you/intro" value={q.url || ""} onChange={(e)=>update({url:e.target.value})} /></Field>
+        <Toggle checked={q.embed !== false} onChange={(c)=>update({embed:c})} label="Show the scheduler inline" />
+        <div className="hint" style={{marginTop:6}}>Inline embedding works with Calendly. Turn it off to show a button for schedulers that block embedding.</div>
+      </>)}
+      {q.type === "payment" && (<>
+        <Field label="Payment link"><input className="input" placeholder="https://buy.stripe.com/... or PayPal" value={q.url || ""} onChange={(e)=>update({url:e.target.value})} /></Field>
+        <Field label="Amount label (optional)"><input className="input" placeholder="$25.00" value={q.amount || ""} onChange={(e)=>update({amount:e.target.value})} /></Field>
+        <Field label="Button text"><input className="input" value={q.buttonText || ""} onChange={(e)=>update({buttonText:e.target.value})} /></Field>
+        <div className="hint" style={{marginTop:6}}>Create a payment link in Stripe, PayPal, or similar. Payment is handled securely by that provider.</div>
+      </>)}
+      {q.type === "esign" && (<>
+        <Field label="Signing link (DocuSign PowerForm or similar)"><input className="input" placeholder="https://...docusign.net/..." value={q.url || ""} onChange={(e)=>update({url:e.target.value})} /></Field>
+        <Field label="Button text"><input className="input" value={q.buttonText || ""} onChange={(e)=>update({buttonText:e.target.value})} /></Field>
+        <div className="hint" style={{marginTop:6}}>In DocuSign, create a PowerForm and paste its URL. Signing happens securely on DocuSign.</div>
+      </>)}
+    </div>
+  );
+}
+
 function LeftEditor({ q, update, questions, setQuestions }){
   const changeType = (type) => {
     if (type === q.type) return;
@@ -1913,6 +1992,7 @@ function LeftEditor({ q, update, questions, setQuestions }){
       {q.type === "star_rating" && <StarControls q={q} update={update} />}
       {q.type === "signature" && <ReqToggles q={q} update={update} />}
       {q.type === "text_graphic" && <div className="hint" style={{marginTop:6}}>Edit the heading, text, and image directly on the question in the canvas.</div>}
+      {(q.type === "scheduling" || q.type === "payment" || q.type === "esign") && <ActionControls q={q} update={update} />}
       {q.type === "hidden_field" && <HiddenControls q={q} update={update} />}
       {QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field" && <LogicControls q={q} questions={questions} update={update} />}
     </div>
@@ -2071,6 +2151,7 @@ function Builder({ formId }){
   const [overIdx, setOverIdx] = useState(null);
   const [dragId, setDragId] = useState(null);
   const [chooser, setChooser] = useState(isNew);
+  const [share, setShare] = useState(null);
 
   useEffect(()=>{
     if (isNew) return;
@@ -2147,6 +2228,13 @@ function Builder({ formId }){
     toast("Link copied");
   };
 
+  const openShare = () => {
+    if (!id){ toast("Publish your form first to share it."); return; }
+    const slug = form.slug; if (!slug){ toast("Reopen this form from your dashboard to share it."); return; }
+    const uname = form.username || (user && user.username) || "admin";
+    setShare(window.location.origin + "/" + (uname === "admin" ? "" : uname + "/") + slug);
+  };
+
   return (
     <div className="builder">
       {chooser && (
@@ -2179,10 +2267,12 @@ function Builder({ formId }){
         </div>
         <div className="row">
           <button className="btn" onClick={()=>setPreview((p)=>!p)}>{preview ? "Edit" : "Preview"}</button>
-          <button className="btn" onClick={copyLink}>Copy link</button>
+          <button className="btn" onClick={openShare}>Share</button>
           <button className="btn primary" disabled={saving} onClick={save}>{saving ? "Saving..." : "Publish"}</button>
         </div>
       </div>
+
+      {share && <ShareModal link={share} title={form.title} onClose={()=>setShare(null)} />}
 
       {preview ? (
         <div className="b-preview"><div style={{maxWidth:680, margin:"26px auto", padding:"0 18px"}}><FormRenderer form={form} preview /></div></div>
@@ -2470,6 +2560,91 @@ async function exportReport(form, rows){
   doc.save((form.title || "form").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-report.pdf");
 }
 
+function answerText(v){
+  if (v === null || v === undefined || v === "") return "No answer";
+  if (Array.isArray(v)) return v.length ? v.join(", ") : "No answer";
+  if (typeof v === "object") return Object.keys(v).map((k)=> k + ": " + (Array.isArray(v[k]) ? v[k].join("/") : v[k])).join("; ");
+  return String(v);
+}
+
+function ShareModal({ link, title, onClose }){
+  const { toast } = useApp();
+  const embed = '<iframe src="' + link + '" width="100%" height="800" style="border:0;max-width:680px" title="' + String(title || "Form").replace(/"/g, "&quot;") + '"></iframe>';
+  const copy = (text, what)=>{ try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text); } catch (e) {} toast(what + " copied"); };
+  return (
+    <Modal title="Share this form" onClose={onClose}>
+      <div className="pad-lg">
+        <div className="label">Public link</div>
+        <div className="row" style={{gap:8,marginBottom:18}}>
+          <input className="input mono" readOnly value={link} onFocus={(e)=>e.target.select()} style={{fontSize:13}} />
+          <button className="btn" onClick={()=>copy(link, "Link")}>Copy</button>
+        </div>
+        <div className="label">Embed code</div>
+        <textarea className="textarea mono" readOnly value={embed} onFocus={(e)=>e.target.select()} style={{fontSize:12,height:88}} />
+        <div className="row" style={{justifyContent:"flex-end",marginTop:8}}>
+          <button className="btn primary" onClick={()=>copy(embed, "Embed code")}>Copy embed code</button>
+        </div>
+        <div className="hint" style={{marginTop:10}}>Paste the embed code into any web page to show this form inline.</div>
+      </div>
+    </Modal>
+  );
+}
+
+async function exportResponsePdf(form, r){
+  await ensureJsPDF();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:"pt", format:"a4" });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  const M = 42;
+  const theme = form.theme || {};
+  const [pr,pg,pb] = hexRgb(theme.primary || "#5b4fe0");
+  const pf = await loadPdfFonts(doc, theme.font); const ff = pf.family;
+  const ink = hexRgb(theme.secondary || "#1b1830"), soft = [120,116,140];
+  const ensure = (y, need)=>{ if (y + need > H - 40){ doc.addPage(); return 56; } return y; };
+  const wrap = (text, size)=>{ doc.setFontSize(size); return doc.splitTextToSize(String(text), W - 2 * M); };
+  doc.setFillColor(pr,pg,pb); doc.rect(0,0,W,82,"F");
+  let logo = null; try { logo = await svgToPng(LOGO_SVG, "#ffffff", 150); } catch (e) {}
+  if (logo && logo.data){ const lw = 92, lh = lw * (logo.h / logo.w); doc.addImage(logo.data, "PNG", W - M - lw, 22, lw, lh); }
+  doc.setTextColor(255,255,255); doc.setFont(ff,"bold"); doc.setFontSize(20); doc.text((form.title || "Form").slice(0,42), M, 40);
+  doc.setFont(ff,"normal"); doc.setFontSize(11); doc.text("Response", M, 60);
+  doc.setFontSize(10); doc.text(fmtDate(r.created_at), M, 74);
+  let y = 112;
+  const inputQs = (form.schema.questions || []).filter((q)=> QTYPES[q.type] && QTYPES[q.type].isInput && q.type !== "hidden_field");
+  inputQs.forEach((q)=>{
+    const v = r.data ? r.data[q.id] : undefined;
+    y = ensure(y, 40);
+    doc.setFont(ff,"bold"); doc.setFontSize(11); doc.setTextColor.apply(doc, ink);
+    wrap(q.label || q.id, 11).forEach((ln)=>{ y = ensure(y, 14); doc.text(ln, M, y); y += 14; });
+    if (q.type === "signature" && typeof v === "string" && v.indexOf("data:") === 0){
+      try { const iw = 180, ih = iw * 0.31; y = ensure(y, ih + 10); doc.addImage(v, "PNG", M, y, iw, ih); y += ih + 12; }
+      catch (e){ doc.setFont(ff,"normal"); doc.setFontSize(10); doc.setTextColor.apply(doc, soft); doc.text("[signature]", M, y + 4); y += 18; }
+    } else {
+      const text = answerText(v);
+      doc.setFont(ff,"normal"); doc.setFontSize(10); doc.setTextColor.apply(doc, text === "No answer" ? soft : ink);
+      wrap(text, 10).forEach((ln)=>{ y = ensure(y, 13); doc.text(ln, M, y); y += 13; });
+      y += 6;
+    }
+    y += 4;
+  });
+  if (r.meta && Array.isArray(r.meta.followups) && r.meta.followups.length){
+    y = ensure(y, 24); doc.setFont(ff,"bold"); doc.setFontSize(11); doc.setTextColor.apply(doc, ink); doc.text("Follow-ups", M, y); y += 16;
+    r.meta.followups.forEach((fu)=>{
+      doc.setFont(ff,"bold"); doc.setFontSize(9.5);
+      wrap(fu.question || "", 9.5).forEach((ln)=>{ y = ensure(y, 12); doc.setTextColor.apply(doc, ink); doc.text(ln, M, y); y += 12; });
+      doc.setFont(ff,"normal");
+      wrap(fu.answer || "No answer", 9.5).forEach((ln)=>{ y = ensure(y, 12); doc.setTextColor.apply(doc, soft); doc.text(ln, M, y); y += 12; });
+      y += 6;
+    });
+  }
+  y = ensure(y, 30);
+  doc.setFont(ff,"normal"); doc.setFontSize(9); doc.setTextColor.apply(doc, soft);
+  const meta = [ [r.meta && r.meta.city, r.meta && r.meta.region, r.meta && r.meta.country].filter(Boolean).join(", "), [r.meta && r.meta.browser, r.meta && r.meta.os].filter(Boolean).join(" / ") ].filter(Boolean).join(" \u00b7 ");
+  if (meta){ doc.text(meta, M, y); y += 14; }
+  doc.text("Generated by zetetiq", M, H - 24);
+  const stamp = String(r.created_at || "").replace(/[^0-9]/g, "").slice(0, 12) || "response";
+  doc.save((form.title || "form").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-response-" + stamp + ".pdf");
+}
+
 function ExportButtons({ id, form, rows }){
   const { toast } = useApp();
   const [pdfBusy, setPdfBusy] = useState(false);
@@ -2505,7 +2680,7 @@ function ResponsesTab({ id, form }){
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.city, r.meta.country].filter(Boolean).join(", ") || "-"}</td>
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.browser, r.meta.os].filter(Boolean).join(" / ") || "-"}</td>
                 {previewCols.map(c=>(<td key={c} style={{fontSize:13,maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cell(r.data[c])}</td>))}
-                <td className="muted" style={{fontSize:18}}>›</td>
+                <td onClick={(e)=>e.stopPropagation()} style={{whiteSpace:"nowrap"}}><button className="btn sm" disabled={pdfBusy} onClick={async ()=>{ setPdfBusy(true); try { await exportResponsePdf(form, r); } catch (e) { toast("Could not build the PDF."); } setPdfBusy(false); }}>PDF</button></td>
               </tr>
             ))}
           </tbody>
@@ -2514,6 +2689,7 @@ function ResponsesTab({ id, form }){
       {open && (
         <Modal title={"Response · " + fmtDate(open.created_at)} onClose={()=>setOpen(null)}>
           <div className="pad-lg">
+            <div className="between" style={{marginBottom:12}}><span className="muted" style={{fontSize:13}}>Response detail</span><button className="btn sm primary" disabled={pdfBusy} onClick={async ()=>{ setPdfBusy(true); try { await exportResponsePdf(form, open); } catch (e) { toast("Could not build the PDF."); } setPdfBusy(false); }}>{pdfBusy ? "Preparing..." : "Export PDF"}</button></div>
             {(form.schema.questions||[]).filter(q=>QTYPES[q.type] && QTYPES[q.type].isInput).map(q=>(
               <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#fff"}} /> : <span className="muted">Not signed</span>) : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
             ))}

@@ -261,3 +261,19 @@ IMPORTANT, one time database step: brand kits use a new table called brand_kits.
 The drag to reorder crash is fixed. Reordering a question by dragging used to throw a map is not a function error because the reorder helper was accidentally storing a function in place of the question list. The helper now always keeps the question list as a proper array, so dragging, the move up and down buttons, duplicate, and delete all behave correctly.
 
 The side panel icons were updated: the Theme button now uses an artist palette icon and the Form settings button now uses a gear icon.
+
+## Scheduling, payments, e-signature, embedding, and per-response PDFs
+
+Three new question types are available in the builder, alongside the existing ones:
+
+Scheduling lets people book a time. Paste a Calendly link (or any scheduler) in the question's left panel. With Show the scheduler inline turned on, the booking widget is embedded right in the form (this works with Calendly). For schedulers that block embedding, turn it off to show an Open scheduler button instead.
+
+Payment collects money through a payment link. Create a payment link in Stripe, PayPal, or a similar provider, paste it in, and optionally set an amount label and button text. The form shows a payment button that opens the provider, which handles the transaction securely. No card details ever touch this app.
+
+E-signature (DocuSign) sends people to a document to review and sign. In DocuSign, create a PowerForm, paste its URL, and the form shows a Review and sign button. Signing happens on DocuSign. This is separate from the draw-it-yourself Signature field, which captures a simple drawn signature inside the form.
+
+For all three, the heading and description are edited directly on the question card, and the link and options are set in the left panel. These are action blocks: the form does not record whether the booking, payment, or signing was completed, since that happens on the provider. If you need to react to a submission elsewhere, the webhook setting under Form settings still fires on every form submission.
+
+Sharing now includes embedding. The Share button in the builder toolbar opens a panel with the form's public link and a ready to paste embed code. The embed code is an iframe you can drop into any web page to show the form inline. Both have one click copy buttons.
+
+Every response can be exported individually as a PDF. In a form's Responses tab there is a PDF button on each response row, and an Export PDF button at the top of the response detail. The PDF is themed with the form's colors and font and includes the answers, any drawn signature, the follow-up answers, and the submission location and device. The aggregate Export report PDF that summarizes all responses is unchanged.
