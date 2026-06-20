@@ -114,10 +114,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .err{font-size:12.5px;color:var(--bad);margin-top:5px;font-weight:600}
 .switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none;font-size:14px}
 .switch input{display:none}
-.switch .track{width:38px;height:22px;border-radius:999px;background:var(--line-strong);position:relative;transition:.15s}
-.switch .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch .track{width:44px;height:24px;border-radius:999px;background:var(--line-strong);position:relative;transition:.15s}
+.switch .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .switch input:checked + .track{background:var(--bo)}
-.switch input:checked + .track .knob{left:18px}
+.switch input:checked + .track .knob{left:23px}
 
 /* ai summary card */
 .ai{background:var(--card);border-color:transparent;box-shadow:var(--bevel-inset);border-radius:var(--radius);padding:16px 18px;position:relative}
@@ -177,7 +177,7 @@ html[data-theme="dark"] .form-scope .finput,html[data-theme="dark"] .form-scope 
 html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--raise-sheen:none;--paper:#F3EFE7;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#E0DACE;--line-strong:#CDC6B7;--hover:#EAE5DA;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
 .form-embed.form-page{min-height:auto;padding:14px 14px 22px;background:transparent}
-.form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.form-scope .fcard{background:var(--card);border:1px solid transparent;border-radius:16px;padding:22px;box-shadow:var(--bevel-inset)}
 .form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--ftext);font-weight:600;line-height:1.2}
 .form-scope .fdesc{color:var(--ink-soft);margin-top:8px;font-size:15px}
 .form-scope .q{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -969,6 +969,11 @@ html[data-theme="dark"] .poll-heatcell{color:#E8F5EC}
 .doc-circle.on{border-style:solid;border-width:3px;opacity:1;box-shadow:0 0 0 2px var(--fa,#5C88CD) inset}
 .doc-place-circle{background:transparent;border:none;box-shadow:none;min-width:0;padding:0}
 .ai-note{font-size:12px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
+
+/* nav wordmark: carved, no color */
+.nav .brand{color:var(--paper)}
+.nav .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.7)) drop-shadow(0 -1px 1px rgba(70,55,30,.42))}
+html[data-theme="dark"] .nav .brand .logo svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55)) drop-shadow(0 -1px 0 rgba(255,255,255,.07))}
 </style>
 </head>
 <body>
@@ -1066,6 +1071,15 @@ const api = {
   dashSummary: refresh => req("/api/summary" + (refresh ? "?refresh=1" : "")),
   formSummary: (id, refresh) => req("/api/forms/" + id + "/summary" + (refresh ? "?refresh=1" : "")),
   publicForm: (username, slug) => req("/api/public/" + encodeURIComponent(username) + "/" + encodeURIComponent(slug)),
+  updateUsername: username => req("/api/me/username", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      username
+    })
+  }),
   submit: (formId, payload) => req("/api/public/" + formId + "/responses", {
     method: "POST",
     headers: {
@@ -8526,6 +8540,82 @@ function AdminConsole() {
     className: "aform-meta"
   }, f.responses, " ", f.responses === 1 ? "response" : "responses", " ", "\u00b7", " ", fmtBytes(f.storageBytes), " ", "\u00b7", " /", f.slug)))))))))))));
 }
+function AccountModal({
+  onClose
+}) {
+  const {
+    user,
+    setUser,
+    toast
+  } = useApp();
+  const [val, setVal] = useState(user.username || "");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+  const clean = str => str.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 30);
+  const save = () => {
+    const u = clean(val);
+    if (u.length <= 3) {
+      setErr("Username must be more than 3 characters.");
+      return;
+    }
+    setSaving(true);
+    setErr("");
+    api.updateUsername(u).then(({
+      ok,
+      data
+    }) => {
+      setSaving(false);
+      if (ok && data && data.ok) {
+        setUser(p => ({
+          ...p,
+          username: data.user.username
+        }));
+        toast("Username updated");
+        onClose();
+      } else setErr(data && data.error === "taken" ? "That username is already taken." : data && data.error === "invalid_username" ? "Use 4 to 30 characters: letters, numbers, hyphen or underscore." : "Could not update the username.");
+    });
+  };
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: "Account",
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pad-lg"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Username"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: val,
+    onChange: e => {
+      setVal(clean(e.target.value));
+      setErr("");
+    },
+    placeholder: "your-name"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, "This is the public part of your form links. More than 3 characters, using letters, numbers, hyphen or underscore, and not already taken by someone else."), err && /*#__PURE__*/React.createElement("div", {
+    className: "ferr",
+    style: {
+      marginTop: 8
+    }
+  }, err), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "flex-end",
+      gap: 8,
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn ghost",
+    onClick: onClose
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: saving || clean(val).length <= 3,
+    onClick: save
+  }, saving ? "Saving..." : "Save"))));
+}
 function TopNav() {
   const {
     user,
@@ -8534,6 +8624,7 @@ function TopNav() {
     theme,
     toggleTheme
   } = useApp();
+  const [acct, setAcct] = useState(false);
   return /*#__PURE__*/React.createElement("div", {
     className: "nav"
   }, /*#__PURE__*/React.createElement("div", {
@@ -8558,7 +8649,10 @@ function TopNav() {
   }, user && user.role === "admin" && /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
     onClick: () => navigate("/admin")
-  }, "Admin"), user && /*#__PURE__*/React.createElement("span", {
+  }, "Admin"), user && user.role !== "admin" && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => setAcct(true)
+  }, "Account"), user && /*#__PURE__*/React.createElement("span", {
     className: "greet"
   }, "hey ", user.name), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
@@ -8568,7 +8662,9 @@ function TopNav() {
         navigate("/");
       });
     }
-  }, "Log out"))));
+  }, "Log out"))), acct && /*#__PURE__*/React.createElement(AccountModal, {
+    onClose: () => setAcct(false)
+  }));
 }
 function Modal({
   title,
@@ -15218,11 +15314,11 @@ function App() {
     tip.style.display = "none";
     document.body.appendChild(tip);
     let cur = null;
-    const tipText = el => el.getAttribute("data-tip") || el.getAttribute("title") || "";
+    const tipText = el => el.getAttribute("data-tip") || el.getAttribute("title") || el.getAttribute("data-otitle") || "";
     const findTip = t => {
       let el = t;
       while (el && el !== document.body) {
-        if (el.getAttribute && (el.getAttribute("data-tip") || el.getAttribute("title"))) return el;
+        if (el.getAttribute && (el.getAttribute("data-tip") || el.getAttribute("title") || el.getAttribute("data-otitle"))) return el;
         el = el.parentElement;
       }
       return null;

@@ -357,3 +357,9 @@ The stray characters that appeared on dropdowns in the builder side panel are fi
 E-sign documents now have a large Place fields view for accurate positioning, and a new circle field lets signers ring a spot on the document, alongside the existing checkbox, text, date, and signature fields.
 
 If overviews still say basic after connecting Workers AI, the card will tell you what to check: the binding must be named AI on this project, and the project must be redeployed after adding it.
+
+## Accounts, links, and polish
+
+New accounts get a clean username from the email, and you can change it under the Account button in the top bar (more than three characters, letters numbers hyphen or underscore, not already taken). Your public form link uses this username, so a clean name makes a clean link. If a test account still has an email style username and its link reads as not found, set a username under Account.
+
+Toggle switches now sit correctly in their track, the whole form frame reads as recessed, and the signed in wordmark is carved with no color. The hover tip no longer flickers when you move onto an icon inside a button. Overviews now turn on once an account has more than five forms or a form with more than fifteen responses.

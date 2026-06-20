@@ -27,6 +27,7 @@ async function route(seg, method, request, env, context) {
   if (p === "auth/google/start" && method === "GET") return googleStart(request, env);
   if (p === "auth/google/callback" && method === "GET") return googleCallback(request, env);
   if (p === "me" && method === "GET") return me(request, env);
+  if (p === "me/username" && method === "POST") return updateUsername(request, env);
   if (p === "summary" && method === "GET") return dashSummary(request, env);
 
   // ---- public (no auth) ----
@@ -226,10 +227,11 @@ async function googleCallback(request, env) {
   let row = await env.DB.prepare("SELECT id, username, name FROM users WHERE google_id = ?").bind(sub).first();
   if (!row) {
     const newId = "g_" + sub;
+    const uname = await uniqueUsername(env, usernameFromEmail(email || newId), newId);
     await env.DB.prepare(
       "INSERT OR IGNORE INTO users (id, username, name, email, google_id, is_admin) VALUES (?, ?, ?, ?, ?, 0)"
-    ).bind(newId, email || newId, name, email, sub).run();
-    row = { id: newId, username: email || newId, name };
+    ).bind(newId, uname, name, email, sub).run();
+    row = { id: newId, username: uname, name };
   }
 
   const payload = {
@@ -392,8 +394,8 @@ async function publicForm(username, slug, env) {
   const row = await env.DB.prepare(
     `SELECT f.id, f.title, f.description, f.theme, f.schema, f.is_open, u.username, u.name
      FROM forms f JOIN users u ON u.id = f.owner_id
-     WHERE u.username = ? AND f.slug = ?`
-  ).bind(username, slug).first();
+     WHERE lower(u.username) = lower(?) AND f.slug = ?`
+  ).bind(String(username||"").trim(), slug).first();
   if (!row) return json({ error: "not_found" }, 404);
 
   const schema = safeParse(row.schema, { questions: [], settings: {} });
@@ -846,6 +848,42 @@ function defaultTheme() {
   return { primary: "#BF5700", secondary: "#1A1A1A", accent: "#BF5700", font: "sans" };
 }
 
+function usernameFromEmail(email) {
+  return String(email || "").split("@")[0].toLowerCase().replace(/[^a-z0-9_-]+/g, "").slice(0, 28);
+}
+const RESERVED_USERNAMES = new Set(["admin","dashboard","builder","login","api","assets","favicon","robots","new","me","public","auth","cron","cal","v1","logout","account","settings"]);
+function validUsername(u) {
+  return typeof u === "string" && /^[a-z0-9_-]{4,30}$/.test(u) && !RESERVED_USERNAMES.has(u);
+}
+async function uniqueUsername(env, base, excludeUid) {
+  base = String(base || "").replace(/[^a-z0-9_-]/g, "").slice(0, 28) || "user";
+  while (base.length < 4) base += "0";
+  let cand = base, n = 1;
+  while (true) {
+    if (cand.length < 4 || RESERVED_USERNAMES.has(cand)) { n += 1; cand = base + n; continue; }
+    const hit = await env.DB.prepare("SELECT id FROM users WHERE username = ?").bind(cand).first();
+    if (!hit || (excludeUid && hit.id === excludeUid)) return cand;
+    n += 1; cand = base + n;
+  }
+}
+
+async function updateUsername(request, env) {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (user.uid === "admin") return json({ error: "admin_fixed" }, 400);
+  const body = await readJson(request) || {};
+  const desired = String(body.username || "").toLowerCase().trim();
+  if (!validUsername(desired)) return json({ error: "invalid_username" }, 400);
+  const existing = await env.DB.prepare("SELECT id FROM users WHERE username = ?").bind(desired).first();
+  if (existing && existing.id !== user.uid) return json({ error: "taken" }, 409);
+  await env.DB.prepare("UPDATE users SET username = ? WHERE id = ?").bind(desired, user.uid).run();
+  const payload = { uid: user.uid, username: desired, name: user.name, role: user.role, exp: Date.now() + 1000 * 60 * 60 * 24 * 30 };
+  const token = await makeToken(secret(env), payload);
+  const res = json({ ok: true, user: publicUser(payload) });
+  res.headers.append("Set-Cookie", sessionCookie(token));
+  return res;
+}
+
 function slugify(s) {
   return (s || "")
     .toString().toLowerCase().trim()
@@ -1192,6 +1230,10 @@ async function dashSummary(request, env) {
     if (cached) return json({ summary: cached.summary, generated: true, cached: true, created_at: cached.created_at });
   }
 
+  const maxResp = forms.reduce((a, f) => Math.max(a, f.responses || 0), 0);
+  if (!(forms.length > 5 || maxResp > 15)) {
+    return json({ summary: `${forms.length} forms, ${total} total responses. Your most active form is "${forms[0].title}" with ${forms[0].responses}.`, generated: false });
+  }
   const open = forms.filter((f) => f.is_open).length;
   const lines = forms.slice(0, 20)
     .map((f) => `- ${f.title}: ${f.responses} response(s), ${f.is_open ? "open" : "closed"}`)
@@ -1229,6 +1271,9 @@ async function formSummary(user, id, request, env) {
   const total = (totalRow && totalRow.c) || 0;
   if (total === 0) {
     return json({ summary: "No responses yet. Share this form to start collecting data.", generated: false });
+  }
+  if (total <= 15) {
+    return json({ summary: `${total} response${total === 1 ? "" : "s"} collected so far. Open the analytics tab for the full breakdown.`, generated: false });
   }
 
   const signature = `${total}|${form.updated_at}`;
