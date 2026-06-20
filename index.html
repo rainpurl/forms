@@ -1054,6 +1054,42 @@ body{top:0!important}
 .cal-soon-row{opacity:.6;cursor:default}
 .cal-soon-row:hover{transform:none;box-shadow:var(--bevel-raise)}
 .cal-soon{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);white-space:nowrap}
+/* booking calendar */
+.book-cal{display:flex;gap:20px;align-items:flex-start;margin-top:6px}
+.book-month{flex:1;min-width:0}
+.book-mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.book-mtitle{font-size:17px;font-weight:700;color:var(--ftext)}
+.book-myear{color:var(--ink-soft);font-weight:600}
+.book-nav{display:flex;gap:4px}
+.book-navbtn{appearance:none;border:0;background:transparent;color:var(--ink-soft);font-size:20px;line-height:1;width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s}
+.book-navbtn:hover{background:var(--card);color:var(--ftext)}
+.book-wdrow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}
+.book-wd{text-align:center;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft)}
+.book-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.book-day{position:relative;appearance:none;border:0;background:transparent;color:var(--ftext);aspect-ratio:1/1;border-radius:12px;cursor:pointer;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s,transform .12s,box-shadow .12s}
+.book-day.oom{color:var(--ink-soft);opacity:.5}
+.book-day:disabled{cursor:default;opacity:.4;font-weight:500}
+.book-day.avail{background:var(--card);box-shadow:var(--bevel-inset)}
+.book-day.avail:hover:not(.sel){transform:translateY(-1px)}
+.book-day.sel{background:var(--fa);color:#f5f2f0;box-shadow:var(--bevel-press)}
+.book-daynum{position:relative;z-index:1}
+.book-daymon{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--ink-soft);background:var(--card);padding:1px 5px;border-radius:6px;z-index:2}
+.book-daydot{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--fa)}
+.book-day.sel .book-daydot{background:#f5f2f0}
+.book-times{width:212px;flex-shrink:0;display:flex;flex-direction:column;min-width:0}
+.book-thead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.book-tdate{font-size:16px;font-weight:700;color:var(--ftext)}
+.book-ap{display:inline-flex;border-radius:9px;padding:2px;background:var(--card);box-shadow:var(--bevel-inset);flex-shrink:0}
+.book-apbtn{appearance:none;border:0;background:transparent;color:var(--ink-soft);font-size:12px;font-weight:700;padding:4px 9px;border-radius:7px;cursor:pointer;transition:.12s}
+.book-apbtn.on{background:var(--card);color:var(--ftext);box-shadow:var(--bevel-raise)}
+.book-tlist{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;padding-right:2px}
+.book-slot{position:relative;appearance:none;border:1px solid var(--line-strong);background:var(--card);color:var(--ftext);border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;text-align:center;box-shadow:var(--bevel-raise);transition:transform .12s,box-shadow .12s,border-color .12s}
+.book-slot:hover:not(:disabled):not(.sel){transform:translateY(-1px);border-color:var(--fa)}
+.book-slot.sel{background:var(--fa);color:#f5f2f0;border-color:var(--fa);box-shadow:var(--bevel-press)}
+.book-slot:disabled{opacity:.5;cursor:not-allowed}
+.book-slotspots{display:block;font-size:10px;font-weight:600;color:var(--ink-soft);margin-top:2px}
+.book-slot.sel .book-slotspots{color:#f5f2f0}
+@media (max-width:560px){.book-cal{flex-direction:column}.book-times{width:100%}.book-tlist{max-height:none}}
 </style>
 </head>
 <body>
@@ -2440,69 +2476,167 @@ function windowSlots(q, busy) {
   }
   return out;
 }
-function WindowFreePick({
-  q,
+function fmtSlotTime(d, h24) {
+  const H = d.getHours(),
+    M = d.getMinutes();
+  if (h24) return zpad(H) + ":" + zpad(M);
+  const ap = H >= 12 ? "pm" : "am";
+  let h = H % 12;
+  if (h === 0) h = 12;
+  return h + ":" + zpad(M) + ap;
+}
+function BookingCalendar({
+  slots,
+  counts,
   value,
   onChange,
-  error
+  mt,
+  capDefault
 }) {
-  const sh = q.startHour == null ? 9 : q.startHour;
-  const eh = q.endHour == null ? 17 : q.endHour;
-  const datePart = value ? value.slice(0, 10) : "";
-  const timePart = value && value.length >= 16 ? value.slice(11, 16) : "";
-  const minD = q.windowStart || zToday();
-  const maxD = q.windowEnd || "";
-  const vlabel = {
-    zoom: "Zoom",
-    meet: "Google Meet",
-    teams: "Microsoft Teams",
-    webex: "Webex"
+  const byDate = {};
+  (slots || []).forEach(s => {
+    const d = new Date(s.start);
+    if (isNaN(d)) return;
+    const key = d.getFullYear() + "-" + zpad(d.getMonth() + 1) + "-" + zpad(d.getDate());
+    (byDate[key] = byDate[key] || []).push(s);
+  });
+  const dateKeys = Object.keys(byDate).sort();
+  const parseKey = k => {
+    const p = k.split("-");
+    return new Date(+p[0], +p[1] - 1, +p[2]);
   };
-  const emit = (dp, tp) => {
-    if (!dp) {
-      onChange("");
-      return;
+  const firstKey = dateKeys[0] || null;
+  const [selDate, setSelDate] = useState(firstKey);
+  const initM = firstKey ? parseKey(firstKey) : new Date();
+  const [month, setMonth] = useState(new Date(initM.getFullYear(), initM.getMonth(), 1));
+  const [h24, setH24] = useState(false);
+  const keysSig = dateKeys.join(",");
+  useEffect(() => {
+    if ((!selDate || !byDate[selDate]) && dateKeys.length) {
+      setSelDate(dateKeys[0]);
+      const m = parseKey(dateKeys[0]);
+      setMonth(new Date(m.getFullYear(), m.getMonth(), 1));
     }
-    onChange(dp + "T" + (tp || zpad(sh) + ":00"));
-  };
-  const fmtH = h => {
-    const ap = h >= 12 ? "PM" : "AM";
-    let h12 = h % 12;
-    if (h12 === 0) h12 = 12;
-    return h12 + " " + ap;
-  };
+  }, [keysSig]);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const keyOf = d => d.getFullYear() + "-" + zpad(d.getMonth() + 1) + "-" + zpad(d.getDate());
+  const todayKey = keyOf(today);
+  const gridStart = new Date(month.getFullYear(), month.getMonth(), 1);
+  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
+  const cells = [];
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(gridStart);
+    d.setDate(gridStart.getDate() + i);
+    cells.push(d);
+  }
+  const yr = month.getFullYear();
+  const monthLabel = month.toLocaleDateString(undefined, {
+    month: "long"
+  });
+  const WD = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const daySlots = selDate && byDate[selDate] ? byDate[selDate].slice().sort((a, b) => a.start < b.start ? -1 : 1) : [];
+  const selD = selDate ? parseKey(selDate) : null;
+  const selLabel = selD ? selD.toLocaleDateString(undefined, {
+    weekday: "short",
+    day: "numeric"
+  }) : "";
   return /*#__PURE__*/React.createElement("div", {
-    className: "q"
-  }, /*#__PURE__*/React.createElement(QLabel, {
-    q: q
-  }), (q.meetingTitle || q.duration || q.location || q.video && q.video !== "none") && /*#__PURE__*/React.createElement("div", {
-    className: "mt-card"
-  }, q.meetingTitle && /*#__PURE__*/React.createElement("div", {
-    className: "mt-title"
-  }, q.meetingTitle), /*#__PURE__*/React.createElement("div", {
-    className: "mt-meta"
-  }, [q.duration ? q.duration + " min" : "", q.location || "", q.video && q.video !== "none" ? vlabel[q.video] + " link" : ""].filter(Boolean).join(" \u00b7 "))), /*#__PURE__*/React.createElement("div", {
-    className: "row",
+    className: "book-cal"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "book-month"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "book-mhead"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "book-mtitle"
+  }, monthLabel, " ", /*#__PURE__*/React.createElement("span", {
+    className: "book-myear"
+  }, yr)), /*#__PURE__*/React.createElement("div", {
+    className: "book-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "book-navbtn",
+    "aria-label": "Previous month",
+    onClick: () => setMonth(new Date(yr, month.getMonth() - 1, 1))
+  }, "\u2039"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "book-navbtn",
+    "aria-label": "Next month",
+    onClick: () => setMonth(new Date(yr, month.getMonth() + 1, 1))
+  }, "\u203a"))), /*#__PURE__*/React.createElement("div", {
+    className: "book-wdrow"
+  }, WD.map(w => /*#__PURE__*/React.createElement("div", {
+    key: w,
+    className: "book-wd"
+  }, w))), /*#__PURE__*/React.createElement("div", {
+    className: "book-grid"
+  }, cells.map((d, i) => {
+    const k = keyOf(d);
+    const inMonth = d.getMonth() === month.getMonth();
+    const avail = !!byDate[k];
+    const sel = k === selDate;
+    const isToday = k === todayKey;
+    const firstOfMonth = d.getDate() === 1;
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: i,
+      className: "book-day" + (sel ? " sel" : "") + (avail ? " avail" : "") + (inMonth ? "" : " oom"),
+      disabled: !avail,
+      onClick: () => {
+        if (avail) setSelDate(k);
+      }
+    }, firstOfMonth && !sel && /*#__PURE__*/React.createElement("span", {
+      className: "book-daymon"
+    }, d.toLocaleDateString(undefined, {
+      month: "short"
+    }).toUpperCase()), /*#__PURE__*/React.createElement("span", {
+      className: "book-daynum"
+    }, d.getDate()), isToday && /*#__PURE__*/React.createElement("span", {
+      className: "book-daydot",
+      "aria-hidden": "true"
+    }));
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "book-times"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "book-thead"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "book-tdate"
+  }, selLabel || "Select a date"), /*#__PURE__*/React.createElement("div", {
+    className: "book-ap"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "book-apbtn" + (!h24 ? " on" : ""),
+    onClick: () => setH24(false)
+  }, "12h"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "book-apbtn" + (h24 ? " on" : ""),
+    onClick: () => setH24(true)
+  }, "24h"))), /*#__PURE__*/React.createElement("div", {
+    className: "book-tlist"
+  }, daySlots.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
     style: {
-      gap: 8
+      fontSize: 13
     }
-  }, /*#__PURE__*/React.createElement(DateField, {
-    className: "select",
-    value: datePart,
-    min: minD,
-    max: maxD,
-    onChange: e => emit(e.target.value, timePart)
-  }), /*#__PURE__*/React.createElement(TimeField, {
-    value: timePart || zpad(sh) + ":00",
-    onChange: e => emit(datePart || minD || zToday(), e.target.value)
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "hint",
-    style: {
-      marginTop: 6
-    }
-  }, "Choose a time between ", fmtH(sh), " and ", fmtH(eh), maxD ? "" : "", "."), error && /*#__PURE__*/React.createElement("div", {
-    className: "ferr"
-  }, error));
+  }, "No times available.") : daySlots.map(s => {
+    const d = new Date(s.start);
+    const cap = s.capacity == null ? mt === "group" ? capDefault || 1 : 1 : s.capacity;
+    const used = counts && counts[s.start] || 0;
+    const left = Math.max(0, cap - used);
+    const full = cap > 0 && used >= cap;
+    const isSel = value === s.start;
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: s.id || s.start,
+      className: "book-slot" + (isSel ? " sel" : ""),
+      disabled: full && !isSel,
+      onClick: () => onChange(s.start)
+    }, fmtSlotTime(d, h24), mt === "group" && cap > 1 ? /*#__PURE__*/React.createElement("span", {
+      className: "book-slotspots"
+    }, full ? "Full" : left + " left") : full ? /*#__PURE__*/React.createElement("span", {
+      className: "book-slotspots"
+    }, "Full") : null);
+  }))));
 }
 function SchedulingRenderer({
   q,
@@ -2524,12 +2658,6 @@ function SchedulingRenderer({
     formId: formId,
     preview: preview
   });
-  if (q.availMode === "window" && q.freePick) return /*#__PURE__*/React.createElement(WindowFreePick, {
-    q: q,
-    value: value,
-    onChange: onChange,
-    error: error
-  });
   const slots = q.availMode === "window" ? windowSlots(q, busy) : Array.isArray(q.slots) ? q.slots : [];
   const counts = bookings || {};
   const now = Date.now();
@@ -2550,21 +2678,6 @@ function SchedulingRenderer({
     const d = new Date(s.start);
     if (isNaN(d)) return true;
     return d.getTime() >= now + minNoticeMs;
-  });
-  const groups = {};
-  const order = [];
-  visible.forEach(s => {
-    const d = new Date(s.start);
-    const key = isNaN(d) ? "Other" : d.toLocaleDateString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric"
-    });
-    if (!groups[key]) {
-      groups[key] = [];
-      order.push(key);
-    }
-    groups[key].push(s);
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "q"
@@ -2588,38 +2701,14 @@ function SchedulingRenderer({
     style: {
       fontSize: 13
     }
-  }, "No times are currently available.") : /*#__PURE__*/React.createElement("div", {
-    className: "slot-wrap"
-  }, order.map(day => /*#__PURE__*/React.createElement("div", {
-    key: day,
-    className: "slot-day"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "slot-date"
-  }, day), /*#__PURE__*/React.createElement("div", {
-    className: "slot-grid"
-  }, groups[day].map(s => {
-    const d = new Date(s.start);
-    const tlabel = isNaN(d) ? s.start : d.toLocaleTimeString(undefined, {
-      hour: "numeric",
-      minute: "2-digit"
-    });
-    const cap = s.capacity == null ? mt === "group" ? q.capacity || 1 : 1 : s.capacity;
-    const used = counts[s.start] || 0;
-    const left = Math.max(0, cap - used);
-    const full = cap > 0 && used >= cap;
-    const isSel = value === s.start;
-    return /*#__PURE__*/React.createElement("button", {
-      type: "button",
-      key: s.id || s.start,
-      className: "slot-btn" + (isSel ? " sel" : ""),
-      disabled: full && !isSel,
-      onClick: () => onChange(s.start)
-    }, tlabel, mt === "group" && cap > 1 ? /*#__PURE__*/React.createElement("span", {
-      className: "slot-spots"
-    }, full ? "Full" : left + " left") : full ? /*#__PURE__*/React.createElement("span", {
-      className: "slot-full"
-    }, "Full") : null);
-  }))))), (mt === "round_robin" || mt === "collective") && Array.isArray(q.hosts) && q.hosts.filter(h => h.name).length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "No times are currently available.") : /*#__PURE__*/React.createElement(BookingCalendar, {
+    slots: visible,
+    counts: counts,
+    value: value,
+    onChange: onChange,
+    mt: mt,
+    capDefault: q.capacity || 1
+  }), (mt === "round_robin" || mt === "collective") && Array.isArray(q.hosts) && q.hosts.filter(h => h.name).length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "hint",
     style: {
       marginTop: 8
@@ -3334,22 +3423,7 @@ function SchedulingControls({
     onChange: e => update({
       slotMinutes: Math.max(5, parseInt(e.target.value || "60", 10))
     })
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 10
-    }
-  }, /*#__PURE__*/React.createElement(Toggle, {
-    checked: !!q.freePick,
-    onChange: c => update({
-      freePick: c
-    }),
-    label: "Let people pick any time in the window"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "hint",
-    style: {
-      marginTop: 6
-    }
-  }, q.freePick ? "People pick any time inside this window." : "Times are offered every " + (q.slotMinutes || 60) + " minutes inside this window.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }))) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 8,

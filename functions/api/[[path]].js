@@ -411,17 +411,21 @@ async function outlookBusy(env, conn, timeMin, timeMax){
   try {
     const o = conn && conn.outlook;
     const rt = o && o.refresh_token;
-    if (!rt || !o.email) return [];
+    if (!rt) return [];
     const at = await msAccessToken(env, rt);
     if (!at) return [];
-    const r = await fetch("https://graph.microsoft.com/v1.0/me/calendar/getSchedule", {
-      method: "POST", headers: { "Authorization": "Bearer " + at, "Content-Type": "application/json" },
-      body: JSON.stringify({ schedules: [o.email], startTime: { dateTime: timeMin, timeZone: "UTC" }, endTime: { dateTime: timeMax, timeZone: "UTC" }, availabilityViewInterval: 30 }),
+    // calendarView works for both personal and work/school accounts (getSchedule is unreliable on consumer accounts)
+    const qs = new URLSearchParams({ startDateTime: timeMin, endDateTime: timeMax, "$select": "start,end,showAs,isCancelled", "$top": "250", "$orderby": "start/dateTime" });
+    const r = await fetch("https://graph.microsoft.com/v1.0/me/calendarView?" + qs.toString(), {
+      headers: { "Authorization": "Bearer " + at, "Prefer": 'outlook.timezone="UTC"' },
     });
     const j = await r.json();
-    const sched = (j && j.value && j.value[0] && j.value[0].scheduleItems) || [];
-    const toIso = (dt)=>{ try { let s = (dt && dt.dateTime) || ""; if (!s) return null; if (!/[Zz]|[+\-]\d\d:?\d\d$/.test(s)) s += "Z"; const d = new Date(s); return isNaN(d.getTime()) ? null : d.toISOString(); } catch (e) { return null; } };
-    return sched.map((it)=>({ start: toIso(it.start), end: toIso(it.end) })).filter((b)=> b.start && b.end);
+    const items = (j && j.value) || [];
+    const toIso = (dt)=>{ try { let str = (dt && dt.dateTime) || ""; if (!str) return null; if (!/[Zz]|[+\-]\d\d:?\d\d$/.test(str)) str += "Z"; const d = new Date(str); return isNaN(d.getTime()) ? null : d.toISOString(); } catch (e) { return null; } };
+    return items
+      .filter((it)=> !it.isCancelled && (it.showAs == null || it.showAs === "busy" || it.showAs === "oof" || it.showAs === "tentative" || it.showAs === "workingElsewhere"))
+      .map((it)=>({ start: toIso(it.start), end: toIso(it.end) }))
+      .filter((b)=> b.start && b.end);
   } catch (e) { return []; }
 }
 
