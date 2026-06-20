@@ -936,6 +936,21 @@ html[data-theme="dark"] .boot-word{text-shadow:0 -1px 0 rgba(255,255,255,.07),0 
 /* poll heatmap number legible on green tint in dark mode */
 html[data-theme="dark"] .poll-heatcell{color:#E8F5EC}
 @media (prefers-reduced-motion: reduce){.loadlogo .logo svg,.boot-word{animation:none}}
+
+/* footer admin sign-in + admin console */
+.lp-foot-admin{appearance:none;background:none;border:none;color:var(--ink-soft);font-size:13px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px;font-family:inherit}
+.lp-foot-admin:hover{color:var(--ink)}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:22px}
+.astat{background:var(--card);box-shadow:var(--bevel-inset);border-radius:12px;padding:14px 16px}
+.astat .av{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1}
+.astat .al{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-top:4px}
+.admin-users td{vertical-align:top}
+.admin-users tr.clickable{cursor:pointer}
+.urow-detail td{background:var(--hover)}
+.admin-forms{display:flex;flex-direction:column;gap:7px;padding:4px 0 6px}
+.aform{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.aform-title{font-weight:600}
+.aform-meta{color:var(--ink-soft);font-size:12px}
 </style>
 </head>
 <body>
@@ -987,6 +1002,7 @@ const api = {
     method: "POST"
   }),
   listForms: () => req("/api/forms"),
+  adminOverview: () => req("/api/admin/overview"),
   createForm: payload => req("/api/forms", {
     method: "POST",
     headers: {
@@ -1332,6 +1348,78 @@ function readFileDataUrl(file, maxBytes, cb) {
   };
   reader.readAsDataURL(file);
 }
+function fmtBytes(n) {
+  n = n || 0;
+  if (n < 1024) return n + " B";
+  if (n < 1048576) return (n / 1024).toFixed(n < 10240 ? 1 : 0) + " KB";
+  if (n < 1073741824) return (n / 1048576).toFixed(n < 10485760 ? 1 : 0) + " MB";
+  return (n / 1073741824).toFixed(2) + " GB";
+}
+function jpgName(n) {
+  return String(n || "image").replace(/\.[^.]+$/, "") + ".jpg";
+}
+function compressImageUnder(file, maxBytes, cb) {
+  const attempts = [[1, 0.82], [1, 0.7], [0.85, 0.68], [0.7, 0.62], [0.55, 0.56], [0.45, 0.5], [0.35, 0.45]];
+  let url;
+  try {
+    url = URL.createObjectURL(file);
+  } catch (e) {
+    cb(null);
+    return;
+  }
+  const done = f => {
+    try {
+      URL.revokeObjectURL(url);
+    } catch (e) {}
+    cb(f);
+  };
+  const img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth || img.width,
+      h = img.naturalHeight || img.height;
+    if (!w || !h) {
+      done(null);
+      return;
+    }
+    let i = 0;
+    const attempt = () => {
+      if (i >= attempts.length) {
+        done(null);
+        return;
+      }
+      const a = attempts[i++],
+        scale = a[0],
+        quality = a[1];
+      const cw = Math.max(1, Math.round(w * scale)),
+        ch = Math.max(1, Math.round(h * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = cw;
+      canvas.height = ch;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        attempt();
+        return;
+      }
+      ctx.drawImage(img, 0, 0, cw, ch);
+      if (canvas.toBlob) {
+        canvas.toBlob(blob => {
+          if (blob && blob.size <= maxBytes) {
+            done(new File([blob], jpgName(file.name), {
+              type: "image/jpeg"
+            }));
+          } else attempt();
+        }, "image/jpeg", quality);
+      } else {
+        attempt();
+      }
+    };
+    attempt();
+  };
+  img.onerror = () => {
+    done(null);
+  };
+  img.src = url;
+}
 function FileUploadRenderer({
   q,
   value,
@@ -1346,35 +1434,51 @@ function FileUploadRenderer({
   const [busy, setBusy] = useState(false);
   const multiple = !!q.multiple;
   const items = multiple ? Array.isArray(value) ? value : value ? [value] : [] : value && value.key ? [value] : [];
+  const capMb = Math.min(q.maxMb || 10, 10);
   const pick = file => {
     if (!file) return;
     if (preview || !formId) {
       toast("File uploads work on the published form.");
       return;
     }
-    const maxMb = q.maxMb || 10;
-    if (file.size && file.size > maxMb * 1024 * 1024) {
-      toast("That file is larger than " + maxMb + " MB.");
+    const cap = capMb * 1024 * 1024;
+    const send = f => {
+      setBusy(true);
+      api.uploadFile(formId, f).then(({
+        ok,
+        data
+      }) => {
+        setBusy(false);
+        if (!ok || !data || !data.key) {
+          toast(data && data.error === "storage_unconfigured" ? "File uploads are not set up for this form yet." : data && data.error === "too_large" ? "That file is larger than " + (data.maxMb || capMb) + " MB." : "Upload failed. Please try again.");
+          return;
+        }
+        const rec = {
+          key: data.key,
+          name: data.name,
+          size: data.size,
+          type: data.type
+        };
+        if (multiple) onChange(items.concat([rec]));else onChange(rec);
+      });
+    };
+    if (!file.size || file.size <= cap) {
+      send(file);
       return;
     }
-    setBusy(true);
-    api.uploadFile(formId, file).then(({
-      ok,
-      data
-    }) => {
-      setBusy(false);
-      if (!ok || !data || !data.key) {
-        toast(data && data.error === "storage_unconfigured" ? "File uploads are not set up for this form yet." : "Upload failed. Please try again.");
-        return;
-      }
-      const rec = {
-        key: data.key,
-        name: data.name,
-        size: data.size,
-        type: data.type
-      };
-      if (multiple) onChange(items.concat([rec]));else onChange(rec);
-    });
+    if (/^image\//.test(file.type)) {
+      setBusy(true);
+      compressImageUnder(file, cap, out => {
+        if (out) {
+          send(out);
+        } else {
+          setBusy(false);
+          toast("That image is too large, even after compressing. Please choose one under " + capMb + " MB.");
+        }
+      });
+    } else {
+      toast("That file is larger than " + capMb + " MB and cannot be compressed. Please choose a smaller file.");
+    }
   };
   const removeAt = i => {
     if (multiple) {
@@ -1410,7 +1514,7 @@ function FileUploadRenderer({
     className: "filezone-ico"
   }, busy ? "Uploading\u2026" : multiple ? "Choose files" : "Choose a file"), /*#__PURE__*/React.createElement("span", {
     className: "filezone-hint"
-  }, q.accept ? "Accepted: " + q.accept : "Any file type", q.maxMb ? " \u00b7 up to " + q.maxMb + " MB" : "")), items.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, q.accept ? "Accepted: " + q.accept : "Any file type", " \u00b7 up to " + capMb + " MB, images shrink to fit")), items.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "filelist"
   }, items.map((it, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
@@ -1450,15 +1554,15 @@ function FileUploadControls({
   }, "Spreadsheets"), /*#__PURE__*/React.createElement("option", {
     value: "image/*,application/pdf"
   }, "Images and PDF"))), /*#__PURE__*/React.createElement(Field, {
-    label: "Maximum size (MB)"
+    label: "Maximum size (MB, 10 max)"
   }, /*#__PURE__*/React.createElement("input", {
     className: "input",
     type: "number",
     min: "1",
-    max: "50",
+    max: "10",
     value: q.maxMb || 10,
     onChange: e => update({
-      maxMb: parseInt(e.target.value || "10", 10)
+      maxMb: Math.min(10, Math.max(1, parseInt(e.target.value || "10", 10)))
     })
   })), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.multiple,
@@ -7695,7 +7799,7 @@ function Landing({
       setBusy(false);
       if (ok && data && data.user) {
         setUser(data.user);
-        navigate("/dashboard");
+        navigate("/admin");
       } else setErr("Incorrect password.");
     });
   };
@@ -7818,10 +7922,7 @@ function Landing({
   }, /*#__PURE__*/React.createElement("button", {
     className: "gbtn auto",
     onClick: google
-  }, /*#__PURE__*/React.createElement(GoogleG, null), " Continue with Google"), /*#__PURE__*/React.createElement("button", {
-    className: "btn lg",
-    onClick: () => setOpen(true)
-  }, "Admin login"))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GoogleG, null), " Continue with Google"))), /*#__PURE__*/React.createElement("div", {
     className: "lp-visual",
     "aria-hidden": "true"
   }, /*#__PURE__*/React.createElement("div", {
@@ -7932,10 +8033,7 @@ function Landing({
   }, /*#__PURE__*/React.createElement("button", {
     className: "gbtn auto",
     onClick: google
-  }, /*#__PURE__*/React.createElement(GoogleG, null), " Continue with Google"), /*#__PURE__*/React.createElement("button", {
-    className: "btn lg",
-    onClick: () => setOpen(true)
-  }, "Admin login"))), /*#__PURE__*/React.createElement("footer", {
+  }, /*#__PURE__*/React.createElement(GoogleG, null), " Continue with Google"))), /*#__PURE__*/React.createElement("footer", {
     className: "lp-foot"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-foot-in"
@@ -7948,7 +8046,11 @@ function Landing({
     href: "https://zetetiq.pages.dev",
     target: "_blank",
     rel: "noopener"
-  }, "zetetiq.pages.dev")), /*#__PURE__*/React.createElement("div", {
+  }, "zetetiq.pages.dev"), !user && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "lp-foot-admin",
+    onClick: () => setOpen(true)
+  }, "Admin sign in")), /*#__PURE__*/React.createElement("div", {
     className: "lp-foot-copy"
   }, "© 2026 Zetetiq XM")), open && !user && /*#__PURE__*/React.createElement(Modal, {
     title: "Admin login",
@@ -8310,6 +8412,148 @@ function BrandStudio({
     onClick: save
   }, saving ? "Saving..." : "Save brand kit"));
 }
+function AdminConsole() {
+  const {
+    navigate
+  } = useApp();
+  const [data, setData] = useState(null);
+  const [expanded, setExpanded] = useState({});
+  const [err, setErr] = useState(false);
+  const load = useCallback(() => {
+    setErr(false);
+    api.adminOverview().then(({
+      ok,
+      data
+    }) => {
+      if (ok && data && data.totals) setData(data);else setErr(true);
+    }).catch(() => setErr(true));
+  }, []);
+  useEffect(() => {
+    load();
+  }, [load]);
+  const toggle = id => setExpanded(e => {
+    const n = Object.assign({}, e);
+    n[id] = !n[id];
+    return n;
+  });
+  const t = data && data.totals;
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
+    className: "wrap page"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      flexWrap: "wrap",
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontSize: 26,
+      margin: 0
+    }
+  }, "Admin console"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: load,
+    disabled: data === null && !err
+  }, "Refresh")), err ? /*#__PURE__*/React.createElement("div", {
+    className: "muted"
+  }, "Could not load admin data. Make sure you are signed in as the admin.") : data === null ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center",
+      padding: "56px 0"
+    }
+  }, /*#__PURE__*/React.createElement(LoadingLogo, null)) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "admin-stats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "astat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "av"
+  }, t.users), /*#__PURE__*/React.createElement("div", {
+    className: "al"
+  }, "Users")), /*#__PURE__*/React.createElement("div", {
+    className: "astat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "av"
+  }, t.forms), /*#__PURE__*/React.createElement("div", {
+    className: "al"
+  }, "Forms")), /*#__PURE__*/React.createElement("div", {
+    className: "astat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "av"
+  }, t.responses), /*#__PURE__*/React.createElement("div", {
+    className: "al"
+  }, "Responses")), /*#__PURE__*/React.createElement("div", {
+    className: "astat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "av"
+  }, t.openForms), /*#__PURE__*/React.createElement("div", {
+    className: "al"
+  }, "Open forms")), /*#__PURE__*/React.createElement("div", {
+    className: "astat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "av"
+  }, t.storageAvailable ? fmtBytes(t.storageBytes) : "n/a"), /*#__PURE__*/React.createElement("div", {
+    className: "al"
+  }, t.storageAvailable ? "Storage used of 10 GB" : "Storage (R2 off)"))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-title",
+    style: {
+      marginBottom: 6
+    }
+  }, "Users"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 12
+    }
+  }, "Click a user to see their forms. Storage is the total size of files uploaded to that user's forms."), data.users.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted"
+  }, "No users yet.") : /*#__PURE__*/React.createElement("table", {
+    className: "table admin-users"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "User"), /*#__PURE__*/React.createElement("th", null, "Forms"), /*#__PURE__*/React.createElement("th", null, "Responses"), /*#__PURE__*/React.createElement("th", null, "Storage"), /*#__PURE__*/React.createElement("th", null, "Joined"), /*#__PURE__*/React.createElement("th", null, "Last activity"))), /*#__PURE__*/React.createElement("tbody", null, data.users.map(u => /*#__PURE__*/React.createElement(React.Fragment, {
+    key: u.id
+  }, /*#__PURE__*/React.createElement("tr", {
+    className: "clickable",
+    onClick: () => toggle(u.id)
+  }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600
+    }
+  }, u.name || u.username, u.isAdmin && /*#__PURE__*/React.createElement("span", {
+    className: "kind-badge",
+    style: {
+      marginLeft: 6
+    }
+  }, "admin")), /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 12
+    }
+  }, u.email || u.username)), /*#__PURE__*/React.createElement("td", null, u.formCount), /*#__PURE__*/React.createElement("td", null, u.responseCount), /*#__PURE__*/React.createElement("td", null, fmtBytes(u.storageBytes)), /*#__PURE__*/React.createElement("td", null, u.created_at ? fmtAgo(u.created_at) : "-"), /*#__PURE__*/React.createElement("td", null, u.lastResponseAt ? fmtAgo(u.lastResponseAt) : /*#__PURE__*/React.createElement("span", {
+    className: "muted"
+  }, "no responses"))), expanded[u.id] && /*#__PURE__*/React.createElement("tr", {
+    className: "urow-detail"
+  }, /*#__PURE__*/React.createElement("td", {
+    colSpan: 6
+  }, u.forms.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, "No forms.") : /*#__PURE__*/React.createElement("div", {
+    className: "admin-forms"
+  }, u.forms.map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.id,
+    className: "aform"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "badge " + (f.isOpen ? "open" : "closed")
+  }, f.isOpen ? "Open" : "Closed"), /*#__PURE__*/React.createElement("span", {
+    className: "aform-title"
+  }, f.title || "Untitled form"), /*#__PURE__*/React.createElement("span", {
+    className: "aform-meta"
+  }, f.responses, " ", f.responses === 1 ? "response" : "responses", " ", "\u00b7", " ", fmtBytes(f.storageBytes), " ", "\u00b7", " /", f.slug)))))))))))));
+}
 function TopNav() {
   const {
     user,
@@ -8339,7 +8583,10 @@ function TopNav() {
     onClick: () => navigate("/builder/new")
   }, "+ New form"), /*#__PURE__*/React.createElement("div", {
     className: "navright"
-  }, user && /*#__PURE__*/React.createElement("span", {
+  }, user && user.role === "admin" && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: () => navigate("/admin")
+  }, "Admin"), user && /*#__PURE__*/React.createElement("span", {
     className: "greet"
   }, "hey ", user.name), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
@@ -15158,7 +15405,7 @@ function App() {
     })));
   } else {
     const seg = path.split("/").filter(Boolean);
-    const reserved = new Set(["dashboard", "builder", "login", "api", "assets", "favicon.ico", "robots.txt"]);
+    const reserved = new Set(["dashboard", "builder", "login", "admin", "api", "assets", "favicon.ico", "robots.txt"]);
     if (seg.length === 1 && !reserved.has(seg[0])) view = /*#__PURE__*/React.createElement(PublicForm, {
       username: "admin",
       slug: seg[0]
@@ -15169,7 +15416,7 @@ function App() {
       showLogin: true
     });else if (!user) view = /*#__PURE__*/React.createElement(Landing, {
       showLogin: true
-    });else if (seg[0] === "dashboard" && seg.length === 1) view = /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "dashboard" && seg.length === 2) view = /*#__PURE__*/React.createElement(FormDashboard, {
+    });else if (seg[0] === "dashboard" && seg.length === 1) view = /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "admin" && seg.length === 1) view = user.role === "admin" ? /*#__PURE__*/React.createElement(AdminConsole, null) : /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "dashboard" && seg.length === 2) view = /*#__PURE__*/React.createElement(FormDashboard, {
       id: seg[1]
     });else if (seg[0] === "builder" && seg.length === 2) view = /*#__PURE__*/React.createElement(Builder, {
       formId: seg[1]

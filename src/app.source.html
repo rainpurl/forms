@@ -942,6 +942,21 @@ html[data-theme="dark"] .boot-word{text-shadow:0 -1px 0 rgba(255,255,255,.07),0 
 /* poll heatmap number legible on green tint in dark mode */
 html[data-theme="dark"] .poll-heatcell{color:#E8F5EC}
 @media (prefers-reduced-motion: reduce){.loadlogo .logo svg,.boot-word{animation:none}}
+
+/* footer admin sign-in + admin console */
+.lp-foot-admin{appearance:none;background:none;border:none;color:var(--ink-soft);font-size:13px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px;font-family:inherit}
+.lp-foot-admin:hover{color:var(--ink)}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:22px}
+.astat{background:var(--card);box-shadow:var(--bevel-inset);border-radius:12px;padding:14px 16px}
+.astat .av{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1}
+.astat .al{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-top:4px}
+.admin-users td{vertical-align:top}
+.admin-users tr.clickable{cursor:pointer}
+.urow-detail td{background:var(--hover)}
+.admin-forms{display:flex;flex-direction:column;gap:7px;padding:4px 0 6px}
+.aform{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.aform-title{font-weight:600}
+.aform-meta{color:var(--ink-soft);font-size:12px}
 </style>
 </head>
 <body>
@@ -966,6 +981,7 @@ const api = {
   loginAdmin: (password) => req("/api/auth/admin", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ password }) }),
   logout: () => req("/api/auth/logout", { method:"POST" }),
   listForms: () => req("/api/forms"),
+  adminOverview: () => req("/api/admin/overview"),
   createForm: (payload) => req("/api/forms", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   getForm: (id) => req("/api/forms/" + id),
   followup: (formId, questionId, answer) => req("/api/public/" + formId + "/followup", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ questionId, answer }) }),
@@ -1151,23 +1167,53 @@ function readFileDataUrl(file, maxBytes, cb){
   reader.onload = ()=>{ const r = reader.result; if (typeof r === "string" && maxBytes && r.length > maxBytes * 1.4){ cb(null); return; } cb(r); };
   reader.readAsDataURL(file);
 }
+function fmtBytes(n){ n = n || 0; if (n < 1024) return n + " B"; if (n < 1048576) return (n / 1024).toFixed(n < 10240 ? 1 : 0) + " KB"; if (n < 1073741824) return (n / 1048576).toFixed(n < 10485760 ? 1 : 0) + " MB"; return (n / 1073741824).toFixed(2) + " GB"; }
+function jpgName(n){ return String(n || "image").replace(/\.[^.]+$/, "") + ".jpg"; }
+function compressImageUnder(file, maxBytes, cb){
+  const attempts = [[1, 0.82], [1, 0.7], [0.85, 0.68], [0.7, 0.62], [0.55, 0.56], [0.45, 0.5], [0.35, 0.45]];
+  let url;
+  try { url = URL.createObjectURL(file); } catch (e){ cb(null); return; }
+  const done = (f)=>{ try { URL.revokeObjectURL(url); } catch (e){} cb(f); };
+  const img = new Image();
+  img.onload = ()=>{
+    const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+    if (!w || !h){ done(null); return; }
+    let i = 0;
+    const attempt = ()=>{
+      if (i >= attempts.length){ done(null); return; }
+      const a = attempts[i++], scale = a[0], quality = a[1];
+      const cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+      const canvas = document.createElement("canvas"); canvas.width = cw; canvas.height = ch;
+      const ctx = canvas.getContext("2d"); if (!ctx){ attempt(); return; }
+      ctx.drawImage(img, 0, 0, cw, ch);
+      if (canvas.toBlob){
+        canvas.toBlob((blob)=>{ if (blob && blob.size <= maxBytes){ done(new File([blob], jpgName(file.name), { type: "image/jpeg" })); } else attempt(); }, "image/jpeg", quality);
+      } else { attempt(); }
+    };
+    attempt();
+  };
+  img.onerror = ()=>{ done(null); };
+  img.src = url;
+}
+
 function FileUploadRenderer({ q, value, onChange, error, formId, preview }){
   const { toast } = useApp();
   const [busy, setBusy] = useState(false);
   const multiple = !!q.multiple;
   const items = multiple ? (Array.isArray(value) ? value : (value ? [value] : [])) : (value && value.key ? [value] : []);
+  const capMb = Math.min((q.maxMb || 10), 10);
   const pick = (file)=>{
     if (!file) return;
     if (preview || !formId){ toast("File uploads work on the published form."); return; }
-    const maxMb = q.maxMb || 10;
-    if (file.size && file.size > maxMb * 1024 * 1024){ toast("That file is larger than " + maxMb + " MB."); return; }
-    setBusy(true);
-    api.uploadFile(formId, file).then(({ ok, data })=>{
-      setBusy(false);
-      if (!ok || !data || !data.key){ toast((data && data.error === "storage_unconfigured") ? "File uploads are not set up for this form yet." : "Upload failed. Please try again."); return; }
-      const rec = { key: data.key, name: data.name, size: data.size, type: data.type };
-      if (multiple) onChange(items.concat([rec])); else onChange(rec);
-    });
+    const cap = capMb * 1024 * 1024;
+    const send = (f)=>{ setBusy(true); api.uploadFile(formId, f).then(({ ok, data })=>{ setBusy(false); if (!ok || !data || !data.key){ toast((data && data.error === "storage_unconfigured") ? "File uploads are not set up for this form yet." : (data && data.error === "too_large") ? ("That file is larger than " + (data.maxMb || capMb) + " MB.") : "Upload failed. Please try again."); return; } const rec = { key: data.key, name: data.name, size: data.size, type: data.type }; if (multiple) onChange(items.concat([rec])); else onChange(rec); }); };
+    if (!file.size || file.size <= cap){ send(file); return; }
+    if (/^image\//.test(file.type)){
+      setBusy(true);
+      compressImageUnder(file, cap, (out)=>{ if (out){ send(out); } else { setBusy(false); toast("That image is too large, even after compressing. Please choose one under " + capMb + " MB."); } });
+    } else {
+      toast("That file is larger than " + capMb + " MB and cannot be compressed. Please choose a smaller file.");
+    }
   };
   const removeAt = (i)=>{ if (multiple){ const next = items.slice(); next.splice(i, 1); onChange(next); } else onChange(null); };
   return (
@@ -1176,7 +1222,7 @@ function FileUploadRenderer({ q, value, onChange, error, formId, preview }){
       <label className={"filezone" + (error ? " err" : "") + (busy ? " busy" : "")}>
         <input type="file" accept={q.accept || undefined} multiple={multiple} style={{display:"none"}} disabled={busy} onChange={(e)=>{ const fs = e.target.files; if (multiple){ Array.prototype.slice.call(fs).forEach(pick); } else { pick(fs && fs[0]); } e.target.value = ""; }} />
         <span className="filezone-ico">{busy ? "Uploading\u2026" : (multiple ? "Choose files" : "Choose a file")}</span>
-        <span className="filezone-hint">{q.accept ? ("Accepted: " + q.accept) : "Any file type"}{q.maxMb ? (" \u00b7 up to " + q.maxMb + " MB") : ""}</span>
+        <span className="filezone-hint">{q.accept ? ("Accepted: " + q.accept) : "Any file type"}{" \u00b7 up to " + capMb + " MB, images shrink to fit"}</span>
       </label>
       {items.length > 0 && <div className="filelist">{items.map((it, i)=>(<div key={i} className="fileitem"><span className="filename">{it.name || "File"}</span><button type="button" className="fbtn-ghost sm" onClick={()=>removeAt(i)}>Remove</button></div>))}</div>}
       {error && <div className="ferr">{error}</div>}
@@ -1196,7 +1242,7 @@ function FileUploadControls({ q, update }){
           <option value="image/*,application/pdf">Images and PDF</option>
         </Select>
       </Field>
-      <Field label="Maximum size (MB)"><input className="input" type="number" min="1" max="50" value={q.maxMb || 10} onChange={(e)=>update({maxMb: parseInt(e.target.value || "10", 10)})} /></Field>
+      <Field label="Maximum size (MB, 10 max)"><input className="input" type="number" min="1" max="10" value={q.maxMb || 10} onChange={(e)=>update({maxMb: Math.min(10, Math.max(1, parseInt(e.target.value || "10", 10)))})} /></Field>
       <Toggle checked={!!q.multiple} onChange={(c)=>update({multiple:c})} label="Allow multiple files" />
       <div className="hint" style={{marginTop:6}}>File storage must be enabled for your deployment (a Cloudflare R2 bucket bound as FILES). Without it, uploads show a friendly message.</div>
       <div className="panel-section">Response requirements</div>
@@ -3177,7 +3223,7 @@ function Landing({ showLogin }){
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(()=>{ const q = new URLSearchParams(window.location.search); const ge = q.get("google_error"); if (ge){ toast(ge === "setup" ? "Google sign in is not set up yet." : "Google sign in did not complete. Please try again."); window.history.replaceState({}, "", "/login"); } }, []);
-  const doLogin = () => { setBusy(true); setErr(""); api.loginAdmin(pw).then(({ok,data})=>{ setBusy(false); if (ok && data && data.user){ setUser(data.user); navigate("/dashboard"); } else setErr("Incorrect password."); }); };
+  const doLogin = () => { setBusy(true); setErr(""); api.loginAdmin(pw).then(({ok,data})=>{ setBusy(false); if (ok && data && data.user){ setUser(data.user); navigate("/admin"); } else setErr("Incorrect password."); }); };
   const google = ()=>{ window.location.href = "/api/auth/google/start"; };
 
   const features = [
@@ -3228,7 +3274,6 @@ function Landing({ showLogin }){
           ) : (
             <div className="lp-cta-row">
               <button className="gbtn auto" onClick={google}><GoogleG/> Continue with Google</button>
-              <button className="btn lg" onClick={()=>setOpen(true)}>Admin login</button>
             </div>
           )}
         </div>
@@ -3283,7 +3328,7 @@ function Landing({ showLogin }){
         <h2 className="lp-h2">Start building for free</h2>
         <p className="lp-lead">Full access while zetetiq is getting started.</p>
         {user ? <button className="btn primary lg" onClick={()=>navigate("/dashboard")}>Go to dashboard</button>
-              : <div className="lp-cta-row center"><button className="gbtn auto" onClick={google}><GoogleG/> Continue with Google</button><button className="btn lg" onClick={()=>setOpen(true)}>Admin login</button></div>}
+              : <div className="lp-cta-row center"><button className="gbtn auto" onClick={google}><GoogleG/> Continue with Google</button></div>}
       </section>
 
       <footer className="lp-foot">
@@ -3291,6 +3336,7 @@ function Landing({ showLogin }){
           <Logo size={16} />
           <span className="lp-foot-tag">Human-centered Experience Management.</span>
           <a className="lp-foot-link" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">zetetiq.pages.dev</a>
+          {!user && <button type="button" className="lp-foot-admin" onClick={()=>setOpen(true)}>Admin sign in</button>}
         </div>
         <div className="lp-foot-copy">© 2026 Zetetiq XM</div>
       </footer>
@@ -3392,6 +3438,80 @@ function BrandStudio({ form, setTheme, setSettings }){
   );
 }
 
+function AdminConsole(){
+  const { navigate } = useApp();
+  const [data, setData] = useState(null);
+  const [expanded, setExpanded] = useState({});
+  const [err, setErr] = useState(false);
+  const load = useCallback(()=>{ setErr(false); api.adminOverview().then(({ ok, data })=>{ if (ok && data && data.totals) setData(data); else setErr(true); }).catch(()=>setErr(true)); }, []);
+  useEffect(()=>{ load(); }, [load]);
+  const toggle = (id)=> setExpanded((e)=>{ const n = Object.assign({}, e); n[id] = !n[id]; return n; });
+  const t = data && data.totals;
+  return (
+    <div>
+      <TopNav/>
+      <div className="wrap page">
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap",marginBottom:18}}>
+          <h1 style={{fontSize:26,margin:0}}>Admin console</h1>
+          <button className="btn sm" onClick={load} disabled={data === null && !err}>Refresh</button>
+        </div>
+        {err ? <div className="muted">Could not load admin data. Make sure you are signed in as the admin.</div>
+         : data === null ? <div style={{display:"flex",justifyContent:"center",padding:"56px 0"}}><LoadingLogo /></div>
+         : (
+          <div>
+            <div className="admin-stats">
+              <div className="astat"><div className="av">{t.users}</div><div className="al">Users</div></div>
+              <div className="astat"><div className="av">{t.forms}</div><div className="al">Forms</div></div>
+              <div className="astat"><div className="av">{t.responses}</div><div className="al">Responses</div></div>
+              <div className="astat"><div className="av">{t.openForms}</div><div className="al">Open forms</div></div>
+              <div className="astat"><div className="av">{t.storageAvailable ? fmtBytes(t.storageBytes) : "n/a"}</div><div className="al">{t.storageAvailable ? "Storage used of 10 GB" : "Storage (R2 off)"}</div></div>
+            </div>
+            <div className="panel-title" style={{marginBottom:6}}>Users</div>
+            <div className="hint" style={{marginBottom:12}}>Click a user to see their forms. Storage is the total size of files uploaded to that user's forms.</div>
+            {data.users.length === 0 ? <div className="muted">No users yet.</div> : (
+              <table className="table admin-users">
+                <thead><tr><th>User</th><th>Forms</th><th>Responses</th><th>Storage</th><th>Joined</th><th>Last activity</th></tr></thead>
+                <tbody>
+                  {data.users.map((u)=>(
+                    <React.Fragment key={u.id}>
+                      <tr className="clickable" onClick={()=>toggle(u.id)}>
+                        <td>
+                          <div style={{fontWeight:600}}>{u.name || u.username}{u.isAdmin && <span className="kind-badge" style={{marginLeft:6}}>admin</span>}</div>
+                          <div className="muted" style={{fontSize:12}}>{u.email || u.username}</div>
+                        </td>
+                        <td>{u.formCount}</td>
+                        <td>{u.responseCount}</td>
+                        <td>{fmtBytes(u.storageBytes)}</td>
+                        <td>{u.created_at ? fmtAgo(u.created_at) : "-"}</td>
+                        <td>{u.lastResponseAt ? fmtAgo(u.lastResponseAt) : <span className="muted">no responses</span>}</td>
+                      </tr>
+                      {expanded[u.id] && (
+                        <tr className="urow-detail"><td colSpan={6}>
+                          {u.forms.length === 0 ? <div className="muted" style={{fontSize:13}}>No forms.</div> : (
+                            <div className="admin-forms">
+                              {u.forms.map((f)=>(
+                                <div key={f.id} className="aform">
+                                  <span className={"badge " + (f.isOpen ? "open" : "closed")}>{f.isOpen ? "Open" : "Closed"}</span>
+                                  <span className="aform-title">{f.title || "Untitled form"}</span>
+                                  <span className="aform-meta">{f.responses} {f.responses === 1 ? "response" : "responses"} {"\u00b7"} {fmtBytes(f.storageBytes)} {"\u00b7"} /{f.slug}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </td></tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+         )}
+      </div>
+    </div>
+  );
+}
+
 function TopNav(){
   const { user, setUser, navigate, theme, toggleTheme } = useApp();
   return (
@@ -3402,6 +3522,7 @@ function TopNav(){
       </div>
       <button className="btn primary navnew" onClick={()=>navigate("/builder/new")}>+ New form</button>
       <div className="navright">
+        {user && user.role === "admin" && <button className="btn sm" onClick={()=>navigate("/admin")}>Admin</button>}
         {user && <span className="greet">hey {user.name}</span>}
         <button className="btn sm" onClick={()=>{ api.logout().then(()=>{ setUser(null); navigate("/"); }); }}>Log out</button>
       </div>
@@ -5397,13 +5518,14 @@ function App(){
     view = <div className="center-screen"><div style={{color:"var(--bo)"}}><Logo size={34} /></div></div>;
   } else {
     const seg = path.split("/").filter(Boolean);
-    const reserved = new Set(["dashboard","builder","login","api","assets","favicon.ico","robots.txt"]);
+    const reserved = new Set(["dashboard","builder","login","admin","api","assets","favicon.ico","robots.txt"]);
     if (seg.length === 1 && !reserved.has(seg[0])) view = <PublicForm username="admin" slug={seg[0]} />;
     else if (seg.length === 2 && !reserved.has(seg[0])) view = <PublicForm username={seg[0]} slug={seg[1]} />;
     else if (seg.length === 0) view = user ? <Dashboard/> : <Landing/>;
     else if (seg[0] === "login") view = <Landing showLogin />;
     else if (!user) view = <Landing showLogin />;
     else if (seg[0] === "dashboard" && seg.length === 1) view = <Dashboard/>;
+    else if (seg[0] === "admin" && seg.length === 1) view = (user.role === "admin") ? <AdminConsole/> : <Dashboard/>;
     else if (seg[0] === "dashboard" && seg.length === 2) view = <FormDashboard id={seg[1]} />;
     else if (seg[0] === "builder" && seg.length === 2) view = <Builder formId={seg[1]} />;
     else view = <div className="center-screen"><h2>Not found</h2><button className="btn" onClick={()=>navigate(user ? "/dashboard" : "/")}>Go home</button></div>;

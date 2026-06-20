@@ -343,3 +343,9 @@ The interface now rests flush. Buttons, fields, options, and cards all sit gentl
 ## Calendar sync and reminders
 
 Open a form's settings to find Notifications and calendar. You can have bookings flow straight into your own calendar by turning on the calendar subscription and adding the shown URL to Google, Apple, or Outlook once. You can also email a confirmation to anyone who books a time, get notified yourself when responses come in, and send a reminder before each meeting. The email features use Resend and the reminder timer uses a simple scheduled call, both set up in Cloudflare. The handoff document walks through the exact keys to add. If those are not set up, everything else still works and the email options simply stay quiet.
+
+## Admin console
+
+The admin account now signs in from a small Admin sign in link in the page footer, rather than a button next to Continue with Google. After signing in, the admin lands on an admin console: totals for users, forms, responses, and storage, plus a table of every user with their forms, response counts, and storage use, so you can see at a glance who is on the system and help troubleshoot. The storage numbers need R2 connected. Your own forms are still one click away from the logo, and an Admin button brings you back to the console.
+
+File uploads are capped at 10 MB. Larger images are automatically shrunk to fit before uploading, and anything that still will not fit shows a clear message.

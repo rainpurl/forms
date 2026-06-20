@@ -86,6 +86,10 @@ async function route(seg, method, request, env, context) {
     if (path.length === 3 && path[2] === "file" && method === "GET") return serveFile(user, id, request, env);
   }
 
+  if (path[0] === "admin" && path[1] === "overview" && path.length === 2 && method === "GET") {
+    return adminOverview(request, env);
+  }
+
   if (path[0] === "brand-kits") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "unauthorized" }, 401);
@@ -773,7 +777,7 @@ async function uploadFile(formId, request, env) {
   let file;
   try { const fd = await request.formData(); file = fd.get("file"); } catch (e) { return json({ error: "bad_request" }, 400); }
   if (!file || typeof file === "string") return json({ error: "no_file" }, 400);
-  const maxMb = Math.min(50, parseInt(settingsA.maxUploadMb, 10) || 25);
+  const maxMb = 10; // hard cap: files larger are rejected (the client compresses images to fit first)
   if (file.size && file.size > maxMb * 1024 * 1024) return json({ error: "too_large", maxMb }, 413);
   const safe = String(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "file";
   const key = "uploads/" + formId + "/" + crypto.randomUUID() + "-" + safe;
@@ -1094,6 +1098,45 @@ async function cronReminders(request, env, context){
     }
   }
   return json({ ok: true, sent, scanned });
+}
+
+/* ---- admin console: system-wide overview (admin only) ---- */
+async function r2UsageByForm(env){
+  const map = {};
+  if (!env || !env.FILES) return { map, total: 0, available: false };
+  let cursor = undefined, total = 0, guard = 0;
+  try {
+    do {
+      const res = await env.FILES.list({ limit: 1000, cursor });
+      (res.objects || []).forEach((o)=>{ const parts = String(o.key || "").split("/"); const fid = parts[0] === "uploads" ? (parts[1] || "") : parts[0]; const sz = o.size || 0; if (fid) map[fid] = (map[fid] || 0) + sz; total += sz; });
+      cursor = res.truncated ? res.cursor : undefined; guard++;
+    } while (cursor && guard < 50);
+  } catch (e) { return { map, total, available: false }; }
+  return { map, total, available: true };
+}
+async function adminOverview(request, env){
+  const user = await currentUser(request, env);
+  if (!user || user.role !== "admin") return json({ error: "forbidden" }, 403);
+  const usersRes = await env.DB.prepare("SELECT id, username, name, email, is_admin, created_at FROM users").all();
+  const formsRes = await env.DB.prepare("SELECT id, owner_id, slug, title, is_open, created_at, updated_at FROM forms").all();
+  const rcRes = await env.DB.prepare("SELECT form_id, COUNT(*) AS c, MAX(created_at) AS last FROM responses GROUP BY form_id").all();
+  const rc = {}; (rcRes.results || []).forEach((r)=>{ rc[r.form_id] = { c: r.c || 0, last: r.last || null }; });
+  const usage = await r2UsageByForm(env);
+  const users = (usersRes.results || []).map((u)=>({ id: u.id, username: u.username, name: u.name, email: u.email, isAdmin: !!u.is_admin, created_at: u.created_at, forms: [], formCount: 0, responseCount: 0, storageBytes: 0, lastResponseAt: null }));
+  const byId = {}; users.forEach((u)=>{ byId[u.id] = u; });
+  let totalResponses = 0, openForms = 0;
+  (formsRes.results || []).forEach((f)=>{
+    const r = rc[f.id] || { c: 0, last: null };
+    const sb = usage.map[f.id] || 0;
+    totalResponses += r.c; if (f.is_open) openForms++;
+    const fo = { id: f.id, slug: f.slug, title: f.title, isOpen: !!f.is_open, created_at: f.created_at, updated_at: f.updated_at, responses: r.c, lastResponseAt: r.last, storageBytes: sb };
+    const owner = byId[f.owner_id];
+    if (owner){ owner.forms.push(fo); owner.formCount++; owner.responseCount += r.c; owner.storageBytes += sb; if (r.last && (!owner.lastResponseAt || r.last > owner.lastResponseAt)) owner.lastResponseAt = r.last; }
+  });
+  users.forEach((u)=> u.forms.sort((a, b)=> (b.responses - a.responses) || (String(b.updated_at) > String(a.updated_at) ? 1 : -1)));
+  users.sort((a, b)=> (b.responseCount - a.responseCount) || (b.formCount - a.formCount));
+  const totals = { users: users.length, forms: (formsRes.results || []).length, responses: totalResponses, openForms, storageBytes: usage.total, storageAvailable: usage.available };
+  return json({ totals, users });
 }
 
 function json(obj, status = 200) {
