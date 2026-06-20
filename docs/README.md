@@ -349,3 +349,11 @@ Open a form's settings to find Notifications and calendar. You can have bookings
 The admin account now signs in from a small Admin sign in link in the page footer, rather than a button next to Continue with Google. After signing in, the admin lands on an admin console: totals for users, forms, responses, and storage, plus a table of every user with their forms, response counts, and storage use, so you can see at a glance who is on the system and help troubleshoot. The storage numbers need R2 connected. Your own forms are still one click away from the logo, and an Admin button brings you back to the console.
 
 File uploads are capped at 10 MB. Larger images are automatically shrunk to fit before uploading, and anything that still will not fit shows a clear message.
+
+## Builder refinements
+
+The stray characters that appeared on dropdowns in the builder side panel are fixed. Response requirements are now a single Off, Request, or Require selector instead of two toggles. The default form font is Inter, and the brand font option has been removed from the font pickers.
+
+E-sign documents now have a large Place fields view for accurate positioning, and a new circle field lets signers ring a spot on the document, alongside the existing checkbox, text, date, and signature fields.
+
+If overviews still say basic after connecting Workers AI, the card will tell you what to check: the binding must be named AI on this project, and the project must be redeployed after adding it.

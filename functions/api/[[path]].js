@@ -1366,21 +1366,30 @@ function formSystem() {
 
 async function runAI(env, system, userMsg, maxTokens) {
   if (!env.AI || typeof env.AI.run !== "function") return null; // binding not configured yet
-  const model = env.AI_MODEL || "@cf/meta/llama-3.1-8b-instruct";
-  try {
-    const out = await env.AI.run(model, {
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: userMsg },
-      ],
-      max_tokens: maxTokens || 240,
-      temperature: 0.3,
-    });
-    const text = (out && (out.response || out.result || "")) || "";
-    return { text: cleanText(text), model };
-  } catch (e) {
-    return { error: String((e && e.message) || e) };
+  const models = [env.AI_MODEL, "@cf/meta/llama-3.1-8b-instruct", "@cf/meta/llama-3.1-8b-instruct-fast"].filter(Boolean);
+  let lastErr = "ai_unavailable";
+  for (const model of models) {
+    try {
+      const out = await env.AI.run(model, {
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: userMsg },
+        ],
+        max_tokens: maxTokens || 240,
+        temperature: 0.3,
+      });
+      let text = "";
+      if (typeof out === "string") text = out;
+      else if (out) {
+        text = out.response || out.result || out.output_text || out.text ||
+          (out.choices && out.choices[0] && ((out.choices[0].message && out.choices[0].message.content) || out.choices[0].text)) || "";
+      }
+      text = cleanText(text);
+      if (text) return { text, model };
+      lastErr = "empty_response";
+    } catch (e) { lastErr = String((e && e.message) || e); }
   }
+  return { error: lastErr };
 }
 
 function cleanText(t) {
