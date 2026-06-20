@@ -23,8 +23,8 @@
   --bo-dark:#4A73B5;
   --ink:#2A2620;
   --ink-soft:#736B5E;
-  --line:#CFC6B4;
-  --line-strong:#BEB39C;
+  --line:#E0DACE;
+  --line-strong:#CDC6B7;
   --paper:#F3EFE7;
   --card:#FBFAF6;
   --good:#4F8A5B;
@@ -33,7 +33,7 @@
   --sans:'Mozilla Text',system-ui,-apple-system,sans-serif;
   --display:'Mozilla Headline','Mozilla Text',system-ui,sans-serif;
   --mono:'Mozilla Text',system-ui,sans-serif;
-  --hover:#E7DFD0;
+  --hover:#EAE5DA;
   --nav-bg:rgba(243,239,231,.84);
 }
 html[data-theme="dark"]{
@@ -51,7 +51,7 @@ html[data-theme="dark"] .badge.open{background:rgba(84,201,138,.18)}
 html[data-theme="dark"] .badge.closed{background:rgba(166,158,140,.16)}
 html[data-theme="dark"] .bar-row .track2{background:#2A2620}
 html[data-theme="dark"] .shimmer{background:linear-gradient(90deg,#221F18 25%,#2E2A20 37%,#221F18 63%);background-size:400% 100%}
-html[data-theme="dark"] .ai{background:#1C1A14}
+html[data-theme="dark"] .ai{background:var(--card)}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -100,14 +100,14 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 /* badges */
 .badge{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
 .badge.open{background:#e8f3ec;color:var(--good)}
-.badge.closed{background:#E7DFD0;color:var(--ink-soft)}
+.badge.closed{background:#EAE5DA;color:var(--ink-soft)}
 
 /* tables */
 .table{width:100%;border-collapse:collapse}
 .table th{text-align:left;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;padding:10px 14px;border-bottom:1px solid var(--line)}
 .table td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
 .table tr.clickable{cursor:pointer}
-.table tr.clickable:hover td{background:#f4f3fe}
+.table tr.clickable:hover td{background:var(--hover)}
 .table tr:last-child td{border-bottom:0}
 
 /* inputs */
@@ -126,20 +126,20 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .switch input:checked + .track .knob{left:18px}
 
 /* ai summary card */
-.ai{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative}
+.ai{background:var(--card);border-color:transparent;box-shadow:var(--bevel-inset);border-radius:var(--radius);padding:16px 18px;position:relative}
 .ai .ai-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .ai .spark{width:16px;height:16px;color:var(--bo)}
 .ai .ai-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--bo);font-weight:700}
 .ai .ai-body{font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap}
 .ai .ai-foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line-strong)}
 .ai .ai-meta{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
-.shimmer{height:13px;border-radius:6px;background:linear-gradient(90deg,#E7DFD0 25%,#F2EEE6 37%,#E7DFD0 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;margin:7px 0}
+.shimmer{height:13px;border-radius:6px;background:linear-gradient(90deg,#EAE5DA 25%,#F2EEE6 37%,#EAE5DA 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;margin:7px 0}
 @keyframes sh{0%{background-position:100% 0}100%{background-position:-100% 0}}
 
 /* bars (analytics) */
 .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13.5px}
 .bar-row .k{width:130px;flex:none;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-row .track2{flex:1;background:#E7DFD0;border-radius:6px;height:20px;overflow:hidden}
+.bar-row .track2{flex:1;background:#EAE5DA;border-radius:6px;height:20px;overflow:hidden}
 .bar-row .fill{height:100%;background:var(--bo);border-radius:6px}
 .bar-row .v{width:42px;flex:none;text-align:right;font-family:var(--mono);font-size:12px}
 
@@ -173,15 +173,15 @@ h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-0.01em;margi
 .landing .lo .dot{color:var(--ink)}
 .landing .tag{max-width:430px;color:var(--ink-soft);font-size:16px;margin:14px 0 28px}
 .gbtn{display:inline-flex;align-items:center;gap:10px;justify-content:center;width:100%;padding:12px 16px;border-radius:11px;border:1px solid var(--line-strong);background:var(--card);font-weight:600;cursor:pointer}
-.gbtn:hover{background:#f4f3fe}
+.gbtn:hover{background:var(--hover)}
 
 /* form scope (respondent + preview): themed */
 .form-scope{--fp:#5C88CD;--fs:#2A2620;--fa:#5C88CD;--ftext:var(--fs);font-family:var(--sans)}
-.form-page,.form-scope{--raise-sheen:none;--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--good:#4F8A5B;--bad:#C0563F;--hover:#E7DFD0;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
+.form-page,.form-scope{--raise-sheen:none;--paper:#F3EFE7;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#E0DACE;--line-strong:#CDC6B7;--good:#4F8A5B;--bad:#C0563F;--hover:#EAE5DA;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
 html[data-theme="dark"] .form-page,html[data-theme="dark"] .form-scope{--raise-sheen:none;--paper:#151310;--card:#211E18;--ink:#ECE7DB;--ink-soft:#A69E8C;--line:#332F24;--line-strong:#46402F;--hover:#2A2620;--ftext:#ECE7DB;--bevel-raise:inset 0 1px 0 rgba(255,255,255,.08),0 1px 1px rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.42);--bevel-press:inset 0 2px 5px rgba(0,0,0,.65);--bevel-inset:inset 0 1.5px 4px rgba(0,0,0,.6);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.45);}
 html[data-theme="dark"] .form-scope .finput,html[data-theme="dark"] .form-scope textarea,html[data-theme="dark"] .form-scope select{background:var(--card);color:var(--ink)}
 html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
-.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--raise-sheen:none;--paper:#EFEAE0;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#CFC6B4;--line-strong:#BEB39C;--hover:#E7DFD0;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
+.form-embed.form-page,.form-embed .form-scope,html[data-theme="dark"] .form-embed.form-page,html[data-theme="dark"] .form-embed .form-scope{--raise-sheen:none;--paper:#F3EFE7;--card:#FBFAF6;--ink:#2A2620;--ink-soft:#736B5E;--line:#E0DACE;--line-strong:#CDC6B7;--hover:#EAE5DA;--ftext:var(--fs);--bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);--bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);--bevel-soft:inset 0 1px 0 rgba(255,255,255,.7),0 1px 1.5px rgba(55,45,28,.07);}
 .form-embed.form-page{min-height:auto;padding:14px 14px 22px;background:transparent}
 .form-scope .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
 .form-scope .ftitle{font-family:inherit;font-size:27px;color:var(--ftext);font-weight:600;line-height:1.2}
@@ -257,8 +257,8 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .qcc-type{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
 .qcc-menu{position:relative}
 .wq-title{width:100%;border:0;background:none;font-size:16px;font-weight:600;color:var(--ink);outline:none;padding:3px 2px;border-radius:6px}
-.wq-title:focus{background:#f4f3ff}
-.wq-title::placeholder{color:#a39ec2;font-weight:500}
+.wq-title:focus{background:var(--hover)}
+.wq-title::placeholder{color:var(--ink-soft);font-weight:500}
 .wq-textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:8px;min-height:64px;outline:none;resize:vertical;font-family:inherit}
 .wq-body{margin-top:10px}
 .wq-choice{display:flex;align-items:center;gap:9px;margin:6px 0}
@@ -266,8 +266,8 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .wq-mark.rd{border-radius:50%}
 .wq-mark.sq{border-radius:4px}
 .wq-choice-input{flex:1;border:0;border-bottom:1px solid transparent;background:none;padding:5px 2px;outline:none;font-size:14px}
-.wq-choice-input:focus{border-bottom-color:var(--line-strong);background:#f4f3ff}
-.wq-choice-input::placeholder{color:#a39ec2}
+.wq-choice-input:focus{border-bottom-color:var(--line-strong);background:var(--hover)}
+.wq-choice-input::placeholder{color:var(--ink-soft)}
 .wq-addchoice{border:0;background:none;color:var(--bo);font-weight:600;font-size:13px;cursor:pointer;padding:6px 2px;margin-top:2px}
 .wq-addchoice:hover{text-decoration:underline}
 .wq-prev{margin-top:4px}
@@ -358,14 +358,14 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .form-scope .fnav{display:flex;align-items:center;gap:12px}
 .form-scope .fpage-count{font-size:13px;color:var(--ink-soft)}
 .form-scope .fbtn-ghost{border:1px solid var(--line-strong);background:var(--card);color:var(--ftext);padding:11px 18px;border-radius:10px;font-weight:600;cursor:pointer;transition:background .14s}
-.form-scope .fbtn-ghost:hover{background:#f6f5ff}
+.form-scope .fbtn-ghost:hover{background:var(--hover)}
 .form-scope .fpage{animation:fadeUp .28s ease both}
 /* add-question modal */
 .addq-modal{max-width:560px}
 .addq-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
 .addq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 18px;max-height:62vh;overflow:auto}
 .addq-item{text-align:left;border:1px solid var(--line-strong);background:var(--card);border-radius:10px;padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s}
-.addq-item:hover{border-color:var(--bo);background:#f6f5ff}
+.addq-item:hover{border-color:var(--bo);background:var(--hover)}
 .addq-item .t{font-weight:600;font-size:14px}
 .addq-item .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
 .addq-adv-toggle{grid-column:1/-1;text-align:center;border:1px dashed var(--line-strong);background:transparent;border-radius:10px;padding:9px 12px;cursor:pointer;color:var(--ink-soft);font-size:13px;font-weight:600;transition:border-color .12s,color .12s}
@@ -373,7 +373,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 @media(max-width:560px){.addq-grid{grid-template-columns:1fr}}
 /* trash */
 .trashbox{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
-.trashbox-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:#faf7ff;border-bottom:1px solid var(--line)}
+.trashbox-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--hover);border-bottom:1px solid var(--line)}
 .trashbox-head .t{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700}
 .trash-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);animation:fadeUp .2s ease both}
 .trash-item:last-child{border-bottom:0}
@@ -897,6 +897,51 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 .ztime .zsel{width:auto;min-width:44px;padding:6px 8px;font-size:13px}
 .ztime-ap .zsel,.ztime-ap.zsel{min-width:52px}
 .ztime-colon{font-weight:700;color:var(--ink-soft)}
+
+/* ===== v6: recessed by default; action buttons pop out on hover; bevel is the only edge ===== */
+.btn,.btn.primary,.btn.danger,.iconbtn,.gbtn{box-shadow:var(--bevel-inset);background-image:none}
+.btn:hover,.iconbtn:hover,.gbtn:hover{box-shadow:var(--bevel-raise),0 4px 12px rgba(55,45,28,.12);transform:translateY(-1px)}
+.btn.primary:hover{box-shadow:var(--bevel-raise),0 5px 14px rgba(50,100,190,.30);transform:translateY(-1px)}
+.btn.danger:hover{box-shadow:var(--bevel-raise),0 4px 12px rgba(120,40,25,.22);transform:translateY(-1px)}
+.btn:active,.btn.primary:active,.btn.danger:active,.iconbtn:active,.gbtn:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.btn:disabled,.btn.primary:disabled{box-shadow:var(--bevel-inset);transform:none;background-image:none}
+.btn.ghost{box-shadow:none;background-image:none}
+.btn.ghost:hover{box-shadow:var(--bevel-raise),0 4px 12px rgba(55,45,28,.12);transform:translateY(-1px);background:var(--hover)}
+.btn.ghost:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.cpick-trigger{box-shadow:var(--bevel-inset)}
+.cpick-trigger:hover{transform:none;box-shadow:var(--bevel-inset);background:var(--hover)}
+.cpick-trigger:active{box-shadow:var(--bevel-press)}
+.form-scope .submit,.form-scope .fcta,.form-scope .fbtn-ghost,.form-scope .nps button,.form-scope .slot-btn,.cal-nav{box-shadow:var(--bevel-inset);background-image:none}
+.form-scope .submit:hover,.form-scope .fcta:hover,.form-scope .fbtn-ghost:hover,.form-scope .nps button:hover,.form-scope .slot-btn:hover,.cal-nav:hover{box-shadow:var(--bevel-raise),0 4px 12px rgba(55,45,28,.12);transform:translateY(-1px)}
+.form-scope .submit:active,.form-scope .fcta:active,.form-scope .fbtn-ghost:active,.cal-nav:active{box-shadow:var(--bevel-press);transform:translateY(1px)}
+.form-scope .nps button.on,.form-scope .slot-btn.sel{box-shadow:var(--bevel-press);transform:none}
+.form-scope .opt{box-shadow:var(--bevel-inset);background-image:none}
+.form-scope .opt:hover{box-shadow:var(--bevel-inset);background:var(--hover);transform:none}
+.form-scope .opt.sel{box-shadow:var(--bevel-press);transform:none}
+.btn:focus,.btn.primary:focus,.btn.danger:focus,.iconbtn:focus,.gbtn:focus,.zsel:focus,.cpick-trigger:focus,.cal-nav:focus,.form-scope .submit:focus,.form-scope .fcta:focus,.form-scope .fbtn-ghost:focus,.form-scope .slot-btn:focus{outline:none}
+.zsel:focus{box-shadow:var(--bevel-inset)}
+.btn:focus-visible,.iconbtn:focus-visible,.gbtn:focus-visible{box-shadow:var(--bevel-raise),0 4px 12px rgba(55,45,28,.12);transform:translateY(-1px)}
+.zsel:focus-visible,.cpick-trigger:focus-visible{box-shadow:var(--bevel-press)}
+/* signed-out landing recessed/stamped to match */
+.lp-card{background:var(--paper);border-color:transparent;box-shadow:var(--bevel-inset)}
+.lp-chip{background:var(--paper);border-color:transparent;box-shadow:var(--bevel-inset)}
+.lp-ico{box-shadow:var(--bevel-inset)}
+.lp-win{border-color:transparent;box-shadow:var(--bevel-raise),0 26px 64px -30px rgba(20,16,48,.5)}
+/* loading: zetetiq wordmark, same colour as the background, pressed in */
+.loadlogo{display:inline-flex;align-items:center;color:var(--paper)}
+.loadlogo .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.75)) drop-shadow(0 -1px 1px rgba(70,55,30,.4));animation:loadpulse 1.7s var(--ease) infinite}
+html[data-theme="dark"] .loadlogo{color:var(--paper)}
+html[data-theme="dark"] .loadlogo .logo svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.6)) drop-shadow(0 -1px 0 rgba(255,255,255,.08))}
+@keyframes loadpulse{0%,100%{opacity:.5}50%{opacity:.92}}
+/* initial boot splash before the app mounts */
+.boot-splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--paper);z-index:9999}
+.boot-word{font-family:var(--display),system-ui,sans-serif;font-size:44px;font-weight:700;letter-spacing:-.01em;color:var(--paper);text-shadow:0 -1px 1px rgba(70,55,30,.32),0 1px 0 rgba(255,255,255,.7);animation:loadpulse 1.7s var(--ease) infinite}
+html[data-theme="dark"] .boot-word{text-shadow:0 -1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.6)}
+/* theme toggle while filling out a form */
+.form-theme-toggle{position:fixed;top:16px;right:16px;z-index:60}
+/* poll heatmap number legible on green tint in dark mode */
+html[data-theme="dark"] .poll-heatcell{color:#E8F5EC}
+@media (prefers-reduced-motion: reduce){.loadlogo .logo svg,.boot-word{animation:none}}
 </style>
 </head>
 <body>
@@ -1028,6 +1073,7 @@ const useApp = () => useContext(Ctx);
 /* ----------------------------- question registry ----------------------------- */
 function fmtSlot(s){
   if (!s) return "";
+  if (typeof s === "object") return fmtPollAnswer(s);
   const d = new Date(s);
   if (isNaN(d)) return s;
   return d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
@@ -1064,6 +1110,17 @@ function quizReview(form, answers){
     out.push({ id: q.id, label: q.label || "Question", correct, given, isCorrect, explanation: q.explanation || "" });
   });
   return out;
+}
+function fmtPollAnswer(val){
+  if (!val || typeof val !== "object" || Array.isArray(val)) return "";
+  if (!Array.isArray(val.available) && !Array.isArray(val.maybe)) return val.name ? String(val.name) : "";
+  const av = (val.available || []).map((k)=> fmtPollSlot(k));
+  const mb = (val.maybe || []).map((k)=> fmtPollSlot(k));
+  const parts = [];
+  if (av.length) parts.push("Available: " + av.join(", "));
+  if (mb.length) parts.push("Maybe: " + mb.join(", "));
+  const who = val.name ? (String(val.name) + " \u00b7 ") : "";
+  return who + (parts.length ? parts.join(" \u00b7 ") : "No availability submitted");
 }
 function fmtPollSlot(key, q){
   if (!key) return "";
@@ -2662,6 +2719,7 @@ function AiSummary({ fetcher }){
 function answerToText(v){
   if (v === null || v === undefined) return "";
   if (Array.isArray(v)) return v.join(", ");
+  if (v && typeof v === "object" && (Array.isArray(v.available) || Array.isArray(v.maybe))) return fmtPollAnswer(v);
   if (typeof v === "object") return Object.keys(v).map((k)=>{ const val = v[k]; if (val && typeof val === "object" && !Array.isArray(val)) return k + ": (" + Object.keys(val).map((c)=> c + "=" + val[c]).join(", ") + ")"; return k + ":" + (Array.isArray(val) ? val.join("/") : val); }).join(", ");
   return String(v);
 }
@@ -3035,7 +3093,7 @@ function PublicForm({ username, slug }){
     return ()=>{ m = false; };
   },[username, slug]);
 
-  if (st.loading) return <div className="center-screen"><div className="muted">Loading...</div></div>;
+  if (st.loading) return <LoadingLogo full />;
   if (st.notFound) return <div className="center-screen"><h2>Form not found</h2><p className="muted">This link may be wrong, or the form was removed.</p></div>;
   const form = st.form;
   const scope = { "--fa": (form.theme && form.theme.accent) || "#5C88CD", fontFamily: ((form.theme && form.theme.customFont) ? ("\u0027" + form.theme.customFont + "\u0027, ") : "") + (FORM_FONTS[form.theme && form.theme.font] || FORM_FONTS.sans) };
@@ -3060,7 +3118,7 @@ function PublicForm({ username, slug }){
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
     const bookedSched = !disq ? (((form.schema && form.schema.questions) || []).filter((q)=> q.type === "scheduling" && typeof doneAnswers[q.id] === "string" && doneAnswers[q.id])) : [];
     const review = (!disq && set.reviewAnswers) ? quizReview(form, doneAnswers) : [];
-    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}><div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}{review.length > 0 && <div className="quiz-review">{review.map((r)=>(<div key={r.id} className={"qr-item " + (r.isCorrect ? "qr-ok" : "qr-no")}><div className="qr-q">{(r.isCorrect ? "✓ " : "✗ ") + r.label}</div><div className="qr-line">Your answer: {r.given.length ? r.given.join(", ") : "(none)"}</div>{!r.isCorrect && <div className="qr-line">Correct: {r.correct.join(", ")}</div>}{r.explanation && <div className="qr-exp">{r.explanation}</div>}</div>))}</div>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
+    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}>{!embed && <FormThemeToggle/>}<div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}{review.length > 0 && <div className="quiz-review">{review.map((r)=>(<div key={r.id} className={"qr-item " + (r.isCorrect ? "qr-ok" : "qr-no")}><div className="qr-q">{(r.isCorrect ? "✓ " : "✗ ") + r.label}</div><div className="qr-line">Your answer: {r.given.length ? r.given.join(", ") : "(none)"}</div>{!r.isCorrect && <div className="qr-line">Correct: {r.correct.join(", ")}</div>}{r.explanation && <div className="qr-exp">{r.explanation}</div>}</div>))}</div>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
   if (already && !done){
     const set2 = (lform.schema && lform.schema.settings) || {};
@@ -3083,6 +3141,7 @@ function PublicForm({ username, slug }){
   };
   return (
     <div className={pageCls}><div className="form-page-inner">
+      {!embed && <FormThemeToggle/>}
       <FormRenderer form={lform} ui={uiLabels} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} poll={st.poll} />
       {!(form.schema && form.schema.settings && form.schema.settings.hideBranding) && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}
     </div></div>
@@ -3372,7 +3431,7 @@ function Dashboard(){
           <h1 style={{fontSize:26}}>Your forms</h1>
         </div>
         <AiSummary fetcher={fetcher} />
-        {forms === null ? <div className="muted">Loading...</div>
+        {forms === null ? <div style={{display:"flex",justifyContent:"center",padding:"56px 0"}}><LoadingLogo /></div>
           : forms.length === 0 ? (
             <div className="muted" style={{marginBottom:6}}>You have no forms yet. Start from a template below, or use New form in the top bar to build one from scratch.</div>
           ) : (
@@ -4190,6 +4249,17 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       {form.schema.settings.experiment && <Field label="Number of variants"><Select className="select" value={String(form.schema.settings.variantCount || 2)} onChange={(e)=>setSettings({variantCount: parseInt(e.target.value, 10)})}><option value="2">2 (A, B)</option><option value="3">3 (A, B, C)</option><option value="4">4 (A, B, C, D)</option></Select></Field>}
       <div className="hint">Each respondent is randomly assigned a variant, recorded with their response and shown in analytics and exports. Set a question's variant under Advanced to show it only to that group.</div>
 
+      <div className="panel-section">Notifications and calendar</div>
+      <Field label="Notify this email on new responses (optional)"><input className="input" type="email" placeholder="you@example.com" value={form.schema.settings.notifyEmail || ""} onChange={(e)=>setSettings({notifyEmail:e.target.value})} /></Field>
+      <Toggle checked={!!form.schema.settings.confirmEmail} onChange={(c)=>setSettings({confirmEmail:c})} label="Email a confirmation to people who book a time" />
+      <div className="hint">Confirmations include the meeting details and a calendar invite, sent to the first email address found in the response.</div>
+      <div style={{height:8}}></div>
+      <Toggle checked={!!form.schema.settings.reminders} onChange={(c)=>setSettings({reminders:c})} label="Send a reminder before booked meetings" />
+      {form.schema.settings.reminders && <Field label="Hours before the meeting"><input className="input" type="number" min="1" value={form.schema.settings.reminderHours || 24} onChange={(e)=>setSettings({reminderHours: parseInt(e.target.value || "24", 10)})} /></Field>}
+      <div className="hint">Email features need a Resend API key set in Cloudflare. Reminders also need a scheduler to call the reminder endpoint on a timer. The handoff doc has the setup steps.</div>
+      <div style={{height:10}}></div>
+      <Toggle checked={!!form.schema.settings.calFeed} onChange={(c)=>{ if (c && !form.schema.settings.calToken){ const t = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, "") : (Date.now().toString(36) + Math.random().toString(36).slice(2)); setSettings({calFeed:true, calToken:t}); } else { setSettings({calFeed:c}); } }} label="Publish a calendar subscription of bookings" />
+      {form.schema.settings.calFeed && form.schema.settings.calToken && id && (function(){ const url = ((typeof window !== "undefined" && window.location) ? window.location.origin : "") + "/api/cal/" + id + "/" + form.schema.settings.calToken + "/booked.ics"; return (<div><div className="himg-preview" style={{alignItems:"center"}}><code style={{fontSize:11,wordBreak:"break-all",flex:1}}>{url}</code><button className="btn sm" onClick={()=>{ try { navigator.clipboard.writeText(url); toast("Feed URL copied"); } catch (e2){ toast("Copy failed"); } }}>Copy</button></div><div className="hint">Add this URL as a subscribed calendar in Google, Apple, or Outlook. Bookings appear automatically and refresh on the calendar app schedule.</div></div>); })()}
       <div className="panel-section">Integrations</div>
       <Field label="Webhook URL (optional)"><input className="input" placeholder="https://hooks.example.com/..." value={form.schema.settings.webhookUrl || ""} onChange={(e)=>setSettings({webhookUrl:e.target.value})} /></Field>
       <div className="hint">On each submission we POST a JSON payload (event, responses, and metadata like UTM source and time to complete) to this URL.</div>
@@ -4402,7 +4472,7 @@ function Builder({ formId }){
   }, [flipSig]);
 
   if (loadErr) return <FullMsg text="Form not found." onBack={()=>navigate("/dashboard")} />;
-  if (!form) return <FullMsg text="Loading..." />;
+  if (!form) return <LoadingLogo full />;
 
   const questions = Array.isArray(form.schema.questions) ? form.schema.questions : [];
   const selQ = questions.find((q)=>q.id === sel) || null;
@@ -4661,9 +4731,20 @@ function Logo({ size = 20, style, className }){
       dangerouslySetInnerHTML={{ __html: LOGO_SVG }} />
   );
 }
+function LoadingLogo({ full, size }){
+  const body = <span className="loadlogo" aria-label="Loading" role="img"><Logo size={size || 46} /></span>;
+  return full ? <div className="center-screen">{body}</div> : body;
+}
+function FormThemeToggle(){
+  const { theme, toggleTheme } = useApp();
+  return (<button type="button" className="themebtn form-theme-toggle" onClick={toggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{theme === "dark" ? <IconSun/> : <IconMoon/>}</button>);
+}
 
 /* ----------------------------- pdf report ----------------------------- */
 function hexRgb(h){ h = String(h || "#5C88CD").replace("#",""); if (h.length === 3) h = h.split("").map((c)=>c + c).join(""); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function _ch(n){ n = Math.max(0, Math.min(255, Math.round(n))); return n.toString(16).padStart(2, "0"); }
+function darkenHex(h, amt){ const [r,g,b] = hexRgb(h); const f = 1 - amt; return "#" + _ch(r*f) + _ch(g*f) + _ch(b*f); }
+function lightenHex(h, amt){ const [r,g,b] = hexRgb(h); return "#" + _ch(r+(255-r)*amt) + _ch(g+(255-g)*amt) + _ch(b+(255-b)*amt); }
 function ensureJsPDF(){ return new Promise((res, rej)=>{ if (window.jspdf && window.jspdf.jsPDF) return res(); const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"; sc.onload = ()=>res(); sc.onerror = ()=>rej(new Error("pdf_load")); document.head.appendChild(sc); }); }
 
 function statLines(q, rows){
@@ -4798,8 +4879,11 @@ async function drawExportLogo(doc, form, W, M){
       return;
     } catch (e){}
   }
-  let logo = null; try { logo = await svgToPng(LOGO_SVG, "#ffffff", 150); } catch (e){}
-  if (logo && logo.data){ const lw = 92, lh = lw * (logo.h / logo.w); doc.addImage(logo.data, "PNG", W - M - lw, 22, lw, lh); }
+  const _base = (form.theme && form.theme.primary) || "#5C88CD";
+  let logoDk = null, logoLt = null;
+  try { logoDk = await svgToPng(LOGO_SVG, darkenHex(_base, 0.34), 150); } catch (e){}
+  try { logoLt = await svgToPng(LOGO_SVG, lightenHex(_base, 0.5), 150); } catch (e){}
+  if (logoDk && logoDk.data){ const lw = 92, lh = lw * (logoDk.h / logoDk.w); const lx = W - M - lw, ly = 22; if (logoLt && logoLt.data) doc.addImage(logoLt.data, "PNG", lx, ly + 0.8, lw, lh); doc.addImage(logoDk.data, "PNG", lx, ly, lw, lh); }
 }
 
 async function exportReport(form, rows){
@@ -5005,7 +5089,7 @@ function ResponsesTab({ id, form, setForm }){
   const clearAll = ()=>{ if (!window.confirm("Delete ALL responses for this form? This cannot be undone.")) return; api.clearResponses(id).then(({ ok })=>{ if (ok){ setRows([]); toast("All responses deleted"); } else toast("Could not clear responses."); }); };
   const downloadPollCsv = ()=>{ try { const csv = buildPollMatrix(pollQ, rows || []); const blob = new Blob(["\ufeff" + csv], { type:"text/csv" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = ((form.title || "poll").replace(/[^a-z0-9]+/gi, "-").toLowerCase()) + "-availability.csv"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); } catch (e) { toast("Could not build the CSV."); } };
   const variants = useMemo(()=>{ const set = {}; (rows||[]).forEach((r)=>{ const v = r.meta && r.meta.variant; if (v) set[v] = true; }); return Object.keys(set).sort(); }, [rows]);
-  const cell = (v)=>{ if (v===null||v===undefined) return ""; if (Array.isArray(v)) return v.join(", "); if (typeof v==="object") return Object.keys(v).map(k=>k+": "+(Array.isArray(v[k])?v[k].join("/"):v[k])).join(" | "); return String(v); };
+  const cell = (v)=>{ if (v===null||v===undefined) return ""; if (Array.isArray(v)) return v.join(", "); if (v && typeof v==="object" && (Array.isArray(v.available)||Array.isArray(v.maybe))) return fmtPollAnswer(v); if (typeof v==="object") return Object.keys(v).map(k=>k+": "+(Array.isArray(v[k])?v[k].join("/"):v[k])).join(" | "); return String(v); };
   const rowText = (r)=>{ const parts = []; const d = r.data || {}; Object.keys(d).forEach((k)=>{ parts.push(cell(d[k])); }); const mm = r.meta || {}; parts.push(mm.city || "", mm.country || "", mm.browser || "", mm.os || ""); return parts.join(" ").toLowerCase(); };
   const filtered = (rows || []).filter((r)=>{ const mm = r.meta || {}; if (statusF === "completed" && mm.disqualified) return false; if (statusF === "screenout" && !mm.disqualified) return false; if (experiment && variantF !== "all" && mm.variant !== variantF) return false; const qq = query.trim().toLowerCase(); if (qq && rowText(r).indexOf(qq) === -1) return false; return true; });
   if (rows === null) return <div className="muted">Loading...</div>;
@@ -5045,7 +5129,7 @@ function ResponsesTab({ id, form, setForm }){
           <div className="pad-lg">
             <div className="between" style={{marginBottom:12}}><span className="muted" style={{fontSize:13}}>Response detail</span><button className="btn sm primary" disabled={pdfBusy} onClick={async ()=>{ setPdfBusy(true); try { await exportResponsePdf(form, open); } catch (e) { toast("Could not build the PDF."); } setPdfBusy(false); }}>{pdfBusy ? "Preparing..." : "Export PDF"}</button></div>
             {(form.schema.questions||[]).filter(q=>QTYPES[q.type] && QTYPES[q.type].isInput).map(q=>(
-              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#fff"}} /> : <span className="muted">Not signed</span>) : q.type === "scheduling" ? (open.data[q.id] ? fmtSlot(open.data[q.id]) : <span className="muted">Not booked</span>) : q.type === "document_sign" ? <DocSignAnswer q={q} val={open.data[q.id]} /> : q.type === "file_upload" ? <FileAnswer val={open.data[q.id]} formId={id} /> : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
+              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#fff"}} /> : <span className="muted">Not signed</span>) : q.type === "scheduling" ? (open.data[q.id] ? (typeof open.data[q.id] === "object" ? fmtPollAnswer(open.data[q.id]) : fmtSlot(open.data[q.id])) : <span className="muted">Not booked</span>) : q.type === "document_sign" ? <DocSignAnswer q={q} val={open.data[q.id]} /> : q.type === "file_upload" ? <FileAnswer val={open.data[q.id]} formId={id} /> : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
             ))}
             {open.meta && Array.isArray(open.meta.followups) && open.meta.followups.length > 0 && (
               <div style={{marginBottom:14}}><div className="label">Follow-ups</div>{open.meta.followups.map((fu, i)=>(<div key={i} style={{marginBottom:8}}><div style={{fontSize:13,fontWeight:600}}>{fu.question}</div><div>{fu.answer || <span className="muted">No answer</span>}</div></div>))}</div>

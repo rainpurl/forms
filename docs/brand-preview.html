@@ -14,7 +14,7 @@
     --ease:cubic-bezier(.4,0,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--t-fast:.14s;--t:.2s;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--sans);background:#cdc3b0;color:#2A2620;-webkit-font-smoothing:antialiased;padding:28px}
+  body{margin:0;font-family:var(--sans);background:#ECE7DD;color:#2A2620;-webkit-font-smoothing:antialiased;padding:28px}
   .head{max-width:980px;margin:0 auto 22px}
   .wm{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.02em;color:#5C88CD}
   .sub{color:#6E665A;margin-top:4px;font-size:14px}
@@ -25,7 +25,7 @@
   .pane{border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(40,30,15,.16)}
   .light{
     --bo:#5C88CD;--bo-dark:#4A73B5;--ink:#2A2620;--ink-soft:#736B5E;
-    --line-strong:#BEB39C;--paper:#F3EFE7;--card:#FBFAF6;--good:#4F8A5B;--hover:#E7DFD0;
+    --line-strong:#CDC6B7;--paper:#F3EFE7;--card:#FBFAF6;--good:#4F8A5B;--hover:#EAE5DA;
     --bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--raise-sheen:none;
     --bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);
     --bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);
@@ -89,18 +89,27 @@
   .themebtn svg{transition:transform var(--t) var(--ease-spring)}
   .themebtn:hover svg{transform:rotate(20deg) scale(1.06)}
   .note{font-size:12px;color:var(--ink-soft);margin-top:2px}
+
+/* v6 preview */
+.btn{box-shadow:var(--bevel-inset)!important}
+.btn:hover{box-shadow:var(--bevel-raise),0 4px 12px rgba(55,45,28,.12)!important;transform:translateY(-1px)}
+.btn:active{box-shadow:var(--bevel-press)!important;transform:translateY(1px)}
+.btn.primary:hover{box-shadow:var(--bevel-raise),0 5px 14px rgba(50,100,190,.30)!important}
+.btn.ghost{box-shadow:none!important}
+.btn.ghost:hover{box-shadow:var(--bevel-raise),0 4px 12px rgba(55,45,28,.12)!important;transform:translateY(-1px);background:var(--hover)}
+.demo-input,.demo-select{box-shadow:var(--bevel-inset)!important}
 </style>
 </head>
 <body>
   <div class="head">
     <div class="wm">zetetiq</div>
-    <div class="sub">New brand: sand #DDD4C4 + blue #5C88CD. Off-white background. Raised buttons lift with a soft drop shadow and a crisp top edge (no gloss); ghost buttons press in on hover; homepage cards are stamped into the page. Hover and press below.</div>
+    <div class="sub">New brand: off-white #F3EFE7 + blue #5C88CD. Off-white throughout. Everything sits recessed at rest; action buttons pop out when you hover and press back in on click; inputs stay recessed; homepage cards are stamped into the page. No blue outline anywhere; the bevel is the only edge. Hover and press below.</div>
   </div>
   <div class="grid">
     <div class="pane light" id="lp">
       <h3>Light</h3>
       <div class="swatches">
-        <div class="sw" style="background:#DDD4C4"><small>#DDD4C4 sand</small></div>
+        <div class="sw" style="background:#F3EFE7"><small>#F3EFE7 off-white</small></div>
         <div class="sw" style="background:#5C88CD;color:#fff"><small style="background:rgba(0,0,0,.25);color:#fff">#5C88CD blue</small></div>
         <div class="sw" style="background:#FBFAF6"><small>card</small></div>
         <div class="sw" style="background:#2A2620;color:#fff"><small style="background:rgba(255,255,255,.2);color:#fff">ink</small></div>

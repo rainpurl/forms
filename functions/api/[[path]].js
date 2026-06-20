@@ -47,6 +47,14 @@ async function route(seg, method, request, env, context) {
   if (path[0] === "public" && path.length === 3 && path[2] === "upload" && method === "POST") {
     return uploadFile(path[1], request, env);
   }
+  // GET /api/cal/:formId/:token/booked.ics  (calendar subscription feed)
+  if (path[0] === "cal" && path.length === 4 && path[3] === "booked.ics" && method === "GET") {
+    return calendarFeed(path[1], path[2], env);
+  }
+  // GET|POST /api/cron/reminders?key=CRON_SECRET  (external scheduler hits this)
+  if (path[0] === "cron" && path[1] === "reminders" && (method === "GET" || method === "POST")) {
+    return cronReminders(request, env, context);
+  }
 
   // ---- forms (auth required) ----
   if (path[0] === "v1" && path[1] === "forms" && path.length === 3 && method === "GET") {
@@ -563,6 +571,14 @@ async function submitResponse(formId, request, env, context) {
     }
   } catch (e) {}
 
+  try {
+    const schemaE = safeParse(form.schema, {});
+    const settingsE = (schemaE && schemaE.settings) || {};
+    if (context && context.waitUntil && (settingsE.notifyEmail || settingsE.confirmEmail)) {
+      context.waitUntil(notifyOnSubmit(env, formId, schemaE, settingsE, data, meta, respId));
+    }
+  } catch (e) {}
+
   return json({ ok: true, id: respId, score: scoreInfo ? scoreInfo.score : null, maxScore: scoreInfo ? scoreInfo.max : null });
 }
 
@@ -957,6 +973,127 @@ async function readJson(request) {
 
 function safeParse(s, fallback) {
   try { return JSON.parse(s); } catch { return fallback; }
+}
+
+/* ---- calendar subscription feed, email notifications, and reminders ---- */
+function _icsEsc(t){ return String(t == null ? "" : t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n"); }
+function _p2(n){ return String(n).padStart(2, "0"); }
+function _icsStamp(d){ return d.getUTCFullYear() + _p2(d.getUTCMonth() + 1) + _p2(d.getUTCDate()) + "T" + _p2(d.getUTCHours()) + _p2(d.getUTCMinutes()) + _p2(d.getUTCSeconds()) + "Z"; }
+function htmlEscape(t){ return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function stripHtmlTags(h){ return String(h || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+function fmtWhenUTC(d){ try { return d.toUTCString().replace(" GMT", " UTC"); } catch (e){ return d.toISOString(); } }
+function bookingEventsFrom(schema, data){
+  const qs = (schema && schema.questions) || []; const out = [];
+  qs.forEach((q)=>{ if (!q || q.type !== "scheduling") return; const v = data[q.id]; if (typeof v !== "string" || !v) return; const start = new Date(v); if (isNaN(start.getTime())) return;
+    const dur = (q.duration && q.duration > 0) ? q.duration : 30;
+    const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" };
+    out.push({ uid: (q.id + "-" + start.getTime()), start, durationMin: dur, summary: (q.meetingTitle || q.label || "Meeting"), location: (q.location || ""), video: (q.video && q.video !== "none") ? (vl[q.video] || "Video") : "", attendee: "" });
+  });
+  return out;
+}
+function buildBookingICS(events, calName){
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//zetetiq//calendar//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:" + _icsEsc(calName || "Bookings")];
+  const stamp = _icsStamp(new Date());
+  (events || []).forEach((e)=>{ const end = new Date(e.start.getTime() + e.durationMin * 60000);
+    lines.push("BEGIN:VEVENT", "UID:" + e.uid + "@zetetiq", "DTSTAMP:" + stamp, "DTSTART:" + _icsStamp(e.start), "DTEND:" + _icsStamp(end), "SUMMARY:" + _icsEsc(e.summary));
+    if (e.location) lines.push("LOCATION:" + _icsEsc(e.location));
+    const desc = [e.video ? (e.video + " meeting") : "", e.attendee ? ("With " + e.attendee) : ""].filter(Boolean).join(". ");
+    if (desc) lines.push("DESCRIPTION:" + _icsEsc(desc));
+    lines.push("END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+function findRespondentEmail(data){
+  const rx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; const vals = [];
+  Object.keys(data || {}).forEach((k)=>{ const v = data[k]; if (typeof v === "string") vals.push(v); else if (v && typeof v === "object" && !Array.isArray(v)) Object.keys(v).forEach((kk)=>{ if (typeof v[kk] === "string") vals.push(v[kk]); }); });
+  for (const v of vals){ const t = v.trim(); if (rx.test(t)) return t; }
+  return null;
+}
+function findRespondentName(data){
+  const keys = Object.keys(data || {});
+  for (const k of keys){ const v = data[k]; if (v && typeof v === "object" && !Array.isArray(v)){ for (const kk of Object.keys(v)){ if (/name/i.test(kk) && typeof v[kk] === "string" && v[kk].trim()) return v[kk].trim(); } } }
+  return "";
+}
+async function mailSend(env, opts){
+  if (!env || !env.RESEND_API_KEY) return { ok: false, skipped: true };
+  const from = env.MAIL_FROM || "zetetiq <onboarding@resend.dev>";
+  const body = { from, to: [opts.to], subject: opts.subject, html: opts.html, text: opts.text || stripHtmlTags(opts.html) };
+  if (opts.ics){ let content = ""; try { content = btoa(unescape(encodeURIComponent(opts.ics))); } catch (e){ content = ""; } if (content) body.attachments = [{ filename: opts.icsName || "invite.ics", content }]; }
+  try {
+    const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Authorization": "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    return { ok: r.ok, status: r.status };
+  } catch (e){ return { ok: false, error: String(e && e.message || e) }; }
+}
+async function calendarFeed(formId, token, env){
+  const form = await env.DB.prepare("SELECT id, title, schema FROM forms WHERE id = ?").bind(formId).first();
+  if (!form) return new Response("Not found", { status: 404 });
+  const schema = safeParse(form.schema, { questions: [], settings: {} });
+  const settings = schema.settings || {};
+  if (!settings.calFeed || !settings.calToken || settings.calToken !== token) return new Response("Not found", { status: 404 });
+  const rr = await env.DB.prepare("SELECT data FROM responses WHERE form_id = ?").bind(formId).all();
+  let events = [];
+  (rr.results || []).forEach((row)=>{ const dd = safeParse(row.data, {}); const evs = bookingEventsFrom(schema, dd); const who = findRespondentName(dd) || findRespondentEmail(dd) || ""; evs.forEach((e)=>{ e.attendee = who; }); events = events.concat(evs); });
+  const ics = buildBookingICS(events, (form.title || "Bookings") + " bookings");
+  return new Response(ics, { status: 200, headers: { "Content-Type": "text/calendar; charset=utf-8", "Content-Disposition": "inline; filename=\"booked.ics\"", "Cache-Control": "no-cache" } });
+}
+async function notifyOnSubmit(env, formId, schema, settings, data, meta, respId){
+  try {
+    if (!env || !env.RESEND_API_KEY) return;
+    if (meta && meta.disqualified) return;
+    const events = bookingEventsFrom(schema, data);
+    const isBooking = events.length > 0;
+    const formRow = await env.DB.prepare("SELECT title FROM forms WHERE id = ?").bind(formId).first();
+    const title = (formRow && formRow.title) || "your form";
+    const name = findRespondentName(data);
+    const email = findRespondentEmail(data);
+    if (settings.notifyEmail){
+      let h = "<p>A new response was submitted to " + htmlEscape(title) + ".</p>";
+      if (isBooking) h += "<p>Booking: " + events.map((e)=> htmlEscape(e.summary) + " on " + htmlEscape(fmtWhenUTC(e.start))).join("<br>") + "</p>";
+      if (name) h += "<p>Name: " + htmlEscape(name) + "</p>";
+      if (email) h += "<p>Email: " + htmlEscape(email) + "</p>";
+      await mailSend(env, { to: settings.notifyEmail, subject: (isBooking ? "New booking: " : "New response: ") + title, html: h });
+    }
+    if (settings.confirmEmail && isBooking && email){
+      const ics = buildBookingICS(events.map((e)=>{ const c = Object.assign({}, e); c.attendee = name || ""; return c; }), title);
+      const when = events.map((e)=> htmlEscape(e.summary) + " on " + htmlEscape(fmtWhenUTC(e.start))).join("<br>");
+      const h = "<p>" + (name ? ("Hi " + htmlEscape(name) + ",") : "Hi,") + "</p><p>Your booking is confirmed.</p><p>" + when + "</p><p>A calendar invite is attached. Times are shown in UTC.</p>";
+      await mailSend(env, { to: email, subject: "Your booking is confirmed", html: h, ics, icsName: "booking.ics" });
+    }
+  } catch (e){}
+}
+async function cronReminders(request, env, context){
+  const key = (()=>{ try { return new URL(request.url).searchParams.get("key"); } catch (e){ return null; } })();
+  if (!env || !env.CRON_SECRET || key !== env.CRON_SECRET) return json({ error: "unauthorized" }, 401);
+  if (!env.RESEND_API_KEY) return json({ ok: true, sent: 0, note: "mail not configured" });
+  const now = Date.now();
+  const forms = await env.DB.prepare("SELECT id, title, schema FROM forms").all();
+  let sent = 0, scanned = 0;
+  for (const f of (forms.results || [])){
+    const schema = safeParse(f.schema, { questions: [], settings: {} });
+    const settings = schema.settings || {};
+    if (!settings.reminders) continue;
+    const leadMs = (parseInt(settings.reminderHours, 10) || 24) * 3600000;
+    const rr = await env.DB.prepare("SELECT id, data, meta FROM responses WHERE form_id = ?").bind(f.id).all();
+    for (const row of (rr.results || [])){
+      const data = safeParse(row.data, {});
+      const m = safeParse(row.meta, {});
+      if (m && m.reminded) continue;
+      const events = bookingEventsFrom(schema, data);
+      if (!events.length) continue;
+      scanned++;
+      const due = events.filter((e)=>{ const t = e.start.getTime(); return t > now && (t - now) <= leadMs; });
+      if (!due.length) continue;
+      const email = findRespondentEmail(data);
+      if (!email) continue;
+      const name = findRespondentName(data);
+      const when = due.map((e)=> htmlEscape(e.summary) + " on " + htmlEscape(fmtWhenUTC(e.start))).join("<br>");
+      const ics = buildBookingICS(due.map((e)=>{ const c = Object.assign({}, e); c.attendee = name || ""; return c; }), (f.title || "Reminder"));
+      const res = await mailSend(env, { to: email, subject: "Reminder: upcoming meeting", html: "<p>" + (name ? ("Hi " + htmlEscape(name) + ",") : "Hi,") + "</p><p>This is a reminder of your upcoming meeting.</p><p>" + when + "</p>", ics, icsName: "reminder.ics" });
+      if (res && res.ok !== false){ m.reminded = true; m.remindedAt = new Date().toISOString(); await env.DB.prepare("UPDATE responses SET meta = ? WHERE id = ?").bind(JSON.stringify(m), row.id).run(); sent++; }
+    }
+  }
+  return json({ ok: true, sent, scanned });
 }
 
 function json(obj, status = 200) {

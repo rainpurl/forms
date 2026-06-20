@@ -335,3 +335,11 @@ Date and time fields now open an in-app calendar and time selector that match th
 ## Lighter buttons
 
 The glossy sheen on buttons was removed. They still lift off the page with a soft shadow and a crisp top edge, just without the shine.
+
+## A flush, recessed look
+
+The interface now rests flush. Buttons, fields, options, and cards all sit gently recessed into the page, and action buttons pop out only when you point at them, then press back in when you click. Fields and dropdowns stay recessed, since they are for entering rather than pressing. There is no blue outline on buttons anymore; the soft bevel is the only edge. The signed out homepage uses the same recessed look. While anything is loading you will see the zetetiq wordmark carved into the background, and the same pressed in wordmark now appears on PDF report exports. The light and dark toggle is also available while filling out a form.
+
+## Calendar sync and reminders
+
+Open a form's settings to find Notifications and calendar. You can have bookings flow straight into your own calendar by turning on the calendar subscription and adding the shown URL to Google, Apple, or Outlook once. You can also email a confirmation to anyone who books a time, get notified yourself when responses come in, and send a reminder before each meeting. The email features use Resend and the reminder timer uses a simple scheduled call, both set up in Cloudflare. The handoff document walks through the exact keys to add. If those are not set up, everything else still works and the email options simply stay quiet.
