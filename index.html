@@ -362,7 +362,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .addq-item:hover{border-color:var(--bo);background:var(--hover)}
 .addq-item .t{font-weight:600;font-size:14px}
 .addq-item .h{font-size:12px;color:var(--ink-soft);margin-top:2px}
-.addq-adv-toggle{grid-column:1/-1;text-align:center;border:1px dashed var(--line-strong);background:transparent;border-radius:10px;padding:9px 12px;cursor:pointer;color:var(--ink-soft);font-size:13px;font-weight:600;transition:border-color .12s,color .12s}
+.addq-adv-toggle{grid-column:1/-1;text-align:center;border:1px dashed var(--line-strong);background:transparent;border-radius:10px;padding:14px 16px;margin:10px 0 4px;cursor:pointer;color:var(--ink-soft);font-size:13px;font-weight:600;transition:border-color .12s,color .12s}
 .addq-adv-toggle:hover{border-color:var(--bo);color:var(--ink)}
 @media(max-width:560px){.addq-grid{grid-template-columns:1fr}}
 /* trash */
@@ -1027,7 +1027,7 @@ html[data-theme="dark"] .form-scope .stars .star{text-shadow:0 1px 1px rgba(0,0,
 .acct-lbl{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
 .acct-hint{font-size:12px;color:var(--ink-soft);margin-top:5px;line-height:1.4}
 /* question picker section headers */
-.addq-section-h{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin:14px 2px 8px;padding-top:12px;border-top:1px solid var(--line)}
+.addq-section-h{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;text-align:center;margin:16px 2px 9px;padding-top:13px;border-top:1px solid var(--line)}
 .addq-section-h:first-of-type{border-top:0;padding-top:0;margin-top:2px}
 /* hide the Google website-translate banner/gadget */
 .goog-te-banner-frame.skiptranslate{display:none!important}
@@ -1040,12 +1040,26 @@ body{top:0!important}
 .wd-chip:hover{transform:translateY(-1px);color:var(--ink)}
 .wd-chip.on{background:var(--bo);color:#f5f2f0;box-shadow:var(--bevel-press);background-image:none}
 .acct-cal-on{font-size:13px;color:var(--ink);line-height:1.4;word-break:break-word}
+/* advanced question types: expansion animation */
+.addq-adv-grid{overflow:hidden;animation:addqExpand .26s var(--ease) both}
+@keyframes addqExpand{from{opacity:0;max-height:0;transform:translateY(-4px)}to{opacity:1;max-height:1600px;transform:none}}
+/* calendar connect rows */
+.cal-connect{display:flex;flex-direction:column;gap:8px}
+.cal-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:var(--ink)}
+.cal-connect-btn{appearance:none;border:0;cursor:pointer;background:var(--card);box-shadow:var(--bevel-raise);background-image:var(--raise-sheen);text-align:left;transition:transform var(--t-fast),box-shadow var(--t-fast)}
+.cal-connect-btn:hover{transform:translateY(-1px)}
+.cal-connect-btn:active{box-shadow:var(--bevel-press);transform:none}
+.cal-row-on{background:var(--paper);box-shadow:var(--bevel-inset)}
+.cal-row-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-soon-row{opacity:.6;cursor:default}
+.cal-soon-row:hover{transform:none;box-shadow:var(--bevel-raise)}
+.cal-soon{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);white-space:nowrap}
 </style>
 </head>
 <body>
 <div id="root"><div class="boot-splash" aria-hidden="true"><span class="boot-word">zetetiq</span></div></div>
 
-<script>window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||(r.childNodes.length&&!r.querySelector('.boot-splash')))return;r.innerHTML='<pre style="padding:16px;font:13px monospace;color:#b23b3b;white-space:pre-wrap">'+(e.message||'Error')+'</pre>';},true);</script>
+<script>window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||(r.childNodes.length&&!r.querySelector('.boot-splash')))return;r.innerHTML='<pre>'+(e.message||'Error')+'</pre>';},true);</script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
 <script>function boot(){const {
@@ -1161,7 +1175,7 @@ const api = {
       username
     })
   }),
-  disconnectCalendar: () => req("/api/calendar/google/disconnect", {
+  disconnectCalendar: provider => req("/api/calendar/" + (provider || "google") + "/disconnect", {
     method: "POST"
   }),
   submit: (formId, payload) => req("/api/public/" + formId + "/responses", {
@@ -2473,6 +2487,7 @@ function WindowFreePick({
       gap: 8
     }
   }, /*#__PURE__*/React.createElement(DateField, {
+    className: "select",
     value: datePart,
     min: minD,
     max: maxD,
@@ -3122,21 +3137,12 @@ function SchedulingControls({
     }
   }, mt === "collective" ? "A slot is offered only when every host is free." : "Bookings rotate across hosts based on availability.")), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
-  }, "Connected calendars"), /*#__PURE__*/React.createElement("div", {
-    className: "cal-grid"
-  }, CAL.map(c => /*#__PURE__*/React.createElement("label", {
-    key: c[0],
-    className: "cal-chip" + (cals[c[0]] ? " on" : "")
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: !!cals[c[0]],
-    onChange: e => setCal(c[0], e.target.checked)
-  }), /*#__PURE__*/React.createElement("span", null, c[1])))), /*#__PURE__*/React.createElement("div", {
+  }, "Connected calendars"), /*#__PURE__*/React.createElement(CalendarConnect, null), /*#__PURE__*/React.createElement("div", {
     className: "hint",
     style: {
       marginTop: 6
     }
-  }, "Busy times from connected calendars are blocked automatically once the calendar is linked in your account."), /*#__PURE__*/React.createElement("div", {
+  }, "Connect a calendar to automatically block your busy times on time window scheduling."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Scheduling rules"), /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -3237,6 +3243,7 @@ function SchedulingControls({
       flex: 1
     }
   }, /*#__PURE__*/React.createElement(DateField, {
+    className: "select",
     value: q.windowStart || "",
     onChange: e => update({
       windowStart: e.target.value
@@ -3247,6 +3254,7 @@ function SchedulingControls({
       flex: 1
     }
   }, /*#__PURE__*/React.createElement(DateField, {
+    className: "select",
     value: q.windowEnd || "",
     min: q.windowStart || "",
     onChange: e => update({
@@ -3278,37 +3286,44 @@ function SchedulingControls({
       marginTop: 8
     }
   }, /*#__PURE__*/React.createElement(Field, {
-    label: "From hour",
+    label: "From",
     style: {
       flex: 1
     }
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
-    type: "number",
-    min: "0",
-    max: "23",
-    value: q.startHour == null ? 9 : q.startHour,
+  }, /*#__PURE__*/React.createElement(Select, {
+    className: "select",
+    value: String(q.startHour == null ? 9 : q.startHour),
     onChange: e => update({
-      startHour: Math.max(0, Math.min(23, parseInt(e.target.value || "0", 10)))
+      startHour: parseInt(e.target.value, 10)
     })
-  })), /*#__PURE__*/React.createElement(Field, {
-    label: "To hour",
+  }, Array.from({
+    length: 24
+  }).map((_, h) => /*#__PURE__*/React.createElement("option", {
+    key: h,
+    value: h
+  }, hourLabel(h))))), /*#__PURE__*/React.createElement(Field, {
+    label: "To",
     style: {
       flex: 1
     }
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
-    type: "number",
-    min: "1",
-    max: "24",
-    value: q.endHour == null ? 17 : q.endHour,
+  }, /*#__PURE__*/React.createElement(Select, {
+    className: "select",
+    value: String(q.endHour == null ? 17 : q.endHour),
     onChange: e => update({
-      endHour: Math.max(1, Math.min(24, parseInt(e.target.value || "17", 10)))
+      endHour: parseInt(e.target.value, 10)
     })
-  })), /*#__PURE__*/React.createElement(Field, {
-    label: "Slot length",
+  }, Array.from({
+    length: 24
+  }).map((_, i) => {
+    const h = i + 1;
+    return /*#__PURE__*/React.createElement("option", {
+      key: h,
+      value: h
+    }, hourLabel(h));
+  })))), /*#__PURE__*/React.createElement(Field, {
+    label: "Slot length (minutes)",
     style: {
-      flex: 1
+      marginTop: 8
     }
   }, /*#__PURE__*/React.createElement("input", {
     className: "input",
@@ -3319,7 +3334,7 @@ function SchedulingControls({
     onChange: e => update({
       slotMinutes: Math.max(5, parseInt(e.target.value || "60", 10))
     })
-  }))), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 10
     }
@@ -9225,6 +9240,68 @@ function ensureTranslateWidget() {
     document.body.appendChild(sc);
   } catch (e) {}
 }
+function CalendarConnect() {
+  const {
+    user,
+    setUser,
+    toast
+  } = useApp();
+  const [busyP, setBusyP] = useState("");
+  const cals = user && user.calendars || {
+    google: {
+      connected: false,
+      email: null
+    },
+    outlook: {
+      connected: false,
+      email: null
+    }
+  };
+  const disc = prov => {
+    setBusyP(prov);
+    api.disconnectCalendar(prov).then(() => {
+      setBusyP("");
+      setUser(p => {
+        const c = Object.assign({}, p && p.calendars || {});
+        c[prov] = {
+          connected: false,
+          email: null
+        };
+        return Object.assign({}, p, {
+          calendars: c
+        });
+      });
+      toast((prov === "google" ? "Google" : "Outlook") + " calendar disconnected");
+    });
+  };
+  const row = (prov, label, url) => cals[prov] && cals[prov].connected ? /*#__PURE__*/React.createElement("div", {
+    key: prov,
+    className: "cal-row cal-row-on"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cal-row-name"
+  }, label, " connected", cals[prov].email ? " \u00b7 " + cals[prov].email : ""), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    disabled: busyP === prov,
+    onClick: () => disc(prov)
+  }, busyP === prov ? "..." : "Disconnect")) : /*#__PURE__*/React.createElement("button", {
+    key: prov,
+    type: "button",
+    className: "cal-row cal-connect-btn",
+    onClick: () => {
+      window.location.href = url;
+    }
+  }, "Connect ", label);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "cal-connect"
+  }, row("google", "Google Calendar", "/api/calendar/google/start"), row("outlook", "Outlook", "/api/calendar/outlook/start"), /*#__PURE__*/React.createElement("div", {
+    className: "cal-row cal-connect-btn cal-soon-row",
+    "aria-disabled": "true"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cal-row-name"
+  }, "Apple Calendar"), /*#__PURE__*/React.createElement("span", {
+    className: "cal-soon"
+  }, "coming soon")));
+}
 function AccountMenu({
   onClose
 }) {
@@ -9287,18 +9364,6 @@ function AccountMenu({
     setLang(lng);
     applyTranslate(lng);
   };
-  const [calBusy, setCalBusy] = useState(false);
-  const disconnectCal = () => {
-    setCalBusy(true);
-    api.disconnectCalendar().then(() => {
-      setCalBusy(false);
-      setUser(p => Object.assign({}, p, {
-        calendarConnected: false,
-        calendarEmail: null
-      }));
-      toast("Calendar disconnected");
-    });
-  };
   return /*#__PURE__*/React.createElement("div", {
     className: "acct-menu",
     ref: ref
@@ -9347,23 +9412,9 @@ function AccountMenu({
     className: "acct-sec"
   }, /*#__PURE__*/React.createElement("label", {
     className: "acct-lbl"
-  }, "Calendar"), user.calendarConnected ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "acct-cal-on"
-  }, "Google Calendar connected", user.calendarEmail ? " · " + user.calendarEmail : ""), /*#__PURE__*/React.createElement("button", {
-    className: "btn sm ghost",
-    style: {
-      marginTop: 8
-    },
-    disabled: calBusy,
-    onClick: disconnectCal
-  }, calBusy ? "Removing..." : "Disconnect")) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("button", {
-    className: "btn sm primary",
-    onClick: () => {
-      window.location.href = "/api/calendar/google/start";
-    }
-  }, "Connect Google Calendar"), /*#__PURE__*/React.createElement("div", {
+  }, "Calendar"), /*#__PURE__*/React.createElement(CalendarConnect, null), /*#__PURE__*/React.createElement("div", {
     className: "acct-hint"
-  }, "Busy times from your calendar are blocked automatically on time-window scheduling."))));
+  }, "Busy times from a connected calendar are blocked automatically on time window scheduling.")));
 }
 function TopNav() {
   const {
@@ -9689,6 +9740,13 @@ function Select({
 const COLOR_SWATCHES = ["#5C88CD", "#4A73B5", "#2A6F97", "#4F8A5B", "#2F9E63", "#E0A23B", "#C0563F", "#B5446E", "#7A5CCD", "#736B5E", "#2A2620", "#f5f2f0"];
 function zpad(n) {
   return String(n).padStart(2, "0");
+}
+function hourLabel(h) {
+  const hh = (h % 24 + 24) % 24;
+  const ap = hh >= 12 ? "PM" : "AM";
+  let x = hh % 12;
+  if (x === 0) x = 12;
+  return x + " " + ap + (h >= 24 ? " (next day)" : "");
 }
 function zYmd(d) {
   return d.getFullYear() + "-" + zpad(d.getMonth() + 1) + "-" + zpad(d.getDate());
@@ -12820,7 +12878,7 @@ function AddQuestionMenu({
     className: "addq-adv-toggle",
     onClick: () => setAdv(a => !a)
   }, adv ? "▾" : "▸", " Advanced question types"), adv && /*#__PURE__*/React.createElement("div", {
-    className: "addq-grid"
+    className: "addq-grid addq-adv-grid"
   }, advTypes.map(t => /*#__PURE__*/React.createElement("button", {
     key: t,
     className: "addq-item",
@@ -16443,9 +16501,9 @@ function App() {
   }, toastMsg));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));}
-(function(){function fail(m){var r=document.getElementById('root');if(r)r.innerHTML='<pre style="padding:16px;font:13px monospace;color:#b23b3b">'+m+'</pre>';}
-function inj(src,next){var s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=next;s.onerror=function(){fail('Could not load resources.');};document.head.appendChild(s);}
-try{if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else fail('Could not initialize.');});});}catch(e){fail(String(e));}})();
+(function(){function fail(m){var r=document.getElementById('root');if(r)r.innerHTML='<pre>'+m+'</pre>';}
+function inj(src,next){var s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=next;s.onerror=function(){fail('x');};document.head.appendChild(s);}
+try{if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else inj('https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',function(){inj('https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',function(){if(window.React&&window.ReactDOM&&window.ReactDOM.createRoot)boot();else fail('x');});});}catch(e){fail(String(e));}})();
 </script>
 </body>
 </html>

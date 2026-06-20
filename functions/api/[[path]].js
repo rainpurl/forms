@@ -26,9 +26,9 @@ async function route(seg, method, request, env, context) {
   if (p === "auth/logout" && method === "POST") return authLogout();
   if (p === "auth/google/start" && method === "GET") return googleStart(request, env);
   if (p === "auth/google/callback" && method === "GET") return googleCallback(request, env);
-  if (p === "calendar/google/start" && method === "GET") return calendarStart(request, env);
-  if (p === "calendar/google/callback" && method === "GET") return calendarCallback(request, env);
-  if (p === "calendar/google/disconnect" && method === "POST") return calendarDisconnect(request, env);
+  if (path[0] === "calendar" && path.length === 3 && path[2] === "start" && method === "GET") return calendarStart(path[1], request, env);
+  if (path[0] === "calendar" && path.length === 3 && path[2] === "callback" && method === "GET") return calendarCallback(path[1], request, env);
+  if (path[0] === "calendar" && path.length === 3 && path[2] === "disconnect" && method === "POST") return calendarDisconnect(path[1], request, env);
   if (p === "me" && method === "GET") return me(request, env);
   if (p === "me/username" && method === "POST") return updateUsername(request, env);
   if (p === "plan/apply" && method === "POST") return applyPlan(request, env);
@@ -154,9 +154,9 @@ async function me(request, env) {
   let plan = effectivePlan(row && row.plan, row && row.email);
   if (plan === "edu" && row && (!row.plan || row.plan === "free")) { try { await env.DB.prepare("UPDATE users SET plan = 'edu' WHERE id = ?").bind(user.uid).run(); } catch (e) {} }
   const pr = (row && row.plan_request) ? safeParse(row.plan_request, null) : null;
-  let calConn = false, calEmail = null;
-  try { const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(user.uid).first(); const conn = (cr && cr.calendar) ? safeParse(cr.calendar, null) : null; if (conn && conn.google && conn.google.refresh_token){ calConn = true; calEmail = conn.google.email || null; } } catch (e) {}
-  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendarConnected: calConn, calendarEmail: calEmail }) });
+  let calendars = { google: { connected: false, email: null }, outlook: { connected: false, email: null } };
+  try { const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(user.uid).first(); const conn = (cr && cr.calendar) ? safeParse(cr.calendar, null) : null; if (conn){ if (conn.google && conn.google.refresh_token) calendars.google = { connected: true, email: conn.google.email || null }; if (conn.outlook && conn.outlook.refresh_token) calendars.outlook = { connected: true, email: conn.outlook.email || null }; } } catch (e) {}
+  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendars }) });
 }
 
 async function currentUser(request, env) {
@@ -266,31 +266,48 @@ async function googleCallback(request, env) {
 
 
 /* ------------------------------------------------------------------ */
-/* Google Calendar connect (free/busy, isolated + graceful)            */
+/* Calendar connect (Google + Outlook free/busy, isolated + graceful)  */
 /* ------------------------------------------------------------------ */
-async function calendarStart(request, env){
+function calProviderOk(p){ return p === "google" || p === "outlook"; }
+
+async function calendarStart(provider, request, env){
   const user = await currentUser(request, env);
   if (!user) return redirectTo("/dashboard?calendar=login");
-  const clientId = env.GOOGLE_CLIENT_ID;
-  if (!clientId) return redirectTo("/dashboard?calendar=setup");
+  if (!calProviderOk(provider)) return redirectTo("/dashboard?calendar=denied");
   const origin = new URL(request.url).origin;
-  const redirectUri = origin + "/api/calendar/google/callback";
   const state = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()).replace(/-/g, "");
-  const auth = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    scope: "https://www.googleapis.com/auth/calendar.freebusy openid email",
-    state,
-    access_type: "offline",
-    prompt: "consent",
-    include_granted_scopes: "true",
-  }).toString();
   const stateCookie = `gc_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
+  if (provider === "google"){
+    const clientId = env.GOOGLE_CLIENT_ID;
+    if (!clientId) return redirectTo("/dashboard?calendar=setup");
+    const auth = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: origin + "/api/calendar/google/callback",
+      response_type: "code",
+      scope: "https://www.googleapis.com/auth/calendar.freebusy openid email",
+      state,
+      access_type: "offline",
+      prompt: "consent",
+      include_granted_scopes: "true",
+    }).toString();
+    return redirectTo(auth, [stateCookie]);
+  }
+  // outlook (Microsoft identity platform)
+  const msId = env.MS_CLIENT_ID;
+  if (!msId) return redirectTo("/dashboard?calendar=setup");
+  const auth = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?" + new URLSearchParams({
+    client_id: msId,
+    response_type: "code",
+    redirect_uri: origin + "/api/calendar/outlook/callback",
+    response_mode: "query",
+    scope: "offline_access openid email https://graph.microsoft.com/Calendars.Read",
+    state,
+    prompt: "consent",
+  }).toString();
   return redirectTo(auth, [stateCookie]);
 }
 
-async function calendarCallback(request, env){
+async function calendarCallback(provider, request, env){
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -299,40 +316,62 @@ async function calendarCallback(request, env){
   if (!code || !state || !cookieState || state !== cookieState) return redirectTo("/dashboard?calendar=state");
   const user = await currentUser(request, env);
   if (!user) return redirectTo("/dashboard?calendar=login");
-  const clientId = env.GOOGLE_CLIENT_ID, clientSecret = env.GOOGLE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return redirectTo("/dashboard?calendar=setup");
-  const redirectUri = url.origin + "/api/calendar/google/callback";
-  let tok = null;
-  try {
-    const r = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, grant_type: "authorization_code" }).toString(),
-    });
-    tok = await r.json();
-  } catch (e) { return redirectTo("/dashboard?calendar=token"); }
-  if (!tok || !tok.refresh_token) return redirectTo("/dashboard?calendar=noref");
-  let email = "";
-  try { if (tok.id_token){ const c = decodeJwtPayload(tok.id_token); email = (c && c.email) || ""; } } catch (e) {}
-  const conn = JSON.stringify({ google: { refresh_token: tok.refresh_token, email, connected_at: new Date().toISOString() } });
-  try { await env.DB.prepare("UPDATE users SET calendar = ? WHERE id = ?").bind(conn, user.uid).run(); }
+  if (!calProviderOk(provider)) return redirectTo("/dashboard?calendar=denied");
+  const origin = url.origin;
+  let refresh = "", email = "";
+  if (provider === "google"){
+    const clientId = env.GOOGLE_CLIENT_ID, clientSecret = env.GOOGLE_CLIENT_SECRET;
+    if (!clientId || !clientSecret) return redirectTo("/dashboard?calendar=setup");
+    try {
+      const r = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: origin + "/api/calendar/google/callback", grant_type: "authorization_code" }).toString(),
+      });
+      const tok = await r.json();
+      refresh = (tok && tok.refresh_token) || "";
+      try { if (tok && tok.id_token){ const c = decodeJwtPayload(tok.id_token); email = (c && c.email) || ""; } } catch (e) {}
+    } catch (e) { return redirectTo("/dashboard?calendar=token"); }
+  } else {
+    const msId = env.MS_CLIENT_ID, msSecret = env.MS_CLIENT_SECRET;
+    if (!msId || !msSecret) return redirectTo("/dashboard?calendar=setup");
+    try {
+      const r = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
+        method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ code, client_id: msId, client_secret: msSecret, redirect_uri: origin + "/api/calendar/outlook/callback", grant_type: "authorization_code", scope: "offline_access openid email https://graph.microsoft.com/Calendars.Read" }).toString(),
+      });
+      const tok = await r.json();
+      refresh = (tok && tok.refresh_token) || "";
+      try { if (tok && tok.id_token){ const c = decodeJwtPayload(tok.id_token); email = (c && (c.email || c.preferred_username)) || ""; } } catch (e) {}
+    } catch (e) { return redirectTo("/dashboard?calendar=token"); }
+  }
+  if (!refresh) return redirectTo("/dashboard?calendar=noref");
+  let conn = {};
+  try { const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(user.uid).first(); conn = (cr && cr.calendar) ? (safeParse(cr.calendar, {}) || {}) : {}; } catch (e) { return redirectTo("/dashboard?calendar=migrate"); }
+  conn[provider] = { refresh_token: refresh, email, connected_at: new Date().toISOString() };
+  try { await env.DB.prepare("UPDATE users SET calendar = ? WHERE id = ?").bind(JSON.stringify(conn), user.uid).run(); }
   catch (e) { return redirectTo("/dashboard?calendar=migrate"); }
   const clear = "gc_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0";
   return redirectTo("/dashboard?calendar=connected", [clear]);
 }
 
-async function calendarDisconnect(request, env){
+async function calendarDisconnect(provider, request, env){
   const user = await currentUser(request, env);
   if (!user) return json({ error: "unauthorized" }, 401);
-  try { await env.DB.prepare("UPDATE users SET calendar = NULL WHERE id = ?").bind(user.uid).run(); } catch (e) {}
+  if (!calProviderOk(provider)) return json({ error: "bad_request" }, 400);
+  try {
+    const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(user.uid).first();
+    const conn = (cr && cr.calendar) ? (safeParse(cr.calendar, {}) || {}) : {};
+    delete conn[provider];
+    const left = Object.keys(conn).length ? JSON.stringify(conn) : null;
+    await env.DB.prepare("UPDATE users SET calendar = ? WHERE id = ?").bind(left, user.uid).run();
+  } catch (e) {}
   return json({ ok: true });
 }
 
 async function googleAccessToken(env, refreshToken){
   try {
     const r = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, refresh_token: refreshToken, grant_type: "refresh_token" }).toString(),
     });
     const t = await r.json();
@@ -340,24 +379,60 @@ async function googleAccessToken(env, refreshToken){
   } catch (e) { return null; }
 }
 
-// Returns the owner's busy intervals [{start,end}] over [timeMin,timeMax], or [] on any failure.
-async function getOwnerBusy(env, ownerId, timeMin, timeMax){
+async function msAccessToken(env, refreshToken){
   try {
-    const row = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(ownerId).first();
-    const conn = (row && row.calendar) ? safeParse(row.calendar, null) : null;
+    const r = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: env.MS_CLIENT_ID, client_secret: env.MS_CLIENT_SECRET, refresh_token: refreshToken, grant_type: "refresh_token", scope: "offline_access openid email https://graph.microsoft.com/Calendars.Read" }).toString(),
+    });
+    const t = await r.json();
+    return (t && t.access_token) || null;
+  } catch (e) { return null; }
+}
+
+async function googleBusy(env, conn, timeMin, timeMax){
+  try {
     const rt = conn && conn.google && conn.google.refresh_token;
     if (!rt) return [];
     const at = await googleAccessToken(env, rt);
     if (!at) return [];
     const r = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
-      method: "POST",
-      headers: { "Authorization": "Bearer " + at, "Content-Type": "application/json" },
+      method: "POST", headers: { "Authorization": "Bearer " + at, "Content-Type": "application/json" },
       body: JSON.stringify({ timeMin, timeMax, items: [{ id: "primary" }] }),
     });
     const j = await r.json();
     const prim = j && j.calendars && j.calendars.primary;
     const busy = (prim && prim.busy) || [];
     return busy.map((b)=>({ start: b.start, end: b.end })).filter((b)=> b.start && b.end);
+  } catch (e) { return []; }
+}
+
+async function outlookBusy(env, conn, timeMin, timeMax){
+  try {
+    const o = conn && conn.outlook;
+    const rt = o && o.refresh_token;
+    if (!rt || !o.email) return [];
+    const at = await msAccessToken(env, rt);
+    if (!at) return [];
+    const r = await fetch("https://graph.microsoft.com/v1.0/me/calendar/getSchedule", {
+      method: "POST", headers: { "Authorization": "Bearer " + at, "Content-Type": "application/json" },
+      body: JSON.stringify({ schedules: [o.email], startTime: { dateTime: timeMin, timeZone: "UTC" }, endTime: { dateTime: timeMax, timeZone: "UTC" }, availabilityViewInterval: 30 }),
+    });
+    const j = await r.json();
+    const sched = (j && j.value && j.value[0] && j.value[0].scheduleItems) || [];
+    const toIso = (dt)=>{ try { let s = (dt && dt.dateTime) || ""; if (!s) return null; if (!/[Zz]|[+\-]\d\d:?\d\d$/.test(s)) s += "Z"; const d = new Date(s); return isNaN(d.getTime()) ? null : d.toISOString(); } catch (e) { return null; } };
+    return sched.map((it)=>({ start: toIso(it.start), end: toIso(it.end) })).filter((b)=> b.start && b.end);
+  } catch (e) { return []; }
+}
+
+// Owner's busy intervals [{start,end}] across all connected calendars over [timeMin,timeMax], or [] on any failure.
+async function getOwnerBusy(env, ownerId, timeMin, timeMax){
+  try {
+    const row = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(ownerId).first();
+    const conn = (row && row.calendar) ? safeParse(row.calendar, null) : null;
+    if (!conn) return [];
+    const [g, o] = await Promise.all([ googleBusy(env, conn, timeMin, timeMax), outlookBusy(env, conn, timeMin, timeMax) ]);
+    return g.concat(o);
   } catch (e) { return []; }
 }
 
