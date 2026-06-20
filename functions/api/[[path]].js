@@ -26,8 +26,12 @@ async function route(seg, method, request, env, context) {
   if (p === "auth/logout" && method === "POST") return authLogout();
   if (p === "auth/google/start" && method === "GET") return googleStart(request, env);
   if (p === "auth/google/callback" && method === "GET") return googleCallback(request, env);
+  if (p === "calendar/google/start" && method === "GET") return calendarStart(request, env);
+  if (p === "calendar/google/callback" && method === "GET") return calendarCallback(request, env);
+  if (p === "calendar/google/disconnect" && method === "POST") return calendarDisconnect(request, env);
   if (p === "me" && method === "GET") return me(request, env);
   if (p === "me/username" && method === "POST") return updateUsername(request, env);
+  if (p === "plan/apply" && method === "POST") return applyPlan(request, env);
   if (p === "summary" && method === "GET") return dashSummary(request, env);
 
   // ---- public (no auth) ----
@@ -90,6 +94,12 @@ async function route(seg, method, request, env, context) {
   if (path[0] === "admin" && path[1] === "overview" && path.length === 2 && method === "GET") {
     return adminOverview(request, env);
   }
+  if (path[0] === "admin" && path[1] === "applications" && path.length === 2 && method === "GET") {
+    return adminApplications(request, env);
+  }
+  if (path[0] === "admin" && path[1] === "plan" && path.length === 2 && method === "POST") {
+    return adminSetPlan(request, env);
+  }
 
   if (path[0] === "brand-kits") {
     const user = await currentUser(request, env);
@@ -125,7 +135,7 @@ async function authAdmin(request, env) {
     exp: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days
   };
   const token = await makeToken(secret(env), payload);
-  const res = json({ user: publicUser(payload) });
+  const res = json({ user: Object.assign({}, publicUser(payload), { plan: "enterprise", limits: planLimits("enterprise") }) });
   res.headers.append("Set-Cookie", sessionCookie(token));
   return res;
 }
@@ -139,7 +149,14 @@ function authLogout() {
 async function me(request, env) {
   const user = await currentUser(request, env);
   if (!user) return json({ user: null }, 200);
-  return json({ user: publicUser(user) });
+  if (user.uid === "admin") return json({ user: Object.assign({}, publicUser(user), { plan: "enterprise", limits: planLimits("enterprise") }) });
+  let row = null; try { row = await env.DB.prepare("SELECT plan, email, plan_request FROM users WHERE id = ?").bind(user.uid).first(); } catch (e) {}
+  let plan = effectivePlan(row && row.plan, row && row.email);
+  if (plan === "edu" && row && (!row.plan || row.plan === "free")) { try { await env.DB.prepare("UPDATE users SET plan = 'edu' WHERE id = ?").bind(user.uid).run(); } catch (e) {} }
+  const pr = (row && row.plan_request) ? safeParse(row.plan_request, null) : null;
+  let calConn = false, calEmail = null;
+  try { const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(user.uid).first(); const conn = (cr && cr.calendar) ? safeParse(cr.calendar, null) : null; if (conn && conn.google && conn.google.refresh_token){ calConn = true; calEmail = conn.google.email || null; } } catch (e) {}
+  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendarConnected: calConn, calendarEmail: calEmail }) });
 }
 
 async function currentUser(request, env) {
@@ -231,6 +248,7 @@ async function googleCallback(request, env) {
     await env.DB.prepare(
       "INSERT OR IGNORE INTO users (id, username, name, email, google_id, is_admin) VALUES (?, ?, ?, ?, ?, 0)"
     ).bind(newId, uname, name, email, sub).run();
+    if (isEduEmail(email)) { try { await env.DB.prepare("UPDATE users SET plan = 'edu' WHERE id = ?").bind(newId).run(); } catch (e) {} }
     row = { id: newId, username: uname, name };
   }
 
@@ -246,6 +264,102 @@ async function googleCallback(request, env) {
   return redirectTo("/dashboard", [sessionCookie(token), clearState]);
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Google Calendar connect (free/busy, isolated + graceful)            */
+/* ------------------------------------------------------------------ */
+async function calendarStart(request, env){
+  const user = await currentUser(request, env);
+  if (!user) return redirectTo("/dashboard?calendar=login");
+  const clientId = env.GOOGLE_CLIENT_ID;
+  if (!clientId) return redirectTo("/dashboard?calendar=setup");
+  const origin = new URL(request.url).origin;
+  const redirectUri = origin + "/api/calendar/google/callback";
+  const state = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()).replace(/-/g, "");
+  const auth = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "https://www.googleapis.com/auth/calendar.freebusy openid email",
+    state,
+    access_type: "offline",
+    prompt: "consent",
+    include_granted_scopes: "true",
+  }).toString();
+  const stateCookie = `gc_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
+  return redirectTo(auth, [stateCookie]);
+}
+
+async function calendarCallback(request, env){
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+  if (url.searchParams.get("error")) return redirectTo("/dashboard?calendar=denied");
+  const cookieState = readCookie(request, "gc_state");
+  if (!code || !state || !cookieState || state !== cookieState) return redirectTo("/dashboard?calendar=state");
+  const user = await currentUser(request, env);
+  if (!user) return redirectTo("/dashboard?calendar=login");
+  const clientId = env.GOOGLE_CLIENT_ID, clientSecret = env.GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return redirectTo("/dashboard?calendar=setup");
+  const redirectUri = url.origin + "/api/calendar/google/callback";
+  let tok = null;
+  try {
+    const r = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, grant_type: "authorization_code" }).toString(),
+    });
+    tok = await r.json();
+  } catch (e) { return redirectTo("/dashboard?calendar=token"); }
+  if (!tok || !tok.refresh_token) return redirectTo("/dashboard?calendar=noref");
+  let email = "";
+  try { if (tok.id_token){ const c = decodeJwtPayload(tok.id_token); email = (c && c.email) || ""; } } catch (e) {}
+  const conn = JSON.stringify({ google: { refresh_token: tok.refresh_token, email, connected_at: new Date().toISOString() } });
+  try { await env.DB.prepare("UPDATE users SET calendar = ? WHERE id = ?").bind(conn, user.uid).run(); }
+  catch (e) { return redirectTo("/dashboard?calendar=migrate"); }
+  const clear = "gc_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0";
+  return redirectTo("/dashboard?calendar=connected", [clear]);
+}
+
+async function calendarDisconnect(request, env){
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  try { await env.DB.prepare("UPDATE users SET calendar = NULL WHERE id = ?").bind(user.uid).run(); } catch (e) {}
+  return json({ ok: true });
+}
+
+async function googleAccessToken(env, refreshToken){
+  try {
+    const r = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, refresh_token: refreshToken, grant_type: "refresh_token" }).toString(),
+    });
+    const t = await r.json();
+    return (t && t.access_token) || null;
+  } catch (e) { return null; }
+}
+
+// Returns the owner's busy intervals [{start,end}] over [timeMin,timeMax], or [] on any failure.
+async function getOwnerBusy(env, ownerId, timeMin, timeMax){
+  try {
+    const row = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(ownerId).first();
+    const conn = (row && row.calendar) ? safeParse(row.calendar, null) : null;
+    const rt = conn && conn.google && conn.google.refresh_token;
+    if (!rt) return [];
+    const at = await googleAccessToken(env, rt);
+    if (!at) return [];
+    const r = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + at, "Content-Type": "application/json" },
+      body: JSON.stringify({ timeMin, timeMax, items: [{ id: "primary" }] }),
+    });
+    const j = await r.json();
+    const prim = j && j.calendars && j.calendars.primary;
+    const busy = (prim && prim.busy) || [];
+    return busy.map((b)=>({ start: b.start, end: b.end })).filter((b)=> b.start && b.end);
+  } catch (e) { return []; }
+}
 
 /* ------------------------------------------------------------------ */
 /* forms CRUD                                                          */
@@ -265,6 +379,8 @@ async function listForms(user, env) {
 }
 
 async function createForm(user, request, env) {
+  const _plan = await getUserPlan(env, user.uid); const _lim = planLimits(_plan);
+  if (_lim.maxForms !== Infinity) { const cnt = await env.DB.prepare("SELECT COUNT(*) AS c FROM forms WHERE owner_id = ?").bind(user.uid).first(); if (((cnt && cnt.c) || 0) >= _lim.maxForms) return json({ error: "plan_limit", limit: "forms", max: _lim.maxForms, plan: _plan }, 403); }
   const body = await readJson(request) || {};
   const title = (body.title || "Untitled form").toString().slice(0, 200);
   const slug = await uniqueSlug(env, user.uid, title);
@@ -392,14 +508,15 @@ async function deleteBrandKit(user, id, env) {
 
 async function publicForm(username, slug, env) {
   const row = await env.DB.prepare(
-    `SELECT f.id, f.title, f.description, f.theme, f.schema, f.is_open, u.username, u.name
+    `SELECT f.id, f.owner_id, f.title, f.description, f.theme, f.schema, f.is_open, u.username, u.name
      FROM forms f JOIN users u ON u.id = f.owner_id
      WHERE lower(u.username) = lower(?) AND f.slug = ?`
   ).bind(String(username||"").trim(), slug).first();
   if (!row) return json({ error: "not_found" }, 404);
 
   const schema = safeParse(row.schema, { questions: [], settings: {} });
-  const settings = schema.settings || {};
+  const settings = schema.settings || {}; schema.settings = settings;
+  { const _ol = planLimits(await getUserPlan(env, row.owner_id)); if (!_ol.whiteLabel) settings.hideBranding = false; if (!_ol.customCss && settings.customCss) settings.customCss = ""; }
   let count = null;
   const cap = parseInt(settings.responseCap, 10);
   if (cap > 0) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(row.id).first(); count = (cr && cr.c) || 0; }
@@ -420,6 +537,16 @@ async function publicForm(username, slug, env) {
       pollQs.forEach((qq)=>{ const vv = dd[qq.id]; if (vv && typeof vv === "object" && !Array.isArray(vv)){ const p = poll[qq.id]; p.total++; const av = Array.isArray(vv.available) ? vv.available : []; av.forEach((k)=>{ p.counts[k] = (p.counts[k] || 0) + 1; }); const mb = Array.isArray(vv.maybe) ? vv.maybe : []; mb.forEach((k)=>{ p.maybeCounts[k] = (p.maybeCounts[k] || 0) + 1; }); if (p.people) p.people.push({ name: String(vv.name || "").slice(0, 80), available: av, maybe: mb }); } });
     });
   }
+  let busy = [];
+  try {
+    const winQs = (schema.questions || []).filter((qq)=> qq && qq.type === "scheduling" && qq.availMode === "window");
+    if (winQs.length){
+      const nowB = new Date();
+      let maxEnd = new Date(nowB.getTime() + 30*86400000);
+      winQs.forEach((qq)=>{ if (qq.windowEnd){ const e = new Date(qq.windowEnd + "T23:59:59"); if (!isNaN(e.getTime()) && e > maxEnd) maxEnd = e; } });
+      busy = await getOwnerBusy(env, row.owner_id, nowB.toISOString(), maxEnd.toISOString());
+    }
+  } catch (e) { busy = []; }
   return json({
     form: {
       id: row.id,
@@ -434,6 +561,7 @@ async function publicForm(username, slug, env) {
     bookings,
     optionCounts,
     poll,
+    busy,
   });
 }
 
@@ -464,8 +592,12 @@ function scoreResponse(schema, data){
 }
 
 async function submitResponse(formId, request, env, context) {
-  const form = await env.DB.prepare("SELECT id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
+  const form = await env.DB.prepare("SELECT id, owner_id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
   if (!form) return json({ error: "not_found" }, 404);
+  {
+    const _ol = planLimits(await getUserPlan(env, form.owner_id));
+    if (_ol.maxResp !== Infinity) { const cr = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(formId).first(); if (((cr && cr.c) || 0) >= _ol.maxResp) return json({ error: "response_limit" }, 403); }
+  }
   {
     const schemaA = safeParse(form.schema, { questions: [], settings: {} });
     const settingsA = schemaA.settings || {};
@@ -489,7 +621,11 @@ async function submitResponse(formId, request, env, context) {
         const chosen = data[q.id];
         if (typeof chosen !== "string" || !chosen) continue;
         const slots = Array.isArray(q.slots) ? q.slots : [];
-        const slot = slots.find((sl) => sl.start === chosen);
+        let slot = slots.find((sl) => sl.start === chosen);
+        if (!slot && q.availMode === "window") {
+          if (!validWindowTime(q, chosen)) return json({ error: "slot_invalid", question: q.id }, 409);
+          slot = { start: chosen, capacity: (q.meetingType === "group" ? (q.capacity || 1) : 1) };
+        }
         if (!slot) return json({ error: "slot_invalid", question: q.id }, 409);
         const start = new Date(chosen).getTime();
         if (!isNaN(start)) {
@@ -718,6 +854,7 @@ async function analytics(user, id, env) {
 }
 
 async function exportCsv(user, id, env) {
+  if (!planLimits(await getUserPlan(env, user.uid)).export) return json({ error: "plan_limit", limit: "export" }, 403);
   const form = await env.DB.prepare(
     "SELECT owner_id, title, schema FROM forms WHERE id = ?"
   ).bind(id).first();
@@ -768,7 +905,7 @@ async function exportCsv(user, id, env) {
 
 async function uploadFile(formId, request, env) {
   if (!env.FILES) return json({ error: "storage_unconfigured" }, 501);
-  const form = await env.DB.prepare("SELECT id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
+  const form = await env.DB.prepare("SELECT id, owner_id, is_open, schema FROM forms WHERE id = ?").bind(formId).first();
   if (!form) return json({ error: "not_found" }, 404);
   const schemaA = safeParse(form.schema, { questions: [], settings: {} });
   const settingsA = schemaA.settings || {};
@@ -779,7 +916,7 @@ async function uploadFile(formId, request, env) {
   let file;
   try { const fd = await request.formData(); file = fd.get("file"); } catch (e) { return json({ error: "bad_request" }, 400); }
   if (!file || typeof file === "string") return json({ error: "no_file" }, 400);
-  const maxMb = 10; // hard cap: files larger are rejected (the client compresses images to fit first)
+  const maxMb = planLimits(await getUserPlan(env, form.owner_id)).uploadMb; // plan-based cap (client compresses images to fit first)
   if (file.size && file.size > maxMb * 1024 * 1024) return json({ error: "too_large", maxMb }, 413);
   const safe = String(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "file";
   const key = "uploads/" + formId + "/" + crypto.randomUUID() + "-" + safe;
@@ -882,6 +1019,100 @@ async function updateUsername(request, env) {
   const res = json({ ok: true, user: publicUser(payload) });
   res.headers.append("Set-Cookie", sessionCookie(token));
   return res;
+}
+
+/* ------------------------------------------------------------------ */
+/* plans and tiers                                                     */
+/* ------------------------------------------------------------------ */
+const PLANS = {
+  free:       { maxForms: 5,        maxResp: 100,      uploadMb: 5,    export: false, whiteLabel: false, customCss: false, proFeatures: false, priority: false, team: false, sso: false },
+  edu:        { maxForms: 100,      maxResp: 1000,     uploadMb: 10,   export: true,  whiteLabel: true,  customCss: false, proFeatures: true,  priority: false, team: false, sso: false },
+  pro:        { maxForms: 100,      maxResp: 1000,     uploadMb: 10,   export: true,  whiteLabel: true,  customCss: false, proFeatures: true,  priority: false, team: false, sso: false },
+  premium:    { maxForms: Infinity, maxResp: Infinity, uploadMb: 1024, export: true,  whiteLabel: true,  customCss: true,  proFeatures: true,  priority: true,  team: false, sso: false },
+  enterprise: { maxForms: Infinity, maxResp: Infinity, uploadMb: 1024, export: true,  whiteLabel: true,  customCss: true,  proFeatures: true,  priority: true,  team: true,  sso: true },
+};
+function planLimits(plan){ return PLANS[plan] || PLANS.free; }
+function isEduEmail(email){ return /\.edu(\.[a-z]{2,3})?$/i.test(String(email || "").trim().toLowerCase()); }
+function effectivePlan(plan, email){ plan = plan || "free"; if (plan === "free" && isEduEmail(email)) plan = "edu"; return plan; }
+async function getUserPlan(env, uid){
+  if (uid === "admin") return "enterprise";
+  try {
+    const row = await env.DB.prepare("SELECT plan, email FROM users WHERE id = ?").bind(uid).first();
+    let plan = effectivePlan(row && row.plan, row && row.email);
+    if (plan === "edu" && row && (!row.plan || row.plan === "free")) { try { await env.DB.prepare("UPDATE users SET plan = 'edu' WHERE id = ?").bind(uid).run(); } catch (e) {} }
+    return plan;
+  } catch (e) { return "free"; }
+}
+function adminEmail(env){
+  if (env.ADMIN_EMAIL) return env.ADMIN_EMAIL;
+  const m = String(env.MAIL_FROM || "").match(/<([^>]+)>/);
+  return (m && m[1]) || String(env.MAIL_FROM || "").trim() || "";
+}
+
+async function applyPlan(request, env){
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (user.uid === "admin") return json({ error: "admin_fixed" }, 400);
+  const body = await readJson(request) || {};
+  const kind = body.kind === "nonprofit" ? "nonprofit" : "education";
+  const org = String(body.org || "").slice(0, 160);
+  const note = String(body.note || "").slice(0, 600);
+  const reqObj = { kind, org, note, status: "pending", at: new Date().toISOString() };
+  try { await env.DB.prepare("UPDATE users SET plan_request = ? WHERE id = ?").bind(JSON.stringify(reqObj), user.uid).run(); }
+  catch (e) { return json({ error: "not_available" }, 500); }
+  const to = adminEmail(env);
+  if (to) {
+    const label = kind === "nonprofit" ? "Nonprofit" : "Education";
+    const html = `<p>A user has applied for ${label} status on zetetiq.</p>` +
+      `<p><b>Name:</b> ${user.name || ""}<br/><b>Username:</b> ${user.username || ""}<br/><b>Type:</b> ${label}<br/><b>Organization:</b> ${org || "(none)"}</p>` +
+      (note ? `<p><b>Note:</b> ${note}</p>` : "") +
+      `<p>Open the admin console to approve or decline.</p>`;
+    try { await mailSend(env, { to, subject: `New ${label} application from ${user.name || user.username}`, html }); } catch (e) {}
+  }
+  return json({ ok: true });
+}
+
+async function adminApplications(request, env){
+  const user = await currentUser(request, env);
+  if (!user || user.role !== "admin") return json({ error: "forbidden" }, 403);
+  let rows = [];
+  try { const r = await env.DB.prepare("SELECT id, username, name, email, plan, plan_request FROM users WHERE plan_request IS NOT NULL").all(); rows = r.results || []; } catch (e) {}
+  const apps = rows.map((u)=>{ const pr = u.plan_request ? safeParse(u.plan_request, null) : null; return (pr && pr.status === "pending") ? { uid: u.id, username: u.username, name: u.name, email: u.email, plan: u.plan || "free", request: pr } : null; }).filter(Boolean);
+  return json({ applications: apps });
+}
+
+async function adminSetPlan(request, env){
+  const user = await currentUser(request, env);
+  if (!user || user.role !== "admin") return json({ error: "forbidden" }, 403);
+  const body = await readJson(request) || {};
+  const uid = String(body.uid || "");
+  const plan = ["free","edu","pro","premium","enterprise"].indexOf(body.plan) >= 0 ? body.plan : null;
+  if (!uid || !plan || uid === "admin") return json({ error: "bad_request" }, 400);
+  let pr = null;
+  try { const row = await env.DB.prepare("SELECT plan_request FROM users WHERE id = ?").bind(uid).first(); pr = (row && row.plan_request) ? safeParse(row.plan_request, null) : null; } catch (e) {}
+  const newReq = pr ? JSON.stringify(Object.assign({}, pr, { status: plan === "free" ? "denied" : "approved" })) : null;
+  try { await env.DB.prepare("UPDATE users SET plan = ?, plan_request = ? WHERE id = ?").bind(plan, newReq, uid).run(); }
+  catch (e) { return json({ error: "not_available" }, 500); }
+  return json({ ok: true, plan });
+}
+
+function validWindowTime(q, chosen){
+  if (typeof chosen !== "string") return false;
+  const d = new Date(chosen); if (isNaN(d)) return false;
+  const ymd = chosen.slice(0,10);
+  if (q.windowStart && ymd < q.windowStart) return false;
+  if (q.windowEnd && ymd > q.windowEnd) return false;
+  const wds = (Array.isArray(q.weekdays) && q.weekdays.length) ? q.weekdays : [0,1,2,3,4,5,6];
+  const wd = new Date(ymd + "T00:00:00Z").getUTCDay();
+  if (wds.indexOf(wd) < 0) return false;
+  const sh = q.startHour == null ? 9 : q.startHour;
+  const eh = q.endHour == null ? 17 : q.endHour;
+  const hh = parseInt(chosen.slice(11,13), 10), mm = parseInt(chosen.slice(14,16), 10);
+  if (isNaN(hh) || isNaN(mm)) return false;
+  const mins = hh*60 + mm;
+  if (mins < sh*60 || mins >= eh*60) return false;
+  if (!q.freePick){ const step = Math.max(5, q.slotMinutes || 60); if (((mins - sh*60) % step) !== 0) return false; }
+  return true;
 }
 
 function slugify(s) {
@@ -1160,7 +1391,8 @@ async function adminOverview(request, env){
   const rcRes = await env.DB.prepare("SELECT form_id, COUNT(*) AS c, MAX(created_at) AS last FROM responses GROUP BY form_id").all();
   const rc = {}; (rcRes.results || []).forEach((r)=>{ rc[r.form_id] = { c: r.c || 0, last: r.last || null }; });
   const usage = await r2UsageByForm(env);
-  const users = (usersRes.results || []).map((u)=>({ id: u.id, username: u.username, name: u.name, email: u.email, isAdmin: !!u.is_admin, created_at: u.created_at, forms: [], formCount: 0, responseCount: 0, storageBytes: 0, lastResponseAt: null }));
+  let planMap = {}; try { const pr = await env.DB.prepare("SELECT id, plan FROM users").all(); (pr.results || []).forEach((r)=>{ planMap[r.id] = r.plan; }); } catch (e) {}
+  const users = (usersRes.results || []).map((u)=>({ id: u.id, username: u.username, name: u.name, email: u.email, isAdmin: !!u.is_admin, plan: u.is_admin ? "enterprise" : effectivePlan(planMap[u.id], u.email), created_at: u.created_at, forms: [], formCount: 0, responseCount: 0, storageBytes: 0, lastResponseAt: null }));
   const byId = {}; users.forEach((u)=>{ byId[u.id] = u; });
   let totalResponses = 0, openForms = 0;
   (formsRes.results || []).forEach((f)=>{

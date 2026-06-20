@@ -2,14 +2,23 @@
 -- Run once against your D1 database (see README for how).
 
 CREATE TABLE IF NOT EXISTS users (
-  id          TEXT PRIMARY KEY,
-  username    TEXT UNIQUE NOT NULL,
-  name        TEXT NOT NULL,
-  email       TEXT,
-  google_id   TEXT UNIQUE,
-  is_admin    INTEGER NOT NULL DEFAULT 0,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  id           TEXT PRIMARY KEY,
+  username     TEXT UNIQUE NOT NULL,
+  name         TEXT NOT NULL,
+  email        TEXT,
+  google_id    TEXT UNIQUE,
+  is_admin     INTEGER NOT NULL DEFAULT 0,
+  plan         TEXT DEFAULT 'free',   -- free | edu | pro | premium | enterprise
+  plan_request TEXT,                  -- JSON: { kind, org, note, status, at } for education/nonprofit applications
+  calendar     TEXT,                  -- JSON: { google: { refresh_token, email, connected_at } } for free/busy blocking
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- MIGRATION for existing databases (run these two once if the users table already exists;
+-- they are safe to skip on a brand new database created from the block above):
+--   ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free';
+--   ALTER TABLE users ADD COLUMN plan_request TEXT;
+--   ALTER TABLE users ADD COLUMN calendar TEXT;   -- only needed for Google Calendar free/busy blocking
 
 CREATE TABLE IF NOT EXISTS forms (
   id          TEXT PRIMARY KEY,

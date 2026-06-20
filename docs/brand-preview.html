@@ -25,7 +25,7 @@
   .pane{border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(40,30,15,.16)}
   .light{
     --bo:#5C88CD;--bo-dark:#4A73B5;--ink:#2A2620;--ink-soft:#736B5E;
-    --line-strong:#CDC6B7;--paper:#F3EFE7;--card:#FBFAF6;--good:#4F8A5B;--hover:#EAE5DA;
+    --line-strong:#CDC6B7;--paper:#f5f2f0;--card:#f5f2f0;--good:#4F8A5B;--hover:#EAE5DA;
     --bevel-raise:inset 0 1px 0 rgba(255,255,255,.85),0 1px 1px rgba(55,45,28,.06),0 2px 5px rgba(55,45,28,.1);--raise-sheen:none;
     --bevel-press:inset 0 2px 5px rgba(70,55,30,.24),inset 0 -1px 0 rgba(255,255,255,.35);
     --bevel-inset:inset 0 1.5px 4px rgba(70,55,30,.18),inset 0 -1px 0 rgba(255,255,255,.5);
@@ -52,7 +52,7 @@
   .btn{font-family:var(--sans);appearance:none;border:1px solid transparent;background:var(--card);color:var(--ink);padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;line-height:1;box-shadow:var(--bevel-raise);background-image:var(--raise-sheen);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
   .btn:hover{background:var(--hover);transform:translateY(-1px);box-shadow:var(--bevel-raise),0 5px 14px rgba(60,45,25,.13)}
   .btn:active{transform:translateY(1px);box-shadow:var(--bevel-press)}
-  .btn.primary{background:var(--bo);color:#fff;box-shadow:var(--bevel-raise),0 1px 2px rgba(40,60,110,.25);background-image:var(--raise-sheen)}
+  .btn.primary{background:var(--bo);color:#f5f2f0;box-shadow:var(--bevel-raise),0 1px 2px rgba(40,60,110,.25);background-image:var(--raise-sheen)}
   .btn:active{background-image:none}
   .btn.primary:hover{background:var(--bo-dark);box-shadow:var(--bevel-raise),0 6px 16px rgba(50,100,190,.34)}
   .btn.primary:active{box-shadow:var(--bevel-press)}
@@ -72,7 +72,7 @@
   /* toggle */
   .switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none;font-size:14px}
   .switch .track{width:40px;height:23px;border-radius:999px;background:var(--line-strong);position:relative;box-shadow:var(--bevel-inset);transition:background-color var(--t-fast) var(--ease)}
-  .switch .knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:linear-gradient(180deg,#fff,#e9e6df);box-shadow:var(--bevel-raise),0 2px 3px rgba(40,30,15,.28);transition:left var(--t) var(--ease-spring),transform var(--t-fast) var(--ease)}
+  .switch .knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:linear-gradient(180deg,#f5f2f0,#e9e6df);box-shadow:var(--bevel-raise),0 2px 3px rgba(40,30,15,.28);transition:left var(--t) var(--ease-spring),transform var(--t-fast) var(--ease)}
   .switch.on .track{background:var(--bo)}
   .switch.on .knob{left:19px}
   .switch:active .knob{transform:scale(.9)}
@@ -81,7 +81,7 @@
   .seg{display:inline-flex;border-radius:10px;overflow:hidden;box-shadow:var(--bevel-inset)}
   .seg button{appearance:none;border:0;background:transparent;color:var(--ink-soft);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),color var(--t-fast)}
   .seg button:hover{background:var(--hover)}
-  .seg button.on{background:var(--bo);color:#fff;box-shadow:var(--bevel-press)}
+  .seg button.on{background:var(--bo);color:#f5f2f0;box-shadow:var(--bevel-press)}
 
   .themebtn{appearance:none;border:1px solid transparent;width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;background:var(--hover);color:var(--ink);box-shadow:var(--bevel-inset);transition:background-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
   .themebtn:hover{background:var(--card)}
@@ -103,16 +103,16 @@
 <body>
   <div class="head">
     <div class="wm">zetetiq</div>
-    <div class="sub">New brand: off-white #F3EFE7 + blue #5C88CD. Off-white throughout. Everything sits recessed at rest; action buttons pop out when you hover and press back in on click; inputs stay recessed; homepage cards are stamped into the page. No blue outline anywhere; the bevel is the only edge. Hover and press below.</div>
+    <div class="sub">New brand: off-white #f5f2f0 + blue #5C88CD. Off-white throughout. Everything sits recessed at rest; action buttons pop out when you hover and press back in on click; inputs stay recessed; homepage cards are stamped into the page. No blue outline anywhere; the bevel is the only edge. Hover and press below.</div>
   </div>
   <div class="grid">
     <div class="pane light" id="lp">
       <h3>Light</h3>
       <div class="swatches">
-        <div class="sw" style="background:#F3EFE7"><small>#F3EFE7 off-white</small></div>
-        <div class="sw" style="background:#5C88CD;color:#fff"><small style="background:rgba(0,0,0,.25);color:#fff">#5C88CD blue</small></div>
-        <div class="sw" style="background:#FBFAF6"><small>card</small></div>
-        <div class="sw" style="background:#2A2620;color:#fff"><small style="background:rgba(255,255,255,.2);color:#fff">ink</small></div>
+        <div class="sw" style="background:#f5f2f0"><small>#f5f2f0 off-white</small></div>
+        <div class="sw" style="background:#5C88CD;color:#f5f2f0"><small style="background:rgba(0,0,0,.25);color:#f5f2f0">#5C88CD blue</small></div>
+        <div class="sw" style="background:#f5f2f0"><small>card</small></div>
+        <div class="sw" style="background:#2A2620;color:#f5f2f0"><small style="background:rgba(255,255,255,.2);color:#f5f2f0">ink</small></div>
       </div>
       <div class="row">
         <button class="btn primary">Primary</button>
