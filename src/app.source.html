@@ -1096,6 +1096,7 @@ body{top:0!important}
 .book-slotspots{display:block;font-size:10px;font-weight:600;color:var(--ink-soft);margin-top:2px}
 .book-slot.sel .book-slotspots{color:#f5f2f0}
 @media (max-width:560px){.book-cal{flex-direction:column}.book-times{width:100%}.book-tlist{max-height:none}}
+.plan-bar-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -1124,6 +1125,8 @@ const api = {
   applyPlan: (payload) => req("/api/plan/apply", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   adminApplications: () => req("/api/admin/applications"),
   adminSetPlan: (payload) => req("/api/admin/plan", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
+  checkout: (plan) => req("/api/billing/checkout", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ plan }) }),
+  billingPortal: () => req("/api/billing/portal", { method:"POST" }),
   createForm: (payload) => req("/api/forms", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   getForm: (id) => req("/api/forms/" + id),
   followup: (formId, questionId, answer) => req("/api/public/" + formId + "/followup", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ questionId, answer }) }),
@@ -3544,17 +3547,28 @@ function AdminApplications(){
   </div>);
 }
 function PlanBar({ user, forms, onApply }){
+  const { toast } = useApp();
   const plan = user.plan || "free";
   const lim = user.limits || {};
   const names = { free:"Free", edu:"Education", pro:"Pro", premium:"Premium", enterprise:"Enterprise" };
   const count = Array.isArray(forms) ? forms.length : null;
   const maxForms = lim.maxForms;
   const pending = user.planRequest && user.planRequest.status === "pending";
+  const billing = user.billing || {};
+  const [busy, setBusy] = useState("");
+  const checkout = (p)=>{ setBusy(p); api.checkout(p).then(({ ok, data })=>{ setBusy(""); if (ok && data && data.url) window.location.href = data.url; else toast(data && data.error === "billing_unconfigured" ? "Billing is not set up yet." : "Could not start checkout. Please try again."); }).catch(()=>{ setBusy(""); toast("Could not start checkout."); }); };
+  const portal = ()=>{ setBusy("portal"); api.billingPortal().then(({ ok, data })=>{ setBusy(""); if (ok && data && data.url) window.location.href = data.url; else toast("Could not open billing right now."); }).catch(()=>{ setBusy(""); toast("Could not open billing right now."); }); };
   return (<div className="plan-bar">
     <div className="plan-bar-l"><span className={"plan-pill plan-"+plan}>{names[plan]||plan}</span>{count!=null && <span className="plan-usage">{count}{maxForms!=null?(" of "+maxForms):""} {maxForms===1?"form":"forms"}{plan==="free"?", up to 100 responses each":""}</span>}</div>
-    {plan==="free" && (pending
-      ? <span className="muted" style={{fontSize:13}}>Education or nonprofit application under review</span>
-      : <button className="btn sm ghost" onClick={onApply}>Apply for education or nonprofit</button>)}
+    <div className="plan-bar-r">
+      {plan==="free" && (pending
+        ? <span className="muted" style={{fontSize:13}}>Education or nonprofit application under review</span>
+        : <button className="btn sm ghost" onClick={onApply}>Apply for education or nonprofit</button>)}
+      {plan==="free" && <button className="btn sm" disabled={busy==="pro"} onClick={()=>checkout("pro")}>{busy==="pro"?"Starting...":"Upgrade to Pro"}</button>}
+      {plan==="free" && <button className="btn sm primary" disabled={busy==="premium"} onClick={()=>checkout("premium")}>{busy==="premium"?"Starting...":"Upgrade to Premium"}</button>}
+      {plan==="pro" && <button className="btn sm primary" disabled={busy==="premium"} onClick={()=>checkout("premium")}>{busy==="premium"?"Starting...":"Upgrade to Premium"}</button>}
+      {(plan==="pro"||plan==="premium") && billing.portal && <button className="btn sm ghost" disabled={busy==="portal"} onClick={portal}>{busy==="portal"?"Opening...":"Manage billing"}</button>}
+    </div>
   </div>);
 }
 
@@ -3964,8 +3978,9 @@ function Modal({ title, children, onClose, wide }){
 /* ----------------------------- dashboard ----------------------------- */
 function greetingFor(user){ const h = new Date().getHours(); const part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; const nm = (user && user.name) ? String(user.name).trim().split(/\s+/)[0] : ""; return part + (nm ? (", " + nm) : ""); }
 function Dashboard(){
-  const { navigate, toast, user } = useApp();
+  const { navigate, toast, user, setUser } = useApp();
   useEffect(()=>{ try { const p = new URLSearchParams(location.search).get("calendar"); if (p){ const msg = ({ connected:"Google Calendar connected", denied:"Calendar connection cancelled", migrate:"Run the calendar database migration to enable this", setup:"Google sign in is not configured", noref:"Could not get offline calendar access. Try again and allow access.", state:"That calendar link expired. Try connecting again.", token:"Could not connect the calendar. Try again.", login:"Please sign in first." })[p] || ""; if (msg) toast(msg); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
+  useEffect(()=>{ try { const p = new URLSearchParams(location.search).get("billing"); if (p){ const msg = ({ success:"Thank you. Your upgrade is being applied.", cancel:"Checkout cancelled." })[p] || ""; if (msg) toast(msg); if (p === "success") setTimeout(()=>{ api.me().then(({ ok, data })=>{ if (ok && data && data.user) setUser(data.user); }).catch(()=>{}); }, 2500); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
   const [forms, setForms] = useState(null);
   const [creating, setCreating] = useState(false);
   const [apply, setApply] = useState(false);

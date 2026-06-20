@@ -69,12 +69,29 @@ Credential maintenance (important):
 - The Microsoft client secret expires; Azure caps the lifetime at 24 months. Before it expires, create a new client secret under Certificates and secrets, update MS_CLIENT_SECRET in Cloudflare, and redeploy. Once a secret expires, Connect Outlook and Outlook busy blocking stop working until it is rotated; Google and sign in are unaffected.
 - The Google client secret does not expire on a fixed schedule, but if you ever rotate it, update GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Cloudflare and redeploy.
 
+## Stripe billing (self serve paid plans, now wired)
+Pro ($9 per month) and Premium ($35 per month) are purchasable through Stripe Checkout. Card details go to Stripe, never to zetetiq, so there is no PCI burden. Education and nonprofit stay on the apply flow (the free Pro level granted by an admin), and Enterprise stays contact based. Free users see Upgrade to Pro and Upgrade to Premium on the dashboard plan bar; paid users see Manage billing, which opens the Stripe customer portal to change or cancel. A signed webhook flips the user's plan: completing checkout sets the plan to pro or premium, and a cancelled, unpaid, or deleted subscription drops them back to free. Plan changes from Stripe and from the admin both write the same plan column.
+
+### Stripe setup
+Run this migration once: ALTER TABLE users ADD COLUMN billing TEXT;  (a fresh database from schema.sql already has it). The live round trips can only be verified on the deployed site.
+1. Create a Stripe account at dashboard.stripe.com. Do the first run in Test mode (the toggle near the top) before going live.
+2. Create two recurring Products with monthly Prices: Pro at 9.00 per month and Premium at 35.00 per month. Open each Price and copy its ID (it starts with price_).
+3. Developers, API keys: copy the Secret key (sk_test_ in test mode, sk_live_ in live mode).
+4. Developers, Webhooks, Add endpoint. URL https://YOUR-DOMAIN/api/billing/webhook. Select these events: checkout.session.completed, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted. After creating it, copy the Signing secret (it starts with whsec_).
+5. Settings, Billing, Customer portal: turn the customer portal on and save once, or the Manage billing link will error.
+6. In Cloudflare add four variables (mark the key and secret as secret): STRIPE_SECRET_KEY (sk_...), STRIPE_WEBHOOK_SECRET (whsec_...), STRIPE_PRICE_PRO (the Pro price_ ID), STRIPE_PRICE_PREMIUM (the Premium price_ ID). Redeploy. Until the secret key and price IDs are set, the Upgrade buttons report that billing is not set up and nothing breaks.
+7. Going live: switch Stripe to live mode, recreate the Products and Prices and the webhook endpoint there, and swap all four variables for their live values (sk_live_, the live whsec_, and the live price_ IDs), then redeploy. Test and live mode have separate keys, prices, and webhooks.
+
+### Billing notes
+- The webhook is verified with the Stripe signature (HMAC SHA-256 over the timestamp and the raw request body); forged or tampered requests are rejected, so keep STRIPE_WEBHOOK_SECRET private.
+- No payment data is stored in zetetiq; it keeps only the Stripe customer and subscription ids and the resulting plan, in the billing column.
+
 ## Deferred (next session)
 - A proper programmatic interface translation (locale files) as an alternative to the Google website widget.
-- A payment processor for self serve paid upgrades (paid tiers are still set by an admin).
+- Apple Calendar free/busy (no Apple OAuth calendar API; only iCloud CalDAV with an app specific password, left as a coming soon placeholder).
 
 ## Deploy
-Upload index.html and functions/api/[[path]].js, run the schema migration in D1, set ADMIN_EMAIL, then redeploy (Deployments, Retry). Existing variables: SESSION_SECRET, ADMIN_PASSWORD, GOOGLE_CLIENT_ID and SECRET, RESEND_API_KEY and MAIL_FROM, CRON_SECRET. Optional for Outlook calendar: MS_CLIENT_ID and MS_CLIENT_SECRET (the Microsoft secret expires within 24 months and must be rotated, see Calendar setup). Bindings: DB (D1), AI (Workers AI, named exactly AI), FILES (R2).
+Upload index.html and functions/api/[[path]].js, run the schema migration in D1, set ADMIN_EMAIL, then redeploy (Deployments, Retry). Existing variables: SESSION_SECRET, ADMIN_PASSWORD, GOOGLE_CLIENT_ID and SECRET, RESEND_API_KEY and MAIL_FROM, CRON_SECRET. Optional for Outlook calendar: MS_CLIENT_ID and MS_CLIENT_SECRET (the Microsoft secret expires within 24 months and must be rotated, see Calendar setup). Optional for Stripe billing: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PRO, STRIPE_PRICE_PREMIUM (see Stripe setup). Bindings: DB (D1), AI (Workers AI, named exactly AI), FILES (R2).
 
 ## Build recipe (for whoever rebuilds index.html)
 Extract the single text/babel script from src/app.source.html and transform it with Babel using the react preset and runtime classic (the automatic runtime produces a blank page). Reassemble the shell, inject the boot splash and the resilient React loader (unpkg with a jsDelivr fallback), and strip the app source comment from the deployed file. Verify there is no import statement and no jsx-runtime reference, then node --check the backend.

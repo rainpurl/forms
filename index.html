@@ -1090,6 +1090,7 @@ body{top:0!important}
 .book-slotspots{display:block;font-size:10px;font-weight:600;color:var(--ink-soft);margin-top:2px}
 .book-slot.sel .book-slotspots{color:#f5f2f0}
 @media (max-width:560px){.book-cal{flex-direction:column}.book-times{width:100%}.book-tlist{max-height:none}}
+.plan-bar-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -1156,6 +1157,18 @@ const api = {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(payload)
+  }),
+  checkout: plan => req("/api/billing/checkout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      plan
+    })
+  }),
+  billingPortal: () => req("/api/billing/portal", {
+    method: "POST"
   }),
   createForm: payload => req("/api/forms", {
     method: "POST",
@@ -8413,6 +8426,9 @@ function PlanBar({
   forms,
   onApply
 }) {
+  const {
+    toast
+  } = useApp();
   const plan = user.plan || "free";
   const lim = user.limits || {};
   const names = {
@@ -8425,6 +8441,34 @@ function PlanBar({
   const count = Array.isArray(forms) ? forms.length : null;
   const maxForms = lim.maxForms;
   const pending = user.planRequest && user.planRequest.status === "pending";
+  const billing = user.billing || {};
+  const [busy, setBusy] = useState("");
+  const checkout = p => {
+    setBusy(p);
+    api.checkout(p).then(({
+      ok,
+      data
+    }) => {
+      setBusy("");
+      if (ok && data && data.url) window.location.href = data.url;else toast(data && data.error === "billing_unconfigured" ? "Billing is not set up yet." : "Could not start checkout. Please try again.");
+    }).catch(() => {
+      setBusy("");
+      toast("Could not start checkout.");
+    });
+  };
+  const portal = () => {
+    setBusy("portal");
+    api.billingPortal().then(({
+      ok,
+      data
+    }) => {
+      setBusy("");
+      if (ok && data && data.url) window.location.href = data.url;else toast("Could not open billing right now.");
+    }).catch(() => {
+      setBusy("");
+      toast("Could not open billing right now.");
+    });
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "plan-bar"
   }, /*#__PURE__*/React.createElement("div", {
@@ -8433,7 +8477,9 @@ function PlanBar({
     className: "plan-pill plan-" + plan
   }, names[plan] || plan), count != null && /*#__PURE__*/React.createElement("span", {
     className: "plan-usage"
-  }, count, maxForms != null ? " of " + maxForms : "", " ", maxForms === 1 ? "form" : "forms", plan === "free" ? ", up to 100 responses each" : "")), plan === "free" && (pending ? /*#__PURE__*/React.createElement("span", {
+  }, count, maxForms != null ? " of " + maxForms : "", " ", maxForms === 1 ? "form" : "forms", plan === "free" ? ", up to 100 responses each" : "")), /*#__PURE__*/React.createElement("div", {
+    className: "plan-bar-r"
+  }, plan === "free" && (pending ? /*#__PURE__*/React.createElement("span", {
     className: "muted",
     style: {
       fontSize: 13
@@ -8441,7 +8487,23 @@ function PlanBar({
   }, "Education or nonprofit application under review") : /*#__PURE__*/React.createElement("button", {
     className: "btn sm ghost",
     onClick: onApply
-  }, "Apply for education or nonprofit")));
+  }, "Apply for education or nonprofit")), plan === "free" && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    disabled: busy === "pro",
+    onClick: () => checkout("pro")
+  }, busy === "pro" ? "Starting..." : "Upgrade to Pro"), plan === "free" && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
+    disabled: busy === "premium",
+    onClick: () => checkout("premium")
+  }, busy === "premium" ? "Starting..." : "Upgrade to Premium"), plan === "pro" && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
+    disabled: busy === "premium",
+    onClick: () => checkout("premium")
+  }, busy === "premium" ? "Starting..." : "Upgrade to Premium"), (plan === "pro" || plan === "premium") && billing.portal && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    disabled: busy === "portal",
+    onClick: portal
+  }, busy === "portal" ? "Opening..." : "Manage billing")));
 }
 function Landing({
   showLogin
@@ -9579,7 +9641,8 @@ function Dashboard() {
   const {
     navigate,
     toast,
-    user
+    user,
+    setUser
   } = useApp();
   useEffect(() => {
     try {
@@ -9596,6 +9659,29 @@ function Dashboard() {
           login: "Please sign in first."
         }[p] || "";
         if (msg) toast(msg);
+        try {
+          history.replaceState(null, "", location.pathname);
+        } catch (e) {}
+      }
+    } catch (e) {}
+  }, []);
+  useEffect(() => {
+    try {
+      const p = new URLSearchParams(location.search).get("billing");
+      if (p) {
+        const msg = {
+          success: "Thank you. Your upgrade is being applied.",
+          cancel: "Checkout cancelled."
+        }[p] || "";
+        if (msg) toast(msg);
+        if (p === "success") setTimeout(() => {
+          api.me().then(({
+            ok,
+            data
+          }) => {
+            if (ok && data && data.user) setUser(data.user);
+          }).catch(() => {});
+        }, 2500);
         try {
           history.replaceState(null, "", location.pathname);
         } catch (e) {}

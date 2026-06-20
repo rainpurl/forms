@@ -29,6 +29,9 @@ async function route(seg, method, request, env, context) {
   if (path[0] === "calendar" && path.length === 3 && path[2] === "start" && method === "GET") return calendarStart(path[1], request, env);
   if (path[0] === "calendar" && path.length === 3 && path[2] === "callback" && method === "GET") return calendarCallback(path[1], request, env);
   if (path[0] === "calendar" && path.length === 3 && path[2] === "disconnect" && method === "POST") return calendarDisconnect(path[1], request, env);
+  if (p === "billing/checkout" && method === "POST") return billingCheckout(request, env);
+  if (p === "billing/portal" && method === "POST") return billingPortal(request, env);
+  if (p === "billing/webhook" && method === "POST") return billingWebhook(request, env);
   if (p === "me" && method === "GET") return me(request, env);
   if (p === "me/username" && method === "POST") return updateUsername(request, env);
   if (p === "plan/apply" && method === "POST") return applyPlan(request, env);
@@ -156,7 +159,9 @@ async function me(request, env) {
   const pr = (row && row.plan_request) ? safeParse(row.plan_request, null) : null;
   let calendars = { google: { connected: false, email: null }, outlook: { connected: false, email: null } };
   try { const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(user.uid).first(); const conn = (cr && cr.calendar) ? safeParse(cr.calendar, null) : null; if (conn){ if (conn.google && conn.google.refresh_token) calendars.google = { connected: true, email: conn.google.email || null }; if (conn.outlook && conn.outlook.refresh_token) calendars.outlook = { connected: true, email: conn.outlook.email || null }; } } catch (e) {}
-  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendars }) });
+    let billing = { active: false, portal: false, plan: null, status: null };
+  try { const br = await env.DB.prepare("SELECT billing FROM users WHERE id = ?").bind(user.uid).first(); const b = (br && br.billing) ? safeParse(br.billing, null) : null; if (b){ billing = { active: (b.status === "active" || b.status === "trialing"), portal: !!b.customer, plan: b.plan || null, status: b.status || null }; } } catch (e) {}
+  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendars, billing }) });
 }
 
 async function currentUser(request, env) {
@@ -438,6 +443,118 @@ async function getOwnerBusy(env, ownerId, timeMin, timeMax){
     const [g, o] = await Promise.all([ googleBusy(env, conn, timeMin, timeMax), outlookBusy(env, conn, timeMin, timeMax) ]);
     return g.concat(o);
   } catch (e) { return []; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Stripe billing (Checkout subscriptions + signed webhook + portal)   */
+/* ------------------------------------------------------------------ */
+async function stripeApi(env, path, paramsObj){
+  const r = await fetch("https://api.stripe.com/v1/" + path, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + env.STRIPE_SECRET_KEY, "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(paramsObj).toString(),
+  });
+  return r.json();
+}
+function timingEqual(a, b){ if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false; let r = 0; for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i); return r === 0; }
+async function stripeVerify(secret, payload, header){
+  try {
+    if (!secret || !header) return false;
+    const parts = {}; header.split(",").forEach((kv)=>{ const i = kv.indexOf("="); if (i > 0){ const k = kv.slice(0, i).trim(); const v = kv.slice(i + 1).trim(); (parts[k] = parts[k] || []).push(v); } });
+    const t = parts.t && parts.t[0]; const v1 = parts.v1 || [];
+    if (!t || !v1.length) return false;
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const mac = await crypto.subtle.sign("HMAC", key, enc.encode(t + "." + payload));
+    const hex = Array.from(new Uint8Array(mac)).map((b)=> b.toString(16).padStart(2, "0")).join("");
+    return v1.some((v)=> timingEqual(v, hex));
+  } catch (e) { return false; }
+}
+async function setBilling(env, uid, info){
+  if (!uid || uid === "admin") return;
+  const billing = JSON.stringify({ customer: info.customer || "", subscription: info.subscription || "", status: info.status || "active", plan: info.plan, at: new Date().toISOString() });
+  try { await env.DB.prepare("UPDATE users SET plan = ?, billing = ? WHERE id = ?").bind(info.plan, billing, uid).run(); } catch (e) {}
+}
+async function clearBilling(env, uid, customer, subscription, status){
+  if (!uid || uid === "admin") return;
+  const billing = JSON.stringify({ customer: customer || "", subscription: subscription || "", status: status || "canceled", plan: "free", at: new Date().toISOString() });
+  try { await env.DB.prepare("UPDATE users SET plan = 'free', billing = ? WHERE id = ?").bind(billing, uid).run(); } catch (e) {}
+}
+
+async function billingCheckout(request, env){
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (user.uid === "admin") return json({ error: "admin_fixed" }, 400);
+  if (!env.STRIPE_SECRET_KEY) return json({ error: "billing_unconfigured" }, 503);
+  const body = await readJson(request) || {};
+  const plan = body.plan === "premium" ? "premium" : (body.plan === "pro" ? "pro" : null);
+  if (!plan) return json({ error: "bad_request" }, 400);
+  const price = plan === "premium" ? env.STRIPE_PRICE_PREMIUM : env.STRIPE_PRICE_PRO;
+  if (!price) return json({ error: "price_unconfigured" }, 503);
+  const origin = new URL(request.url).origin;
+  let cust = "", email = "";
+  try { const row = await env.DB.prepare("SELECT email, billing FROM users WHERE id = ?").bind(user.uid).first(); email = (row && row.email) || ""; const b = (row && row.billing) ? safeParse(row.billing, null) : null; cust = (b && b.customer) || ""; } catch (e) {}
+  const params = {
+    "mode": "subscription",
+    "line_items[0][price]": price,
+    "line_items[0][quantity]": "1",
+    "success_url": origin + "/dashboard?billing=success",
+    "cancel_url": origin + "/dashboard?billing=cancel",
+    "client_reference_id": user.uid,
+    "allow_promotion_codes": "true",
+    "metadata[uid]": user.uid,
+    "metadata[plan]": plan,
+    "subscription_data[metadata][uid]": user.uid,
+    "subscription_data[metadata][plan]": plan,
+  };
+  if (cust) params["customer"] = cust; else if (email) params["customer_email"] = email;
+  const sess = await stripeApi(env, "checkout/sessions", params);
+  if (sess && sess.url) return json({ url: sess.url });
+  return json({ error: "stripe_error", detail: (sess && sess.error && sess.error.message) || "unknown" }, 502);
+}
+
+async function billingPortal(request, env){
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (!env.STRIPE_SECRET_KEY) return json({ error: "billing_unconfigured" }, 503);
+  let cust = "";
+  try { const row = await env.DB.prepare("SELECT billing FROM users WHERE id = ?").bind(user.uid).first(); const b = (row && row.billing) ? safeParse(row.billing, null) : null; cust = (b && b.customer) || ""; } catch (e) {}
+  if (!cust) return json({ error: "no_customer" }, 400);
+  const origin = new URL(request.url).origin;
+  const sess = await stripeApi(env, "billing_portal/sessions", { "customer": cust, "return_url": origin + "/dashboard" });
+  if (sess && sess.url) return json({ url: sess.url });
+  return json({ error: "stripe_error" }, 502);
+}
+
+async function billingWebhook(request, env){
+  const sig = request.headers.get("stripe-signature") || "";
+  const raw = await request.text();
+  if (!env.STRIPE_WEBHOOK_SECRET) return json({ error: "unconfigured" }, 503);
+  const ok = await stripeVerify(env.STRIPE_WEBHOOK_SECRET, raw, sig);
+  if (!ok) return json({ error: "bad_signature" }, 400);
+  let evt = null; try { evt = JSON.parse(raw); } catch (e) { return json({ error: "bad_json" }, 400); }
+  const type = evt && evt.type;
+  const obj = (evt && evt.data && evt.data.object) || {};
+  try {
+    if (type === "checkout.session.completed"){
+      const uid = obj.client_reference_id || (obj.metadata && obj.metadata.uid);
+      const plan = (obj.metadata && obj.metadata.plan) || "";
+      if (uid && (plan === "pro" || plan === "premium")) await setBilling(env, uid, { plan, customer: obj.customer || "", subscription: obj.subscription || "", status: "active" });
+    } else if (type === "customer.subscription.created" || type === "customer.subscription.updated"){
+      const uid = obj.metadata && obj.metadata.uid;
+      const plan = (obj.metadata && obj.metadata.plan) || "";
+      const status = obj.status || "";
+      const active = status === "active" || status === "trialing";
+      if (uid){
+        if (active && (plan === "pro" || plan === "premium")) await setBilling(env, uid, { plan, customer: obj.customer || "", subscription: obj.id || "", status });
+        else if (status === "canceled" || status === "unpaid" || status === "incomplete_expired") await clearBilling(env, uid, obj.customer || "", obj.id || "", status);
+      }
+    } else if (type === "customer.subscription.deleted"){
+      const uid = obj.metadata && obj.metadata.uid;
+      if (uid) await clearBilling(env, uid, obj.customer || "", obj.id || "", "canceled");
+    }
+  } catch (e) {}
+  return json({ received: true });
 }
 
 /* ------------------------------------------------------------------ */

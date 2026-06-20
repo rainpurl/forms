@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
   is_admin     INTEGER NOT NULL DEFAULT 0,
   plan         TEXT DEFAULT 'free',   -- free | edu | pro | premium | enterprise
   plan_request TEXT,                  -- JSON: { kind, org, note, status, at } for education/nonprofit applications
-  calendar     TEXT,                  -- JSON: { google: { refresh_token, email, connected_at } } for free/busy blocking
+  calendar     TEXT,                  -- JSON: { google: {...}, outlook: {...} } for free/busy blocking
+  billing      TEXT,                  -- JSON: { customer, subscription, status, plan, at } for Stripe subscriptions
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -18,7 +19,8 @@ CREATE TABLE IF NOT EXISTS users (
 -- they are safe to skip on a brand new database created from the block above):
 --   ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free';
 --   ALTER TABLE users ADD COLUMN plan_request TEXT;
---   ALTER TABLE users ADD COLUMN calendar TEXT;   -- only needed for Google Calendar free/busy blocking
+--   ALTER TABLE users ADD COLUMN calendar TEXT;   -- only needed for Google and Outlook free/busy blocking
+--   ALTER TABLE users ADD COLUMN billing TEXT;    -- only needed for Stripe subscriptions
 
 CREATE TABLE IF NOT EXISTS forms (
   id          TEXT PRIMARY KEY,
