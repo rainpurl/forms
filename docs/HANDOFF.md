@@ -31,6 +31,15 @@ The users table gained plan columns. On an existing database, run:
   ALTER TABLE users ADD COLUMN plan_request TEXT;
 A brand new database created from schema.sql already has them. Until the migration runs, non admin users fall back to free (the admin is unaffected). Set the ADMIN_EMAIL variable so application emails have a recipient; it falls back to the address parsed from MAIL_FROM.
 
+## Latest changes (also live)
+- Document e-sign was rebuilt around an inline drag-and-drop editor. Add a document (image or PDF) and it shows in a large preview with a field palette right above it: text box, circle, check, x, and signature. Drag a field type onto the document, or click a type then click where it goes; drag a placed field to move it, and use the small red x to remove it. The old separate place-fields modal and the side list of fields are gone, and a new e-sign starts with no fields so you place exactly what you need.
+- Signing supports drawn or typed signatures. The person clicks a signature field, then either draws with a finger or mouse, or switches to the Type tab and types their name, which renders in the Monsieur La Doulaise cursive font. Typed signatures show in that same cursive font in the responses view; drawn ones show as the captured image.
+- Field behavior on the document: text box renders in Inter, circle, check, and x are click-to-toggle marks, and signature opens the draw-or-type panel. Older forms built with the previous field model (labelled text, long, date, checkbox) still render in a list below the document for backward compatibility.
+- Drag positioning, canvas drawing, and the cursive font can only be confirmed on the live deploy. The headless tests cover structure, placing and removing fields, the toggle marks, the signature panel tabs, and the typed preview.
+- The favicon is now the brand blue (it was an off brand purple) with more padding around the glyph.
+- On a form overview page: the View form button is no longer underlined, and the share-link box is a recessed off-white well instead of the old gray.
+- Recent control polish that is also live: the theme toggle is carved into the page rather than a bordered square, the blue primary buttons lost their harsh white top rim, every builder toggle is a uniform size, and the recessed wordmark is deeper and now also appears in the builder top bar.
+
 ## This batch (also live)
 - Fonts simplified to two built in choices: Sans (Inter, default) and Serif (IBM Plex Serif). The custom font field is pro and above. The brand studio is pro and above. PDF export already matches: serif maps to Times and sans maps to the embedded Inter face, with a Helvetica fallback.
 - Export field name, A/B testing, and favicon are pro and above.
