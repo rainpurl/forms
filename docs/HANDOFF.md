@@ -43,6 +43,11 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+- Support links to support@zetetiq.com are now in three places: a "Contact support" button in the account menu (the top right dropdown), a "Support" link in the landing page footer, and the "Contact us about Enterprise" line already in the upgrade picker. All are plain mailto links.
+- The Enterprise pricing card (the "Let's talk" tier) now has a "Connect" button that opens an email to support@zetetiq.com with an Enterprise enquiry subject line.
+- Email is operational: receiving via Cloudflare Email Routing and sending as support@zetetiq.com via Gmail with Resend SMTP are set up and working.
+
+## Recent changes
 - The top navigation bar is now a single recessed bar with no gray underline. The inset bevel gives it a carved look that matches the inputs and the plan bar. The builder top bar was updated the same way for consistency.
 - Plan bar: there is now an "Upgrade" button right next to the plan name for anyone who is not already on Premium or Enterprise (so Free, Education, and Pro all see it, including Education users who previously had no upgrade path). Clicking it opens a small picker. Free sees Pro and Premium, Education and Pro see Premium, and there is a line to email support@zetetiq.com about Enterprise. The picker uses the existing Stripe checkout. The separate upgrade buttons that used to sit on the right of the plan bar were folded into this picker; the right side now keeps the education or nonprofit apply link and Manage billing.
 

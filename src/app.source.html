@@ -1179,6 +1179,9 @@ body{top:0!important}
 .up-ent{margin-top:14px;font-size:13px;color:var(--ink-soft);text-align:center}
 .up-link{color:var(--bo);font-weight:600;text-decoration:none}
 .up-link:hover{text-decoration:underline}
+
+/* enterprise contact button on pricing card */
+.price-cta{display:inline-flex;width:100%;justify-content:center;margin-top:14px}
 </style>
 </head>
 <body>
@@ -3622,6 +3625,7 @@ function PricingTable(){
           {t.features.map((f,i)=>(<li key={i} className="pf-yes">{f}</li>))}
           {(t.missing||[]).map((f,i)=>(<li key={"m"+i} className="pf-no">{f}</li>))}
         </ul>
+        {t.id === "enterprise" && <a className="btn sm price-cta" href="mailto:support@zetetiq.com?subject=Enterprise%20plan%20enquiry">Connect</a>}
       </div>
     ))}
   </div>);
@@ -3829,6 +3833,7 @@ function Landing({ showLogin }){
           <Logo size={16} />
           <span className="lp-foot-tag">Human-centered Experience Management.</span>
           <a className="lp-foot-link" href="https://zetetiq.com" target="_blank" rel="noopener">zetetiq.com</a>
+          <a className="lp-foot-link" href="mailto:support@zetetiq.com">Support</a>
           {!user && <button type="button" className="lp-foot-admin" onClick={()=>setOpen(true)}>Admin sign in</button>}
         </div>
         <div className="lp-foot-copy">© 2026 Zetetiq XM</div>
@@ -4093,6 +4098,11 @@ function AccountMenu({ onClose }){
       <label className="acct-lbl">Calendar</label>
       <CalendarConnect />
       <div className="acct-hint">Busy times from a connected calendar are blocked automatically on time window scheduling.</div>
+    </div>
+    <div className="acct-sec">
+      <label className="acct-lbl">Support</label>
+      <a className="btn sm ghost" href="mailto:support@zetetiq.com">Contact support</a>
+      <div className="acct-hint">Questions or something not working? Email support@zetetiq.com and we will help.</div>
     </div>
   </div>);
 }
