@@ -556,7 +556,9 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .embed-empty{padding:18px;border:1px dashed var(--line-strong);border-radius:12px;color:var(--ink-soft);font-size:14px;text-align:center}
 
 .lp{min-height:100vh;background:var(--paper);color:var(--ink)}
-.lp-nav{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:18px 24px}
+.lp-nav{width:100%;background:var(--card);border-bottom:1px solid var(--line);padding:14px clamp(18px,4vw,56px)}
+.lp-nav-in{display:flex;align-items:center;justify-content:space-between;width:100%}
+.lp-nav-logo{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
 .lp-nav-r{display:flex;align-items:center;gap:12px}
 .lp-hero{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding:40px 24px 56px}
 .lp-eyebrow{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700;color:var(--bo);margin-bottom:14px}
@@ -598,13 +600,17 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .lp-band-in{max-width:1080px;margin:0 auto;padding:56px 24px}
 .lp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:860px;margin:0 auto}
 .lp-step{text-align:center}
-.lp-num{width:42px;height:42px;border-radius:50%;background:var(--bo);color:#f5f2f0;font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.lp-num{width:42px;height:42px;border-radius:50%;background:var(--card);color:var(--bo);box-shadow:var(--bevel-inset);font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
 .lp-st{font-weight:700;font-size:17px;margin-bottom:6px;color:var(--ink)}
 .lp-cta{max-width:1080px;margin:0 auto;padding:64px 24px;text-align:center}
-.lp-foot{border-top:1px solid var(--line)}
-.lp-foot-in{max-width:1080px;margin:0 auto;padding:26px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;color:var(--ink-soft);font-size:14px}
-.lp-foot-tag{flex:1;min-width:200px}
-.lp-foot-link{color:var(--bo);text-decoration:none;font-weight:600}
+.lp-foot{border-top:1px solid var(--line);background:var(--card);width:100%}
+.lp-foot-in{padding:30px clamp(18px,4vw,56px) 14px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.lp-foot-brand{display:flex;align-items:center;gap:12px;color:var(--ink-soft)}
+.lp-foot-tag{font-size:14px}
+.lp-foot-links{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.lp-foot-link{color:var(--ink-soft);text-decoration:none;font-size:14px;font-weight:600;transition:color .12s}
+.lp-foot-link:hover{color:var(--ink)}
+.lp-foot-bottom{padding:4px clamp(18px,4vw,56px) 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 @media(max-width:860px){.lp-hero{grid-template-columns:1fr;gap:30px}.lp-h1{font-size:36px}.lp-grid{grid-template-columns:repeat(2,1fr)}.lp-grid-4{grid-template-columns:repeat(2,1fr)}.lp-steps{grid-template-columns:1fr;gap:20px}}
 @media(max-width:560px){.lp-grid,.lp-grid-4{grid-template-columns:1fr}.lp-h1{font-size:30px}.lp-visual{order:-1}.lp-h2{font-size:25px}}
 
@@ -863,7 +869,7 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 .form-card,.tpl-card{border-color:transparent;background:var(--paper);background-image:none;box-shadow:var(--bevel-inset);transform:none}
 .form-card:hover,.tpl-card:hover{border-color:transparent;background:var(--hover);box-shadow:var(--bevel-inset);transform:none}
 .tpl-card:disabled{opacity:.6}
-.lp-foot-copy{max-width:1080px;margin:0 auto;padding:0 24px 22px;color:var(--ink-soft);font-size:12.5px}
+.lp-foot-copy{color:var(--ink-soft);font-size:12.5px}
 
 /* ===== themed date / time pickers (v5) ===== */
 .zdate{justify-content:space-between}
@@ -994,7 +1000,9 @@ html[data-theme="dark"] .nav .brand .logo svg,html[data-theme="dark"] .b-top .br
 .plan-bar-l{display:flex;align-items:center;gap:10px}
 .plan-usage{font-size:13px;color:var(--ink-soft)}
 .plan-lock-row{display:flex;align-items:center;gap:10px}
-.plan-lock-block{margin:4px 0}
+.plan-lock-block{margin:8px 0;padding:12px 14px;border-radius:10px;background:var(--hover);box-shadow:var(--bevel-inset)}
+.plan-lock-block .label{color:var(--ink-soft)}
+.plan-lock-up{margin-top:10px}
 .app-list{display:flex;flex-direction:column;gap:10px}
 .app-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:var(--card);box-shadow:var(--bevel-soft);border-radius:11px;padding:12px 14px;flex-wrap:wrap}
 .app-note{font-size:13px;color:var(--ink-soft);margin-top:5px;max-width:520px}
@@ -1218,6 +1226,62 @@ body{top:0!important}
 
 /* bigger place-fields button */
 .esign-place-btn{margin-top:12px;width:100%;padding:13px 16px;font-size:15px;font-weight:700}
+
+/* pricing extras */
+.price-was{text-decoration:line-through;color:var(--ink-soft);margin-right:8px;font-weight:600}
+.price-lifetime{text-align:center;margin-top:24px}
+/* hero carousel */
+.lp-carousel-body{min-height:312px}
+.lp-slide{animation:lpFade .5s ease both}
+@keyframes lpFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.lp-mock-rank{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.lp-rankrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:13px}
+.lp-ranknum{width:20px;height:20px;border-radius:50%;background:var(--bo);color:#f5f2f0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.lp-rankgrip{color:var(--ink-soft);font-size:13px}
+.lp-mock-doc{border:1px solid var(--line-strong);border-radius:9px;padding:14px;display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.lp-docline{height:8px;border-radius:4px;background:var(--line-strong)}
+.lp-docline.short{width:60%}
+.lp-sign{margin-top:12px;border:1px dashed var(--bo);border-radius:9px;padding:8px 12px;display:flex;flex-direction:column;gap:2px;background:rgba(92,136,205,.08)}
+.lp-sign-cap{font-size:11px;color:var(--ink-soft)}
+.lp-sign-mark{font-family:'Monsieur La Doulaise',cursive;font-size:26px;color:var(--ink);line-height:1.1}
+.lp-mock-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:4px}
+.lp-slot{border:1px solid var(--line-strong);border-radius:8px;padding:9px 0;text-align:center;font-size:13px;font-weight:600}
+.lp-slot.on{border-color:var(--bo);background:var(--bo);color:#f5f2f0}
+.lp-mock-stars{display:flex;gap:6px;font-size:26px;color:var(--line-strong)}
+.lp-star.on{color:#e8b54a}
+.lp-mock-textbox{border:1px solid var(--line-strong);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--ink-soft);margin-top:4px}
+.lp-dots{display:flex;gap:6px;justify-content:center;padding:2px 0 16px}
+.lp-dot{width:7px;height:7px;border-radius:50%;background:var(--line-strong);cursor:pointer;transition:background .2s,transform .2s}
+.lp-dot.on{background:var(--bo);transform:scale(1.3)}
+
+/* form dashboard link row + recessed settings box */
+.dash-linkrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.dash-link{margin-bottom:0!important;max-width:520px;flex:1 1 300px}
+.dash-link-base{font-family:var(--mono);font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.dash-link-input{flex:1;min-width:70px;border:0;background:transparent;font-family:var(--mono);font-size:12px;color:var(--ink);outline:none;padding:0}
+.dash-settings-box{background:var(--card);border-radius:14px;box-shadow:var(--bevel-inset)}
+
+/* non-selectable landing text (inputs stay selectable) */
+.lp-noselect{user-select:none;-webkit-user-select:none}
+.lp-noselect input,.lp-noselect textarea,.lp-noselect [contenteditable]{user-select:text;-webkit-user-select:text}
+/* neutralize the Google Translate top banner if a browser or extension injects it */
+.goog-te-banner-frame,.goog-te-banner-frame.skiptranslate,iframe.skiptranslate{display:none!important}
+body{top:0!important}
+#goog-gt-tt,.goog-te-balloon-frame{display:none!important}
+.goog-text-highlight{background:none!important;box-shadow:none!important}
+/* legal pages */
+.legal-wrap{max-width:760px;margin:0 auto;padding:48px 24px 64px;color:var(--ink)}
+.legal-wrap h1{font-family:var(--display);font-size:34px;margin:0 0 6px;letter-spacing:-0.02em}
+.legal-updated{color:var(--ink-soft);font-size:13px;margin:0 0 28px}
+.legal-wrap h2{font-family:var(--display);font-size:20px;margin:30px 0 8px}
+.legal-wrap p{line-height:1.65;margin:0 0 12px;color:var(--ink-soft)}
+.legal-wrap ul{margin:0 0 12px;padding-left:20px;color:var(--ink-soft);line-height:1.65}
+.legal-wrap li{margin:4px 0}
+.legal-wrap a{color:var(--bo);font-weight:600;text-decoration:none}
+.legal-wrap a:hover{text-decoration:underline}
+
+.zeffy-embed{width:100%;min-height:640px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.zeffy-q .embed-empty{margin-top:4px}
 </style>
 </head>
 <body>
@@ -5481,15 +5545,85 @@ function AdvancedControls({
     placeholder: "e.g. email or nps_score"
   })), /*#__PURE__*/React.createElement("div", {
     className: "hint"
-  }, "Used as the column name in CSV exports and the key in webhook and API payloads.")), isInput && !proFeat && /*#__PURE__*/React.createElement("div", {
-    className: "plan-lock-block"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "label"
-  }, "Export field name ", /*#__PURE__*/React.createElement("span", {
-    className: "plan-pill plan-pro"
-  }, "Pro")), /*#__PURE__*/React.createElement("div", {
+  }, "Used as the column name in CSV exports and the key in webhook and API payloads.")), isInput && !proFeat && /*#__PURE__*/React.createElement(PlanLock, {
+    label: "Export field name",
+    tier: "pro",
+    hint: "Custom export field names are available on Pro and above."
+  }));
+}
+function zeffySrc(v) {
+  if (!v) return "";
+  v = String(v).trim();
+  const m = v.match(/src=["']([^"']+)["']/i);
+  if (m) return m[1];
+  if (/^https?:\/\//i.test(v)) return v;
+  return "";
+}
+function ZeffyRenderer({
+  q
+}) {
+  const src = zeffySrc(q.url);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "q zeffy-q"
+  }, q.heading && /*#__PURE__*/React.createElement("div", {
+    className: "qlabel",
+    style: {
+      fontSize: 18
+    }
+  }, q.heading), q.description && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "var(--ink-soft)",
+      whiteSpace: "pre-wrap",
+      marginBottom: 10
+    }
+  }, q.description), src ? /*#__PURE__*/React.createElement("iframe", {
+    className: "zeffy-embed",
+    src: src,
+    title: "Zeffy donation form",
+    loading: "lazy",
+    allow: "payment",
+    referrerPolicy: "no-referrer-when-downgrade"
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "embed-empty"
+  }, "Add your Zeffy link to show the donation form."));
+}
+function ZeffyControls({
+  q,
+  update
+}) {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Field, {
+    label: "Heading (optional)"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.heading || "",
+    onChange: e => update({
+      heading: e.target.value
+    }),
+    placeholder: "Support our work"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Short description (optional)"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    className: "textarea",
+    style: {
+      minHeight: 60
+    },
+    value: q.description || "",
+    onChange: e => update({
+      description: e.target.value
+    }),
+    placeholder: "Tell people what their donation supports"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Zeffy embed link"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: q.url || "",
+    onChange: e => update({
+      url: e.target.value
+    }),
+    placeholder: "https://www.zeffy.com/embed/..."
+  })), /*#__PURE__*/React.createElement("div", {
     className: "hint"
-  }, "Custom export field names are available on Pro and above.")));
+  }, "In Zeffy, open your form, choose Share, then Embed, and copy the link or the full embed code. Paste it here. Donations and payments are handled by Zeffy. zetetiq does not process or hold the funds."));
 }
 function EmbedRenderer({
   q
@@ -6187,6 +6321,21 @@ const QTYPES = {
         fontSize: 13
       }
     }, "Add a payment link to show the payment button."))
+  },
+  zeffy: {
+    label: "Donations (Zeffy)",
+    hint: "Embed a Zeffy donation or payment form",
+    isInput: false,
+    make: () => ({
+      type: "zeffy",
+      id: uid(),
+      heading: "Support our work",
+      description: "",
+      url: ""
+    }),
+    summary: q => q.url ? "Zeffy form" : "no link yet",
+    validate: () => null,
+    Renderer: ZeffyRenderer
   },
   document_sign: {
     label: "Document to sign",
@@ -7311,15 +7460,7 @@ function AiSummary({
     className: "ai-body"
   }, state.summary || state.error || "No summary available."), !state.loading && m && m.ai_error && /*#__PURE__*/React.createElement("div", {
     className: "ai-note"
-  }, m.ai_error === "ai_unavailable" ? "Connect Workers AI for richer overviews: in Cloudflare, add a Workers AI binding named AI to this Pages project, then redeploy." : "The overview service could not be reached right now (" + m.ai_error + "). Showing a basic summary."), /*#__PURE__*/React.createElement("div", {
-    className: "ai-foot"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "ai-meta"
-  }, metaText), /*#__PURE__*/React.createElement("button", {
-    className: "btn sm ghost",
-    disabled: state.loading,
-    onClick: () => load(true)
-  }, "Refresh")));
+  }, m.ai_error === "ai_unavailable" ? "Connect Workers AI for richer overviews: in Cloudflare, add a Workers AI binding named AI to this Pages project, then redeploy." : "The overview service could not be reached right now (" + m.ai_error + "). Showing a basic summary."));
 }
 
 /* ----------------------------- shared form renderer ----------------------------- */
@@ -8625,33 +8766,34 @@ function LIcon({
 }
 const PLAN_TIERS = [{
   id: "free",
-  name: "Free",
+  name: "Free, forever",
   price: "$0",
   cadence: "",
   tagline: "Everything you need to get started.",
   features: ["All 27 question types", "Up to 5 forms", "100 responses per form", "5 MB file uploads", "Themes, templates and dark mode"],
   missing: ["CSV and PDF export", "Remove the zetetiq footer", "Custom CSS"]
 }, {
-  id: "edu",
-  name: "EDU/Non-profit",
-  price: "Free",
-  cadence: "",
-  tagline: "Free for students, educators, and 501 (c) 3 non profits.",
-  features: ["Everything in Pro", "Dedicated support", "Automatic with a .edu sign in", "Others can apply from the dashboard"]
-}, {
   id: "pro",
   name: "Pro",
   price: "$9",
   cadence: " / month",
   tagline: "For people who build forms often.",
+  featured: true,
   features: ["Up to 100 forms", "1,000 responses per form", "10 MB file uploads", "CSV and PDF export", "Remove the zetetiq footer", "White-label forms"]
+}, {
+  id: "edu",
+  name: "Education",
+  price: "$0",
+  was: "$9",
+  cadence: "",
+  tagline: "Free for students, educators, and 501 (c) 3 non profits.",
+  features: ["Everything in Pro", "Dedicated support", "Automatic with a .edu sign in", "Others can apply from the dashboard"]
 }, {
   id: "premium",
   name: "Premium",
   price: "$35",
   cadence: " / month",
   tagline: "For power users.",
-  featured: true,
   features: ["Everything in Pro", "Unlimited forms", "Unlimited responses", "1 GB file uploads", "Custom CSS and styling", "Priority support"]
 }, {
   id: "enterprise",
@@ -8662,7 +8804,7 @@ const PLAN_TIERS = [{
   features: ["Everything in Premium", "Team support", "SSO sign in", "Dedicated onboarding"]
 }];
 function PricingTable() {
-  return /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "price-grid"
   }, PLAN_TIERS.map(t => /*#__PURE__*/React.createElement("div", {
     key: t.id,
@@ -8675,7 +8817,9 @@ function PricingTable() {
     className: "price-name"
   }, t.name), /*#__PURE__*/React.createElement("div", {
     className: "price-amt"
-  }, t.price, /*#__PURE__*/React.createElement("span", {
+  }, t.was && /*#__PURE__*/React.createElement("span", {
+    className: "price-was"
+  }, t.was), t.price, /*#__PURE__*/React.createElement("span", {
     className: "price-cad"
   }, t.cadence)), /*#__PURE__*/React.createElement("div", {
     className: "price-tag"
@@ -8690,7 +8834,12 @@ function PricingTable() {
   }, f))), t.id === "enterprise" && /*#__PURE__*/React.createElement("a", {
     className: "btn sm price-cta",
     href: "mailto:support@zetetiq.com?subject=Enterprise%20plan%20enquiry"
-  }, "Connect"))));
+  }, "Connect")))), /*#__PURE__*/React.createElement("div", {
+    className: "price-lifetime"
+  }, /*#__PURE__*/React.createElement("a", {
+    className: "btn",
+    href: "mailto:support@zetetiq.com?subject=Lifetime%20access%20enquiry"
+  }, "Not a fan of subscriptions? Contact us to learn about lifetime access.")));
 }
 function ApplyModal({
   onClose
@@ -8852,11 +9001,110 @@ function AdminApplications() {
     className: "app-actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn sm primary",
-    onClick: () => setPlan(a.uid, "edu")
+    onClick: () => setPlan(a.uid, a.request.kind === "nonprofit" ? "nonprofit" : "edu")
   }, "Approve"), /*#__PURE__*/React.createElement("button", {
     className: "btn sm ghost",
     onClick: () => setPlan(a.uid, "free")
   }, "Decline"))))));
+}
+function UpgradeModal({
+  open,
+  onClose
+}) {
+  const {
+    user,
+    toast
+  } = useApp();
+  const [busy, setBusy] = useState("");
+  if (!open) return null;
+  const plan = user && user.plan || "free";
+  const checkout = p => {
+    setBusy(p);
+    api.checkout(p).then(({
+      ok,
+      data
+    }) => {
+      setBusy("");
+      if (ok && data && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      const e = data && data.error;
+      toast(e === "billing_unconfigured" ? "Billing is not set up yet (Stripe secret key missing)." : e === "price_unconfigured" ? "Billing is not fully set up (price IDs missing)." : e === "unauthorized" ? "Please sign in again." : data && data.detail ? "Stripe: " + String(data.detail).slice(0, 120) : "Could not start checkout. Please try again.");
+    }).catch(() => {
+      setBusy("");
+      toast("Could not start checkout.");
+    });
+  };
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: "Upgrade your plan",
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pad-lg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 14
+    }
+  }, "Pick the plan that fits how you work. You can change or cancel anytime."), /*#__PURE__*/React.createElement("div", {
+    className: "up-tiers"
+  }, plan === "free" && /*#__PURE__*/React.createElement("div", {
+    className: "up-tier"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-h"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-name"
+  }, "Pro"), /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-price"
+  }, "$9 / month")), /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-desc"
+  }, "Up to 100 forms, 1,000 responses each, CSV and PDF export, and white-label forms."), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: busy === "pro",
+    onClick: () => checkout("pro")
+  }, busy === "pro" ? "Starting..." : "Choose Pro")), /*#__PURE__*/React.createElement("div", {
+    className: "up-tier featured"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-h"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-name"
+  }, "Premium"), /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-price"
+  }, "$35 / month")), /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-desc"
+  }, "Unlimited forms and responses, 1 GB uploads, custom CSS, and priority support."), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: busy === "premium",
+    onClick: () => checkout("premium")
+  }, busy === "premium" ? "Starting..." : "Choose Premium"))), /*#__PURE__*/React.createElement("div", {
+    className: "up-ent"
+  }, "Need teams or single sign on? ", /*#__PURE__*/React.createElement("a", {
+    className: "up-link",
+    href: "mailto:support@zetetiq.com"
+  }, "Contact us about Enterprise"), ".")));
+}
+function PlanLock({
+  label,
+  tier,
+  hint
+}) {
+  const {
+    upgrade
+  } = useApp();
+  const tierName = tier === "premium" ? "Premium" : tier === "enterprise" ? "Enterprise" : "Pro";
+  const tierCls = tier === "premium" ? "plan-premium" : tier === "enterprise" ? "plan-enterprise" : "plan-pro";
+  return /*#__PURE__*/React.createElement("div", {
+    className: "plan-lock-block"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, label, " ", /*#__PURE__*/React.createElement("span", {
+    className: "plan-pill " + tierCls
+  }, tierName)), hint && /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, hint), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary plan-lock-up",
+    onClick: upgrade
+  }, "Upgrade"));
 }
 function PlanBar({
   user,
@@ -8864,7 +9112,8 @@ function PlanBar({
   onApply
 }) {
   const {
-    toast
+    toast,
+    upgrade
   } = useApp();
   const plan = user.plan || "free";
   const lim = user.limits || {};
@@ -8914,7 +9163,6 @@ function PlanBar({
       toast("Could not open billing right now.");
     });
   };
-  const [upOpen, setUpOpen] = useState(false);
   const canUpgrade = plan !== "premium" && plan !== "enterprise";
   return /*#__PURE__*/React.createElement("div", {
     className: "plan-bar"
@@ -8926,7 +9174,7 @@ function PlanBar({
     className: "plan-usage"
   }, count, maxForms != null ? " of " + maxForms : "", " ", maxForms === 1 ? "form" : "forms", plan === "free" ? ", up to 100 responses each" : ""), canUpgrade && /*#__PURE__*/React.createElement("button", {
     className: "btn sm primary plan-upbtn",
-    onClick: () => setUpOpen(true)
+    onClick: upgrade
   }, "Upgrade")), /*#__PURE__*/React.createElement("div", {
     className: "plan-bar-r"
   }, plan === "free" && (pending ? /*#__PURE__*/React.createElement("span", {
@@ -8941,52 +9189,209 @@ function PlanBar({
     className: "btn sm ghost",
     disabled: busy === "portal",
     onClick: portal
-  }, busy === "portal" ? "Opening..." : "Manage billing")), upOpen && /*#__PURE__*/React.createElement(Modal, {
-    title: "Upgrade your plan",
-    onClose: () => setUpOpen(false)
+  }, busy === "portal" ? "Opening..." : "Manage billing")));
+}
+function HeroCarousel() {
+  const slides = [{
+    title: "Customer feedback",
+    body: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-q"
+    }, "How likely are you to recommend us?"), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-scale"
+    }, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => /*#__PURE__*/React.createElement("span", {
+      key: n,
+      className: "lp-pip" + (n === 9 ? " on" : "")
+    }, n))), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-q"
+    }, "What could we improve?"), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-opts"
+    }, ["Faster support", "A lower price", "More features"].map((o, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      className: "lp-mock-opt" + (i === 0 ? " on" : "")
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "lp-rad"
+    }), o))))
+  }, {
+    title: "Club election",
+    body: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-q"
+    }, "Rank these candidates in order"), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-rank"
+    }, ["Alex Rivera", "Jordan Lee", "Sam Okafor", "Priya Nair"].map((o, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      className: "lp-rankrow"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "lp-ranknum"
+    }, i + 1), /*#__PURE__*/React.createElement("span", {
+      className: "lp-rankgrip"
+    }, "⠿"), /*#__PURE__*/React.createElement("span", null, o)))))
+  }, {
+    title: "Service agreement",
+    body: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-q"
+    }, "Please review and sign below"), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-doc"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "lp-docline"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "lp-docline short"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "lp-docline"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "lp-docline short"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "lp-sign"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "lp-sign-cap"
+    }, "Signature"), /*#__PURE__*/React.createElement("span", {
+      className: "lp-sign-mark"
+    }, "zetetiq")))
+  }, {
+    title: "Book a meeting",
+    body: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-q"
+    }, "Pick a time that works for you"), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-slots"
+    }, ["9:00", "9:30", "10:00", "10:30", "11:00", "11:30", "1:00", "1:30", "2:00"].map((s, i) => /*#__PURE__*/React.createElement("span", {
+      key: i,
+      className: "lp-slot" + (i === 4 ? " on" : "")
+    }, s))))
+  }, {
+    title: "Rate your visit",
+    body: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-q"
+    }, "How was everything?"), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-stars"
+    }, [1, 2, 3, 4, 5].map(n => /*#__PURE__*/React.createElement("span", {
+      key: n,
+      className: "lp-star" + (n <= 4 ? " on" : "")
+    }, "★"))), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-q"
+    }, "Anything you would like to add?"), /*#__PURE__*/React.createElement("div", {
+      className: "lp-mock-textbox"
+    }, "The team was friendly and everything was spotless."))
+  }];
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % slides.length), 3000);
+    return () => clearInterval(t);
+  }, [slides.length]);
+  const s = slides[i];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "lp-win"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "pad-lg"
+    className: "lp-win-bar"
+  }, /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null)), /*#__PURE__*/React.createElement("div", {
+    className: "lp-win-body lp-carousel-body"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "hint",
-    style: {
-      marginBottom: 14
-    }
-  }, "Pick the plan that fits how you work. You can change or cancel anytime."), /*#__PURE__*/React.createElement("div", {
-    className: "up-tiers"
-  }, plan === "free" && /*#__PURE__*/React.createElement("div", {
-    className: "up-tier"
+    className: "lp-slide",
+    key: i
   }, /*#__PURE__*/React.createElement("div", {
-    className: "up-tier-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "up-tier-name"
-  }, "Pro"), /*#__PURE__*/React.createElement("span", {
-    className: "up-tier-price"
-  }, "$9 / month")), /*#__PURE__*/React.createElement("div", {
-    className: "up-tier-desc"
-  }, "Up to 100 forms, 1,000 responses each, CSV and PDF export, and white-label forms."), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    disabled: busy === "pro",
-    onClick: () => checkout("pro")
-  }, busy === "pro" ? "Starting..." : "Choose Pro")), /*#__PURE__*/React.createElement("div", {
-    className: "up-tier featured"
+    className: "lp-mock-title"
+  }, s.title), s.body, /*#__PURE__*/React.createElement("div", {
+    className: "lp-mock-btn"
+  }, "Submit"))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-dots"
+  }, slides.map((_, d) => /*#__PURE__*/React.createElement("span", {
+    key: d,
+    className: "lp-dot" + (d === i ? " on" : ""),
+    onClick: () => setI(d)
+  }))));
+}
+function SiteFooter({
+  onAdmin
+}) {
+  const {
+    navigate
+  } = useApp();
+  const go = p => e => {
+    e.preventDefault();
+    navigate(p);
+  };
+  return /*#__PURE__*/React.createElement("footer", {
+    className: "lp-foot"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "up-tier-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "up-tier-name"
-  }, "Premium"), /*#__PURE__*/React.createElement("span", {
-    className: "up-tier-price"
-  }, "$35 / month")), /*#__PURE__*/React.createElement("div", {
-    className: "up-tier-desc"
-  }, "Unlimited forms and responses, 1 GB uploads, custom CSS, and priority support."), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    disabled: busy === "premium",
-    onClick: () => checkout("premium")
-  }, busy === "premium" ? "Starting..." : "Choose Premium"))), /*#__PURE__*/React.createElement("div", {
-    className: "up-ent"
-  }, "Need teams or single sign on? ", /*#__PURE__*/React.createElement("a", {
-    className: "up-link",
+    className: "lp-foot-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-foot-brand"
+  }, /*#__PURE__*/React.createElement(Logo, {
+    size: 18
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "lp-foot-tag"
+  }, "Experience management, simplified.")), /*#__PURE__*/React.createElement("nav", {
+    className: "lp-foot-links"
+  }, /*#__PURE__*/React.createElement("a", {
+    className: "lp-foot-link",
+    href: "/privacy",
+    onClick: go("/privacy")
+  }, "Privacy"), /*#__PURE__*/React.createElement("a", {
+    className: "lp-foot-link",
+    href: "/terms",
+    onClick: go("/terms")
+  }, "Terms"), /*#__PURE__*/React.createElement("a", {
+    className: "lp-foot-link",
     href: "mailto:support@zetetiq.com"
-  }, "Contact us about Enterprise"), "."))));
+  }, "Support"))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-foot-bottom"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "lp-foot-copy"
+  }, "© 2026 zetetiq"), onAdmin && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "lp-foot-admin",
+    onClick: onAdmin
+  }, "Admin sign in")));
+}
+function PrivacyContent() {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h1", null, "Privacy policy"), /*#__PURE__*/React.createElement("p", {
+    className: "legal-updated"
+  }, "Last updated June 2026"), /*#__PURE__*/React.createElement("p", null, "This policy explains what information zetetiq collects, how it is used, and the choices you have. zetetiq is a form and survey builder operated from Austin, Texas. If you have questions, write to support@zetetiq.com."), /*#__PURE__*/React.createElement("h2", null, "Who this covers"), /*#__PURE__*/React.createElement("p", null, "There are two kinds of people in this policy. Account holders sign in and build forms. Respondents fill out a form that an account holder has shared. When you fill out someone's form, that account holder decides what is asked and what happens with the answers, and zetetiq stores those answers on their behalf."), /*#__PURE__*/React.createElement("h2", null, "What we collect"), /*#__PURE__*/React.createElement("ul", null, /*#__PURE__*/React.createElement("li", null, "Account details. When you sign in with Google, we receive your name and email address so we can create and identify your account."), /*#__PURE__*/React.createElement("li", null, "Content you create. The forms, questions, themes, and settings you build are stored so the service can show and run them."), /*#__PURE__*/React.createElement("li", null, "Responses. Answers that respondents submit are stored for the account holder who owns the form, along with the time of submission."), /*#__PURE__*/React.createElement("li", null, "Connected services. If you connect a calendar or a payment account, we store the tokens needed to use that connection for you. You can disconnect at any time."), /*#__PURE__*/React.createElement("li", null, "Basic technical data. Like most websites, our hosting keeps standard request logs, such as a rough location and device type, to keep the service secure and working.")), /*#__PURE__*/React.createElement("h2", null, "How we use information"), /*#__PURE__*/React.createElement("p", null, "We use it to run the service: to sign you in, store and display your forms, record responses, send the transactional emails you ask for such as a booking confirmation, and keep the product secure. We also use aggregate counts that do not identify anyone to understand how features are used and to improve them. We do not use your forms or responses to show you advertising."), /*#__PURE__*/React.createElement("h2", null, "When we share information"), /*#__PURE__*/React.createElement("p", null, "We do not sell your personal information. We share it only in these cases:"), /*#__PURE__*/React.createElement("ul", null, /*#__PURE__*/React.createElement("li", null, "Service providers that run parts of the product for us, including Cloudflare for hosting and storage, Resend for sending email, Google for calendar features when you connect a calendar, and Stripe for paid subscriptions. For nonprofit accounts that add a Zeffy block, donations and payments are handled by Zeffy under its own terms."), /*#__PURE__*/React.createElement("li", null, "Account holders. If you submit a response to a form, the owner of that form receives your answers."), /*#__PURE__*/React.createElement("li", null, "Legal reasons. We may share information if the law requires it, or to protect the rights and safety of people and the service.")), /*#__PURE__*/React.createElement("h2", null, "Cookies"), /*#__PURE__*/React.createElement("p", null, "We use a single sign in cookie to keep you logged in. We do not use third party advertising or cross site tracking cookies."), /*#__PURE__*/React.createElement("h2", null, "How long we keep it"), /*#__PURE__*/React.createElement("p", null, "We keep your account and content while your account is active. Responses stay until you delete them or delete the form. When you delete a form or your account, the related responses are removed. To have your account and data deleted, write to support@zetetiq.com."), /*#__PURE__*/React.createElement("h2", null, "Security"), /*#__PURE__*/React.createElement("p", null, "Traffic to zetetiq is encrypted in transit, and access to stored data is limited to what is needed to run the service. No method of storage or transmission is perfectly secure, but we work to protect your information and to fix issues quickly."), /*#__PURE__*/React.createElement("h2", null, "Your choices"), /*#__PURE__*/React.createElement("p", null, "You can view and edit your forms and responses at any time, export responses on the plans that include export, disconnect any connected service, and ask us to correct or delete your information. Depending on where you live, you may have additional rights to access or remove your data. To make a request, write to support@zetetiq.com."), /*#__PURE__*/React.createElement("h2", null, "Children"), /*#__PURE__*/React.createElement("p", null, "zetetiq is not directed to children under 13, and we do not knowingly collect their personal information. If you believe a child has provided information through the service, contact us and we will remove it."), /*#__PURE__*/React.createElement("h2", null, "Changes"), /*#__PURE__*/React.createElement("p", null, "We may update this policy as the product changes. When we do, we will update the date at the top of this page. Continued use of the service after a change means you accept the updated policy."), /*#__PURE__*/React.createElement("h2", null, "Contact"), /*#__PURE__*/React.createElement("p", null, "Questions about privacy can be sent to support@zetetiq.com."));
+}
+function TermsContent() {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h1", null, "Terms of service"), /*#__PURE__*/React.createElement("p", {
+    className: "legal-updated"
+  }, "Last updated June 2026"), /*#__PURE__*/React.createElement("p", null, "These terms are the agreement between you and zetetiq for use of the service. By creating an account or using zetetiq, you agree to them. zetetiq is operated from Austin, Texas. If you do not agree, please do not use the service."), /*#__PURE__*/React.createElement("h2", null, "The service"), /*#__PURE__*/React.createElement("p", null, "zetetiq lets you build forms and surveys, share them by link, collect responses, and use features such as themes, logic, scheduling, e-sign, scoring, and exports. We add and change features over time."), /*#__PURE__*/React.createElement("h2", null, "Your account"), /*#__PURE__*/React.createElement("p", null, "You sign in with Google. You are responsible for activity under your account and for keeping your sign in secure. Tell us promptly if you think someone else has accessed your account."), /*#__PURE__*/React.createElement("h2", null, "Acceptable use"), /*#__PURE__*/React.createElement("p", null, "You agree not to use zetetiq to do any of the following:"), /*#__PURE__*/React.createElement("ul", null, /*#__PURE__*/React.createElement("li", null, "Break the law or help anyone else break the law."), /*#__PURE__*/React.createElement("li", null, "Send spam, run phishing, or try to deceive the people who fill out your forms."), /*#__PURE__*/React.createElement("li", null, "Upload malware or attempt to disrupt, overload, or gain unauthorized access to the service."), /*#__PURE__*/React.createElement("li", null, "Collect sensitive personal information without a lawful basis and the proper consent."), /*#__PURE__*/React.createElement("li", null, "Infringe the rights of others, including privacy and intellectual property rights.")), /*#__PURE__*/React.createElement("p", null, "You are responsible for the content of your forms and for how you use the responses you collect."), /*#__PURE__*/React.createElement("h2", null, "Your content"), /*#__PURE__*/React.createElement("p", null, "You keep ownership of the forms you create and the responses you collect. You give zetetiq permission to host, store, and process that content for the purpose of providing the service to you. We do not claim ownership of your content and we do not sell it."), /*#__PURE__*/React.createElement("h2", null, "Plans and billing"), /*#__PURE__*/React.createElement("p", null, "zetetiq offers a free plan and paid plans. Paid subscriptions are billed through Stripe on the cycle shown at checkout and renew until you cancel. You can cancel at any time, and your plan stays active until the end of the period you have paid for. Schools, students with a school email address, and registered nonprofits can apply for the education or nonprofit tier at no cost, subject to review."), /*#__PURE__*/React.createElement("h2", null, "Payments collected through your forms"), /*#__PURE__*/React.createElement("p", null, "If you add a payment link, or for nonprofit accounts a Zeffy donation block, those payments are processed by Stripe or Zeffy, not by zetetiq. The agreement for those payments is between you, the person paying, and the relevant processor. zetetiq does not hold the funds and is not responsible for those transactions."), /*#__PURE__*/React.createElement("h2", null, "Third party services"), /*#__PURE__*/React.createElement("p", null, "Some features rely on services run by others, such as Google, Stripe, Zeffy, and Cloudflare. Your use of those features is also subject to the terms of those providers."), /*#__PURE__*/React.createElement("h2", null, "Availability"), /*#__PURE__*/React.createElement("p", null, "We work to keep zetetiq available and reliable, but the service is provided as is and as available. We do not promise that it will always be uninterrupted or error free."), /*#__PURE__*/React.createElement("h2", null, "Suspension and termination"), /*#__PURE__*/React.createElement("p", null, "You can stop using zetetiq at any time. We may suspend or close an account that breaks these terms or that puts the service or other people at risk. Where it is reasonable to do so, we will give notice."), /*#__PURE__*/React.createElement("h2", null, "Limitation of liability"), /*#__PURE__*/React.createElement("p", null, "To the extent the law allows, zetetiq is not liable for indirect or incidental damages, or for loss of data or profits, arising from your use of the service. Nothing in these terms removes rights that cannot be removed under the law that applies to you."), /*#__PURE__*/React.createElement("h2", null, "Changes to these terms"), /*#__PURE__*/React.createElement("p", null, "We may update these terms as the product changes. When we do, we will update the date at the top of this page. If you keep using the service after a change, you accept the updated terms."), /*#__PURE__*/React.createElement("h2", null, "Governing law"), /*#__PURE__*/React.createElement("p", null, "These terms are governed by the laws of the State of Texas in the United States, without regard to its conflict of law rules."), /*#__PURE__*/React.createElement("h2", null, "Contact"), /*#__PURE__*/React.createElement("p", null, "Questions about these terms can be sent to support@zetetiq.com."));
+}
+function LegalPage({
+  kind
+}) {
+  const {
+    navigate,
+    theme,
+    toggleTheme
+  } = useApp();
+  useEffect(() => {
+    try {
+      window.scrollTo(0, 0);
+    } catch (e) {}
+  }, []);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "lp legal-page"
+  }, /*#__PURE__*/React.createElement("header", {
+    className: "lp-nav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-nav-in"
+  }, /*#__PURE__*/React.createElement("a", {
+    href: "/",
+    className: "lp-nav-logo",
+    onClick: e => {
+      e.preventDefault();
+      navigate("/");
+    }
+  }, /*#__PURE__*/React.createElement(Logo, {
+    size: 22
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-nav-r"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "themebtn",
+    onClick: toggleTheme,
+    title: "Toggle theme",
+    "aria-label": "Toggle theme"
+  }, theme === "dark" ? /*#__PURE__*/React.createElement(IconSun, null) : /*#__PURE__*/React.createElement(IconMoon, null)), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => navigate("/")
+  }, "Back to home")))), /*#__PURE__*/React.createElement("main", {
+    className: "legal-wrap"
+  }, kind === "privacy" ? /*#__PURE__*/React.createElement(PrivacyContent, null) : /*#__PURE__*/React.createElement(TermsContent, null)), /*#__PURE__*/React.createElement(SiteFooter, null));
 }
 function Landing({
   showLogin
@@ -9106,9 +9511,11 @@ function Landing({
   }];
   const types = QTYPE_ORDER.map(k => QTYPES[k] && QTYPES[k].label || k);
   return /*#__PURE__*/React.createElement("div", {
-    className: "lp"
+    className: "lp lp-noselect"
   }, /*#__PURE__*/React.createElement("header", {
     className: "lp-nav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-nav-in"
   }, /*#__PURE__*/React.createElement(Logo, {
     size: 22
   }), /*#__PURE__*/React.createElement("div", {
@@ -9124,7 +9531,7 @@ function Landing({
   }, "Go to dashboard") : /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: google
-  }, "Sign in"))), /*#__PURE__*/React.createElement("section", {
+  }, "Sign in")))), /*#__PURE__*/React.createElement("section", {
     className: "lp-hero"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-hero-text"
@@ -9147,33 +9554,7 @@ function Landing({
   }, /*#__PURE__*/React.createElement(GoogleG, null), " Continue with Google"))), /*#__PURE__*/React.createElement("div", {
     className: "lp-visual",
     "aria-hidden": "true"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lp-win"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lp-win-bar"
-  }, /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null)), /*#__PURE__*/React.createElement("div", {
-    className: "lp-win-body"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lp-mock-title"
-  }, "Customer feedback"), /*#__PURE__*/React.createElement("div", {
-    className: "lp-mock-q"
-  }, "How likely are you to recommend us?"), /*#__PURE__*/React.createElement("div", {
-    className: "lp-mock-scale"
-  }, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => /*#__PURE__*/React.createElement("span", {
-    key: n,
-    className: "lp-pip" + (n === 9 ? " on" : "")
-  }, n))), /*#__PURE__*/React.createElement("div", {
-    className: "lp-mock-q"
-  }, "What could we improve?"), /*#__PURE__*/React.createElement("div", {
-    className: "lp-mock-opts"
-  }, ["Faster support", "A lower price", "More features"].map((o, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    className: "lp-mock-opt" + (i === 0 ? " on" : "")
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "lp-rad"
-  }), o))), /*#__PURE__*/React.createElement("div", {
-    className: "lp-mock-btn"
-  }, "Submit"))))), /*#__PURE__*/React.createElement("section", {
+  }, /*#__PURE__*/React.createElement(HeroCarousel, null))), /*#__PURE__*/React.createElement("section", {
     className: "lp-section"
   }, /*#__PURE__*/React.createElement("h2", {
     className: "lp-h2"
@@ -9262,29 +9643,9 @@ function Landing({
   }, /*#__PURE__*/React.createElement("button", {
     className: "gbtn auto",
     onClick: google
-  }, /*#__PURE__*/React.createElement(GoogleG, null), " Continue with Google"))), /*#__PURE__*/React.createElement("footer", {
-    className: "lp-foot"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lp-foot-in"
-  }, /*#__PURE__*/React.createElement(Logo, {
-    size: 16
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "lp-foot-tag"
-  }, "Human-centered Experience Management."), /*#__PURE__*/React.createElement("a", {
-    className: "lp-foot-link",
-    href: "https://zetetiq.com",
-    target: "_blank",
-    rel: "noopener"
-  }, "zetetiq.com"), /*#__PURE__*/React.createElement("a", {
-    className: "lp-foot-link",
-    href: "mailto:support@zetetiq.com"
-  }, "Support"), !user && /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "lp-foot-admin",
-    onClick: () => setOpen(true)
-  }, "Admin sign in")), /*#__PURE__*/React.createElement("div", {
-    className: "lp-foot-copy"
-  }, "© 2026 Zetetiq XM")), open && !user && /*#__PURE__*/React.createElement(Modal, {
+  }, /*#__PURE__*/React.createElement(GoogleG, null), " Continue with Google"))), /*#__PURE__*/React.createElement(SiteFooter, {
+    onAdmin: !user ? () => setOpen(true) : null
+  }), open && !user && /*#__PURE__*/React.createElement(Modal, {
     title: "Admin login",
     onClose: () => setOpen(false)
   }, /*#__PURE__*/React.createElement("div", {
@@ -9428,17 +9789,14 @@ function BrandStudio({
   if (user && user.limits && user.limits.proFeatures === false) return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "panel-title"
   }, "Brand studio"), /*#__PURE__*/React.createElement("div", {
-    className: "plan-lock-block",
     style: {
       marginTop: 10
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "label"
-  }, "Brand studio ", /*#__PURE__*/React.createElement("span", {
-    className: "plan-pill plan-pro"
-  }, "Pro")), /*#__PURE__*/React.createElement("div", {
-    className: "hint"
-  }, "Save reusable brand kits with your logo, colors, and fonts. Available on Pro and above.")));
+  }, /*#__PURE__*/React.createElement(PlanLock, {
+    label: "Brand studio",
+    tier: "pro",
+    hint: "Save reusable brand kits with your logo, colors, and fonts. Available on Pro and above."
+  })));
   const [kits, setKits] = useState(null);
   const [name, setName] = useState("");
   const [logo, setLogo] = useState(null);
@@ -9841,6 +10199,8 @@ function AdminConsole() {
   }, "Free"), /*#__PURE__*/React.createElement("option", {
     value: "edu"
   }, "Education"), /*#__PURE__*/React.createElement("option", {
+    value: "nonprofit"
+  }, "Nonprofit"), /*#__PURE__*/React.createElement("option", {
     value: "pro"
   }, "Pro"), /*#__PURE__*/React.createElement("option", {
     value: "premium"
@@ -11717,7 +12077,14 @@ function CanvasCard({
     onChange: e => update({
       content: e.target.value
     })
-  })) : /*#__PURE__*/React.createElement("input", {
+  })) : q.type === "zeffy" ? /*#__PURE__*/React.createElement("input", {
+    className: "wq-title",
+    placeholder: "Heading (optional)",
+    value: q.heading || "",
+    onChange: e => update({
+      heading: e.target.value
+    })
+  }) : /*#__PURE__*/React.createElement("input", {
     className: "wq-title",
     placeholder: "Click to write the question text",
     value: q.label || "",
@@ -11794,7 +12161,9 @@ function CanvasCard({
     className: "wq-prev-input"
   }, q.tree && q.tree.length || 0 ? "Cascading dropdowns · " + q.tree.length + " top-level" : "Add options in the left panel"), q.type === "embed" && /*#__PURE__*/React.createElement("div", {
     className: "wq-prev-input"
-  }, q.embedSlug ? (q.embedKind === "schedule" ? "Scheduler" : "E-sign") + ": " + (q.embedTitle || q.embedSlug) : "Pick a scheduler or e-sign in the left panel")));
+  }, q.embedSlug ? (q.embedKind === "schedule" ? "Scheduler" : "E-sign") + ": " + (q.embedTitle || q.embedSlug) : "Pick a scheduler or e-sign in the left panel"), q.type === "zeffy" && /*#__PURE__*/React.createElement("div", {
+    className: "wq-prev-input"
+  }, zeffySrc(q.url) ? "Zeffy donation form embedded" : "Add your Zeffy link in the left panel")));
 }
 function MCControls({
   q,
@@ -12903,6 +13272,9 @@ function LeftEditor({
   }, "Edit the heading, text, and image directly on the question in the canvas."), q.type === "payment" && /*#__PURE__*/React.createElement(ActionControls, {
     q: q,
     update: update
+  }), q.type === "zeffy" && /*#__PURE__*/React.createElement(ZeffyControls, {
+    q: q,
+    update: update
   }), q.type === "scheduling" && /*#__PURE__*/React.createElement(SchedulingControls, {
     q: q,
     update: update
@@ -13533,15 +13905,11 @@ function SettingsPanel({
       hideBranding: c
     }),
     label: "Hide the powered by zetetiq footer"
-  }) : /*#__PURE__*/React.createElement("div", {
-    className: "plan-lock-row"
-  }, /*#__PURE__*/React.createElement(Toggle, {
-    checked: false,
-    onChange: () => toast("Removing the footer is available on Pro and above. Upgrade to enable it."),
-    label: "Hide the powered by zetetiq footer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "plan-pill plan-pro"
-  }, "Pro")), /*#__PURE__*/React.createElement("div", {
+  }) : /*#__PURE__*/React.createElement(PlanLock, {
+    label: "Hide the powered by zetetiq footer",
+    tier: "pro",
+    hint: "Remove the powered by zetetiq footer on your public form."
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 10
     }
@@ -13592,15 +13960,11 @@ function SettingsPanel({
       });
       e.target.value = "";
     }
-  }), /*#__PURE__*/React.createElement("span", null, "Upload a favicon"))) : /*#__PURE__*/React.createElement("div", {
-    className: "plan-lock-block"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "label"
-  }, "Favicon ", /*#__PURE__*/React.createElement("span", {
-    className: "plan-pill plan-pro"
-  }, "Pro")), /*#__PURE__*/React.createElement("div", {
-    className: "hint"
-  }, "Custom favicons are available on Pro and above.")), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, "Upload a favicon"))) : /*#__PURE__*/React.createElement(PlanLock, {
+    label: "Favicon",
+    tier: "pro",
+    hint: "Custom favicons are available on Pro and above."
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 10
     }
@@ -13620,25 +13984,17 @@ function SettingsPanel({
     })
   })), /*#__PURE__*/React.createElement("div", {
     className: "hint"
-  }, "Custom CSS applies to your public form only. Target classes such as .fcard, .ftitle, .fdesc, .opt, .finput, or .submit. The thank-you and closed screens use the same classes.")) : /*#__PURE__*/React.createElement("div", {
-    className: "plan-lock-block"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "label"
-  }, "Custom CSS (advanced) ", /*#__PURE__*/React.createElement("span", {
-    className: "plan-pill plan-premium"
-  }, "Premium")), /*#__PURE__*/React.createElement("div", {
-    className: "hint"
-  }, "Custom CSS and styling is available on Premium.")), /*#__PURE__*/React.createElement("div", {
+  }, "Custom CSS applies to your public form only. Target classes such as .fcard, .ftitle, .fdesc, .opt, .finput, or .submit. The thank-you and closed screens use the same classes.")) : /*#__PURE__*/React.createElement(PlanLock, {
+    label: "Custom CSS (advanced)",
+    tier: "premium",
+    hint: "Custom CSS and styling is available on Premium."
+  }), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
-  }, "A/B testing"), !proFeat ? /*#__PURE__*/React.createElement("div", {
-    className: "plan-lock-block"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "label"
-  }, "A/B testing ", /*#__PURE__*/React.createElement("span", {
-    className: "plan-pill plan-pro"
-  }, "Pro")), /*#__PURE__*/React.createElement("div", {
-    className: "hint"
-  }, "Running experiments is available on Pro and above.")) : /*#__PURE__*/React.createElement(Toggle, {
+  }, "A/B testing"), !proFeat ? /*#__PURE__*/React.createElement(PlanLock, {
+    label: "A/B testing",
+    tier: "pro",
+    hint: "Running experiments is available on Pro and above."
+  }) : /*#__PURE__*/React.createElement(Toggle, {
     checked: !!form.schema.settings.experiment,
     onChange: c => setSettings({
       experiment: c
@@ -13971,6 +14327,9 @@ const BASIC_ITEMS = [{
 function AddQuestionMenu({
   onAdd
 }) {
+  const {
+    user
+  } = useApp();
   const [open, setOpen] = useState(false);
   const lbl = it => it.label || QTYPES[it.type] && QTYPES[it.type].label || it.type;
   const hnt = it => it.hint || QTYPES[it.type] && QTYPES[it.type].hint || "";
@@ -14041,7 +14400,18 @@ function AddQuestionMenu({
     className: "t"
   }, QTYPES[t].label), /*#__PURE__*/React.createElement("div", {
     className: "h"
-  }, QTYPES[t].hint))))))));
+  }, QTYPES[t].hint)))), user && user.limits && user.limits.zeffy && QTYPES.zeffy && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "addq-section-h"
+  }, "Donations"), /*#__PURE__*/React.createElement("div", {
+    className: "addq-grid"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "addq-item",
+    onClick: () => pick("zeffy")
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "t"
+  }, QTYPES.zeffy.label), /*#__PURE__*/React.createElement("div", {
+    className: "h"
+  }, QTYPES.zeffy.hint))))))));
 }
 const FORM_TEMPLATES = [{
   key: "feedback",
@@ -14509,7 +14879,6 @@ function Builder({
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(null);
-  const [tools, setTools] = useState(false);
   const [loadErr, setLoadErr] = useState(false);
   const [trash, setTrash] = useState([]); // session only, never saved
   const [dragIdx, setDragIdx] = useState(null);
@@ -14674,8 +15043,7 @@ function Builder({
     if (e.button != null && e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-    const list = questions;
-    const ids = list.map(q => q.id);
+    const ids = questions.map(q => q.id);
     const els = ids.map(id => cardRefs.current[id]);
     const dragEl = els[index];
     if (!dragEl) return;
@@ -14696,21 +15064,23 @@ function Builder({
     }
     const step = height + gap;
     let dropTo = index;
-    const handleEl = e.currentTarget;
-    const pid = e.pointerId;
     try {
-      if (handleEl.setPointerCapture && pid != null) handleEl.setPointerCapture(pid);
+      document.body.style.userSelect = "none";
     } catch (er) {}
-    dragEl.style.transition = "none";
+    dragEl.style.transition = "box-shadow 160ms ease";
     dragEl.style.zIndex = "999";
     dragEl.style.position = "relative";
     dragEl.style.willChange = "transform";
+    dragEl.style.pointerEvents = "none";
     els.forEach((el, i) => {
-      if (el && i !== index) el.style.transition = "transform 180ms cubic-bezier(.2,.8,.2,1)";
+      if (el && i !== index) el.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1)";
     });
     setDragId(ids[index]);
-    const move = ev => {
-      const dy = ev.clientY - startY;
+    let raf = 0;
+    let lastY = startY;
+    const apply = () => {
+      raf = 0;
+      const dy = lastY - startY;
       dragEl.style.transform = "translateY(" + dy + "px) scale(1.02)";
       const dc = r0.top + dy + height / 2;
       let t = 0;
@@ -14731,12 +15101,20 @@ function Builder({
         });
       }
     };
+    const move = ev => {
+      lastY = ev.clientY;
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
     const up = () => {
-      handleEl.removeEventListener("pointermove", move);
-      handleEl.removeEventListener("pointerup", up);
-      handleEl.removeEventListener("pointercancel", up);
+      document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerup", up);
+      document.removeEventListener("pointercancel", up);
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
       try {
-        if (handleEl.releasePointerCapture && pid != null) handleEl.releasePointerCapture(pid);
+        document.body.style.userSelect = "";
       } catch (er) {}
       const firstTop = dragEl.getBoundingClientRect().top;
       els.forEach(el => {
@@ -14749,14 +15127,15 @@ function Builder({
       setDragId(null);
       reorder(index, dropTo);
       requestAnimationFrame(() => {
-        els.forEach(el => {
-          if (el && el !== dragEl) el.style.transition = "";
-        });
         const ddy = firstTop - dragEl.getBoundingClientRect().top;
         dragEl.style.transition = "none";
         dragEl.style.transform = "translateY(" + ddy + "px) scale(1.02)";
+        dragEl.style.pointerEvents = "";
+        els.forEach(el => {
+          if (el && el !== dragEl) el.style.transition = "";
+        });
         requestAnimationFrame(() => {
-          dragEl.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms ease";
+          dragEl.style.transition = "transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease";
           dragEl.style.transform = "";
         });
         setTimeout(() => {
@@ -14766,12 +15145,12 @@ function Builder({
             dragEl.style.position = "";
             dragEl.style.willChange = "";
           }
-        }, 240);
+        }, 260);
       });
     };
-    handleEl.addEventListener("pointermove", move);
-    handleEl.addEventListener("pointerup", up);
-    handleEl.addEventListener("pointercancel", up);
+    document.addEventListener("pointermove", move);
+    document.addEventListener("pointerup", up);
+    document.addEventListener("pointercancel", up);
   };
   const dnd = {
     draggingId: dragId,
@@ -14936,55 +15315,16 @@ function Builder({
     onClick: toggleTheme,
     title: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
     "aria-label": "Toggle theme"
-  }, theme === "dark" ? /*#__PURE__*/React.createElement(IconSun, null) : /*#__PURE__*/React.createElement(IconMoon, null)), /*#__PURE__*/React.createElement("div", {
-    className: "b-tools"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    onClick: () => setTools(o => !o)
-  }, "Tools ▾"), tools && /*#__PURE__*/React.createElement("div", {
-    className: "menu"
-  }, id && /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      navigate("/dashboard/" + id);
-    }
-  }, "View responses"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setMode("schedule");
-      setTools(false);
-    }
-  }, "Scheduler"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setMode("esign");
-      setTools(false);
-    }
-  }, "E-sign"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setMode("theme");
-      setTools(false);
-    }
-  }, "Theme"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setMode("settings");
-      setTools(false);
-    }
-  }, "Form settings"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setMode("i18n");
-      setTools(false);
-    }
-  }, "Translations"), id && /*#__PURE__*/React.createElement("button", {
-    className: "danger-text",
-    onClick: () => {
-      setTools(false);
-      del();
-    }
-  }, "Delete form"))), /*#__PURE__*/React.createElement("span", {
+  }, theme === "dark" ? /*#__PURE__*/React.createElement(IconSun, null) : /*#__PURE__*/React.createElement(IconMoon, null)), /*#__PURE__*/React.createElement("span", {
     className: "saved-note"
   }, savedAt ? "Saved at " + savedAt : id ? "Saved" : "Not saved yet"), /*#__PURE__*/React.createElement("span", {
     className: "badge " + statusBadge.cls
   }, statusBadge.text)), /*#__PURE__*/React.createElement("div", {
     className: "row"
-  }, /*#__PURE__*/React.createElement("button", {
+  }, id && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => navigate("/dashboard/" + id)
+  }, "Results"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: () => setPreview(p => !p)
   }, preview ? "Edit" : "Preview"), /*#__PURE__*/React.createElement("button", {
@@ -15010,10 +15350,7 @@ function Builder({
     form: form,
     preview: true
   }))) : /*#__PURE__*/React.createElement("div", {
-    className: "b-main",
-    onClick: () => {
-      if (tools) setTools(false);
-    }
+    className: "b-main"
   }, /*#__PURE__*/React.createElement("div", {
     className: "b-rail"
   }, /*#__PURE__*/React.createElement("button", {
@@ -15195,6 +15532,88 @@ function Builder({
     onClick: () => restoreQ(q.id)
   }, "Restore"))))))));
 }
+function EditableLink({
+  id,
+  form,
+  setForm
+}) {
+  const {
+    toast
+  } = useApp();
+  const base = form.username === "admin" ? window.location.origin + "/" : window.location.origin + "/" + form.username + "/";
+  const url = base + form.slug;
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(form.slug);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    setVal(form.slug);
+  }, [form.slug]);
+  const save = () => {
+    const next = val.trim();
+    if (!next || next === form.slug) {
+      setEditing(false);
+      setVal(form.slug);
+      return;
+    }
+    setSaving(true);
+    api.updateForm(id, {
+      slug: next
+    }).then(({
+      ok,
+      data
+    }) => {
+      setSaving(false);
+      setEditing(false);
+      if (ok && data && data.slug) {
+        setForm(f => ({
+          ...f,
+          slug: data.slug
+        }));
+        toast("Link updated");
+      } else {
+        setVal(form.slug);
+        toast("Could not update the link.");
+      }
+    });
+  };
+  const copy = () => {
+    try {
+      if (navigator.clipboard) navigator.clipboard.writeText(url);
+    } catch (e) {}
+    toast("Link copied");
+  };
+  if (editing) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "copyfield dash-link"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "dash-link-base"
+    }, base), /*#__PURE__*/React.createElement("input", {
+      className: "dash-link-input",
+      autoFocus: true,
+      value: val,
+      onChange: e => setVal(e.target.value),
+      onKeyDown: e => {
+        if (e.key === "Enter") save();else if (e.key === "Escape") {
+          setEditing(false);
+          setVal(form.slug);
+        }
+      }
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "btn sm primary",
+      disabled: saving,
+      onClick: save
+    }, saving ? "Saving..." : "Save"));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "copyfield dash-link"
+  }, /*#__PURE__*/React.createElement("code", null, url), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: () => setEditing(true)
+  }, "Edit link"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: copy
+  }, "Copy"));
+}
 function FormDashboard({
   id
 }) {
@@ -15280,32 +15699,19 @@ function FormDashboard({
     }
   }, form.title), /*#__PURE__*/React.createElement("span", {
     className: "badge " + (form.is_open ? "open" : "closed")
-  }, form.is_open ? "Open" : "Closed")), /*#__PURE__*/React.createElement("div", {
-    className: "row"
-  }, /*#__PURE__*/React.createElement("a", {
-    className: "btn sm",
-    href: url,
-    target: "_blank",
-    rel: "noopener"
-  }, "View form"), /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
+  }, form.is_open ? "Open" : "Closed"))), /*#__PURE__*/React.createElement("div", {
+    className: "dash-linkrow"
+  }, /*#__PURE__*/React.createElement(EditableLink, {
+    id: id,
+    form: form,
+    setForm: setForm
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
     onClick: () => navigate("/builder/" + id)
-  }, "Edit"), /*#__PURE__*/React.createElement("button", {
+  }, "Edit form"), /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
     onClick: duplicate
-  }, "Duplicate"))), /*#__PURE__*/React.createElement("div", {
-    className: "copyfield",
-    style: {
-      marginBottom: 20,
-      maxWidth: 520
-    }
-  }, /*#__PURE__*/React.createElement("code", null, url), /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    onClick: () => {
-      if (navigator.clipboard) navigator.clipboard.writeText(url);
-      toast("Link copied");
-    }
-  }, "Copy")), /*#__PURE__*/React.createElement(AiSummary, {
+  }, "Duplicate")), /*#__PURE__*/React.createElement(AiSummary, {
     fetcher: fetcher
   }), /*#__PURE__*/React.createElement("div", {
     className: "tabs"
@@ -15321,7 +15727,7 @@ function FormDashboard({
     id: id,
     form: form
   }), tab === "settings" && /*#__PURE__*/React.createElement("div", {
-    className: "card pad-lg",
+    className: "pad-lg dash-settings-box",
     style: {
       maxWidth: 560
     }
@@ -16367,13 +16773,11 @@ function ExportButtons({
   } = useApp();
   const [pdfBusy, setPdfBusy] = useState(false);
   const canExport = !(user && user.limits && user.limits.export === false);
-  if (!canExport) return /*#__PURE__*/React.createElement("div", {
-    className: "plan-lock-row"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "muted"
-  }, "CSV and PDF export is available on Pro and above."), /*#__PURE__*/React.createElement("span", {
-    className: "plan-pill plan-pro"
-  }, "Pro"));
+  if (!canExport) return /*#__PURE__*/React.createElement(PlanLock, {
+    label: "CSV and PDF export",
+    tier: "pro",
+    hint: "Export your responses as CSV or a themed PDF on Pro and above."
+  });
   return /*#__PURE__*/React.createElement("div", {
     className: "row exp-row",
     style: {
@@ -17798,14 +18202,17 @@ function App() {
       return n;
     });
   }, []);
+  const [upOpen, setUpOpen] = useState(false);
+  const upgrade = useCallback(() => setUpOpen(true), []);
   const ctx = useMemo(() => ({
     user,
     setUser,
     navigate,
     toast,
     theme,
-    toggleTheme
-  }), [user, navigate, toast, theme, toggleTheme]);
+    toggleTheme,
+    upgrade
+  }), [user, navigate, toast, theme, toggleTheme, upgrade]);
   let view;
   if (user === undefined) {
     view = /*#__PURE__*/React.createElement("div", {
@@ -17819,7 +18226,7 @@ function App() {
     })));
   } else {
     const seg = path.split("/").filter(Boolean);
-    const reserved = new Set(["dashboard", "builder", "login", "admin", "team", "api", "assets", "favicon.ico", "robots.txt"]);
+    const reserved = new Set(["dashboard", "builder", "login", "admin", "team", "api", "assets", "favicon.ico", "robots.txt", "privacy", "terms"]);
     if (seg.length === 1 && !reserved.has(seg[0])) view = /*#__PURE__*/React.createElement(PublicForm, {
       username: "admin",
       slug: seg[0]
@@ -17828,6 +18235,10 @@ function App() {
       slug: seg[1]
     });else if (seg.length === 0) view = user ? /*#__PURE__*/React.createElement(Dashboard, null) : /*#__PURE__*/React.createElement(Landing, null);else if (seg[0] === "login") view = /*#__PURE__*/React.createElement(Landing, {
       showLogin: true
+    });else if (seg[0] === "privacy" && seg.length === 1) view = /*#__PURE__*/React.createElement(LegalPage, {
+      kind: "privacy"
+    });else if (seg[0] === "terms" && seg.length === 1) view = /*#__PURE__*/React.createElement(LegalPage, {
+      kind: "terms"
     });else if (!user) view = /*#__PURE__*/React.createElement(Landing, {
       showLogin: true
     });else if (seg[0] === "dashboard" && seg.length === 1) view = /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "team" && seg.length === 1) view = /*#__PURE__*/React.createElement(TeamPanel, null);else if (seg[0] === "admin" && seg.length === 1) view = user.role === "admin" ? /*#__PURE__*/React.createElement(AdminConsole, null) : /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "dashboard" && seg.length === 2) view = /*#__PURE__*/React.createElement(FormDashboard, {
@@ -17845,7 +18256,10 @@ function App() {
     value: ctx
   }, view, toastMsg && /*#__PURE__*/React.createElement("div", {
     className: "toast"
-  }, toastMsg));
+  }, toastMsg), /*#__PURE__*/React.createElement(UpgradeModal, {
+    open: upOpen,
+    onClose: () => setUpOpen(false)
+  }));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));}
 (function(){function fail(m){var r=document.getElementById('root');if(r)r.innerHTML='<pre>'+m+'</pre>';}

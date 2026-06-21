@@ -43,6 +43,46 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+Privacy and terms pages, a cleaner footer, a nonprofit tier, and Zeffy donation embeds.
+
+1. There are now Privacy policy and Terms of service pages at /privacy and /terms. They are written in plain language and cover what is collected, how it is used, who it is shared with, payments through Stripe and Zeffy, cookies, retention, security, your choices, and Texas governing law. Both pages are linked in the footer.
+2. The footer is redesigned. It is one clean band across the full width of the screen with the logo and a short tagline on the left, Privacy, Terms, and Support links on the right, and the copyright line below. The wordmark in the copyright is now lowercase: zetetiq.
+3. The top navigation bar and the footer now span the full width of the screen.
+4. Nonprofit is its own tier in the admin console. The plan dropdown on the users table now has a Nonprofit option, and approving a nonprofit application sets the account to Nonprofit automatically. Education and Nonprofit get the same allowances, but only Nonprofit unlocks the Zeffy donation block.
+5. Nonprofit accounts can add a Donations (Zeffy) question. In the add question window a Donations section appears with a Zeffy block. Paste your Zeffy share link or full embed code, add an optional heading and description, and the donation or payment form is embedded directly in your form. Donations and payments are handled by Zeffy, not by zetetiq.
+6. The Google Translate top bar is suppressed, so translating a page no longer pushes the layout down with a grey banner.
+7. On the landing page the plans were reordered so Pro sits before Education. Pro is still the highlighted, most popular plan.
+8. All marketing text on the landing page is now non-selectable. Form fields and inputs can still be selected and edited normally.
+
+Backend changed this release. Upload both index.html and functions/api/[[path]].js, then redeploy. No database migration is needed. To grant the nonprofit features, open the admin console, set the user's plan to Nonprofit, and that account will then see the Donations (Zeffy) question type.
+
+## Previous release
+Drag animation fix, landing page refresh, and form dashboard cleanup.
+
+1. Question reordering now animates. The dragged card lifts and follows your cursor, and the other cards slide out of the way and settle smoothly. The previous version attached its tracking to the small drag handle, so movement could stall once the cursor left the handle; it now tracks across the whole page.
+2. Pricing on the landing page. Pro is now marked as the most popular plan. Free is labelled Free, forever. The education and nonprofit plan is now called Education, with the price shown as nine dollars crossed out and zero dollars beside it. A button under the plans reads Not a fan of subscriptions? Contact us to learn about lifetime access, linking to the support email.
+3. The form preview at the top of the landing page is now an automatic carousel. Every three seconds it moves to the next example, cycling through a feedback survey, ranked choice voting, a document to sign, meeting scheduling, and a star rating. Dots below let you jump to a slide.
+4. The numbered circles in the How it works section are now recessed.
+5. The automatic overview on a form is simpler. The basic overview label, the refresh button, and the divider line above them are gone. The overview is generated fresh each time the page loads.
+6. On a form page, the link row is now editable and combined with the actions. Edit form is a blue button, Duplicate is a white button the same size, both sitting next to the link. The link itself can be edited here: use Edit link, change the address, and save. The separate View form button has been removed.
+7. The box on the form settings tab that holds the accepting responses toggle and the delete button is now recessed.
+
+Frontend only this release. Upload index.html and redeploy. No backend change and no migration.
+
+## Previous release
+Google Calendar booking sync, visible plan locks, and a simpler builder top bar.
+
+1. Automatic calendar events. When your Google Calendar is connected and someone books a time through one of your forms, the booking is now added to your Google Calendar automatically, and Google sends the person a calendar invite by email so they can add it to their own calendar. This runs in the background after the response is submitted.
+2. Plan locked features now stay visible. Features that need Pro or Premium (such as removing the footer, custom favicon, custom CSS, A/B testing, brand studio, custom export field names, and CSV/PDF export) are no longer hidden on lower plans. They show in place, greyed out, with an Upgrade button that opens the plan picker.
+3. The Tools dropdown next to the light and dark toggle has been removed. Everything it held is reachable elsewhere: the scheduler, e-sign, theme, brand studio, and form settings are all on the left rail, delete form is in form settings, and a new Results button in the top bar opens the responses for the current form.
+
+Setup needed for the calendar sync (one time):
+- Backend changed this release. Upload both index.html and functions/api/[[path]].js, then redeploy.
+- The Google sign in now also asks for permission to add calendar events (previously it could only read free and busy times). In the Google Cloud console, on the OAuth consent screen, add the scope https://www.googleapis.com/auth/calendar.events to the list of scopes.
+- After deploying, disconnect and reconnect Google Calendar from the account menu once, so the new permission is granted. Existing connections will keep working for busy checks but cannot create events until reconnected.
+- No database migration this release.
+
+## Previous release
 Builder polish and e-sign placement improvements.
 - The Add a question dialog no longer has the gray divider lines, and the advanced question types are now just a third section you scroll to rather than hidden behind a toggle. The whole dialog scrolls as one list.
 - For document e-signing, new fields (text boxes, checkboxes, circles, signatures) start at a smaller default size, so they need less resizing.

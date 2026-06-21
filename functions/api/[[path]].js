@@ -309,7 +309,7 @@ async function calendarStart(provider, request, env){
       client_id: clientId,
       redirect_uri: origin + "/api/calendar/google/callback",
       response_type: "code",
-      scope: "https://www.googleapis.com/auth/calendar.freebusy openid email",
+      scope: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy openid email",
       state,
       access_type: "offline",
       prompt: "consent",
@@ -402,6 +402,36 @@ async function googleAccessToken(env, refreshToken){
     const t = await r.json();
     return (t && t.access_token) || null;
   } catch (e) { return null; }
+}
+
+async function googleCreateEvents(env, ownerId, schema, data){
+  try {
+    const events = bookingEventsFrom(schema, data);
+    if (!events.length) return;
+    const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(ownerId).first();
+    const conn = (cr && cr.calendar) ? safeParse(cr.calendar, null) : null;
+    if (!conn || !conn.google || !conn.google.refresh_token) return;
+    const token = await googleAccessToken(env, conn.google.refresh_token);
+    if (!token) return;
+    const email = findRespondentEmail(data);
+    const name = findRespondentName(data);
+    for (const e of events){
+      const end = new Date(e.start.getTime() + e.durationMin * 60000);
+      const descParts = [e.video ? (e.video + " meeting") : "", name ? ("Booked by " + name) : ""].filter(Boolean);
+      const ev = { summary: e.summary, start: { dateTime: e.start.toISOString() }, end: { dateTime: end.toISOString() } };
+      if (e.location) ev.location = e.location;
+      if (descParts.length) ev.description = descParts.join(". ");
+      if (email) ev.attendees = [{ email: email }];
+      const su = email ? "all" : "none";
+      try {
+        await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events?sendUpdates=" + su, {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify(ev),
+        });
+      } catch (e2) {}
+    }
+  } catch (e) {}
 }
 
 async function msAccessToken(env, refreshToken){
@@ -1158,6 +1188,9 @@ async function submitResponse(formId, request, env, context) {
     if (context && context.waitUntil && (settingsE.notifyEmail || settingsE.confirmEmail)) {
       context.waitUntil(notifyOnSubmit(env, formId, schemaE, settingsE, data, meta, respId));
     }
+    if (context && context.waitUntil && bookingEventsFrom(schemaE, data).length) {
+      context.waitUntil(googleCreateEvents(env, form.owner_id, schemaE, data));
+    }
   } catch (e) {}
 
   let paymentUrl = null;
@@ -1499,11 +1532,12 @@ async function updateUsername(request, env) {
 /* plans and tiers                                                     */
 /* ------------------------------------------------------------------ */
 const PLANS = {
-  free:       { maxForms: 5,        maxResp: 100,      uploadMb: 5,    export: false, whiteLabel: false, customCss: false, proFeatures: false, priority: false, team: false, sso: false },
-  edu:        { maxForms: 100,      maxResp: 1000,     uploadMb: 10,   export: true,  whiteLabel: true,  customCss: false, proFeatures: true,  priority: false, team: false, sso: false },
-  pro:        { maxForms: 100,      maxResp: 1000,     uploadMb: 10,   export: true,  whiteLabel: true,  customCss: false, proFeatures: true,  priority: false, team: false, sso: false },
-  premium:    { maxForms: Infinity, maxResp: Infinity, uploadMb: 1024, export: true,  whiteLabel: true,  customCss: true,  proFeatures: true,  priority: true,  team: false, sso: false },
-  enterprise: { maxForms: Infinity, maxResp: Infinity, uploadMb: 1024, export: true,  whiteLabel: true,  customCss: true,  proFeatures: true,  priority: true,  team: true,  sso: true },
+  free:       { maxForms: 5,        maxResp: 100,      uploadMb: 5,    export: false, whiteLabel: false, customCss: false, proFeatures: false, priority: false, team: false, sso: false, zeffy: false },
+  edu:        { maxForms: 100,      maxResp: 1000,     uploadMb: 10,   export: true,  whiteLabel: true,  customCss: false, proFeatures: true,  priority: false, team: false, sso: false, zeffy: false },
+  nonprofit:  { maxForms: 100,      maxResp: 1000,     uploadMb: 10,   export: true,  whiteLabel: true,  customCss: false, proFeatures: true,  priority: false, team: false, sso: false, zeffy: true  },
+  pro:        { maxForms: 100,      maxResp: 1000,     uploadMb: 10,   export: true,  whiteLabel: true,  customCss: false, proFeatures: true,  priority: false, team: false, sso: false, zeffy: false },
+  premium:    { maxForms: Infinity, maxResp: Infinity, uploadMb: 1024, export: true,  whiteLabel: true,  customCss: true,  proFeatures: true,  priority: true,  team: false, sso: false, zeffy: false },
+  enterprise: { maxForms: Infinity, maxResp: Infinity, uploadMb: 1024, export: true,  whiteLabel: true,  customCss: true,  proFeatures: true,  priority: true,  team: true,  sso: true,  zeffy: false },
 };
 function planLimits(plan){ return PLANS[plan] || PLANS.free; }
 function isEduEmail(email){ return /\.edu(\.[a-z]{2,3})?$/i.test(String(email || "").trim().toLowerCase()); }
@@ -1560,7 +1594,7 @@ async function adminSetPlan(request, env){
   if (!user || user.role !== "admin") return json({ error: "forbidden" }, 403);
   const body = await readJson(request) || {};
   const uid = String(body.uid || "");
-  const plan = ["free","edu","pro","premium","enterprise"].indexOf(body.plan) >= 0 ? body.plan : null;
+  const plan = ["free","edu","nonprofit","pro","premium","enterprise"].indexOf(body.plan) >= 0 ? body.plan : null;
   if (!uid || !plan || uid === "admin") return json({ error: "bad_request" }, 400);
   let pr = null;
   try { const row = await env.DB.prepare("SELECT plan_request FROM users WHERE id = ?").bind(uid).first(); pr = (row && row.plan_request) ? safeParse(row.plan_request, null) : null; } catch (e) {}

@@ -562,7 +562,9 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .embed-empty{padding:18px;border:1px dashed var(--line-strong);border-radius:12px;color:var(--ink-soft);font-size:14px;text-align:center}
 
 .lp{min-height:100vh;background:var(--paper);color:var(--ink)}
-.lp-nav{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:18px 24px}
+.lp-nav{width:100%;background:var(--card);border-bottom:1px solid var(--line);padding:14px clamp(18px,4vw,56px)}
+.lp-nav-in{display:flex;align-items:center;justify-content:space-between;width:100%}
+.lp-nav-logo{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
 .lp-nav-r{display:flex;align-items:center;gap:12px}
 .lp-hero{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding:40px 24px 56px}
 .lp-eyebrow{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700;color:var(--bo);margin-bottom:14px}
@@ -604,13 +606,17 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .lp-band-in{max-width:1080px;margin:0 auto;padding:56px 24px}
 .lp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:860px;margin:0 auto}
 .lp-step{text-align:center}
-.lp-num{width:42px;height:42px;border-radius:50%;background:var(--bo);color:#f5f2f0;font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.lp-num{width:42px;height:42px;border-radius:50%;background:var(--card);color:var(--bo);box-shadow:var(--bevel-inset);font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
 .lp-st{font-weight:700;font-size:17px;margin-bottom:6px;color:var(--ink)}
 .lp-cta{max-width:1080px;margin:0 auto;padding:64px 24px;text-align:center}
-.lp-foot{border-top:1px solid var(--line)}
-.lp-foot-in{max-width:1080px;margin:0 auto;padding:26px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;color:var(--ink-soft);font-size:14px}
-.lp-foot-tag{flex:1;min-width:200px}
-.lp-foot-link{color:var(--bo);text-decoration:none;font-weight:600}
+.lp-foot{border-top:1px solid var(--line);background:var(--card);width:100%}
+.lp-foot-in{padding:30px clamp(18px,4vw,56px) 14px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.lp-foot-brand{display:flex;align-items:center;gap:12px;color:var(--ink-soft)}
+.lp-foot-tag{font-size:14px}
+.lp-foot-links{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.lp-foot-link{color:var(--ink-soft);text-decoration:none;font-size:14px;font-weight:600;transition:color .12s}
+.lp-foot-link:hover{color:var(--ink)}
+.lp-foot-bottom{padding:4px clamp(18px,4vw,56px) 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 @media(max-width:860px){.lp-hero{grid-template-columns:1fr;gap:30px}.lp-h1{font-size:36px}.lp-grid{grid-template-columns:repeat(2,1fr)}.lp-grid-4{grid-template-columns:repeat(2,1fr)}.lp-steps{grid-template-columns:1fr;gap:20px}}
 @media(max-width:560px){.lp-grid,.lp-grid-4{grid-template-columns:1fr}.lp-h1{font-size:30px}.lp-visual{order:-1}.lp-h2{font-size:25px}}
 
@@ -869,7 +875,7 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 .form-card,.tpl-card{border-color:transparent;background:var(--paper);background-image:none;box-shadow:var(--bevel-inset);transform:none}
 .form-card:hover,.tpl-card:hover{border-color:transparent;background:var(--hover);box-shadow:var(--bevel-inset);transform:none}
 .tpl-card:disabled{opacity:.6}
-.lp-foot-copy{max-width:1080px;margin:0 auto;padding:0 24px 22px;color:var(--ink-soft);font-size:12.5px}
+.lp-foot-copy{color:var(--ink-soft);font-size:12.5px}
 
 /* ===== themed date / time pickers (v5) ===== */
 .zdate{justify-content:space-between}
@@ -1000,7 +1006,9 @@ html[data-theme="dark"] .nav .brand .logo svg,html[data-theme="dark"] .b-top .br
 .plan-bar-l{display:flex;align-items:center;gap:10px}
 .plan-usage{font-size:13px;color:var(--ink-soft)}
 .plan-lock-row{display:flex;align-items:center;gap:10px}
-.plan-lock-block{margin:4px 0}
+.plan-lock-block{margin:8px 0;padding:12px 14px;border-radius:10px;background:var(--hover);box-shadow:var(--bevel-inset)}
+.plan-lock-block .label{color:var(--ink-soft)}
+.plan-lock-up{margin-top:10px}
 .app-list{display:flex;flex-direction:column;gap:10px}
 .app-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:var(--card);box-shadow:var(--bevel-soft);border-radius:11px;padding:12px 14px;flex-wrap:wrap}
 .app-note{font-size:13px;color:var(--ink-soft);margin-top:5px;max-width:520px}
@@ -1224,6 +1232,62 @@ body{top:0!important}
 
 /* bigger place-fields button */
 .esign-place-btn{margin-top:12px;width:100%;padding:13px 16px;font-size:15px;font-weight:700}
+
+/* pricing extras */
+.price-was{text-decoration:line-through;color:var(--ink-soft);margin-right:8px;font-weight:600}
+.price-lifetime{text-align:center;margin-top:24px}
+/* hero carousel */
+.lp-carousel-body{min-height:312px}
+.lp-slide{animation:lpFade .5s ease both}
+@keyframes lpFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.lp-mock-rank{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.lp-rankrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:13px}
+.lp-ranknum{width:20px;height:20px;border-radius:50%;background:var(--bo);color:#f5f2f0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.lp-rankgrip{color:var(--ink-soft);font-size:13px}
+.lp-mock-doc{border:1px solid var(--line-strong);border-radius:9px;padding:14px;display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.lp-docline{height:8px;border-radius:4px;background:var(--line-strong)}
+.lp-docline.short{width:60%}
+.lp-sign{margin-top:12px;border:1px dashed var(--bo);border-radius:9px;padding:8px 12px;display:flex;flex-direction:column;gap:2px;background:rgba(92,136,205,.08)}
+.lp-sign-cap{font-size:11px;color:var(--ink-soft)}
+.lp-sign-mark{font-family:'Monsieur La Doulaise',cursive;font-size:26px;color:var(--ink);line-height:1.1}
+.lp-mock-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:4px}
+.lp-slot{border:1px solid var(--line-strong);border-radius:8px;padding:9px 0;text-align:center;font-size:13px;font-weight:600}
+.lp-slot.on{border-color:var(--bo);background:var(--bo);color:#f5f2f0}
+.lp-mock-stars{display:flex;gap:6px;font-size:26px;color:var(--line-strong)}
+.lp-star.on{color:#e8b54a}
+.lp-mock-textbox{border:1px solid var(--line-strong);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--ink-soft);margin-top:4px}
+.lp-dots{display:flex;gap:6px;justify-content:center;padding:2px 0 16px}
+.lp-dot{width:7px;height:7px;border-radius:50%;background:var(--line-strong);cursor:pointer;transition:background .2s,transform .2s}
+.lp-dot.on{background:var(--bo);transform:scale(1.3)}
+
+/* form dashboard link row + recessed settings box */
+.dash-linkrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.dash-link{margin-bottom:0!important;max-width:520px;flex:1 1 300px}
+.dash-link-base{font-family:var(--mono);font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.dash-link-input{flex:1;min-width:70px;border:0;background:transparent;font-family:var(--mono);font-size:12px;color:var(--ink);outline:none;padding:0}
+.dash-settings-box{background:var(--card);border-radius:14px;box-shadow:var(--bevel-inset)}
+
+/* non-selectable landing text (inputs stay selectable) */
+.lp-noselect{user-select:none;-webkit-user-select:none}
+.lp-noselect input,.lp-noselect textarea,.lp-noselect [contenteditable]{user-select:text;-webkit-user-select:text}
+/* neutralize the Google Translate top banner if a browser or extension injects it */
+.goog-te-banner-frame,.goog-te-banner-frame.skiptranslate,iframe.skiptranslate{display:none!important}
+body{top:0!important}
+#goog-gt-tt,.goog-te-balloon-frame{display:none!important}
+.goog-text-highlight{background:none!important;box-shadow:none!important}
+/* legal pages */
+.legal-wrap{max-width:760px;margin:0 auto;padding:48px 24px 64px;color:var(--ink)}
+.legal-wrap h1{font-family:var(--display);font-size:34px;margin:0 0 6px;letter-spacing:-0.02em}
+.legal-updated{color:var(--ink-soft);font-size:13px;margin:0 0 28px}
+.legal-wrap h2{font-family:var(--display);font-size:20px;margin:30px 0 8px}
+.legal-wrap p{line-height:1.65;margin:0 0 12px;color:var(--ink-soft)}
+.legal-wrap ul{margin:0 0 12px;padding-left:20px;color:var(--ink-soft);line-height:1.65}
+.legal-wrap li{margin:4px 0}
+.legal-wrap a{color:var(--bo);font-weight:600;text-decoration:none}
+.legal-wrap a:hover{text-decoration:underline}
+
+.zeffy-embed{width:100%;min-height:640px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.zeffy-q .embed-empty{margin-top:4px}
 </style>
 </head>
 <body>
@@ -2489,10 +2553,39 @@ function AdvancedControls({ q, update, experiment }){
     {experiment && experiment.on && (<Field label="Show in variant"><Select className="select" value={q.variant || ""} onChange={(e)=>update({ variant: e.target.value })}><option value="">All variants</option>{Array.from({length: experiment.count}).map((_, i)=>{ const L = String.fromCharCode(65 + i); return <option key={L} value={L}>{"Variant " + L}</option>; })}</Select></Field>)}
     {isInput && proFeat && (<><Field label="Export field name (optional)"><input className="input" value={q.exportKey || ""} onChange={(e)=>update({ exportKey: e.target.value.replace(/[^a-zA-Z0-9_]/g, "") })} placeholder="e.g. email or nps_score" /></Field>
     <div className="hint">Used as the column name in CSV exports and the key in webhook and API payloads.</div></>)}
-    {isInput && !proFeat && (<div className="plan-lock-block"><div className="label">Export field name <span className="plan-pill plan-pro">Pro</span></div><div className="hint">Custom export field names are available on Pro and above.</div></div>)}
+    {isInput && !proFeat && (<PlanLock label="Export field name" tier="pro" hint="Custom export field names are available on Pro and above." />)}
   </div>);
 }
 
+function zeffySrc(v){
+  if (!v) return "";
+  v = String(v).trim();
+  const m = v.match(/src=["']([^"']+)["']/i);
+  if (m) return m[1];
+  if (/^https?:\/\//i.test(v)) return v;
+  return "";
+}
+function ZeffyRenderer({ q }){
+  const src = zeffySrc(q.url);
+  return (
+    <div className="q zeffy-q">
+      {q.heading && <div className="qlabel" style={{fontSize:18}}>{q.heading}</div>}
+      {q.description && <div style={{color:"var(--ink-soft)",whiteSpace:"pre-wrap",marginBottom:10}}>{q.description}</div>}
+      {src ? <iframe className="zeffy-embed" src={src} title="Zeffy donation form" loading="lazy" allow="payment" referrerPolicy="no-referrer-when-downgrade" />
+        : <div className="embed-empty">Add your Zeffy link to show the donation form.</div>}
+    </div>
+  );
+}
+function ZeffyControls({ q, update }){
+  return (
+    <div>
+      <Field label="Heading (optional)"><input className="input" value={q.heading || ""} onChange={(e)=>update({ heading: e.target.value })} placeholder="Support our work" /></Field>
+      <Field label="Short description (optional)"><textarea className="textarea" style={{minHeight:60}} value={q.description || ""} onChange={(e)=>update({ description: e.target.value })} placeholder="Tell people what their donation supports" /></Field>
+      <Field label="Zeffy embed link"><input className="input" value={q.url || ""} onChange={(e)=>update({ url: e.target.value })} placeholder="https://www.zeffy.com/embed/..." /></Field>
+      <div className="hint">In Zeffy, open your form, choose Share, then Embed, and copy the link or the full embed code. Paste it here. Donations and payments are handled by Zeffy. zetetiq does not process or hold the funds.</div>
+    </div>
+  );
+}
 function EmbedRenderer({ q }){
   if (!q.embedSlug || !q.embedUser){
     return (<div className="q">{q.label ? <QLabel q={q} /> : null}<div className="embed-empty">Nothing embedded yet.</div></div>);
@@ -2732,6 +2825,15 @@ const QTYPES = {
           : <div className="muted" style={{fontSize:13}}>Add a payment link to show the payment button.</div>}
       </div>
     ),
+  },
+  zeffy: {
+    label: "Donations (Zeffy)",
+    hint: "Embed a Zeffy donation or payment form",
+    isInput: false,
+    make: () => ({ type:"zeffy", id: uid(), heading:"Support our work", description:"", url:"" }),
+    summary: (q) => q.url ? "Zeffy form" : "no link yet",
+    validate: () => null,
+    Renderer: ZeffyRenderer,
   },
   document_sign: {
     label: "Document to sign",
@@ -3191,10 +3293,6 @@ function AiSummary({ fetcher }){
         ? (<div><div className="shimmer" style={{width:"94%"}}/><div className="shimmer" style={{width:"88%"}}/><div className="shimmer" style={{width:"55%"}}/></div>)
         : (<div className="ai-body">{state.summary || state.error || "No summary available."}</div>)}
       {!state.loading && m && m.ai_error && <div className="ai-note">{m.ai_error === "ai_unavailable" ? "Connect Workers AI for richer overviews: in Cloudflare, add a Workers AI binding named AI to this Pages project, then redeploy." : ("The overview service could not be reached right now (" + m.ai_error + "). Showing a basic summary.")}</div>}
-      <div className="ai-foot">
-        <span className="ai-meta">{metaText}</span>
-        <button className="btn sm ghost" disabled={state.loading} onClick={()=>load(true)}>Refresh</button>
-      </div>
     </div>
   );
 }
@@ -3663,26 +3761,26 @@ function LIcon({ name }){
 }
 
 const PLAN_TIERS = [
-  { id:"free", name:"Free", price:"$0", cadence:"", tagline:"Everything you need to get started.",
+  { id:"free", name:"Free, forever", price:"$0", cadence:"", tagline:"Everything you need to get started.",
     features:["All 27 question types","Up to 5 forms","100 responses per form","5 MB file uploads","Themes, templates and dark mode"],
     missing:["CSV and PDF export","Remove the zetetiq footer","Custom CSS"] },
-  { id:"edu", name:"EDU/Non-profit", price:"Free", cadence:"", tagline:"Free for students, educators, and 501 (c) 3 non profits.",
-    features:["Everything in Pro","Dedicated support","Automatic with a .edu sign in","Others can apply from the dashboard"] },
-  { id:"pro", name:"Pro", price:"$9", cadence:" / month", tagline:"For people who build forms often.",
+  { id:"pro", name:"Pro", price:"$9", cadence:" / month", tagline:"For people who build forms often.", featured:true,
     features:["Up to 100 forms","1,000 responses per form","10 MB file uploads","CSV and PDF export","Remove the zetetiq footer","White-label forms"] },
-  { id:"premium", name:"Premium", price:"$35", cadence:" / month", tagline:"For power users.", featured:true,
+  { id:"edu", name:"Education", price:"$0", was:"$9", cadence:"", tagline:"Free for students, educators, and 501 (c) 3 non profits.",
+    features:["Everything in Pro","Dedicated support","Automatic with a .edu sign in","Others can apply from the dashboard"] },
+  { id:"premium", name:"Premium", price:"$35", cadence:" / month", tagline:"For power users.",
     features:["Everything in Pro","Unlimited forms","Unlimited responses","1 GB file uploads","Custom CSS and styling","Priority support"] },
   { id:"enterprise", name:"Enterprise", price:"Let's talk", cadence:"", tagline:"For organizations and teams.",
     features:["Everything in Premium","Team support","SSO sign in","Dedicated onboarding"] },
 ];
 function PricingTable(){
-  return (<div className="price-grid">
+  return (<><div className="price-grid">
     {PLAN_TIERS.map((t)=>(
       <div key={t.id} className={"price-card" + (t.featured ? " featured" : "")}>
         {t.featured && <div className="price-flag">Most popular</div>}
         {t.badge && <div className="price-badge">{t.badge}</div>}
         <div className="price-name">{t.name}</div>
-        <div className="price-amt">{t.price}<span className="price-cad">{t.cadence}</span></div>
+        <div className="price-amt">{t.was && <span className="price-was">{t.was}</span>}{t.price}<span className="price-cad">{t.cadence}</span></div>
         <div className="price-tag">{t.tagline}</div>
         <ul className="price-feats">
           {t.features.map((f,i)=>(<li key={i} className="pf-yes">{f}</li>))}
@@ -3691,7 +3789,9 @@ function PricingTable(){
         {t.id === "enterprise" && <a className="btn sm price-cta" href="mailto:support@zetetiq.com?subject=Enterprise%20plan%20enquiry">Connect</a>}
       </div>
     ))}
-  </div>);
+  </div>
+  <div className="price-lifetime"><a className="btn" href="mailto:support@zetetiq.com?subject=Lifetime%20access%20enquiry">Not a fan of subscriptions? Contact us to learn about lifetime access.</a></div>
+  </>);
 }
 function ApplyModal({ onClose }){
   const { setUser, toast } = useApp();
@@ -3727,7 +3827,7 @@ function AdminApplications(){
             {a.request.note && <div className="app-note">{a.request.note}</div>}
           </div>
           <div className="app-actions">
-            <button className="btn sm primary" onClick={()=>setPlan(a.uid,"edu")}>Approve</button>
+            <button className="btn sm primary" onClick={()=>setPlan(a.uid, a.request.kind === "nonprofit" ? "nonprofit" : "edu")}>Approve</button>
             <button className="btn sm ghost" onClick={()=>setPlan(a.uid,"free")}>Decline</button>
           </div>
         </div>
@@ -3735,8 +3835,31 @@ function AdminApplications(){
     </div>
   </div>);
 }
+function UpgradeModal({ open, onClose }){
+  const { user, toast } = useApp();
+  const [busy, setBusy] = useState("");
+  if (!open) return null;
+  const plan = (user && user.plan) || "free";
+  const checkout = (p)=>{ setBusy(p); api.checkout(p).then(({ ok, data })=>{ setBusy(""); if (ok && data && data.url){ window.location.href = data.url; return; } const e = data && data.error; toast(e === "billing_unconfigured" ? "Billing is not set up yet (Stripe secret key missing)." : e === "price_unconfigured" ? "Billing is not fully set up (price IDs missing)." : e === "unauthorized" ? "Please sign in again." : (data && data.detail) ? ("Stripe: " + String(data.detail).slice(0,120)) : "Could not start checkout. Please try again."); }).catch(()=>{ setBusy(""); toast("Could not start checkout."); }); };
+  return (<Modal title="Upgrade your plan" onClose={onClose}>
+    <div className="pad-lg">
+      <div className="hint" style={{marginBottom:14}}>Pick the plan that fits how you work. You can change or cancel anytime.</div>
+      <div className="up-tiers">
+        {plan==="free" && (<div className="up-tier"><div className="up-tier-h"><span className="up-tier-name">Pro</span><span className="up-tier-price">$9 / month</span></div><div className="up-tier-desc">Up to 100 forms, 1,000 responses each, CSV and PDF export, and white-label forms.</div><button className="btn primary" disabled={busy==="pro"} onClick={()=>checkout("pro")}>{busy==="pro"?"Starting...":"Choose Pro"}</button></div>)}
+        <div className="up-tier featured"><div className="up-tier-h"><span className="up-tier-name">Premium</span><span className="up-tier-price">$35 / month</span></div><div className="up-tier-desc">Unlimited forms and responses, 1 GB uploads, custom CSS, and priority support.</div><button className="btn primary" disabled={busy==="premium"} onClick={()=>checkout("premium")}>{busy==="premium"?"Starting...":"Choose Premium"}</button></div>
+      </div>
+      <div className="up-ent">Need teams or single sign on? <a className="up-link" href="mailto:support@zetetiq.com">Contact us about Enterprise</a>.</div>
+    </div>
+  </Modal>);
+}
+function PlanLock({ label, tier, hint }){
+  const { upgrade } = useApp();
+  const tierName = tier === "premium" ? "Premium" : tier === "enterprise" ? "Enterprise" : "Pro";
+  const tierCls = tier === "premium" ? "plan-premium" : tier === "enterprise" ? "plan-enterprise" : "plan-pro";
+  return (<div className="plan-lock-block"><div className="label">{label} <span className={"plan-pill " + tierCls}>{tierName}</span></div>{hint && <div className="hint">{hint}</div>}<button className="btn sm primary plan-lock-up" onClick={upgrade}>Upgrade</button></div>);
+}
 function PlanBar({ user, forms, onApply }){
-  const { toast } = useApp();
+  const { toast, upgrade } = useApp();
   const plan = user.plan || "free";
   const lim = user.limits || {};
   const names = { free:"Free", edu:"Education", pro:"Pro", premium:"Premium", enterprise:"Enterprise" };
@@ -3747,29 +3870,195 @@ function PlanBar({ user, forms, onApply }){
   const [busy, setBusy] = useState("");
   const checkout = (p)=>{ setBusy(p); api.checkout(p).then(({ ok, data })=>{ setBusy(""); if (ok && data && data.url){ window.location.href = data.url; return; } const e = data && data.error; try { if (data) console.warn("checkout failed:", e || "", (data && data.detail) || ""); } catch (_) {} toast(e === "billing_unconfigured" ? "Billing is not set up yet (Stripe secret key missing)." : e === "price_unconfigured" ? "Billing is not fully set up (price IDs missing)." : e === "unauthorized" ? "Please sign in again." : (data && data.detail) ? ("Stripe: " + String(data.detail).slice(0,120)) : "Could not start checkout. Please try again."); }).catch(()=>{ setBusy(""); toast("Could not start checkout."); }); };
   const portal = ()=>{ setBusy("portal"); api.billingPortal().then(({ ok, data })=>{ setBusy(""); if (ok && data && data.url) window.location.href = data.url; else toast("Could not open billing right now."); }).catch(()=>{ setBusy(""); toast("Could not open billing right now."); }); };
-  const [upOpen, setUpOpen] = useState(false);
   const canUpgrade = plan !== "premium" && plan !== "enterprise";
   return (<div className="plan-bar">
-    <div className="plan-bar-l"><span className={"plan-pill plan-"+plan}>{names[plan]||plan}</span>{count!=null && <span className="plan-usage">{count}{maxForms!=null?(" of "+maxForms):""} {maxForms===1?"form":"forms"}{plan==="free"?", up to 100 responses each":""}</span>}{canUpgrade && <button className="btn sm primary plan-upbtn" onClick={()=>setUpOpen(true)}>Upgrade</button>}</div>
+    <div className="plan-bar-l"><span className={"plan-pill plan-"+plan}>{names[plan]||plan}</span>{count!=null && <span className="plan-usage">{count}{maxForms!=null?(" of "+maxForms):""} {maxForms===1?"form":"forms"}{plan==="free"?", up to 100 responses each":""}</span>}{canUpgrade && <button className="btn sm primary plan-upbtn" onClick={upgrade}>Upgrade</button>}</div>
     <div className="plan-bar-r">
       {plan==="free" && (pending
         ? <span className="muted" style={{fontSize:13}}>Education or nonprofit application under review</span>
         : <button className="btn sm ghost" onClick={onApply}>Apply for education or nonprofit</button>)}
       {(plan==="pro"||plan==="premium") && billing.portal && <button className="btn sm ghost" disabled={busy==="portal"} onClick={portal}>{busy==="portal"?"Opening...":"Manage billing"}</button>}
     </div>
-    {upOpen && (<Modal title="Upgrade your plan" onClose={()=>setUpOpen(false)}>
-      <div className="pad-lg">
-        <div className="hint" style={{marginBottom:14}}>Pick the plan that fits how you work. You can change or cancel anytime.</div>
-        <div className="up-tiers">
-          {plan==="free" && (<div className="up-tier"><div className="up-tier-h"><span className="up-tier-name">Pro</span><span className="up-tier-price">$9 / month</span></div><div className="up-tier-desc">Up to 100 forms, 1,000 responses each, CSV and PDF export, and white-label forms.</div><button className="btn primary" disabled={busy==="pro"} onClick={()=>checkout("pro")}>{busy==="pro"?"Starting...":"Choose Pro"}</button></div>)}
-          <div className="up-tier featured"><div className="up-tier-h"><span className="up-tier-name">Premium</span><span className="up-tier-price">$35 / month</span></div><div className="up-tier-desc">Unlimited forms and responses, 1 GB uploads, custom CSS, and priority support.</div><button className="btn primary" disabled={busy==="premium"} onClick={()=>checkout("premium")}>{busy==="premium"?"Starting...":"Choose Premium"}</button></div>
-        </div>
-        <div className="up-ent">Need teams or single sign on? <a className="up-link" href="mailto:support@zetetiq.com">Contact us about Enterprise</a>.</div>
-      </div>
-    </Modal>)}
   </div>);
 }
 
+function HeroCarousel(){
+  const slides = [
+    { title:"Customer feedback", body:(
+      <>
+        <div className="lp-mock-q">How likely are you to recommend us?</div>
+        <div className="lp-mock-scale">{[0,1,2,3,4,5,6,7,8,9,10].map((n)=>(<span key={n} className={"lp-pip" + (n === 9 ? " on" : "")}>{n}</span>))}</div>
+        <div className="lp-mock-q">What could we improve?</div>
+        <div className="lp-mock-opts">{["Faster support","A lower price","More features"].map((o,i)=>(<div key={i} className={"lp-mock-opt" + (i === 0 ? " on" : "")}><span className="lp-rad"></span>{o}</div>))}</div>
+      </>
+    ) },
+    { title:"Club election", body:(
+      <>
+        <div className="lp-mock-q">Rank these candidates in order</div>
+        <div className="lp-mock-rank">{["Alex Rivera","Jordan Lee","Sam Okafor","Priya Nair"].map((o,i)=>(<div key={i} className="lp-rankrow"><span className="lp-ranknum">{i+1}</span><span className="lp-rankgrip">⠿</span><span>{o}</span></div>))}</div>
+      </>
+    ) },
+    { title:"Service agreement", body:(
+      <>
+        <div className="lp-mock-q">Please review and sign below</div>
+        <div className="lp-mock-doc"><div className="lp-docline"></div><div className="lp-docline short"></div><div className="lp-docline"></div><div className="lp-docline short"></div></div>
+        <div className="lp-sign"><span className="lp-sign-cap">Signature</span><span className="lp-sign-mark">zetetiq</span></div>
+      </>
+    ) },
+    { title:"Book a meeting", body:(
+      <>
+        <div className="lp-mock-q">Pick a time that works for you</div>
+        <div className="lp-mock-slots">{["9:00","9:30","10:00","10:30","11:00","11:30","1:00","1:30","2:00"].map((s,i)=>(<span key={i} className={"lp-slot" + (i === 4 ? " on" : "")}>{s}</span>))}</div>
+      </>
+    ) },
+    { title:"Rate your visit", body:(
+      <>
+        <div className="lp-mock-q">How was everything?</div>
+        <div className="lp-mock-stars">{[1,2,3,4,5].map((n)=>(<span key={n} className={"lp-star" + (n <= 4 ? " on" : "")}>★</span>))}</div>
+        <div className="lp-mock-q">Anything you would like to add?</div>
+        <div className="lp-mock-textbox">The team was friendly and everything was spotless.</div>
+      </>
+    ) },
+  ];
+  const [i, setI] = useState(0);
+  useEffect(()=>{ const t = setInterval(()=> setI((x)=> (x + 1) % slides.length), 3000); return ()=> clearInterval(t); }, [slides.length]);
+  const s = slides[i];
+  return (
+    <div className="lp-win">
+      <div className="lp-win-bar"><span></span><span></span><span></span></div>
+      <div className="lp-win-body lp-carousel-body">
+        <div className="lp-slide" key={i}>
+          <div className="lp-mock-title">{s.title}</div>
+          {s.body}
+          <div className="lp-mock-btn">Submit</div>
+        </div>
+      </div>
+      <div className="lp-dots">{slides.map((_, d)=>(<span key={d} className={"lp-dot" + (d === i ? " on" : "")} onClick={()=>setI(d)}></span>))}</div>
+    </div>
+  );
+}
+function SiteFooter({ onAdmin }){
+  const { navigate } = useApp();
+  const go = (p) => (e) => { e.preventDefault(); navigate(p); };
+  return (
+    <footer className="lp-foot">
+      <div className="lp-foot-in">
+        <div className="lp-foot-brand"><Logo size={18} /><span className="lp-foot-tag">Experience management, simplified.</span></div>
+        <nav className="lp-foot-links">
+          <a className="lp-foot-link" href="/privacy" onClick={go("/privacy")}>Privacy</a>
+          <a className="lp-foot-link" href="/terms" onClick={go("/terms")}>Terms</a>
+          <a className="lp-foot-link" href="mailto:support@zetetiq.com">Support</a>
+        </nav>
+      </div>
+      <div className="lp-foot-bottom">
+        <span className="lp-foot-copy">© 2026 zetetiq</span>
+        {onAdmin && <button type="button" className="lp-foot-admin" onClick={onAdmin}>Admin sign in</button>}
+      </div>
+    </footer>
+  );
+}
+function PrivacyContent(){
+  return (<>
+    <h1>Privacy policy</h1>
+    <p className="legal-updated">Last updated June 2026</p>
+    <p>This policy explains what information zetetiq collects, how it is used, and the choices you have. zetetiq is a form and survey builder operated from Austin, Texas. If you have questions, write to support@zetetiq.com.</p>
+    <h2>Who this covers</h2>
+    <p>There are two kinds of people in this policy. Account holders sign in and build forms. Respondents fill out a form that an account holder has shared. When you fill out someone's form, that account holder decides what is asked and what happens with the answers, and zetetiq stores those answers on their behalf.</p>
+    <h2>What we collect</h2>
+    <ul>
+      <li>Account details. When you sign in with Google, we receive your name and email address so we can create and identify your account.</li>
+      <li>Content you create. The forms, questions, themes, and settings you build are stored so the service can show and run them.</li>
+      <li>Responses. Answers that respondents submit are stored for the account holder who owns the form, along with the time of submission.</li>
+      <li>Connected services. If you connect a calendar or a payment account, we store the tokens needed to use that connection for you. You can disconnect at any time.</li>
+      <li>Basic technical data. Like most websites, our hosting keeps standard request logs, such as a rough location and device type, to keep the service secure and working.</li>
+    </ul>
+    <h2>How we use information</h2>
+    <p>We use it to run the service: to sign you in, store and display your forms, record responses, send the transactional emails you ask for such as a booking confirmation, and keep the product secure. We also use aggregate counts that do not identify anyone to understand how features are used and to improve them. We do not use your forms or responses to show you advertising.</p>
+    <h2>When we share information</h2>
+    <p>We do not sell your personal information. We share it only in these cases:</p>
+    <ul>
+      <li>Service providers that run parts of the product for us, including Cloudflare for hosting and storage, Resend for sending email, Google for calendar features when you connect a calendar, and Stripe for paid subscriptions. For nonprofit accounts that add a Zeffy block, donations and payments are handled by Zeffy under its own terms.</li>
+      <li>Account holders. If you submit a response to a form, the owner of that form receives your answers.</li>
+      <li>Legal reasons. We may share information if the law requires it, or to protect the rights and safety of people and the service.</li>
+    </ul>
+    <h2>Cookies</h2>
+    <p>We use a single sign in cookie to keep you logged in. We do not use third party advertising or cross site tracking cookies.</p>
+    <h2>How long we keep it</h2>
+    <p>We keep your account and content while your account is active. Responses stay until you delete them or delete the form. When you delete a form or your account, the related responses are removed. To have your account and data deleted, write to support@zetetiq.com.</p>
+    <h2>Security</h2>
+    <p>Traffic to zetetiq is encrypted in transit, and access to stored data is limited to what is needed to run the service. No method of storage or transmission is perfectly secure, but we work to protect your information and to fix issues quickly.</p>
+    <h2>Your choices</h2>
+    <p>You can view and edit your forms and responses at any time, export responses on the plans that include export, disconnect any connected service, and ask us to correct or delete your information. Depending on where you live, you may have additional rights to access or remove your data. To make a request, write to support@zetetiq.com.</p>
+    <h2>Children</h2>
+    <p>zetetiq is not directed to children under 13, and we do not knowingly collect their personal information. If you believe a child has provided information through the service, contact us and we will remove it.</p>
+    <h2>Changes</h2>
+    <p>We may update this policy as the product changes. When we do, we will update the date at the top of this page. Continued use of the service after a change means you accept the updated policy.</p>
+    <h2>Contact</h2>
+    <p>Questions about privacy can be sent to support@zetetiq.com.</p>
+  </>);
+}
+function TermsContent(){
+  return (<>
+    <h1>Terms of service</h1>
+    <p className="legal-updated">Last updated June 2026</p>
+    <p>These terms are the agreement between you and zetetiq for use of the service. By creating an account or using zetetiq, you agree to them. zetetiq is operated from Austin, Texas. If you do not agree, please do not use the service.</p>
+    <h2>The service</h2>
+    <p>zetetiq lets you build forms and surveys, share them by link, collect responses, and use features such as themes, logic, scheduling, e-sign, scoring, and exports. We add and change features over time.</p>
+    <h2>Your account</h2>
+    <p>You sign in with Google. You are responsible for activity under your account and for keeping your sign in secure. Tell us promptly if you think someone else has accessed your account.</p>
+    <h2>Acceptable use</h2>
+    <p>You agree not to use zetetiq to do any of the following:</p>
+    <ul>
+      <li>Break the law or help anyone else break the law.</li>
+      <li>Send spam, run phishing, or try to deceive the people who fill out your forms.</li>
+      <li>Upload malware or attempt to disrupt, overload, or gain unauthorized access to the service.</li>
+      <li>Collect sensitive personal information without a lawful basis and the proper consent.</li>
+      <li>Infringe the rights of others, including privacy and intellectual property rights.</li>
+    </ul>
+    <p>You are responsible for the content of your forms and for how you use the responses you collect.</p>
+    <h2>Your content</h2>
+    <p>You keep ownership of the forms you create and the responses you collect. You give zetetiq permission to host, store, and process that content for the purpose of providing the service to you. We do not claim ownership of your content and we do not sell it.</p>
+    <h2>Plans and billing</h2>
+    <p>zetetiq offers a free plan and paid plans. Paid subscriptions are billed through Stripe on the cycle shown at checkout and renew until you cancel. You can cancel at any time, and your plan stays active until the end of the period you have paid for. Schools, students with a school email address, and registered nonprofits can apply for the education or nonprofit tier at no cost, subject to review.</p>
+    <h2>Payments collected through your forms</h2>
+    <p>If you add a payment link, or for nonprofit accounts a Zeffy donation block, those payments are processed by Stripe or Zeffy, not by zetetiq. The agreement for those payments is between you, the person paying, and the relevant processor. zetetiq does not hold the funds and is not responsible for those transactions.</p>
+    <h2>Third party services</h2>
+    <p>Some features rely on services run by others, such as Google, Stripe, Zeffy, and Cloudflare. Your use of those features is also subject to the terms of those providers.</p>
+    <h2>Availability</h2>
+    <p>We work to keep zetetiq available and reliable, but the service is provided as is and as available. We do not promise that it will always be uninterrupted or error free.</p>
+    <h2>Suspension and termination</h2>
+    <p>You can stop using zetetiq at any time. We may suspend or close an account that breaks these terms or that puts the service or other people at risk. Where it is reasonable to do so, we will give notice.</p>
+    <h2>Limitation of liability</h2>
+    <p>To the extent the law allows, zetetiq is not liable for indirect or incidental damages, or for loss of data or profits, arising from your use of the service. Nothing in these terms removes rights that cannot be removed under the law that applies to you.</p>
+    <h2>Changes to these terms</h2>
+    <p>We may update these terms as the product changes. When we do, we will update the date at the top of this page. If you keep using the service after a change, you accept the updated terms.</p>
+    <h2>Governing law</h2>
+    <p>These terms are governed by the laws of the State of Texas in the United States, without regard to its conflict of law rules.</p>
+    <h2>Contact</h2>
+    <p>Questions about these terms can be sent to support@zetetiq.com.</p>
+  </>);
+}
+function LegalPage({ kind }){
+  const { navigate, theme, toggleTheme } = useApp();
+  useEffect(()=>{ try { window.scrollTo(0,0); } catch(e){} }, []);
+  return (
+    <div className="lp legal-page">
+      <header className="lp-nav">
+        <div className="lp-nav-in">
+          <a href="/" className="lp-nav-logo" onClick={(e)=>{ e.preventDefault(); navigate("/"); }}><Logo size={22} /></a>
+          <div className="lp-nav-r">
+            <button className="themebtn" onClick={toggleTheme} title="Toggle theme" aria-label="Toggle theme">{theme === "dark" ? <IconSun/> : <IconMoon/>}</button>
+            <button className="btn" onClick={()=>navigate("/")}>Back to home</button>
+          </div>
+        </div>
+      </header>
+      <main className="legal-wrap">
+        {kind === "privacy" ? <PrivacyContent/> : <TermsContent/>}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
 function Landing({ showLogin }){
   const { user, setUser, navigate, toast, theme, toggleTheme } = useApp();
   const [open, setOpen] = useState(!!showLogin);
@@ -3808,13 +4097,15 @@ function Landing({ showLogin }){
   const types = QTYPE_ORDER.map((k)=> (QTYPES[k] && QTYPES[k].label) || k);
 
   return (
-    <div className="lp">
+    <div className="lp lp-noselect">
       <header className="lp-nav">
+        <div className="lp-nav-in">
         <Logo size={22} />
         <div className="lp-nav-r">
           <button className="themebtn" onClick={toggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{theme === "dark" ? <IconSun/> : <IconMoon/>}</button>
           {user ? <button className="btn primary" onClick={()=>navigate("/dashboard")}>Go to dashboard</button>
                 : <button className="btn primary" onClick={google}>Sign in</button>}
+        </div>
         </div>
       </header>
 
@@ -3832,17 +4123,7 @@ function Landing({ showLogin }){
           )}
         </div>
         <div className="lp-visual" aria-hidden="true">
-          <div className="lp-win">
-            <div className="lp-win-bar"><span></span><span></span><span></span></div>
-            <div className="lp-win-body">
-              <div className="lp-mock-title">Customer feedback</div>
-              <div className="lp-mock-q">How likely are you to recommend us?</div>
-              <div className="lp-mock-scale">{[0,1,2,3,4,5,6,7,8,9,10].map((n)=>(<span key={n} className={"lp-pip" + (n === 9 ? " on" : "")}>{n}</span>))}</div>
-              <div className="lp-mock-q">What could we improve?</div>
-              <div className="lp-mock-opts">{["Faster support","A lower price","More features"].map((o,i)=>(<div key={i} className={"lp-mock-opt" + (i === 0 ? " on" : "")}><span className="lp-rad"></span>{o}</div>))}</div>
-              <div className="lp-mock-btn">Submit</div>
-            </div>
-          </div>
+          <HeroCarousel />
         </div>
       </section>
 
@@ -3891,16 +4172,7 @@ function Landing({ showLogin }){
               : <div className="lp-cta-row center"><button className="gbtn auto" onClick={google}><GoogleG/> Continue with Google</button></div>}
       </section>
 
-      <footer className="lp-foot">
-        <div className="lp-foot-in">
-          <Logo size={16} />
-          <span className="lp-foot-tag">Human-centered Experience Management.</span>
-          <a className="lp-foot-link" href="https://zetetiq.com" target="_blank" rel="noopener">zetetiq.com</a>
-          <a className="lp-foot-link" href="mailto:support@zetetiq.com">Support</a>
-          {!user && <button type="button" className="lp-foot-admin" onClick={()=>setOpen(true)}>Admin sign in</button>}
-        </div>
-        <div className="lp-foot-copy">© 2026 Zetetiq XM</div>
-      </footer>
+      <SiteFooter onAdmin={!user ? (()=>setOpen(true)) : null} />
 
       {open && !user && (
         <Modal title="Admin login" onClose={()=>setOpen(false)}>
@@ -3939,7 +4211,7 @@ function TemplateGrid({ onPick, creating }){
 function IconBrand(){ return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><circle cx="17.5" cy="17.5" r="3.5"/></svg>); }
 function BrandStudio({ form, setTheme, setSettings }){
   const { toast, user } = useApp();
-  if (user && user.limits && user.limits.proFeatures === false) return (<div><div className="panel-title">Brand studio</div><div className="plan-lock-block" style={{marginTop:10}}><div className="label">Brand studio <span className="plan-pill plan-pro">Pro</span></div><div className="hint">Save reusable brand kits with your logo, colors, and fonts. Available on Pro and above.</div></div></div>);
+  if (user && user.limits && user.limits.proFeatures === false) return (<div><div className="panel-title">Brand studio</div><div style={{marginTop:10}}><PlanLock label="Brand studio" tier="pro" hint="Save reusable brand kits with your logo, colors, and fonts. Available on Pro and above." /></div></div>);
   const [kits, setKits] = useState(null);
   const [name, setName] = useState("");
   const [logo, setLogo] = useState(null);
@@ -4064,7 +4336,7 @@ function AdminConsole(){
                         <td>{fmtBytes(u.storageBytes)}</td>
                         <td>{u.created_at ? fmtAgo(u.created_at) : "-"}</td>
                         <td>{u.lastResponseAt ? fmtAgo(u.lastResponseAt) : <span className="muted">no responses</span>}</td>
-                        <td onClick={(e)=>e.stopPropagation()}><Select className="select" value={u.plan||"free"} onChange={(e)=>setPlan(u.id, e.target.value)} disabled={u.isAdmin}><option value="free">Free</option><option value="edu">Education</option><option value="pro">Pro</option><option value="premium">Premium</option><option value="enterprise">Enterprise</option></Select></td><td onClick={(e)=>e.stopPropagation()}>{!u.isAdmin && <button className="btn sm danger" onClick={()=>delUser(u)}>Delete</button>}</td>
+                        <td onClick={(e)=>e.stopPropagation()}><Select className="select" value={u.plan||"free"} onChange={(e)=>setPlan(u.id, e.target.value)} disabled={u.isAdmin}><option value="free">Free</option><option value="edu">Education</option><option value="nonprofit">Nonprofit</option><option value="pro">Pro</option><option value="premium">Premium</option><option value="enterprise">Enterprise</option></Select></td><td onClick={(e)=>e.stopPropagation()}>{!u.isAdmin && <button className="btn sm danger" onClick={()=>delUser(u)}>Delete</button>}</td>
                       </tr>
                       {expanded[u.id] && (
                         <tr className="urow-detail"><td colSpan={8}>
@@ -4562,6 +4834,8 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
           <input className="wq-title" placeholder="Heading" value={q.heading || ""} onChange={(e)=>update({heading:e.target.value})} />
           <textarea className="wq-textarea" placeholder="Add text or instructions" value={q.content || ""} onChange={(e)=>update({content:e.target.value})} />
         </div>
+      ) : q.type === "zeffy" ? (
+        <input className="wq-title" placeholder="Heading (optional)" value={q.heading || ""} onChange={(e)=>update({heading:e.target.value})} />
       ) : (
         <input className="wq-title" placeholder="Click to write the question text" value={q.label || ""} onChange={(e)=>update({label:e.target.value})} />
       )}
@@ -4591,6 +4865,7 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         {q.type === "number_entry" && <div className="wq-prev-input" style={{maxWidth:240}}>{(q.prefix||"") + "0" + (q.suffix||"") + (((q.min!==""&&q.min!=null)||(q.max!==""&&q.max!=null)) ? ("  (" + ((q.min!==""&&q.min!=null)?q.min:"") + " to " + ((q.max!==""&&q.max!=null)?q.max:"") + ")") : "")}</div>}
         {q.type === "drill_down" && <div className="wq-prev-input">{((q.tree&&q.tree.length)||0) ? ("Cascading dropdowns · " + q.tree.length + " top-level") : "Add options in the left panel"}</div>}
         {q.type === "embed" && <div className="wq-prev-input">{q.embedSlug ? ((q.embedKind === "schedule" ? "Scheduler" : "E-sign") + ": " + (q.embedTitle || q.embedSlug)) : "Pick a scheduler or e-sign in the left panel"}</div>}
+        {q.type === "zeffy" && <div className="wq-prev-input">{zeffySrc(q.url) ? "Zeffy donation form embedded" : "Add your Zeffy link in the left panel"}</div>}
       </div>
     </div>
   );
@@ -4969,6 +5244,7 @@ function LeftEditor({ q, update, questions, setQuestions, scoring, experiment })
       {q.type === "signature" && <ReqToggles q={q} update={update} />}
       {q.type === "text_graphic" && <div className="hint" style={{marginTop:6}}>Edit the heading, text, and image directly on the question in the canvas.</div>}
       {q.type === "payment" && <ActionControls q={q} update={update} />}
+      {q.type === "zeffy" && <ZeffyControls q={q} update={update} />}
       {q.type === "scheduling" && <SchedulingControls q={q} update={update} />}
       {q.type === "document_sign" && <DocumentControls q={q} update={update} />}
       {q.type === "file_upload" && <FileUploadControls q={q} update={update} />}
@@ -5109,18 +5385,18 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <div className="panel-section">Branding and white-label</div>
       {wlAllowed
         ? <Toggle checked={!!form.schema.settings.hideBranding} onChange={(c)=>setSettings({hideBranding:c})} label="Hide the powered by zetetiq footer" />
-        : <div className="plan-lock-row"><Toggle checked={false} onChange={()=>toast("Removing the footer is available on Pro and above. Upgrade to enable it.")} label="Hide the powered by zetetiq footer" /><span className="plan-pill plan-pro">Pro</span></div>}
+        : <PlanLock label="Hide the powered by zetetiq footer" tier="pro" hint="Remove the powered by zetetiq footer on your public form." />}
       <div style={{height:10}}></div>
       <Field label="Browser tab title (optional)"><input className="input" placeholder={form.title || "Form"} value={form.schema.settings.pageTitle || ""} onChange={(e)=>setSettings({pageTitle:e.target.value})} /></Field>
       {proFeat ? (<><div className="label">Favicon (optional)</div>
       {form.schema.settings.favicon
         ? (<div className="himg-preview"><img src={form.schema.settings.favicon} alt="" style={{width:24,height:24,borderRadius:4}} /><button className="btn sm ghost" onClick={()=>setSettings({favicon:null})}>Remove</button></div>)
-        : (<label className="himg-upload"><input type="file" accept="image/*" style={{display:"none"}} onChange={(e)=>{ const f = e.target.files && e.target.files[0]; if (f) readImageScaled(f, 64, (u)=>{ if (!u){ toast("Could not read that image."); return; } setSettings({favicon:u}); }); e.target.value=""; }} /><span>Upload a favicon</span></label>)}</>) : (<div className="plan-lock-block"><div className="label">Favicon <span className="plan-pill plan-pro">Pro</span></div><div className="hint">Custom favicons are available on Pro and above.</div></div>)}
+        : (<label className="himg-upload"><input type="file" accept="image/*" style={{display:"none"}} onChange={(e)=>{ const f = e.target.files && e.target.files[0]; if (f) readImageScaled(f, 64, (u)=>{ if (!u){ toast("Could not read that image."); return; } setSettings({favicon:u}); }); e.target.value=""; }} /><span>Upload a favicon</span></label>)}</>) : (<PlanLock label="Favicon" tier="pro" hint="Custom favicons are available on Pro and above." />)}
       <div style={{height:10}}></div>
       {cssAllowed ? (<><Field label="Custom CSS (advanced)"><textarea className="textarea" style={{minHeight:120,fontFamily:"var(--mono)",fontSize:12}} placeholder=".fcard { border-radius: 0; } .submit { background: #111; }" value={form.schema.settings.customCss || ""} onChange={(e)=>setSettings({customCss:e.target.value})} /></Field>
-      <div className="hint">Custom CSS applies to your public form only. Target classes such as .fcard, .ftitle, .fdesc, .opt, .finput, or .submit. The thank-you and closed screens use the same classes.</div></>) : (<div className="plan-lock-block"><div className="label">Custom CSS (advanced) <span className="plan-pill plan-premium">Premium</span></div><div className="hint">Custom CSS and styling is available on Premium.</div></div>)}
+      <div className="hint">Custom CSS applies to your public form only. Target classes such as .fcard, .ftitle, .fdesc, .opt, .finput, or .submit. The thank-you and closed screens use the same classes.</div></>) : (<PlanLock label="Custom CSS (advanced)" tier="premium" hint="Custom CSS and styling is available on Premium." />)}
       <div className="panel-section">A/B testing</div>
-      {!proFeat ? (<div className="plan-lock-block"><div className="label">A/B testing <span className="plan-pill plan-pro">Pro</span></div><div className="hint">Running experiments is available on Pro and above.</div></div>) : <Toggle checked={!!form.schema.settings.experiment} onChange={(c)=>setSettings({experiment:c})} label="Run an experiment (assign a random variant)" />}
+      {!proFeat ? (<PlanLock label="A/B testing" tier="pro" hint="Running experiments is available on Pro and above." />) : <Toggle checked={!!form.schema.settings.experiment} onChange={(c)=>setSettings({experiment:c})} label="Run an experiment (assign a random variant)" />}
       {form.schema.settings.experiment && <Field label="Number of variants"><Select className="select" value={String(form.schema.settings.variantCount || 2)} onChange={(e)=>setSettings({variantCount: parseInt(e.target.value, 10)})}><option value="2">2 (A, B)</option><option value="3">3 (A, B, C)</option><option value="4">4 (A, B, C, D)</option></Select></Field>}
       <div className="hint">Each respondent is randomly assigned a variant, recorded with their response and shown in analytics and exports. Set a question's variant under Advanced to show it only to that group.</div>
 
@@ -5189,6 +5465,7 @@ const BASIC_ITEMS = [
   { type:"rank_order", label:"Rank order", hint:"Drag options into order of preference" },
 ];
 function AddQuestionMenu({ onAdd }){
+  const { user } = useApp();
   const [open, setOpen] = useState(false);
   const lbl = (it)=> it.label || (QTYPES[it.type] && QTYPES[it.type].label) || it.type;
   const hnt = (it)=> it.hint || (QTYPES[it.type] && QTYPES[it.type].hint) || "";
@@ -5230,6 +5507,14 @@ function AddQuestionMenu({ onAdd }){
                   </button>
                 ))}
               </div>
+              {user && user.limits && user.limits.zeffy && QTYPES.zeffy && (<>
+                <div className="addq-section-h">Donations</div>
+                <div className="addq-grid">
+                  <button className="addq-item" onClick={()=>pick("zeffy")}>
+                    <div className="t">{QTYPES.zeffy.label}</div><div className="h">{QTYPES.zeffy.hint}</div>
+                  </button>
+                </div>
+              </>)}
             </div>
           </div>
         </div>
@@ -5349,7 +5634,6 @@ function Builder({ formId }){
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(null);
-  const [tools, setTools] = useState(false);
   const [loadErr, setLoadErr] = useState(false);
   const [trash, setTrash] = useState([]);            // session only, never saved
   const [dragIdx, setDragIdx] = useState(null);
@@ -5413,8 +5697,7 @@ function Builder({ formId }){
   const beginDrag = (e, index)=>{
     if (e.button != null && e.button !== 0) return;
     e.preventDefault(); e.stopPropagation();
-    const list = questions;
-    const ids = list.map((q)=> q.id);
+    const ids = questions.map((q)=> q.id);
     const els = ids.map((id)=> cardRefs.current[id]);
     const dragEl = els[index];
     if (!dragEl) return;
@@ -5426,13 +5709,14 @@ function Builder({ formId }){
     for (let i = 0; i < rects.length - 1; i++){ if (rects[i] && rects[i+1]){ const g = rects[i+1].top - rects[i].top - rects[i].height; if (g >= 0){ gap = g; break; } } }
     const step = height + gap;
     let dropTo = index;
-    const handleEl = e.currentTarget; const pid = e.pointerId;
-    try { if (handleEl.setPointerCapture && pid != null) handleEl.setPointerCapture(pid); } catch (er) {}
-    dragEl.style.transition = "none"; dragEl.style.zIndex = "999"; dragEl.style.position = "relative"; dragEl.style.willChange = "transform";
-    els.forEach((el, i)=>{ if (el && i !== index) el.style.transition = "transform 180ms cubic-bezier(.2,.8,.2,1)"; });
+    try { document.body.style.userSelect = "none"; } catch (er) {}
+    dragEl.style.transition = "box-shadow 160ms ease"; dragEl.style.zIndex = "999"; dragEl.style.position = "relative"; dragEl.style.willChange = "transform"; dragEl.style.pointerEvents = "none";
+    els.forEach((el, i)=>{ if (el && i !== index) el.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1)"; });
     setDragId(ids[index]);
-    const move = (ev)=>{
-      const dy = ev.clientY - startY;
+    let raf = 0; let lastY = startY;
+    const apply = ()=>{
+      raf = 0;
+      const dy = lastY - startY;
       dragEl.style.transform = "translateY(" + dy + "px) scale(1.02)";
       const dc = r0.top + dy + height / 2;
       let t = 0;
@@ -5442,26 +5726,28 @@ function Builder({ formId }){
         els.forEach((el, i)=>{ if (!el || i === index) return; let sh = 0; if (i > index) sh -= step; const eff = (i < index) ? i : i - 1; if (eff >= dropTo) sh += step; el.style.transform = sh ? ("translateY(" + sh + "px)") : ""; });
       }
     };
+    const move = (ev)=>{ lastY = ev.clientY; if (!raf) raf = requestAnimationFrame(apply); };
     const up = ()=>{
-      handleEl.removeEventListener("pointermove", move);
-      handleEl.removeEventListener("pointerup", up);
-      handleEl.removeEventListener("pointercancel", up);
-      try { if (handleEl.releasePointerCapture && pid != null) handleEl.releasePointerCapture(pid); } catch (er) {}
+      document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerup", up);
+      document.removeEventListener("pointercancel", up);
+      if (raf){ cancelAnimationFrame(raf); raf = 0; }
+      try { document.body.style.userSelect = ""; } catch (er) {}
       const firstTop = dragEl.getBoundingClientRect().top;
       els.forEach((el)=>{ if (el){ el.style.transition = "none"; el.style.transform = ""; } });
       suppressFlip.current = true; setDragId(null);
       reorder(index, dropTo);
       requestAnimationFrame(()=>{
-        els.forEach((el)=>{ if (el && el !== dragEl) el.style.transition = ""; });
         const ddy = firstTop - dragEl.getBoundingClientRect().top;
-        dragEl.style.transition = "none"; dragEl.style.transform = "translateY(" + ddy + "px) scale(1.02)";
-        requestAnimationFrame(()=>{ dragEl.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms ease"; dragEl.style.transform = ""; });
-        setTimeout(()=>{ if (dragEl){ dragEl.style.transition = ""; dragEl.style.zIndex = ""; dragEl.style.position = ""; dragEl.style.willChange = ""; } }, 240);
+        dragEl.style.transition = "none"; dragEl.style.transform = "translateY(" + ddy + "px) scale(1.02)"; dragEl.style.pointerEvents = "";
+        els.forEach((el)=>{ if (el && el !== dragEl) el.style.transition = ""; });
+        requestAnimationFrame(()=>{ dragEl.style.transition = "transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease"; dragEl.style.transform = ""; });
+        setTimeout(()=>{ if (dragEl){ dragEl.style.transition = ""; dragEl.style.zIndex = ""; dragEl.style.position = ""; dragEl.style.willChange = ""; } }, 260);
       });
     };
-    handleEl.addEventListener("pointermove", move);
-    handleEl.addEventListener("pointerup", up);
-    handleEl.addEventListener("pointercancel", up);
+    document.addEventListener("pointermove", move);
+    document.addEventListener("pointerup", up);
+    document.addEventListener("pointercancel", up);
   };
   const dnd = { draggingId: dragId, beginDrag };
 
@@ -5514,24 +5800,11 @@ function Builder({ formId }){
         <div className="row" style={{gap:12}}>
           <button className="brand" onClick={()=>navigate("/dashboard")}><Logo size={26} /></button>
           <button className="themebtn" onClick={toggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{theme === "dark" ? <IconSun/> : <IconMoon/>}</button>
-          <div className="b-tools">
-            <button className="btn sm" onClick={()=>setTools((o)=>!o)}>Tools ▾</button>
-            {tools && (
-              <div className="menu">
-                {id && <button onClick={()=>{ navigate("/dashboard/" + id); }}>View responses</button>}
-                <button onClick={()=>{ setMode("schedule"); setTools(false); }}>Scheduler</button>
-                <button onClick={()=>{ setMode("esign"); setTools(false); }}>E-sign</button>
-                <button onClick={()=>{ setMode("theme"); setTools(false); }}>Theme</button>
-                <button onClick={()=>{ setMode("settings"); setTools(false); }}>Form settings</button>
-                <button onClick={()=>{ setMode("i18n"); setTools(false); }}>Translations</button>
-                {id && <button className="danger-text" onClick={()=>{ setTools(false); del(); }}>Delete form</button>}
-              </div>
-            )}
-          </div>
           <span className="saved-note">{savedAt ? "Saved at " + savedAt : (id ? "Saved" : "Not saved yet")}</span>
           <span className={"badge " + statusBadge.cls}>{statusBadge.text}</span>
         </div>
         <div className="row">
+          {id && <button className="btn" onClick={()=>navigate("/dashboard/" + id)}>Results</button>}
           <button className="btn" onClick={()=>setPreview((p)=>!p)}>{preview ? "Edit" : "Preview"}</button>
           <button className="btn" onClick={openShare}>Share</button>
           <button className="btn primary" disabled={saving} onClick={save}>{saving ? "Saving..." : "Publish"}</button>
@@ -5543,7 +5816,7 @@ function Builder({ formId }){
       {preview ? (
         <div className="b-preview"><div style={{maxWidth:680, margin:"26px auto", padding:"0 18px"}}><FormRenderer form={form} preview /></div></div>
       ) : (
-        <div className="b-main" onClick={()=>{ if (tools) setTools(false); }}>
+        <div className="b-main">
           <div className="b-rail">
             <button className={mode === "edit" ? "active" : ""} title="Questions" onClick={()=>setMode("edit")}><IconList /></button>
             <button className={mode === "schedule" ? "active" : ""} title="Scheduler" onClick={()=>setMode("schedule")}><IconCalendar /></button>
@@ -5614,6 +5887,26 @@ function Builder({ formId }){
   );
 }
 
+function EditableLink({ id, form, setForm }){
+  const { toast } = useApp();
+  const base = form.username === "admin" ? (window.location.origin + "/") : (window.location.origin + "/" + form.username + "/");
+  const url = base + form.slug;
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(form.slug);
+  const [saving, setSaving] = useState(false);
+  useEffect(()=>{ setVal(form.slug); }, [form.slug]);
+  const save = ()=>{
+    const next = val.trim();
+    if (!next || next === form.slug){ setEditing(false); setVal(form.slug); return; }
+    setSaving(true);
+    api.updateForm(id, { slug: next }).then(({ ok, data })=>{ setSaving(false); setEditing(false); if (ok && data && data.slug){ setForm((f)=>({ ...f, slug: data.slug })); toast("Link updated"); } else { setVal(form.slug); toast("Could not update the link."); } });
+  };
+  const copy = ()=>{ try { if (navigator.clipboard) navigator.clipboard.writeText(url); } catch (e) {} toast("Link copied"); };
+  if (editing){
+    return (<div className="copyfield dash-link"><span className="dash-link-base">{base}</span><input className="dash-link-input" autoFocus value={val} onChange={(e)=>setVal(e.target.value)} onKeyDown={(e)=>{ if (e.key === "Enter") save(); else if (e.key === "Escape"){ setEditing(false); setVal(form.slug); } }} /><button className="btn sm primary" disabled={saving} onClick={save}>{saving ? "Saving..." : "Save"}</button></div>);
+  }
+  return (<div className="copyfield dash-link"><code>{url}</code><button className="btn sm" onClick={()=>setEditing(true)}>Edit link</button><button className="btn sm" onClick={copy}>Copy</button></div>);
+}
 function FormDashboard({ id }){
   const { navigate, toast, user } = useApp();
   const [form, setForm] = useState(null);
@@ -5637,9 +5930,9 @@ function FormDashboard({ id }){
         <button className="btn ghost sm" style={{marginBottom:14}} onClick={()=>navigate("/dashboard")}>← All forms</button>
         <div className="between" style={{marginBottom:6,flexWrap:"wrap",gap:10}}>
           <div className="row" style={{gap:12}}><h1 style={{fontSize:25}}>{form.title}</h1><span className={"badge "+(form.is_open?"open":"closed")}>{form.is_open?"Open":"Closed"}</span></div>
-          <div className="row"><a className="btn sm" href={url} target="_blank" rel="noopener">View form</a><button className="btn sm" onClick={()=>navigate("/builder/"+id)}>Edit</button><button className="btn sm" onClick={duplicate}>Duplicate</button></div>
+          
         </div>
-        <div className="copyfield" style={{marginBottom:20,maxWidth:520}}><code>{url}</code><button className="btn sm" onClick={()=>{ if(navigator.clipboard) navigator.clipboard.writeText(url); toast("Link copied"); }}>Copy</button></div>
+        <div className="dash-linkrow"><EditableLink id={id} form={form} setForm={setForm} /><button className="btn sm primary" onClick={()=>navigate("/builder/"+id)}>Edit form</button><button className="btn sm" onClick={duplicate}>Duplicate</button></div>
 
         <AiSummary fetcher={fetcher} />
 
@@ -5648,7 +5941,7 @@ function FormDashboard({ id }){
         {tab==="responses" && <ResponsesTab id={id} form={form} setForm={setForm} />}
         {tab==="analytics" && <AnalyticsTab id={id} form={form} />}
         {tab==="settings" && (
-          <div className="card pad-lg" style={{maxWidth:560}}>
+          <div className="pad-lg dash-settings-box" style={{maxWidth:560}}>
             <div className="between" style={{marginBottom:8}}>
               <div><div style={{fontWeight:600}}>Accepting responses</div><div className="hint">When closed, the public link shows a closed message.</div></div>
               <Toggle checked={form.is_open} onChange={toggleOpen} label="" />
@@ -6066,7 +6359,7 @@ function ExportButtons({ id, form, rows }){
   const { toast, user } = useApp();
   const [pdfBusy, setPdfBusy] = useState(false);
   const canExport = !(user && user.limits && user.limits.export === false);
-  if (!canExport) return (<div className="plan-lock-row"><span className="muted">CSV and PDF export is available on Pro and above.</span><span className="plan-pill plan-pro">Pro</span></div>);
+  if (!canExport) return (<PlanLock label="CSV and PDF export" tier="pro" hint="Export your responses as CSV or a themed PDF on Pro and above." />);
   return (
     <div className="row exp-row" style={{gap:10,flexWrap:"wrap"}}>
       <a className="btn" href={"/api/forms/" + id + "/export"}>Download CSV</a>
@@ -6397,18 +6690,22 @@ function App(){
     return ()=>{ document.removeEventListener("pointerover", onOver); document.removeEventListener("pointermove", onMove); document.removeEventListener("pointerdown", onDown, true); if (cur) hide(cur); tip.remove(); };
   }, []);
   const toggleTheme = useCallback(()=>{ setTheme((t)=>{ const n = t === "dark" ? "light" : "dark"; try { localStorage.setItem("zq-theme", n); } catch (e) {} return n; }); },[]);
-  const ctx = useMemo(()=>({ user, setUser, navigate, toast, theme, toggleTheme }), [user, navigate, toast, theme, toggleTheme]);
+  const [upOpen, setUpOpen] = useState(false);
+  const upgrade = useCallback(()=>setUpOpen(true), []);
+  const ctx = useMemo(()=>({ user, setUser, navigate, toast, theme, toggleTheme, upgrade }), [user, navigate, toast, theme, toggleTheme, upgrade]);
 
   let view;
   if (user === undefined){
     view = <div className="center-screen"><div style={{color:"var(--bo)"}}><Logo size={34} /></div></div>;
   } else {
     const seg = path.split("/").filter(Boolean);
-    const reserved = new Set(["dashboard","builder","login","admin","team","api","assets","favicon.ico","robots.txt"]);
+    const reserved = new Set(["dashboard","builder","login","admin","team","api","assets","favicon.ico","robots.txt","privacy","terms"]);
     if (seg.length === 1 && !reserved.has(seg[0])) view = <PublicForm username="admin" slug={seg[0]} />;
     else if (seg.length === 2 && !reserved.has(seg[0])) view = <PublicForm username={seg[0]} slug={seg[1]} />;
     else if (seg.length === 0) view = user ? <Dashboard/> : <Landing/>;
     else if (seg[0] === "login") view = <Landing showLogin />;
+    else if (seg[0] === "privacy" && seg.length === 1) view = <LegalPage kind="privacy" />;
+    else if (seg[0] === "terms" && seg.length === 1) view = <LegalPage kind="terms" />;
     else if (!user) view = <Landing showLogin />;
     else if (seg[0] === "dashboard" && seg.length === 1) view = <Dashboard/>;
     else if (seg[0] === "team" && seg.length === 1) view = <TeamPanel/>;
@@ -6417,7 +6714,7 @@ function App(){
     else if (seg[0] === "builder" && seg.length === 2) view = <Builder formId={seg[1]} />;
     else view = <div className="center-screen"><h2>Not found</h2><button className="btn" onClick={()=>navigate(user ? "/dashboard" : "/")}>Go home</button></div>;
   }
-  return (<Ctx.Provider value={ctx}>{view}{toastMsg && <div className="toast">{toastMsg}</div>}</Ctx.Provider>);
+  return (<Ctx.Provider value={ctx}>{view}{toastMsg && <div className="toast">{toastMsg}</div>}<UpgradeModal open={upOpen} onClose={()=>setUpOpen(false)} /></Ctx.Provider>);
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);

@@ -3,7 +3,10 @@
 A forms and surveys builder on Cloudflare Pages, Pages Functions, D1, Workers AI, and R2. The app is a single compiled index.html with an ESM backend at functions/api/[[path]].js.
 
 ## Plans
-free, education and nonprofits, pro, premium, and enterprise. Free covers all question types with limits (5 forms, 100 responses per form, 5 MB uploads, no export). Education matches pro at no cost and is automatic with a .edu sign in. Pro is 9 per month, premium is 35 per month, enterprise is by contact. See docs/HANDOFF.md for the full feature matrix, the required D1 migration, and the admin approval flow.
+free, education, nonprofit, pro, premium, and enterprise. Free covers all question types with limits (5 forms, 100 responses per form, 5 MB uploads, no export). Education and nonprofit match pro at no cost; education is automatic with a .edu sign in, and both can be granted in the admin console. Nonprofit also unlocks a Donations (Zeffy) question that embeds a Zeffy donation or payment form. Pro is 9 per month, premium is 35 per month, enterprise is by contact. See docs/HANDOFF.md for the full feature matrix and the admin approval flow.
+
+## Pages
+Privacy policy and terms of service are served in the app at /privacy and /terms and are linked from the footer.
 
 ## Setup
 1. Create the D1 database and run schema.sql (or, on an existing database, the migration in schema.sql).
