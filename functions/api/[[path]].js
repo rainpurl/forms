@@ -32,6 +32,9 @@ async function route(seg, method, request, env, context) {
   if (p === "billing/checkout" && method === "POST") return billingCheckout(request, env);
   if (p === "billing/portal" && method === "POST") return billingPortal(request, env);
   if (p === "billing/webhook" && method === "POST") return billingWebhook(request, env);
+  if (p === "connect/start" && method === "GET") return connectStart(request, env);
+  if (p === "connect/callback" && method === "GET") return connectCallback(request, env);
+  if (p === "connect/disconnect" && method === "POST") return connectDisconnect(request, env);
   if (p === "me" && method === "GET") return me(request, env);
   if (p === "me/username" && method === "POST") return updateUsername(request, env);
   if (p === "plan/apply" && method === "POST") return applyPlan(request, env);
@@ -60,6 +63,9 @@ async function route(seg, method, request, env, context) {
   }
   if (path[0] === "public" && path.length === 3 && path[2] === "upload" && method === "POST") {
     return uploadFile(path[1], request, env);
+  }
+  if (path[0] === "public" && path.length === 3 && path[2] === "pay-confirm" && method === "POST") {
+    return payConfirm(path[1], request, env);
   }
   // GET /api/cal/:formId/:token/booked.ics  (calendar subscription feed)
   if (path[0] === "cal" && path.length === 4 && path[3] === "booked.ics" && method === "GET") {
@@ -162,7 +168,7 @@ async function me(request, env) {
   const user = await currentUser(request, env);
   if (!user) return json({ user: null }, 200);
   if (user.uid === "admin") return json({ user: Object.assign({}, publicUser(user), { plan: "enterprise", limits: planLimits("enterprise") }) });
-  let row = null; try { row = await env.DB.prepare("SELECT plan, email, plan_request FROM users WHERE id = ?").bind(user.uid).first(); } catch (e) {}
+  let row = null; try { row = await env.DB.prepare("SELECT plan, email, plan_request, stripe_account FROM users WHERE id = ?").bind(user.uid).first(); } catch (e) {}
   let plan = effectivePlan(row && row.plan, row && row.email);
   if (plan === "edu" && row && (!row.plan || row.plan === "free")) { try { await env.DB.prepare("UPDATE users SET plan = 'edu' WHERE id = ?").bind(user.uid).run(); } catch (e) {} }
   const pr = (row && row.plan_request) ? safeParse(row.plan_request, null) : null;
@@ -172,7 +178,8 @@ async function me(request, env) {
   try { const br = await env.DB.prepare("SELECT billing FROM users WHERE id = ?").bind(user.uid).first(); const b = (br && br.billing) ? safeParse(br.billing, null) : null; if (b){ billing = { active: (b.status === "active" || b.status === "trialing"), portal: !!b.customer, plan: b.plan || null, status: b.status || null }; } } catch (e) {}
   try { await processInvites(env, { uid: user.uid, email: row && row.email }); } catch (e) {}
   let org = null; try { org = await getUserOrg(env, user.uid); } catch (e) {}
-  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendars, billing, org }) });
+  const payments = { connected: !!(row && row.stripe_account) };
+  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendars, billing, org, payments }) });
 }
 
 async function currentUser(request, env) {
@@ -461,12 +468,16 @@ async function getOwnerBusy(env, ownerId, timeMin, timeMax){
 /* ------------------------------------------------------------------ */
 /* Stripe billing (Checkout subscriptions + signed webhook + portal)   */
 /* ------------------------------------------------------------------ */
-async function stripeApi(env, path, paramsObj){
-  const r = await fetch("https://api.stripe.com/v1/" + path, {
-    method: "POST",
-    headers: { "Authorization": "Bearer " + env.STRIPE_SECRET_KEY, "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(paramsObj).toString(),
-  });
+async function stripeApi(env, path, paramsObj, acct){
+  const headers = { "Authorization": "Bearer " + env.STRIPE_SECRET_KEY, "Content-Type": "application/x-www-form-urlencoded" };
+  if (acct) headers["Stripe-Account"] = acct;
+  const r = await fetch("https://api.stripe.com/v1/" + path, { method: "POST", headers, body: new URLSearchParams(paramsObj).toString() });
+  return r.json();
+}
+async function stripeGet(env, path, acct){
+  const headers = { "Authorization": "Bearer " + env.STRIPE_SECRET_KEY };
+  if (acct) headers["Stripe-Account"] = acct;
+  const r = await fetch("https://api.stripe.com/v1/" + path, { method: "GET", headers });
   return r.json();
 }
 function timingEqual(a, b){ if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false; let r = 0; for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i); return r === 0; }
@@ -539,6 +550,71 @@ async function billingPortal(request, env){
   return json({ error: "stripe_error" }, 502);
 }
 
+async function connectStart(request, env){
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (user.uid === "admin") return json({ error: "admin_fixed" }, 400);
+  if (!env.STRIPE_CONNECT_CLIENT_ID) return redirectTo("/dashboard?connect=unconfigured");
+  const url = new URL(request.url);
+  let ret = url.searchParams.get("return") || "/dashboard";
+  if (!/^\/[A-Za-z0-9/_-]*$/.test(ret)) ret = "/dashboard";
+  let email = "";
+  try { const er = await env.DB.prepare("SELECT email FROM users WHERE id = ?").bind(user.uid).first(); email = (er && er.email) || ""; } catch (e) {}
+  const state = crypto.randomUUID();
+  const redirectUri = url.origin + "/api/connect/callback";
+  const auth = "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=" + encodeURIComponent(env.STRIPE_CONNECT_CLIENT_ID) + "&scope=read_write&redirect_uri=" + encodeURIComponent(redirectUri) + "&state=" + encodeURIComponent(state) + (email ? ("&stripe_user[email]=" + encodeURIComponent(email)) : "");
+  const cookie = "cstate=" + encodeURIComponent(state + "|" + ret) + "; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600";
+  return redirectTo(auth, [cookie]);
+}
+async function connectCallback(request, env){
+  const user = await currentUser(request, env);
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+  const ck = readCookie(request, "cstate") || "";
+  const clear = "cstate=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0";
+  const parts = decodeURIComponent(ck).split("|");
+  const cstate = parts[0]; const ret = (parts[1] && /^\/[A-Za-z0-9/_-]*$/.test(parts[1])) ? parts[1] : "/dashboard";
+  if (!user) return redirectTo("/dashboard?connect=login", [clear]);
+  if (url.searchParams.get("error")) return redirectTo(ret + "?connect=denied", [clear]);
+  if (!code || !state || !cstate || state !== cstate) return redirectTo(ret + "?connect=state", [clear]);
+  try {
+    const tok = await fetch("https://connect.stripe.com/oauth/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_secret: env.STRIPE_SECRET_KEY, code: code, grant_type: "authorization_code" }).toString() });
+    const data = await tok.json();
+    if (data && data.stripe_user_id){
+      await env.DB.prepare("UPDATE users SET stripe_account = ? WHERE id = ?").bind(data.stripe_user_id, user.uid).run();
+      return redirectTo(ret + "?connect=connected", [clear]);
+    }
+  } catch (e) {}
+  return redirectTo(ret + "?connect=error", [clear]);
+}
+async function connectDisconnect(request, env){
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  let acct = "";
+  try { const r = await env.DB.prepare("SELECT stripe_account FROM users WHERE id = ?").bind(user.uid).first(); acct = (r && r.stripe_account) || ""; } catch (e) {}
+  if (acct && env.STRIPE_CONNECT_CLIENT_ID){ try { await fetch("https://connect.stripe.com/oauth/deauthorize", { method: "POST", headers: { "Authorization": "Bearer " + env.STRIPE_SECRET_KEY, "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: env.STRIPE_CONNECT_CLIENT_ID, stripe_user_id: acct }).toString() }); } catch (e) {} }
+  try { await env.DB.prepare("UPDATE users SET stripe_account = NULL WHERE id = ?").bind(user.uid).run(); } catch (e) {}
+  return json({ ok: true });
+}
+async function payConfirm(formId, request, env){
+  const body = await readJson(request) || {};
+  const sid = String(body.session || "");
+  if (!sid || !env.STRIPE_SECRET_KEY) return json({ paid: false });
+  const fr = await env.DB.prepare("SELECT owner_id FROM forms WHERE id = ?").bind(formId).first();
+  if (!fr) return json({ paid: false });
+  const ar = await env.DB.prepare("SELECT stripe_account FROM users WHERE id = ?").bind(fr.owner_id).first();
+  const acct = ar && ar.stripe_account; if (!acct) return json({ paid: false });
+  const sess = await stripeGet(env, "checkout/sessions/" + encodeURIComponent(sid), acct);
+  if (!sess || sess.error) return json({ paid: false });
+  const paid = sess.payment_status === "paid" || sess.status === "complete";
+  const rid = sess.metadata && sess.metadata.response_id;
+  if (paid && rid){
+    try { const r = await env.DB.prepare("SELECT meta FROM responses WHERE id = ? AND form_id = ?").bind(rid, formId).first(); if (r){ const m = safeParse(r.meta, {}); m.payment = Object.assign({}, m.payment, { status: "paid", paidAt: new Date().toISOString() }); await env.DB.prepare("UPDATE responses SET meta = ? WHERE id = ?").bind(JSON.stringify(m), rid).run(); } } catch (e) {}
+  }
+  return json({ paid: !!paid });
+}
+
 async function billingWebhook(request, env){
   const sig = request.headers.get("stripe-signature") || "";
   const raw = await request.text();
@@ -550,9 +626,14 @@ async function billingWebhook(request, env){
   const obj = (evt && evt.data && evt.data.object) || {};
   try {
     if (type === "checkout.session.completed"){
-      const uid = obj.client_reference_id || (obj.metadata && obj.metadata.uid);
-      const plan = (obj.metadata && obj.metadata.plan) || "";
-      if (uid && (plan === "pro" || plan === "premium")) await setBilling(env, uid, { plan, customer: obj.customer || "", subscription: obj.subscription || "", status: "active" });
+      if (obj.metadata && obj.metadata.response_id){
+        const rid = obj.metadata.response_id;
+        try { const rr = await env.DB.prepare("SELECT meta FROM responses WHERE id = ?").bind(rid).first(); if (rr){ const mm = safeParse(rr.meta, {}); mm.payment = Object.assign({}, mm.payment, { status: "paid", paidAt: new Date().toISOString() }); await env.DB.prepare("UPDATE responses SET meta = ? WHERE id = ?").bind(JSON.stringify(mm), rid).run(); } } catch (e) {}
+      } else {
+        const uid = obj.client_reference_id || (obj.metadata && obj.metadata.uid);
+        const plan = (obj.metadata && obj.metadata.plan) || "";
+        if (uid && (plan === "pro" || plan === "premium")) await setBilling(env, uid, { plan, customer: obj.customer || "", subscription: obj.subscription || "", status: "active" });
+      }
     } else if (type === "customer.subscription.created" || type === "customer.subscription.updated"){
       const uid = obj.metadata && obj.metadata.uid;
       const plan = (obj.metadata && obj.metadata.plan) || "";
@@ -1079,7 +1160,42 @@ async function submitResponse(formId, request, env, context) {
     }
   } catch (e) {}
 
-  return json({ ok: true, id: respId, score: scoreInfo ? scoreInfo.score : null, maxScore: scoreInfo ? scoreInfo.max : null });
+  let paymentUrl = null;
+  try {
+    const schemaPay = safeParse(form.schema, {});
+    const pay = (schemaPay.settings && schemaPay.settings.payment) || null;
+    if (pay && pay.enabled && env.STRIPE_SECRET_KEY && !pollUpsertId){
+      const ar = await env.DB.prepare("SELECT stripe_account FROM users WHERE id = ?").bind(form.owner_id).first();
+      const acct = ar && ar.stripe_account;
+      const amount = Math.round(parseFloat(pay.amount) * 100);
+      if (acct && amount >= 50){
+        const cur = (pay.currency || "usd").toLowerCase();
+        const origin = new URL(request.url).origin;
+        const pubRow = await env.DB.prepare("SELECT f.slug, u.username FROM forms f JOIN users u ON u.id = f.owner_id WHERE f.id = ?").bind(formId).first();
+        const path = pubRow ? ("/" + ((pubRow.username && pubRow.username !== "admin") ? (pubRow.username + "/") : "") + pubRow.slug) : "/";
+        const params = {
+          "mode": "payment",
+          "line_items[0][price_data][currency]": cur,
+          "line_items[0][price_data][unit_amount]": String(amount),
+          "line_items[0][price_data][product_data][name]": String(pay.label || form.title || "Payment").slice(0, 120),
+          "line_items[0][quantity]": "1",
+          "success_url": origin + path + "?paid={CHECKOUT_SESSION_ID}",
+          "cancel_url": origin + path + "?pay_cancel=1",
+          "metadata[response_id]": respId,
+          "metadata[form_id]": formId,
+          "payment_intent_data[metadata][response_id]": respId,
+        };
+        const sess = await stripeApi(env, "checkout/sessions", params, acct);
+        if (sess && sess.url){
+          paymentUrl = sess.url;
+          meta.payment = { status: "pending", amount, currency: cur, session: sess.id, at: new Date().toISOString() };
+          await env.DB.prepare("UPDATE responses SET meta = ? WHERE id = ?").bind(JSON.stringify(meta), respId).run();
+        }
+      }
+    }
+  } catch (e) {}
+
+  return json({ ok: true, id: respId, score: scoreInfo ? scoreInfo.score : null, maxScore: scoreInfo ? scoreInfo.max : null, payment_url: paymentUrl });
 }
 
 async function pollLoad(formId, request, env){

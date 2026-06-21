@@ -1208,6 +1208,12 @@ body{top:0!important}
 .trow-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .trole{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
 .zsel.sm{font-size:12px;padding:5px 9px}
+
+/* respondent payments */
+.pay-chip{display:inline-block;margin-left:6px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:1px 6px;border-radius:6px;vertical-align:middle}
+.pay-chip.paid{background:rgba(47,158,99,.16);color:#2F9E63}
+.pay-chip.due{background:rgba(192,86,63,.15);color:#C0563F}
+.conn-ok{font-size:13px;color:#2F9E63;font-weight:600}
 </style>
 </head>
 <body>
@@ -1245,6 +1251,8 @@ const api = {
   adminDeleteUser: (payload) => req("/api/admin/delete-user", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   checkout: (plan) => req("/api/billing/checkout", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ plan }) }),
   billingPortal: () => req("/api/billing/portal", { method:"POST" }),
+  connectDisconnect: () => req("/api/connect/disconnect", { method:"POST" }),
+  payConfirm: (formId, session) => req("/api/public/" + formId + "/pay-confirm", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ session }) }),
   createForm: (payload) => req("/api/forms", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   getForm: (id) => req("/api/forms/" + id),
   followup: (formId, questionId, answer) => req("/api/public/" + formId + "/followup", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ questionId, answer }) }),
@@ -3550,6 +3558,13 @@ function PublicForm({ username, slug }){
     return ()=>{ document.title = prevTitle; if (icon && icon.parentNode) icon.parentNode.removeChild(icon); if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl); };
   }, [st.form]);
   useEffect(()=>{
+    if (!st.form) return;
+    let sp2; try { sp2 = new URLSearchParams(window.location.search); } catch (e) { return; }
+    const paidS = sp2.get("paid"); const cancelS = sp2.get("pay_cancel");
+    if (paidS){ try { api.payConfirm(st.form.id, paidS); } catch (e) {} setDone(true); try { window.history.replaceState({}, "", window.location.pathname); } catch (e) {} }
+    else if (cancelS){ try { window.history.replaceState({}, "", window.location.pathname); } catch (e) {} try { window.alert("Payment was canceled, so your submission was not completed."); } catch (e) {} }
+  }, [st.form]);
+  useEffect(()=>{
     let m = true;
     api.publicForm(username, slug).then(({ok,data})=>{
       if (!m) return;
@@ -3596,6 +3611,7 @@ function PublicForm({ username, slug }){
     api.submit(form.id, { data: answers, viewport: { w: window.innerWidth, h: window.innerHeight }, referrer: document.referrer, seconds: extra.seconds, utm: extra.utm, followups: extra.followups, variant: extra.variant, disqualified: extra.disqualified ? true : undefined }).then(({ok,data})=>{
       setSubmitting(false);
       if (ok && data && data.ok){
+        if (data.payment_url){ window.location.href = data.payment_url; return; }
         const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
         if (r && !extra.disqualified){ window.location.href = /^https?:\/\//i.test(r) ? r : ("https://" + r); return; }
         const _one = form.schema && form.schema.settings && form.schema.settings.oneResponse; if (_one && !extra.disqualified){ try { if (window.localStorage) window.localStorage.setItem("zq-done-" + form.id, "1"); } catch (e) {} }
@@ -4136,6 +4152,13 @@ function AccountMenu({ onClose }){
       <CalendarConnect />
       <div className="acct-hint">Busy times from a connected calendar are blocked automatically on time window scheduling.</div>
     </div>
+    <div className="acct-sec">
+      <label className="acct-lbl">Payments</label>
+      {user.payments && user.payments.connected
+        ? <div><span className="conn-ok">Stripe connected</span><button className="btn sm ghost" style={{marginLeft:8}} onClick={()=>{ if (window.confirm("Disconnect Stripe? Your forms will stop collecting payments.")) api.connectDisconnect().then(()=>{ setUser((p)=> p ? Object.assign({}, p, { payments:{ connected:false } }) : p); toast("Stripe disconnected"); }); }}>Disconnect</button></div>
+        : <a className="btn sm ghost" href="/api/connect/start?return=/dashboard">Connect Stripe</a>}
+      <div className="acct-hint">Connect Stripe to collect payments from respondents on your forms. Payments go to your account and zetetiq does not take a cut.</div>
+    </div>
     {user.limits && user.limits.team && (<div className="acct-sec">
       <label className="acct-lbl">Team</label>
       <button className="btn sm ghost" onClick={()=>{ onClose(); navigate("/team"); }}>Manage team</button>
@@ -4180,6 +4203,7 @@ function Dashboard(){
   const { navigate, toast, user, setUser } = useApp();
   useEffect(()=>{ try { const sp = new URLSearchParams(location.search); const p = sp.get("calendar"); if (p){ const provName = sp.get("cal") === "outlook" ? "Outlook" : "Google"; const msg = ({ connected: provName + " Calendar connected", denied:"Calendar connection cancelled", migrate:"Run the calendar database migration to enable this", setup:"Sign in is not configured", noref:"Could not get offline calendar access. Try again and allow access.", state:"That calendar link expired. Try connecting again.", token:"Could not connect the calendar. Try again.", login:"Please sign in first." })[p] || ""; if (msg) toast(msg); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
   useEffect(()=>{ try { const p = new URLSearchParams(location.search).get("billing"); if (p){ const msg = ({ success:"Thank you. Your upgrade is being applied.", cancel:"Checkout cancelled." })[p] || ""; if (msg) toast(msg); if (p === "success") setTimeout(()=>{ api.me().then(({ ok, data })=>{ if (ok && data && data.user) setUser(data.user); }).catch(()=>{}); }, 2500); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
+  useEffect(()=>{ try { const p = new URLSearchParams(location.search).get("connect"); if (p){ const msg = ({ connected:"Stripe connected. You can now collect payments on your forms.", denied:"Stripe connection cancelled.", unconfigured:"Payments are not set up yet.", state:"That connection link expired. Try again.", error:"Could not connect Stripe. Try again.", login:"Please sign in first." })[p] || ""; if (msg) toast(msg); if (p === "connected") setTimeout(()=>{ api.me().then(({ ok, data })=>{ if (ok && data && data.user) setUser(data.user); }).catch(()=>{}); }, 600); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
   const [forms, setForms] = useState(null);
   const [creating, setCreating] = useState(false);
   const [apply, setApply] = useState(false);
@@ -5097,6 +5121,22 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <div style={{height:8}}></div>
       <Toggle checked={!!form.schema.settings.reminders} onChange={(c)=>setSettings({reminders:c})} label="Send a reminder before booked meetings" />
       {form.schema.settings.reminders && <Field label="Hours before the meeting"><input className="input" type="number" min="1" value={form.schema.settings.reminderHours || 24} onChange={(e)=>setSettings({reminderHours: parseInt(e.target.value || "24", 10)})} /></Field>}
+      {(()=>{ const pay = form.schema.settings.payment || {}; const connected = !!(user && user.payments && user.payments.connected); return (<div>
+        <div style={{fontFamily:"var(--mono)",fontSize:12,textTransform:"uppercase",letterSpacing:".05em",color:"var(--ink-soft)",margin:"18px 0 8px"}}>Payments</div>
+        {!connected ? (
+          <div className="hint">Collect a payment from each respondent when they submit. Connect your Stripe account from the Account menu first. Payments go to your Stripe account and zetetiq does not take a cut.</div>
+        ) : (<div>
+          <Toggle checked={!!pay.enabled} onChange={(c)=>setSettings({ payment: Object.assign({}, pay, { enabled: c }) })} label="Require a payment to submit this form" />
+          {pay.enabled && (<div style={{marginTop:8}}>
+            <div className="row" style={{gap:8}}>
+              <div style={{flex:1}}><Field label="Amount"><input className="input" type="number" min="0.50" step="0.01" value={pay.amount || ""} onChange={(e)=>setSettings({ payment: Object.assign({}, pay, { amount: e.target.value }) })} placeholder="25.00" /></Field></div>
+              <div style={{width:120}}><Field label="Currency"><Select className="select" value={pay.currency || "usd"} onChange={(e)=>setSettings({ payment: Object.assign({}, pay, { currency: e.target.value }) })}>{["usd","eur","gbp","cad","aud"].map((c)=>(<option key={c} value={c}>{c.toUpperCase()}</option>))}</Select></Field></div>
+            </div>
+            <Field label="What the payment is for"><input className="input" value={pay.label || ""} onChange={(e)=>setSettings({ payment: Object.assign({}, pay, { label: e.target.value }) })} placeholder="Registration fee" /></Field>
+            <div className="hint">Respondents pay through Stripe secure checkout after they fill out the form, and the response is marked paid once payment completes. The Stripe minimum is about 0.50.</div>
+          </div>)}
+        </div>)}
+      </div>); })()}
       <div className="hint">Email features need a Resend API key set in Cloudflare. Reminders also need a scheduler to call the reminder endpoint on a timer. The handoff doc has the setup steps.</div>
       <div style={{height:10}}></div>
       <Toggle checked={!!form.schema.settings.calFeed} onChange={(c)=>{ if (c && !form.schema.settings.calToken){ const t = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, "") : (Date.now().toString(36) + Math.random().toString(36).slice(2)); setSettings({calFeed:true, calToken:t}); } else { setSettings({calFeed:c}); } }} label="Publish a calendar subscription of bookings" />
@@ -6060,7 +6100,7 @@ function ResponsesTab({ id, form, setForm }){
           <tbody>
             {filtered.map(r=>(
               <tr key={r.id} className="clickable" onClick={()=>setOpen(r)}>
-                <td style={{fontSize:13}}>{fmtDate(r.created_at)}</td>
+                <td style={{fontSize:13}}>{fmtDate(r.created_at)}{r.meta && r.meta.payment && <span className={"pay-chip " + (r.meta.payment.status === "paid" ? "paid" : "due")}>{r.meta.payment.status === "paid" ? "Paid" : "Unpaid"}</span>}</td>
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.city, r.meta.country].filter(Boolean).join(", ") || "-"}</td>
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.browser, r.meta.os].filter(Boolean).join(" / ") || "-"}</td>
                 {previewCols.map(c=>(<td key={c} style={{fontSize:13,maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cell(r.data[c])}</td>))}
@@ -6083,6 +6123,7 @@ function ResponsesTab({ id, form, setForm }){
             )}
             <hr style={{border:0,borderTop:"1px solid var(--line)",margin:"14px 0"}} />
             <div className="mono" style={{fontSize:12,color:"var(--ink-soft)"}}>{[open.meta.city, open.meta.region, open.meta.country].filter(Boolean).join(", ")} · {[open.meta.browser, open.meta.os].filter(Boolean).join(" / ")}{open.meta.viewport ? " · " + open.meta.viewport.w + "x" + open.meta.viewport.h : ""}</div>
+            {open.meta && open.meta.payment && <div className="mono" style={{fontSize:12,marginTop:6,color: open.meta.payment.status === "paid" ? "var(--fa)" : "#C0563F"}}>Payment {open.meta.payment.status === "paid" ? "received" : "pending"} · {(open.meta.payment.amount/100).toFixed(2)} {String(open.meta.payment.currency||"").toUpperCase()}</div>}
           </div>
         </Modal>
       )}

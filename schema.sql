@@ -12,12 +12,14 @@ CREATE TABLE IF NOT EXISTS users (
   plan_request TEXT,                  -- JSON: { kind, org, note, status, at } for education/nonprofit applications
   calendar     TEXT,                  -- JSON: { google: {...}, outlook: {...} } for free/busy blocking
   billing      TEXT,                  -- JSON: { customer, subscription, status, plan, at } for Stripe subscriptions
+  stripe_account TEXT,                -- connected Stripe account id (acct_...) for collecting respondent payments
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- MIGRATION for existing databases (run these two once if the users table already exists;
 -- they are safe to skip on a brand new database created from the block above):
 --   ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free';
+--   ALTER TABLE users ADD COLUMN stripe_account TEXT;
 --   ALTER TABLE users ADD COLUMN plan_request TEXT;
 --   ALTER TABLE users ADD COLUMN calendar TEXT;   -- only needed for Google and Outlook free/busy blocking
 --   ALTER TABLE users ADD COLUMN billing TEXT;    -- only needed for Stripe subscriptions

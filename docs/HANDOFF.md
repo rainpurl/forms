@@ -43,30 +43,29 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
-This release removes the SMS reminder path entirely (it was never wired) and adds team workspaces for the Enterprise plan.
+This release adds respondent payments: form owners can collect money from the people who fill out a form, paid out to the owner's own Stripe account.
 
-### Teams (Enterprise)
-Enterprise accounts can create a team, invite people by email, and share forms with everyone on the team.
-- Create a team from Account then Manage team (or visit /team). The creator becomes the owner.
-- Invite by email. If the person already has a zetetiq account they are added immediately; otherwise they join automatically the next time they sign in with that email address. Roles are owner, admin, and member. Owners and admins can invite, change roles, and remove people; any member can leave.
-- Share a form with the team using the Team toggle in the form's Settings (owner only). Shared forms appear under the team tab on the dashboard.
-- What team members can do with a shared form: see it on their dashboard, open it, edit and save it, and view its responses and analytics. Reserved to the form owner for now: deleting the form, deleting responses, duplicating, exporting, AI summaries, and file operations, plus sharing or unsharing.
-- Personal forms that are not shared stay private to you. The dashboard shows a Personal and team switcher when you belong to a team.
+### Respondent payments (Stripe Connect)
+- The owner connects their Stripe account once from Account then Payments (Connect Stripe). This uses Stripe Connect, so payments go straight to the owner's Stripe balance and zetetiq does not take a cut.
+- Per form, in Settings then Payments, turn on "Require a payment to submit this form" and set an amount, currency, and a short label. The toggle only appears once Stripe is connected.
+- Respondents fill out the form, then are sent to Stripe's hosted checkout to pay. Their response is saved immediately as unpaid and flips to paid once the payment completes (confirmed both by the return from checkout and by webhook). The owner sees a Paid or Unpaid chip on each response and the amount in the response detail.
+- There is also a separate, older payment question type that just shows a button linking to a payment link you make yourself; that is unchanged. The new Settings option is the integrated pay-to-submit flow.
 
-Run these migrations on the D1 database, then redeploy:
-  CREATE TABLE IF NOT EXISTS orgs (id TEXT PRIMARY KEY, name TEXT, owner_id TEXT, created_at TEXT DEFAULT (datetime('now')));
-  CREATE TABLE IF NOT EXISTS org_members (org_id TEXT, user_id TEXT, role TEXT DEFAULT 'member', added_at TEXT DEFAULT (datetime('now')), PRIMARY KEY (org_id, user_id));
-  CREATE TABLE IF NOT EXISTS org_invites (id TEXT PRIMARY KEY, org_id TEXT, email TEXT, role TEXT DEFAULT 'member', created_at TEXT DEFAULT (datetime('now')));
-  ALTER TABLE forms ADD COLUMN org_id TEXT;
-The three CREATE TABLE statements are also in schema.sql. On an existing database you need all three new tables plus the one ALTER.
+Setup, one time:
+1. In the Stripe Dashboard, enable Connect and copy the platform's OAuth client id (starts with ca_). In Connect settings, add the redirect URI https://zetetiq.com/api/connect/callback (and the pages.dev equivalent if used).
+2. In Cloudflare Pages, add an environment variable STRIPE_CONNECT_CLIENT_ID set to that ca_ value. (The existing STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET are reused.)
+3. On the existing Stripe webhook endpoint, make sure it also listens to events on connected accounts so checkout.session.completed from a respondent's payment is delivered. The return-from-checkout confirmation works even without this, but the webhook is the reliable backstop.
+4. Run the database migration below and redeploy.
 
-Upload index.html and functions/api/[[path]].js, run the migrations, and redeploy.
+Migration (D1):
+  ALTER TABLE forms ADD COLUMN org_id TEXT;   -- only if not already added for teams
+  ALTER TABLE users ADD COLUMN stripe_account TEXT;
+The stripe_account column is the only new one this release. It is also in schema.sql.
 
-### SMS removed
-The SMS sender, the phone-number finder, the reminder SMS branch, and the form's SMS toggle are all gone. Reminders are email only and no SMS environment variables are used.
+Upload index.html and functions/api/[[path]].js, add STRIPE_CONNECT_CLIENT_ID, run the migration, and redeploy.
 
 ### Still open (larger items, not done)
-True SAML or OIDC single sign-on (the Enterprise plan reserves an sso flag, but real identity-provider sign-on is a separate project; email-domain auto-join would be a lighter step toward it), respondent-facing payment collection, Apple/iCloud and Exchange calendar free/busy, and maintained-string localization.
+True SAML or OIDC single sign-on for Enterprise, Apple/iCloud and Exchange calendar free/busy, and maintained-string localization. Possible payment follow-ons: letting respondents choose a quantity, variable amounts, applying a platform fee, and refund handling from the response view.
 
 ## Recent changes
 - Custom form link (slug). In form Settings there is now a "Link" field showing your username prefix and an editable slug, the part after /username/ in the form's web address. It accepts letters, numbers, and hyphens. Saving applies it; if the slug collides with another of your forms it gets a numeric suffix and the field updates to show the real one. Works on first publish and on later edits. The previous link stops working once changed.

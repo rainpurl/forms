@@ -1202,6 +1202,12 @@ body{top:0!important}
 .trow-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .trole{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
 .zsel.sm{font-size:12px;padding:5px 9px}
+
+/* respondent payments */
+.pay-chip{display:inline-block;margin-left:6px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:1px 6px;border-radius:6px;vertical-align:middle}
+.pay-chip.paid{background:rgba(47,158,99,.16);color:#2F9E63}
+.pay-chip.due{background:rgba(192,86,63,.15);color:#C0563F}
+.conn-ok{font-size:13px;color:#2F9E63;font-weight:600}
 </style>
 </head>
 <body>
@@ -1335,6 +1341,18 @@ const api = {
   }),
   billingPortal: () => req("/api/billing/portal", {
     method: "POST"
+  }),
+  connectDisconnect: () => req("/api/connect/disconnect", {
+    method: "POST"
+  }),
+  payConfirm: (formId, session) => req("/api/public/" + formId + "/pay-confirm", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      session
+    })
   }),
   createForm: payload => req("/api/forms", {
     method: "POST",
@@ -8218,6 +8236,33 @@ function PublicForm({
     };
   }, [st.form]);
   useEffect(() => {
+    if (!st.form) return;
+    let sp2;
+    try {
+      sp2 = new URLSearchParams(window.location.search);
+    } catch (e) {
+      return;
+    }
+    const paidS = sp2.get("paid");
+    const cancelS = sp2.get("pay_cancel");
+    if (paidS) {
+      try {
+        api.payConfirm(st.form.id, paidS);
+      } catch (e) {}
+      setDone(true);
+      try {
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch (e) {}
+    } else if (cancelS) {
+      try {
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch (e) {}
+      try {
+        window.alert("Payment was canceled, so your submission was not completed.");
+      } catch (e) {}
+    }
+  }, [st.form]);
+  useEffect(() => {
     let m = true;
     api.publicForm(username, slug).then(({
       ok,
@@ -8458,6 +8503,10 @@ function PublicForm({
     }) => {
       setSubmitting(false);
       if (ok && data && data.ok) {
+        if (data.payment_url) {
+          window.location.href = data.payment_url;
+          return;
+        }
         const r = form.schema && form.schema.settings && form.schema.settings.redirectUrl;
         if (r && !extra.disqualified) {
           window.location.href = /^https?:\/\//i.test(r) ? r : "https://" + r;
@@ -10032,7 +10081,33 @@ function AccountMenu({
     className: "acct-lbl"
   }, "Calendar"), /*#__PURE__*/React.createElement(CalendarConnect, null), /*#__PURE__*/React.createElement("div", {
     className: "acct-hint"
-  }, "Busy times from a connected calendar are blocked automatically on time window scheduling.")), user.limits && user.limits.team && /*#__PURE__*/React.createElement("div", {
+  }, "Busy times from a connected calendar are blocked automatically on time window scheduling.")), /*#__PURE__*/React.createElement("div", {
+    className: "acct-sec"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "acct-lbl"
+  }, "Payments"), user.payments && user.payments.connected ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    className: "conn-ok"
+  }, "Stripe connected"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    style: {
+      marginLeft: 8
+    },
+    onClick: () => {
+      if (window.confirm("Disconnect Stripe? Your forms will stop collecting payments.")) api.connectDisconnect().then(() => {
+        setUser(p => p ? Object.assign({}, p, {
+          payments: {
+            connected: false
+          }
+        }) : p);
+        toast("Stripe disconnected");
+      });
+    }
+  }, "Disconnect")) : /*#__PURE__*/React.createElement("a", {
+    className: "btn sm ghost",
+    href: "/api/connect/start?return=/dashboard"
+  }, "Connect Stripe"), /*#__PURE__*/React.createElement("div", {
+    className: "acct-hint"
+  }, "Connect Stripe to collect payments from respondents on your forms. Payments go to your account and zetetiq does not take a cut.")), user.limits && user.limits.team && /*#__PURE__*/React.createElement("div", {
     className: "acct-sec"
   }, /*#__PURE__*/React.createElement("label", {
     className: "acct-lbl"
@@ -10187,6 +10262,33 @@ function Dashboard() {
             if (ok && data && data.user) setUser(data.user);
           }).catch(() => {});
         }, 2500);
+        try {
+          history.replaceState(null, "", location.pathname);
+        } catch (e) {}
+      }
+    } catch (e) {}
+  }, []);
+  useEffect(() => {
+    try {
+      const p = new URLSearchParams(location.search).get("connect");
+      if (p) {
+        const msg = {
+          connected: "Stripe connected. You can now collect payments on your forms.",
+          denied: "Stripe connection cancelled.",
+          unconfigured: "Payments are not set up yet.",
+          state: "That connection link expired. Try again.",
+          error: "Could not connect Stripe. Try again.",
+          login: "Please sign in first."
+        }[p] || "";
+        if (msg) toast(msg);
+        if (p === "connected") setTimeout(() => {
+          api.me().then(({
+            ok,
+            data
+          }) => {
+            if (ok && data && data.user) setUser(data.user);
+          }).catch(() => {});
+        }, 600);
         try {
           history.replaceState(null, "", location.pathname);
         } catch (e) {}
@@ -13591,7 +13693,87 @@ function SettingsPanel({
     onChange: e => setSettings({
       reminderHours: parseInt(e.target.value || "24", 10)
     })
-  })), /*#__PURE__*/React.createElement("div", {
+  })), (() => {
+    const pay = form.schema.settings.payment || {};
+    const connected = !!(user && user.payments && user.payments.connected);
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "var(--mono)",
+        fontSize: 12,
+        textTransform: "uppercase",
+        letterSpacing: ".05em",
+        color: "var(--ink-soft)",
+        margin: "18px 0 8px"
+      }
+    }, "Payments"), !connected ? /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Collect a payment from each respondent when they submit. Connect your Stripe account from the Account menu first. Payments go to your Stripe account and zetetiq does not take a cut.") : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Toggle, {
+      checked: !!pay.enabled,
+      onChange: c => setSettings({
+        payment: Object.assign({}, pay, {
+          enabled: c
+        })
+      }),
+      label: "Require a payment to submit this form"
+    }), pay.enabled && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "Amount"
+    }, /*#__PURE__*/React.createElement("input", {
+      className: "input",
+      type: "number",
+      min: "0.50",
+      step: "0.01",
+      value: pay.amount || "",
+      onChange: e => setSettings({
+        payment: Object.assign({}, pay, {
+          amount: e.target.value
+        })
+      }),
+      placeholder: "25.00"
+    }))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 120
+      }
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "Currency"
+    }, /*#__PURE__*/React.createElement(Select, {
+      className: "select",
+      value: pay.currency || "usd",
+      onChange: e => setSettings({
+        payment: Object.assign({}, pay, {
+          currency: e.target.value
+        })
+      })
+    }, ["usd", "eur", "gbp", "cad", "aud"].map(c => /*#__PURE__*/React.createElement("option", {
+      key: c,
+      value: c
+    }, c.toUpperCase())))))), /*#__PURE__*/React.createElement(Field, {
+      label: "What the payment is for"
+    }, /*#__PURE__*/React.createElement("input", {
+      className: "input",
+      value: pay.label || "",
+      onChange: e => setSettings({
+        payment: Object.assign({}, pay, {
+          label: e.target.value
+        })
+      }),
+      placeholder: "Registration fee"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "hint"
+    }, "Respondents pay through Stripe secure checkout after they fill out the form, and the response is marked paid once payment completes. The Stripe minimum is about 0.50."))));
+  })(), /*#__PURE__*/React.createElement("div", {
     className: "hint"
   }, "Email features need a Resend API key set in Cloudflare. Reminders also need a scheduler to call the reminder endpoint on a timer. The handoff doc has the setup steps."), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -16482,7 +16664,9 @@ function ResponsesTab({
     style: {
       fontSize: 13
     }
-  }, fmtDate(r.created_at)), /*#__PURE__*/React.createElement("td", {
+  }, fmtDate(r.created_at), r.meta && r.meta.payment && /*#__PURE__*/React.createElement("span", {
+    className: "pay-chip " + (r.meta.payment.status === "paid" ? "paid" : "due")
+  }, r.meta.payment.status === "paid" ? "Paid" : "Unpaid")), /*#__PURE__*/React.createElement("td", {
     className: "hide-sm",
     style: {
       fontSize: 13
@@ -16627,7 +16811,14 @@ function ResponsesTab({
       fontSize: 12,
       color: "var(--ink-soft)"
     }
-  }, [open.meta.city, open.meta.region, open.meta.country].filter(Boolean).join(", "), " · ", [open.meta.browser, open.meta.os].filter(Boolean).join(" / "), open.meta.viewport ? " · " + open.meta.viewport.w + "x" + open.meta.viewport.h : ""))));
+  }, [open.meta.city, open.meta.region, open.meta.country].filter(Boolean).join(", "), " · ", [open.meta.browser, open.meta.os].filter(Boolean).join(" / "), open.meta.viewport ? " · " + open.meta.viewport.w + "x" + open.meta.viewport.h : ""), open.meta && open.meta.payment && /*#__PURE__*/React.createElement("div", {
+    className: "mono",
+    style: {
+      fontSize: 12,
+      marginTop: 6,
+      color: open.meta.payment.status === "paid" ? "var(--fa)" : "#C0563F"
+    }
+  }, "Payment ", open.meta.payment.status === "paid" ? "received" : "pending", " · ", (open.meta.payment.amount / 100).toFixed(2), " ", String(open.meta.payment.currency || "").toUpperCase()))));
 }
 function BarCard({
   title,
