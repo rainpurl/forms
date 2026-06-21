@@ -1136,14 +1136,15 @@ body{top:0!important}
 .lp-hero-text{position:relative;z-index:2}
 .lp-visual{position:relative;z-index:1}
 
-/* blue and red buttons: simple recessed at rest like the white controls, no raised lip */
-.btn.primary{box-shadow:inset 0 1px 3px rgba(18,42,92,.5)}
-.btn.primary:hover{background:var(--bo-dark);box-shadow:inset 0 1px 2px rgba(18,42,92,.32),0 3px 9px rgba(50,100,190,.26);transform:translateY(-1px)}
-.btn.primary:active{background:var(--bo-dark);box-shadow:inset 0 2px 6px rgba(18,42,92,.58);transform:translateY(0)}
-.btn.danger{box-shadow:inset 0 1px 3px rgba(92,22,16,.5)}
-.btn.danger:hover{background:var(--bad);filter:brightness(.95);box-shadow:inset 0 1px 2px rgba(92,22,16,.32),0 3px 9px rgba(150,45,30,.24);transform:translateY(-1px)}
-.btn.danger:active{background:var(--bad);box-shadow:inset 0 2px 6px rgba(92,22,16,.55);transform:translateY(0)}
-.btn.primary,.btn.danger{background-image:none}
+/* blue and red buttons: soft color glow from the center fading into the surface by the edge */
+.btn.primary{background:radial-gradient(var(--bo) 0%, var(--bo) 42%, color-mix(in srgb, var(--bo) 45%, var(--paper)) 78%, var(--paper) 100%);border-color:transparent;box-shadow:var(--bevel-soft)}
+.btn.primary:hover{background:var(--bo-dark);box-shadow:var(--bevel-raise),0 4px 12px rgba(50,100,190,.22);transform:translateY(-1px)}
+.btn.primary:active{background:var(--bo-dark);box-shadow:var(--bevel-press);transform:translateY(1px)}
+.btn.danger{background:radial-gradient(var(--bad) 0%, var(--bad) 42%, color-mix(in srgb, var(--bad) 45%, var(--paper)) 78%, var(--paper) 100%);border-color:transparent;box-shadow:var(--bevel-soft)}
+.btn.danger:hover{background:var(--bad);filter:brightness(.96);box-shadow:var(--bevel-raise),0 4px 12px rgba(150,45,30,.2);transform:translateY(-1px)}
+.btn.danger:active{background:var(--bad);box-shadow:var(--bevel-press);transform:translateY(1px)}
+.btn.primary:disabled,.btn.danger:disabled{opacity:.62;transform:none;filter:none}
+.btn.primary,.btn.danger{background-repeat:no-repeat}
 
 /* e-sign placement editor: resizeable fields fill their box */
 .esign-modal .esign-doc{display:block;margin:0 auto;max-width:100%}

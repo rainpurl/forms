@@ -43,6 +43,9 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+- Colored buttons (the blue primary and red danger) no longer use the inset recessed look. At rest they now have a radial gradient: the full color sits in the center and fades into the surface color by the edges, with a soft raised bevel so they still read as buttons. On hover they fill to the solid darker color and lift; on click they press in. Text stays light over the colored core. The gradient stops (color holds to about 42 percent, fades to the surface by the edge) are easy to retune in the ".btn.primary" and ".btn.danger" rules if the fade should be stronger or weaker.
+
+## Recent changes
 - Support links to support@zetetiq.com are now in three places: a "Contact support" button in the account menu (the top right dropdown), a "Support" link in the landing page footer, and the "Contact us about Enterprise" line already in the upgrade picker. All are plain mailto links.
 - The Enterprise pricing card (the "Let's talk" tier) now has a "Connect" button that opens an email to support@zetetiq.com with an Enterprise enquiry subject line.
 - Email is operational: receiving via Cloudflare Email Routing and sending as support@zetetiq.com via Gmail with Resend SMTP are set up and working.
