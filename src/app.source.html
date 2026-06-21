@@ -1214,6 +1214,12 @@ body{top:0!important}
 .pay-chip.paid{background:rgba(47,158,99,.16);color:#2F9E63}
 .pay-chip.due{background:rgba(192,86,63,.15);color:#C0563F}
 .conn-ok{font-size:13px;color:#2F9E63;font-weight:600}
+
+/* drag handle + pickup feel (reorder) */
+.drag-handle{font-size:16px;padding:4px 7px;border-radius:7px;cursor:grab;touch-action:none;user-select:none}
+.drag-handle:hover{background:var(--hover);color:var(--ink)}
+.drag-handle:active{cursor:grabbing}
+.qccard.dragging,.blockcard.dragging,.pbreak.dragging{box-shadow:0 18px 42px rgba(0,0,0,.28);opacity:1}
 </style>
 </head>
 <body>
@@ -5399,51 +5405,60 @@ function Builder({ formId }){
   const moveQ = (i, dir)=>{ const qs = questions.slice(); const j = i + dir; if (j < 0 || j >= qs.length) return; const t = qs[i]; qs[i] = qs[j]; qs[j] = t; setQuestions(qs); };
   const dupQ = (qid)=>{ const qs = questions.slice(); const idx = qs.findIndex((q)=>q.id === qid); if (idx < 0) return; let copy; try { copy = JSON.parse(JSON.stringify(qs[idx])); } catch (e) { copy = { ...qs[idx] }; } copy.id = uid(); ["fields","slots","hosts","reminders","attributes","options"].forEach((kk)=>{ if (Array.isArray(copy[kk])) copy[kk] = copy[kk].map((it)=> (it && typeof it === "object" && ("id" in it)) ? { ...it, id: uid() } : it); }); qs.splice(idx + 1, 0, copy); setQuestions(qs); setSel(copy.id); };
   const reorder = (from, to)=>{ if (from === null || from === to) return; const qs = questions.slice(); const [m] = qs.splice(from, 1); qs.splice(to, 0, m); setQuestions(qs); };
-  const applyShifts = (D, dropTo)=>{
-    const H = D.height;
-    D.list.forEach((q, i)=>{ if (i === D.fromIdx) return; const el = cardRefs.current[q.id]; if (!el) return;
-      const removeUp = (i > D.fromIdx) ? -H : 0; const eff = (i < D.fromIdx) ? i : i - 1; const insertDown = (eff >= dropTo) ? H : 0; const sh = removeUp + insertDown;
-      el.style.transform = sh ? ("translateY(" + sh + "px)") : ""; });
-  };
-  const onDragMove = (e)=>{
-    const D = dragSess.current; if (!D) return;
-    const py = e.touches ? e.touches[0].clientY : e.clientY;
-    const el = cardRefs.current[D.id]; if (el) el.style.transform = "translateY(" + (py - D.grabDy - D.fromTop) + "px) scale(1.02)";
-    const dc = py - D.grabDy + D.height / 2;
-    let above = 0; for (let i = 0; i < D.centers.length; i++){ if (i === D.fromIdx) continue; if (D.centers[i] < dc) above++; }
-    if (above !== D.dropTo){ D.dropTo = above; applyShifts(D, above); }
-  };
-  const onDragUp = ()=>{
-    const D = dragSess.current;
-    window.removeEventListener("pointermove", onDragMove); window.removeEventListener("pointerup", onDragUp);
-    if (!D) return;
-    const dragEl = cardRefs.current[D.id];
-    const firstTop = dragEl ? dragEl.getBoundingClientRect().top : 0;
-    D.list.forEach((q)=>{ if (q.id === D.id) return; const el = cardRefs.current[q.id]; if (el){ el.style.transition = "none"; el.style.transform = ""; } });
-    if (dragEl){ dragEl.style.transition = "none"; dragEl.style.transform = ""; }
-    suppressFlip.current = true; dragSess.current = null; setDragId(null);
-    reorder(D.fromIdx, D.dropTo);
-    requestAnimationFrame(()=>{
-      D.list.forEach((q)=>{ if (q.id === D.id) return; const el = cardRefs.current[q.id]; if (el) el.style.transition = ""; });
-      if (dragEl){
-        const dy = firstTop - dragEl.getBoundingClientRect().top;
-        dragEl.style.transition = "none";
-        dragEl.style.transform = "translateY(" + dy + "px) scale(1.02)";
-        requestAnimationFrame(()=>{ dragEl.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms ease"; dragEl.style.transform = ""; });
-        setTimeout(()=>{ if (dragEl) dragEl.style.transition = ""; }, 260);
-      }
-    });
-  };
+  // Pointer-capture drag: the handle captures the pointer so move/up always reach us,
+  // the dragged card follows the cursor 1:1, and the other cards slide out of the way.
   const beginDrag = (e, index)=>{
     if (e.button != null && e.button !== 0) return;
     e.preventDefault(); e.stopPropagation();
     const list = questions;
-    const centers = list.map((q)=>{ const el = cardRefs.current[q.id]; if (!el) return 0; const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
-    const el0 = cardRefs.current[list[index].id]; const r0 = el0 ? el0.getBoundingClientRect() : { top:0, height:0 };
-    if (el0) el0.style.transition = "none";
-    dragSess.current = { id: list[index].id, fromIdx: index, dropTo: index, grabDy: e.clientY - r0.top, fromTop: r0.top, height: r0.height, centers, list };
-    setDragId(list[index].id);
-    window.addEventListener("pointermove", onDragMove); window.addEventListener("pointerup", onDragUp);
+    const ids = list.map((q)=> q.id);
+    const els = ids.map((id)=> cardRefs.current[id]);
+    const dragEl = els[index];
+    if (!dragEl) return;
+    const rects = els.map((el)=> el ? el.getBoundingClientRect() : null);
+    const r0 = rects[index]; if (!r0) return;
+    const startY = e.clientY;
+    const height = r0.height;
+    let gap = 12;
+    for (let i = 0; i < rects.length - 1; i++){ if (rects[i] && rects[i+1]){ const g = rects[i+1].top - rects[i].top - rects[i].height; if (g >= 0){ gap = g; break; } } }
+    const step = height + gap;
+    let dropTo = index;
+    const handleEl = e.currentTarget; const pid = e.pointerId;
+    try { if (handleEl.setPointerCapture && pid != null) handleEl.setPointerCapture(pid); } catch (er) {}
+    dragEl.style.transition = "none"; dragEl.style.zIndex = "999"; dragEl.style.position = "relative"; dragEl.style.willChange = "transform";
+    els.forEach((el, i)=>{ if (el && i !== index) el.style.transition = "transform 180ms cubic-bezier(.2,.8,.2,1)"; });
+    setDragId(ids[index]);
+    const move = (ev)=>{
+      const dy = ev.clientY - startY;
+      dragEl.style.transform = "translateY(" + dy + "px) scale(1.02)";
+      const dc = r0.top + dy + height / 2;
+      let t = 0;
+      for (let i = 0; i < rects.length; i++){ if (i === index || !rects[i]) continue; const c = rects[i].top + rects[i].height / 2; if (c < dc) t++; }
+      if (t !== dropTo){
+        dropTo = t;
+        els.forEach((el, i)=>{ if (!el || i === index) return; let sh = 0; if (i > index) sh -= step; const eff = (i < index) ? i : i - 1; if (eff >= dropTo) sh += step; el.style.transform = sh ? ("translateY(" + sh + "px)") : ""; });
+      }
+    };
+    const up = ()=>{
+      handleEl.removeEventListener("pointermove", move);
+      handleEl.removeEventListener("pointerup", up);
+      handleEl.removeEventListener("pointercancel", up);
+      try { if (handleEl.releasePointerCapture && pid != null) handleEl.releasePointerCapture(pid); } catch (er) {}
+      const firstTop = dragEl.getBoundingClientRect().top;
+      els.forEach((el)=>{ if (el){ el.style.transition = "none"; el.style.transform = ""; } });
+      suppressFlip.current = true; setDragId(null);
+      reorder(index, dropTo);
+      requestAnimationFrame(()=>{
+        els.forEach((el)=>{ if (el && el !== dragEl) el.style.transition = ""; });
+        const ddy = firstTop - dragEl.getBoundingClientRect().top;
+        dragEl.style.transition = "none"; dragEl.style.transform = "translateY(" + ddy + "px) scale(1.02)";
+        requestAnimationFrame(()=>{ dragEl.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms ease"; dragEl.style.transform = ""; });
+        setTimeout(()=>{ if (dragEl){ dragEl.style.transition = ""; dragEl.style.zIndex = ""; dragEl.style.position = ""; dragEl.style.willChange = ""; } }, 240);
+      });
+    };
+    handleEl.addEventListener("pointermove", move);
+    handleEl.addEventListener("pointerup", up);
+    handleEl.addEventListener("pointercancel", up);
   };
   const dnd = { draggingId: dragId, beginDrag };
 

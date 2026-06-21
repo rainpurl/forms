@@ -43,6 +43,11 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+Reordering questions in the builder was rebuilt from scratch. Dragging a question by its handle now picks the card up and moves it with the cursor, the other cards slide out of the way to open a gap, and the card settles into its new slot when you let go. The new engine uses pointer capture on the handle, so the drag keeps tracking even if the cursor moves quickly or leaves the card, and it works the same with a mouse or on a touch screen. The handle is also larger and clearer now.
+
+Only index.html changed this release. Upload index.html and redeploy. No backend change and no migration.
+
+## Previous release: respondent payments
 This release adds respondent payments: form owners can collect money from the people who fill out a form, paid out to the owner's own Stripe account.
 
 ### Respondent payments (Stripe Connect)
