@@ -357,8 +357,9 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .form-scope .fpage{animation:fadeUp .28s ease both}
 /* add-question modal */
 .addq-modal{max-width:560px}
-.addq-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
-.addq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 18px;max-height:62vh;overflow:auto}
+.addq-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 4px}
+.addq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 18px 2px}
+.addq-body{max-height:72vh;overflow:auto;padding-bottom:14px}
 .addq-item{text-align:left;border:1px solid var(--line-strong);background:var(--card);border-radius:10px;padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s}
 .addq-item:hover{border-color:var(--bo);background:var(--hover)}
 .addq-item .t{font-weight:600;font-size:14px}
@@ -1028,8 +1029,8 @@ html[data-theme="dark"] .form-scope .stars .star{text-shadow:0 1px 1px rgba(0,0,
 .acct-lbl{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
 .acct-hint{font-size:12px;color:var(--ink-soft);margin-top:5px;line-height:1.4}
 /* question picker section headers */
-.addq-section-h{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;text-align:center;margin:16px 2px 9px;padding-top:13px;border-top:1px solid var(--line)}
-.addq-section-h:first-of-type{border-top:0;padding-top:0;margin-top:2px}
+.addq-section-h{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;text-align:center;margin:18px 2px 9px}
+.addq-section-h:first-of-type{margin-top:6px}
 /* hide the Google website-translate banner/gadget */
 .goog-te-banner-frame.skiptranslate{display:none!important}
 body{top:0!important}
@@ -1095,7 +1096,7 @@ body{top:0!important}
 
 /* document e-sign: inline drag-and-drop field editor + renderer */
 .esign-wrap{margin-top:10px}
-.esign-palette{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.esign-palette{display:flex;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:10;background:var(--card);padding:10px 0;margin:0 0 12px;box-shadow:0 8px 10px -10px rgba(0,0,0,.4)}
 .esign-pal-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 12px;font-size:13px;font-weight:600;cursor:grab;box-shadow:var(--bevel-raise);user-select:none}
 .esign-pal-btn:active{cursor:grabbing}
 .esign-pal-btn.armed{background:var(--bo);color:#f5f2f0;border-color:transparent}
@@ -1214,6 +1215,9 @@ body{top:0!important}
 .drag-handle:hover{background:var(--hover);color:var(--ink)}
 .drag-handle:active{cursor:grabbing}
 .qccard.dragging,.blockcard.dragging,.pbreak.dragging{box-shadow:0 18px 42px rgba(0,0,0,.28);opacity:1}
+
+/* bigger place-fields button */
+.esign-place-btn{margin-top:12px;width:100%;padding:13px 16px;font-size:15px;font-weight:700}
 </style>
 </head>
 <body>
@@ -3988,32 +3992,32 @@ const ESIGN_TYPES = [{
 }];
 const ESIGN_DEFAULTS = {
   text: {
-    w: 24,
-    h: 6
+    w: 16,
+    h: 5
   },
   long: {
-    w: 30,
-    h: 12
+    w: 22,
+    h: 8
   },
   date: {
-    w: 18,
-    h: 6
+    w: 13,
+    h: 5
   },
   circle: {
-    w: 6,
-    h: 6
+    w: 5,
+    h: 5
   },
   check: {
-    w: 5,
-    h: 5
+    w: 4,
+    h: 4
   },
   x: {
-    w: 5,
-    h: 5
+    w: 4,
+    h: 4
   },
   signature: {
-    w: 28,
-    h: 10
+    w: 20,
+    h: 7
   }
 };
 const esignSize = f => {
@@ -4231,10 +4235,7 @@ function DocumentControls({
       e.target.value = "";
     }
   }), /*#__PURE__*/React.createElement("span", null, "Upload a document (image or PDF)")), q.document ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    style: {
-      marginTop: 10
-    },
+    className: "btn primary esign-place-btn",
     onClick: () => setPlaceOpen(true)
   }, "Place fields on the document"), /*#__PURE__*/React.createElement("div", {
     className: "hint",
@@ -13971,7 +13972,6 @@ function AddQuestionMenu({
   onAdd
 }) {
   const [open, setOpen] = useState(false);
-  const [adv, setAdv] = useState(false);
   const lbl = it => it.label || QTYPES[it.type] && QTYPES[it.type].label || it.type;
   const hnt = it => it.hint || QTYPES[it.type] && QTYPES[it.type].hint || "";
   const exclude = new Set(["scheduling", "document_sign", "multiple_choice", "text_entry", "rank_order"]);
@@ -14004,6 +14004,8 @@ function AddQuestionMenu({
     onClick: () => setOpen(false),
     title: "Close"
   }, "×")), /*#__PURE__*/React.createElement("div", {
+    className: "addq-body"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "addq-section-h"
   }, "Scheduling and signing"), /*#__PURE__*/React.createElement("div", {
     className: "addq-grid"
@@ -14027,11 +14029,10 @@ function AddQuestionMenu({
     className: "t"
   }, lbl(it)), /*#__PURE__*/React.createElement("div", {
     className: "h"
-  }, hnt(it))))), /*#__PURE__*/React.createElement("button", {
-    className: "addq-adv-toggle",
-    onClick: () => setAdv(a => !a)
-  }, adv ? "▾" : "▸", " Advanced question types"), adv && /*#__PURE__*/React.createElement("div", {
-    className: "addq-grid addq-adv-grid"
+  }, hnt(it))))), /*#__PURE__*/React.createElement("div", {
+    className: "addq-section-h"
+  }, "Advanced question types"), /*#__PURE__*/React.createElement("div", {
+    className: "addq-grid"
   }, advTypes.map(t => /*#__PURE__*/React.createElement("button", {
     key: t,
     className: "addq-item",
@@ -14040,7 +14041,7 @@ function AddQuestionMenu({
     className: "t"
   }, QTYPES[t].label), /*#__PURE__*/React.createElement("div", {
     className: "h"
-  }, QTYPES[t].hint)))))));
+  }, QTYPES[t].hint))))))));
 }
 const FORM_TEMPLATES = [{
   key: "feedback",

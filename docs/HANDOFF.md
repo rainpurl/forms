@@ -43,6 +43,15 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+Builder polish and e-sign placement improvements.
+- The Add a question dialog no longer has the gray divider lines, and the advanced question types are now just a third section you scroll to rather than hidden behind a toggle. The whole dialog scrolls as one list.
+- For document e-signing, new fields (text boxes, checkboxes, circles, signatures) start at a smaller default size, so they need less resizing.
+- The Place fields on the document button is now a large, full width primary button so it is easy to find.
+- In the placement view, the field palette is now pinned to the top: as you scroll down a long document, the row of field types stays in view so you do not have to scroll back up to grab one.
+
+Only index.html changed this release. Upload index.html and redeploy. No backend change and no migration.
+
+## Previous release
 Reordering questions in the builder was rebuilt from scratch. Dragging a question by its handle now picks the card up and moves it with the cursor, the other cards slide out of the way to open a gap, and the card settles into its new slot when you let go. The new engine uses pointer capture on the handle, so the drag keeps tracking even if the cursor moves quickly or leaves the card, and it works the same with a mouse or on a touch screen. The handle is also larger and clearer now.
 
 Only index.html changed this release. Upload index.html and redeploy. No backend change and no migration.
