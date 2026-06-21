@@ -358,7 +358,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .form-scope .fprogress-bar{height:100%;background:var(--fa);border-radius:999px;transition:width .35s ease}
 .form-scope .fnav{display:flex;align-items:center;gap:12px}
 .form-scope .fpage-count{font-size:13px;color:var(--ink-soft)}
-.form-scope .fbtn-ghost{border:1px solid var(--line-strong);background:var(--card);color:var(--ftext);padding:11px 18px;border-radius:10px;font-weight:600;cursor:pointer;transition:background .14s}
+.form-scope .fbtn-ghost{border:1px solid transparent;background:var(--card);color:var(--ftext);padding:11px 18px;border-radius:10px;font-weight:600;cursor:pointer;transition:background .14s}
 .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .form-scope .fpage{animation:fadeUp .28s ease both}
 /* add-question modal */
@@ -471,7 +471,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .slot-wrap{display:flex;flex-direction:column;gap:14px}
 .slot-day .slot-date{font-size:13px;font-weight:600;color:var(--ftext);margin-bottom:7px}
 .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
-.slot-btn{position:relative;border:1px solid var(--line-strong);background:var(--card);border-radius:9px;padding:10px 8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--ftext)}
+.slot-btn{position:relative;border:1px solid transparent;background:var(--card);border-radius:9px;padding:10px 8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--ftext)}
 .slot-btn:hover:not(:disabled){border-color:var(--fa)}
 .slot-btn.sel{background:var(--fa);color:#f5f2f0;border-color:var(--fa)}
 .slot-btn:disabled{opacity:.5;cursor:not-allowed}
@@ -1090,7 +1090,7 @@ body{top:0!important}
 .book-apbtn{appearance:none;border:0;background:transparent;color:var(--ink-soft);font-size:12px;font-weight:700;padding:4px 9px;border-radius:7px;cursor:pointer;transition:.12s}
 .book-apbtn.on{background:var(--card);color:var(--ftext);box-shadow:var(--bevel-raise)}
 .book-tlist{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;padding-right:2px}
-.book-slot{position:relative;appearance:none;border:1px solid var(--line-strong);background:var(--card);color:var(--ftext);border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;text-align:center;box-shadow:var(--bevel-raise);transition:transform .12s,box-shadow .12s,border-color .12s}
+.book-slot{position:relative;appearance:none;border:1px solid transparent;background:var(--card);color:var(--ftext);border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;text-align:center;box-shadow:var(--bevel-inset);transition:transform .12s,box-shadow .12s,border-color .12s}
 .book-slot:hover:not(:disabled):not(.sel){transform:translateY(-1px);border-color:var(--fa)}
 .book-slot.sel{background:var(--fa);color:#f5f2f0;border-color:var(--fa);box-shadow:var(--bevel-press)}
 .book-slot:disabled{opacity:.5;cursor:not-allowed}
@@ -1135,6 +1135,26 @@ body{top:0!important}
 .dash-head .plan-bar{margin-bottom:0;flex:0 1 auto}
 .lp-hero-text{position:relative;z-index:2}
 .lp-visual{position:relative;z-index:1}
+
+/* blue and red buttons: simple recessed at rest like the white controls, no raised lip */
+.btn.primary{box-shadow:inset 0 1px 3px rgba(18,42,92,.5)}
+.btn.primary:hover{background:var(--bo-dark);box-shadow:inset 0 1px 2px rgba(18,42,92,.32),0 3px 9px rgba(50,100,190,.26);transform:translateY(-1px)}
+.btn.primary:active{background:var(--bo-dark);box-shadow:inset 0 2px 6px rgba(18,42,92,.58);transform:translateY(0)}
+.btn.danger{box-shadow:inset 0 1px 3px rgba(92,22,16,.5)}
+.btn.danger:hover{background:var(--bad);filter:brightness(.95);box-shadow:inset 0 1px 2px rgba(92,22,16,.32),0 3px 9px rgba(150,45,30,.24);transform:translateY(-1px)}
+.btn.danger:active{background:var(--bad);box-shadow:inset 0 2px 6px rgba(92,22,16,.55);transform:translateY(0)}
+.btn.primary,.btn.danger{background-image:none}
+
+/* e-sign placement editor: resizeable fields fill their box */
+.esign-modal .esign-doc{display:block;margin:0 auto;max-width:100%}
+.esign-modal .esign-edit .pdf-page{margin:0 auto 10px}
+.esign-efield .esign-marker{width:100%;height:100%;min-width:0;min-height:0;padding:2px 5px;overflow:hidden}
+.esign-efield .esign-marker.esign-circle{width:100%;height:100%}
+.esign-efield .esign-marker.esign-signature{min-width:0;min-height:0}
+.esign-efield .esign-marker.esign-text{min-width:0;justify-content:flex-start}
+.esign-efield{touch-action:none}
+.esign-rs{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;border-radius:50%;background:var(--bo);border:2px solid #fff;cursor:nwse-resize;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.35);touch-action:none}
+.esign-r-text .esign-input,.esign-r-long .esign-input,.esign-r-date .esign-input{min-width:0}
 </style>
 </head>
 <body>
@@ -1776,13 +1796,14 @@ function DocumentSignRenderer({ q, value, onChange, error }){
     const v = data[f.id];
     if (f.kind === "circle" || f.kind === "check" || f.kind === "x"){
       const g = f.kind === "check" ? "✓" : f.kind === "x" ? "✗" : "";
-      return <button type="button" className={"esign-toggle" + (f.kind === "circle" ? " esign-circle" : "") + (v ? " on" : "")} onClick={()=>setField(f.id, !v)} aria-label={f.kind}>{g}</button>;
+      return <button type="button" className={"esign-toggle" + (f.kind === "circle" ? " esign-circle" : "") + (v ? " on" : "")} onClick={()=>setField(f.id, !v)} aria-label={f.kind} style={{width:"100%",height:"100%"}}>{g}</button>;
     }
-    if (f.kind === "signature") return <button type="button" className="esign-sigbtn" onClick={()=>setSigField(f.id)}>{!sigHas(v) ? "Sign here" : sigView(v)}</button>;
-    if (f.kind === "date") return <input className="esign-input" type="date" value={typeof v === "string" ? v : ""} onChange={(e)=>setField(f.id, e.target.value)} />;
-    return <input className="esign-input" placeholder={f.label || ""} value={typeof v === "string" ? v : ""} onChange={(e)=>setField(f.id, e.target.value)} style={{width:(f.w || 150)}} />;
+    if (f.kind === "signature") return <button type="button" className="esign-sigbtn" onClick={()=>setSigField(f.id)} style={{width:"100%",height:"100%"}}>{!sigHas(v) ? "Sign here" : sigView(v)}</button>;
+    if (f.kind === "date") return <input className="esign-input" type="date" value={typeof v === "string" ? v : ""} onChange={(e)=>setField(f.id, e.target.value)} style={{width:"100%",height:"100%"}} />;
+    if (f.kind === "long") return <textarea className="esign-input" placeholder={f.label || ""} value={typeof v === "string" ? v : ""} onChange={(e)=>setField(f.id, e.target.value)} style={{width:"100%",height:"100%",resize:"none"}} />;
+    return <input className="esign-input" placeholder={f.label || ""} value={typeof v === "string" ? v : ""} onChange={(e)=>setField(f.id, e.target.value)} style={{width:"100%",height:"100%"}} />;
   };
-  const fieldBox = (f)=> <div key={f.id} className={"esign-field esign-r-" + f.kind} style={{left:f.x + "%", top:f.y + "%"}}>{fieldEl(f)}</div>;
+  const fieldBox = (f)=>{ const sz = esignSize(f); return <div key={f.id} className={"esign-field esign-r-" + f.kind} style={{left:f.x + "%", top:f.y + "%", width:sz.w + "%", aspectRatio: sz.w + " / " + sz.h}}>{fieldEl(f)}</div>; };
   const pageFields = (i)=> positioned.filter((f)=> isPdf ? ((f.page || 0) === i) : true);
   return (
     <div className="q">
@@ -1955,48 +1976,53 @@ function RequireSelect({ q, update }){
 const ESIGN_TYPES = [
   { kind:"text", label:"Text box", ico:"T" },
   { kind:"circle", label:"Circle", ico:"○" },
-  { kind:"check", label:"Check", ico:"✓" },
-  { kind:"x", label:"X", ico:"✗" },
+  { kind:"check", label:"Checkbox", ico:"✓" },
   { kind:"signature", label:"Signature", ico:"✎" },
 ];
+const ESIGN_DEFAULTS = { text:{w:24,h:6}, long:{w:30,h:12}, date:{w:18,h:6}, circle:{w:6,h:6}, check:{w:5,h:5}, x:{w:5,h:5}, signature:{w:28,h:10} };
+const esignSize = (f)=>{ const d = ESIGN_DEFAULTS[f.kind] || { w:18, h:6 }; return { w: f.w || d.w, h: f.h || d.h }; };
 function DocumentControls({ q, update }){
   const { toast } = useApp();
   const fields = Array.isArray(q.fields) ? q.fields : [];
   const [armed, setArmed] = useState(null);
+  const [placeOpen, setPlaceOpen] = useState(false);
   const [pdfFailed, setPdfFailed] = useState(false);
   const onUpload = (file)=>{ if (!file) return; if (file.type === "application/pdf"){ readFileDataUrl(file, 2000000, (url)=>{ if (!url){ toast("That PDF is too large (2MB max) or could not be read."); return; } update({ document: url, documentName: file.name, documentKind: "pdf" }); }); } else { readImageScaled(file, 1400, (url)=>{ if (!url){ toast("Could not read that image."); return; } if (url.length > 1300000){ toast("That image is too large."); return; } update({ document: url, documentName: file.name, documentKind: "image" }); }); } };
-  const addField = (kind, x, y, page)=>{ const f = { id: uid(), kind, x: Math.round(x*10)/10, y: Math.round(y*10)/10, page: page || 0 }; if (kind === "text") f.label = "Text"; update({ fields: fields.concat([f]) }); };
+  const addField = (kind, x, y, page)=>{ const d = ESIGN_DEFAULTS[kind] || { w:18, h:6 }; const f = { id: uid(), kind, x: Math.round(x*10)/10, y: Math.round(y*10)/10, w: d.w, h: d.h, page: page || 0 }; if (kind === "text") f.label = "Text"; update({ fields: fields.concat([f]) }); };
   const setField = (id, patch)=> update({ fields: fields.map((f)=> f.id === id ? { ...f, ...patch } : f) });
   const removeField = (id)=> update({ fields: fields.filter((f)=>f.id !== id) });
   const pt = (e, el)=>{ const r = el.getBoundingClientRect(); if (!r.width || !r.height) return null; return { x: Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)), y: Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)) }; };
-  const handleDrop = (e, el, page)=>{ e.preventDefault(); const p = pt(e, el); if (!p) return; let kind = ""; let moveId = ""; try { kind = e.dataTransfer.getData("esign-kind"); moveId = e.dataTransfer.getData("esign-move"); } catch (er) {} if (moveId){ setField(moveId, { x: Math.round(p.x*10)/10, y: Math.round(p.y*10)/10, page: page || 0 }); } else if (kind){ addField(kind, p.x, p.y, page); } };
+  const handleDrop = (e, el, page)=>{ e.preventDefault(); const p = pt(e, el); if (!p) return; let kind = ""; try { kind = e.dataTransfer.getData("esign-kind"); } catch (er) {} if (kind) addField(kind, p.x, p.y, page); };
   const handleClick = (e, el, page)=>{ if (!armed) return; const p = pt(e, el); if (!p) return; addField(armed, p.x, p.y, page); setArmed(null); };
-  const marker = (f)=>{
-    const inner = f.kind === "check" ? "✓" : f.kind === "x" ? "✗" : f.kind === "signature" ? "Signature" : f.kind === "text" ? (f.label || "Text") : "";
-    return (<div key={f.id} className="esign-field" style={{left:f.x + "%", top:f.y + "%"}} draggable onDragStart={(e)=>{ try { e.dataTransfer.setData("esign-move", f.id); e.dataTransfer.effectAllowed = "move"; } catch (er) {} }}>
-      <div className={"esign-marker esign-" + f.kind}>{inner}</div>
-      <button type="button" className="esign-fdel" title="Remove field" onMouseDown={(e)=>e.stopPropagation()} onClick={(e)=>{ e.stopPropagation(); removeField(f.id); }}>×</button>
-    </div>);
-  };
+  const containerOf = (el)=> el && (el.closest(".esign-doc") || el.closest(".pdf-page"));
+  const onFieldDown = (e, f)=>{ if (e.button != null && e.button !== 0) return; const docEl = containerOf(e.currentTarget); if (!docEl) return; e.preventDefault(); const rect = docEl.getBoundingClientRect(); if (!rect.width || !rect.height) return; const move = (ev)=>{ const x = Math.max(0, Math.min(100, (ev.clientX - rect.left)/rect.width*100)); const y = Math.max(0, Math.min(100, (ev.clientY - rect.top)/rect.height*100)); setField(f.id, { x: Math.round(x*10)/10, y: Math.round(y*10)/10 }); }; const up = ()=>{ window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); }; window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); };
+  const onResizeDown = (e, f)=>{ e.preventDefault(); e.stopPropagation(); const fieldEl = e.currentTarget.closest(".esign-field"); const docEl = containerOf(fieldEl); if (!docEl) return; const rect = docEl.getBoundingClientRect(); if (!rect.width) return; const cx = rect.left + (f.x/100)*rect.width; const cy = rect.top + (f.y/100)*rect.height; const move = (ev)=>{ const w = Math.max(3, Math.min(92, (2*(ev.clientX - cx))/rect.width*100)); const h = Math.max(2, Math.min(70, (2*(ev.clientY - cy))/rect.width*100)); setField(f.id, { w: Math.round(w*10)/10, h: Math.round(h*10)/10 }); }; const up = ()=>{ window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); }; window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); };
+  const marker = (f)=>{ const sz = esignSize(f); const inner = f.kind === "check" ? "✓" : f.kind === "x" ? "✗" : f.kind === "signature" ? "Signature" : f.kind === "text" ? (f.label || "Text") : ""; return (<div key={f.id} className="esign-field esign-efield" style={{left:f.x + "%", top:f.y + "%", width:sz.w + "%", aspectRatio: sz.w + " / " + sz.h}} onPointerDown={(e)=>onFieldDown(e, f)}><div className={"esign-marker esign-" + f.kind}>{inner}</div><button type="button" className="esign-fdel" title="Remove field" onPointerDown={(e)=>e.stopPropagation()} onClick={(e)=>{ e.stopPropagation(); removeField(f.id); }}>×</button><span className="esign-rs" title="Drag to resize" onPointerDown={(e)=>onResizeDown(e, f)}></span></div>); };
   return (
     <div>
       <div className="label">Document</div>
       {q.document ? (<div className="himg-preview"><span className="mono" style={{fontSize:12}}>{q.documentName || "Document attached"}</span><button className="btn sm ghost" onClick={()=>update({ document:"", documentName:"", documentKind:"image", fields:[] })}>Remove</button></div>)
         : (<label className="himg-upload"><input type="file" accept="image/*,application/pdf" style={{display:"none"}} onChange={(e)=>{ const f = e.target.files && e.target.files[0]; onUpload(f); e.target.value=""; }} /><span>Upload a document (image or PDF)</span></label>)}
-      {!q.document && <div className="hint" style={{marginTop:6}}>Upload an image or PDF, then drag fields onto it where people sign or fill in.</div>}
-      {q.document && (<div className="esign-wrap">
-        <div className="hint" style={{marginBottom:8}}>Drag a field onto the document, or click a field type then click where it goes. Drag a placed field to move it.</div>
-        <div className="esign-palette">{ESIGN_TYPES.map((t)=>(<button key={t.kind} type="button" className={"esign-pal-btn" + (armed === t.kind ? " armed" : "")} draggable onDragStart={(e)=>{ try { e.dataTransfer.setData("esign-kind", t.kind); e.dataTransfer.effectAllowed = "copy"; } catch (er) {} }} onClick={()=>setArmed(armed === t.kind ? null : t.kind)}><span className="esign-pal-ico">{t.ico}</span>{t.label}</button>))}</div>
-        {q.documentKind === "image"
-          ? <div className={"esign-doc esign-edit" + (armed ? " armed" : "")} onDragOver={(e)=>e.preventDefault()} onDrop={(e)=>handleDrop(e, e.currentTarget, 0)} onClick={(e)=>handleClick(e, e.currentTarget, 0)}><img src={q.document} alt="" />{fields.filter((f)=> typeof f.x === "number").map(marker)}</div>
-          : <div className="esign-edit"><PdfDoc src={q.document} onError={()=>setPdfFailed(true)} fallback={<div className="hint">Could not render this PDF for placement. Upload an image version to place fields.</div>} onPageClick={(i, e, el)=>handleClick(e, el, i)} onPageDrop={(i, e, el)=>handleDrop(e, el, i)} renderOverlay={(i)=> fields.filter((f)=> typeof f.x === "number" && (f.page || 0) === i).map(marker)} /></div>}
-        <div className="hint" style={{marginTop:8}}>{fields.length} field{fields.length === 1 ? "" : "s"} placed.</div>
-      </div>)}
+      {q.document
+        ? (<><button className="btn sm" style={{marginTop:10}} onClick={()=>setPlaceOpen(true)}>Place fields on the document</button><div className="hint" style={{marginTop:6}}>{fields.length} field{fields.length === 1 ? "" : "s"} placed. Open the large view to drag fields onto the document.</div></>)
+        : <div className="hint" style={{marginTop:6}}>Upload an image or PDF, then place fields where people sign or fill in.</div>}
       <div className="panel-section">Response requirements</div>
       <RequireSelect q={q} update={update} />
+      {placeOpen && q.document && (
+        <Modal title="Place fields on the document" wide onClose={()=>{ setPlaceOpen(false); setArmed(null); }}>
+          <div className="pad-lg esign-modal">
+            <div className="hint" style={{marginBottom:10}}>Drag a field type onto the document, or click a type then click where it goes. Drag a placed field to move it, drag its corner dot to resize, or use the red dot to remove it.</div>
+            <div className="esign-palette">{ESIGN_TYPES.map((t)=>(<button key={t.kind} type="button" className={"esign-pal-btn" + (armed === t.kind ? " armed" : "")} draggable onDragStart={(e)=>{ try { e.dataTransfer.setData("esign-kind", t.kind); e.dataTransfer.effectAllowed = "copy"; } catch (er) {} }} onClick={()=>setArmed(armed === t.kind ? null : t.kind)}><span className="esign-pal-ico">{t.ico}</span>{t.label}</button>))}</div>
+            {q.documentKind === "image"
+              ? <div className={"esign-doc esign-edit" + (armed ? " armed" : "")} onDragOver={(e)=>e.preventDefault()} onDrop={(e)=>handleDrop(e, e.currentTarget, 0)} onClick={(e)=>handleClick(e, e.currentTarget, 0)}><img src={q.document} alt="" />{fields.filter((f)=> typeof f.x === "number").map(marker)}</div>
+              : <div className="esign-edit"><PdfDoc src={q.document} onError={()=>setPdfFailed(true)} fallback={<div className="hint">Could not render this PDF for placement. Upload an image version to place fields.</div>} onPageClick={(i, e, el)=>handleClick(e, el, i)} onPageDrop={(i, e, el)=>handleDrop(e, el, i)} renderOverlay={(i)=> fields.filter((f)=> typeof f.x === "number" && (f.page || 0) === i).map(marker)} /></div>}
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
+
 function DocSignAnswer({ q, val }){
   const fields = q.fields || [];
   const data = (val && val.fields) || {};
@@ -4050,7 +4076,7 @@ function Modal({ title, children, onClose, wide }){
 function greetingFor(user){ const h = new Date().getHours(); const part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; const nm = (user && user.name) ? String(user.name).trim().split(/\s+/)[0] : ""; return part + (nm ? (", " + nm) : ""); }
 function Dashboard(){
   const { navigate, toast, user, setUser } = useApp();
-  useEffect(()=>{ try { const p = new URLSearchParams(location.search).get("calendar"); if (p){ const msg = ({ connected:"Google Calendar connected", denied:"Calendar connection cancelled", migrate:"Run the calendar database migration to enable this", setup:"Google sign in is not configured", noref:"Could not get offline calendar access. Try again and allow access.", state:"That calendar link expired. Try connecting again.", token:"Could not connect the calendar. Try again.", login:"Please sign in first." })[p] || ""; if (msg) toast(msg); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
+  useEffect(()=>{ try { const sp = new URLSearchParams(location.search); const p = sp.get("calendar"); if (p){ const provName = sp.get("cal") === "outlook" ? "Outlook" : "Google"; const msg = ({ connected: provName + " Calendar connected", denied:"Calendar connection cancelled", migrate:"Run the calendar database migration to enable this", setup:"Sign in is not configured", noref:"Could not get offline calendar access. Try again and allow access.", state:"That calendar link expired. Try connecting again.", token:"Could not connect the calendar. Try again.", login:"Please sign in first." })[p] || ""; if (msg) toast(msg); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
   useEffect(()=>{ try { const p = new URLSearchParams(location.search).get("billing"); if (p){ const msg = ({ success:"Thank you. Your upgrade is being applied.", cancel:"Checkout cancelled." })[p] || ""; if (msg) toast(msg); if (p === "success") setTimeout(()=>{ api.me().then(({ ok, data })=>{ if (ok && data && data.user) setUser(data.user); }).catch(()=>{}); }, 2500); try { history.replaceState(null, "", location.pathname); } catch (e) {} } } catch (e) {} }, []);
   const [forms, setForms] = useState(null);
   const [creating, setCreating] = useState(false);
@@ -5420,6 +5446,67 @@ function hexRgb(h){ h = String(h || "#5C88CD").replace("#",""); if (h.length ===
 function _ch(n){ n = Math.max(0, Math.min(255, Math.round(n))); return n.toString(16).padStart(2, "0"); }
 function darkenHex(h, amt){ const [r,g,b] = hexRgb(h); const f = 1 - amt; return "#" + _ch(r*f) + _ch(g*f) + _ch(b*f); }
 function lightenHex(h, amt){ const [r,g,b] = hexRgb(h); return "#" + _ch(r+(255-r)*amt) + _ch(g+(255-g)*amt) + _ch(b+(255-b)*amt); }
+function esignLoadImg(src){ return new Promise((res, rej)=>{ const im = new window.Image(); im.onload = ()=>res(im); im.onerror = ()=>rej(new Error("img")); im.src = src; }); }
+function esignDrawField(ctx, f, W, H, sigImg){
+  const sz = esignSize(f);
+  const cx = (f.x/100)*W, cy = (f.y/100)*H;
+  const fw = (sz.w/100)*W, fh = (sz.h/100)*W;
+  const x0 = cx - fw/2, y0 = cy - fh/2, v = f._v;
+  ctx.fillStyle = "#141414"; ctx.strokeStyle = "#141414"; ctx.textBaseline = "middle";
+  if (f.kind === "text" || f.kind === "long" || f.kind === "date"){
+    if (v){ ctx.font = "500 " + Math.max(11, Math.round(fh*0.62)) + "px 'Inter',Arial,sans-serif"; ctx.fillText(String(v), x0 + Math.max(2, fw*0.03), cy, fw*0.96); }
+  } else if (f.kind === "check"){
+    if (v){ ctx.lineWidth = Math.max(2, fw*0.1); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(x0 + fw*0.18, cy + fh*0.02); ctx.lineTo(x0 + fw*0.42, y0 + fh*0.74); ctx.lineTo(x0 + fw*0.82, y0 + fh*0.22); ctx.stroke(); }
+  } else if (f.kind === "x"){
+    if (v){ ctx.lineWidth = Math.max(2, fw*0.1); ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(x0 + fw*0.2, y0 + fh*0.2); ctx.lineTo(x0 + fw*0.8, y0 + fh*0.8); ctx.moveTo(x0 + fw*0.8, y0 + fh*0.2); ctx.lineTo(x0 + fw*0.2, y0 + fh*0.8); ctx.stroke(); }
+  } else if (f.kind === "circle"){
+    if (v){ ctx.lineWidth = Math.max(2, fw*0.06); ctx.beginPath(); if (ctx.ellipse) ctx.ellipse(cx, cy, (fw/2)*0.92, (fh/2)*0.92, 0, 0, Math.PI*2); ctx.stroke(); }
+  } else if (f.kind === "signature"){
+    if (sigImg){ const r = Math.min(fw/sigImg.width, fh/sigImg.height) || 1; const dw = sigImg.width*r, dh = sigImg.height*r; ctx.drawImage(sigImg, cx - dw/2, cy - dh/2, dw, dh); }
+    else if (v && v.mode === "type" && v.text){ ctx.font = Math.max(14, Math.round(fh*0.85)) + "px 'Monsieur La Doulaise',cursive"; ctx.fillText(v.text, x0 + fw*0.02, cy, fw*0.96); }
+  }
+}
+async function downloadFilledDoc(q, val, fileName){
+  await ensureJsPDF();
+  try { if (document.fonts && document.fonts.load) await document.fonts.load("40px 'Monsieur La Doulaise'"); } catch (e) {}
+  const jsPDFc = window.jspdf.jsPDF;
+  const data = (val && val.fields) || {};
+  const fields = (q.fields || []).filter((f)=> typeof f.x === "number" && typeof f.y === "number").map((f)=> Object.assign({}, f, { _v: data[f.id] }));
+  const sigImgs = {};
+  await Promise.all(fields.filter((f)=> f.kind === "signature" && typeof data[f.id] === "string" && data[f.id].indexOf("data:") === 0).map((f)=> esignLoadImg(data[f.id]).then((im)=>{ sigImgs[f.id] = im; }).catch(()=>{})));
+  const name = (String(fileName || "document").replace(/[^a-z0-9_-]+/ig, "_").slice(0, 60)) || "document";
+  if (q.documentKind === "pdf"){
+    const lib = await loadPdfJs();
+    const pdfDoc = await lib.getDocument(q.document).promise;
+    let out = null;
+    for (let i = 0; i < pdfDoc.numPages; i++){
+      const page = await pdfDoc.getPage(i + 1);
+      const vp = page.getViewport({ scale: 2 });
+      const canvas = document.createElement("canvas"); canvas.width = Math.round(vp.width); canvas.height = Math.round(vp.height);
+      const ctx = canvas.getContext("2d");
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      fields.filter((f)=> (f.page || 0) === i).forEach((f)=> esignDrawField(ctx, f, canvas.width, canvas.height, sigImgs[f.id]));
+      const orient = canvas.width >= canvas.height ? "l" : "p";
+      if (!out) out = new jsPDFc({ unit: "px", format: [canvas.width, canvas.height], orientation: orient });
+      else out.addPage([canvas.width, canvas.height], orient);
+      out.addImage(canvas.toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, canvas.width, canvas.height);
+    }
+    if (out) out.save(name + ".pdf");
+  } else {
+    const img = await esignLoadImg(q.document);
+    let W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+    const cap = 1600; if (W > cap){ const sc = cap/W; W = Math.round(W*sc); H = Math.round(H*sc); }
+    const canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, W, H);
+    fields.forEach((f)=> esignDrawField(ctx, f, W, H, sigImgs[f.id]));
+    const orient = W >= H ? "l" : "p";
+    const out = new jsPDFc({ unit: "px", format: [W, H], orientation: orient });
+    out.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, W, H);
+    out.save(name + ".pdf");
+  }
+}
+
 function ensureJsPDF(){ return new Promise((res, rej)=>{ if (window.jspdf && window.jspdf.jsPDF) return res(); const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"; sc.onload = ()=>res(); sc.onerror = ()=>rej(new Error("pdf_load")); document.head.appendChild(sc); }); }
 
 function statLines(q, rows){
@@ -5806,7 +5893,7 @@ function ResponsesTab({ id, form, setForm }){
           <div className="pad-lg">
             <div className="between" style={{marginBottom:12}}><span className="muted" style={{fontSize:13}}>Response detail</span><button className="btn sm primary" disabled={pdfBusy} onClick={async ()=>{ setPdfBusy(true); try { await exportResponsePdf(form, open); } catch (e) { toast("Could not build the PDF."); } setPdfBusy(false); }}>{pdfBusy ? "Preparing..." : "Export PDF"}</button></div>
             {(form.schema.questions||[]).filter(q=>QTYPES[q.type] && QTYPES[q.type].isInput).map(q=>(
-              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#f5f2f0"}} /> : <span className="muted">Not signed</span>) : q.type === "scheduling" ? (open.data[q.id] ? (typeof open.data[q.id] === "object" ? fmtPollAnswer(open.data[q.id]) : fmtSlot(open.data[q.id])) : <span className="muted">Not booked</span>) : q.type === "document_sign" ? <DocSignAnswer q={q} val={open.data[q.id]} /> : q.type === "file_upload" ? <FileAnswer val={open.data[q.id]} formId={id} /> : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
+              <div key={q.id} style={{marginBottom:14}}><div className="label">{q.label||q.id}</div><div>{q.type === "signature" ? (open.data[q.id] ? <img src={open.data[q.id]} alt="signature" style={{maxWidth:280,border:"1px solid var(--line)",borderRadius:8,background:"#f5f2f0"}} /> : <span className="muted">Not signed</span>) : q.type === "scheduling" ? (open.data[q.id] ? (typeof open.data[q.id] === "object" ? fmtPollAnswer(open.data[q.id]) : fmtSlot(open.data[q.id])) : <span className="muted">Not booked</span>) : q.type === "document_sign" ? <div><DocSignAnswer q={q} val={open.data[q.id]} />{q.document && <button className="btn sm" style={{marginTop:10}} onClick={()=>{ toast("Preparing document..."); downloadFilledDoc(q, open.data[q.id], (form.title || "document") + "-filled").catch(()=>toast("Could not generate the document.")); }}>Download filled document</button>}</div> : q.type === "file_upload" ? <FileAnswer val={open.data[q.id]} formId={id} /> : (cell(open.data[q.id]) || <span className="muted">No answer</span>)}</div></div>
             ))}
             {open.meta && Array.isArray(open.meta.followups) && open.meta.followups.length > 0 && (
               <div style={{marginBottom:14}}><div className="label">Follow-ups</div>{open.meta.followups.map((fu, i)=>(<div key={i} style={{marginBottom:8}}><div style={{fontSize:13,fontWeight:600}}>{fu.question}</div><div>{fu.answer || <span className="muted">No answer</span>}</div></div>))}</div>

@@ -356,7 +356,7 @@ async function calendarCallback(provider, request, env){
   try { await env.DB.prepare("UPDATE users SET calendar = ? WHERE id = ?").bind(JSON.stringify(conn), user.uid).run(); }
   catch (e) { return redirectTo("/dashboard?calendar=migrate"); }
   const clear = "gc_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0";
-  return redirectTo("/dashboard?calendar=connected", [clear]);
+  return redirectTo("/dashboard?calendar=connected&cal=" + provider, [clear]);
 }
 
 async function calendarDisconnect(provider, request, env){

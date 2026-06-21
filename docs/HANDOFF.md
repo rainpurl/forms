@@ -43,12 +43,20 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+- Document e-sign placement is back in a large centered modal. The side panel has an upload and a "Place fields on the document" button; clicking it opens a wide modal with the document and the field palette, so there is room to drop fields precisely. Drag a field type onto the document, or click a type then click a spot. Placed fields can be dragged to move and dragged by the corner dot to resize, and default to a standard size per type.
+- Field types are now text box, circle, checkbox, and signature. The X option was removed and the old "Check" is labelled "Checkbox".
+- The signature box (draw or type) is a screen-centered modal, so clicking a signature field opens it in the middle of the viewport rather than wherever the field sits, which matters for long or multipage PDFs.
+- Form makers can download a filled copy of the document from a response. In Responses, open a response and use "Download filled document" under a document e-sign answer. It composites the typed text, marks, and signatures (drawn, or typed in the cursive font) at their positions and saves a PDF, for image documents and PDFs including multipage. Generation runs in the browser with the response open.
+- Theming: booking time slots and the form back button no longer have a gray border, they use the plain recessed look. Blue and red buttons are now simply recessed at rest like the white controls, with the raised white lip removed; they lift on hover and press on click. Red delete buttons no longer turn white with white text on hover.
+- Connecting Outlook now shows "Outlook Calendar connected" instead of the Google message.
+
+## Recent changes
 - The loading and boot wordmark no longer has the doubled look. It was a background-colored glyph with two offset shadows (light below and dark above), which read as two ghosts. It is now a faint visible glyph with a single soft highlight, so it reads as gently carved instead of doubled. The same single-shadow treatment was applied to the navbar and builder wordmark.
 - The current plan and limits bar now sits to the right of the good morning greeting instead of on its own row below it.
 - Footer links point to zetetiq.com (see the custom domain section above).
 - The homepage hero sits above the decorative mockup in the stacking order, in case that element was ever intercepting clicks on the sign in button.
 
-## Latest changes (also live)
+## Recent changes
 - Document e-sign was rebuilt around an inline drag-and-drop editor. Add a document (image or PDF) and it shows in a large preview with a field palette right above it: text box, circle, check, x, and signature. Drag a field type onto the document, or click a type then click where it goes; drag a placed field to move it, and use the small red x to remove it. The old separate place-fields modal and the side list of fields are gone, and a new e-sign starts with no fields so you place exactly what you need.
 - Signing supports drawn or typed signatures. The person clicks a signature field, then either draws with a finger or mouse, or switches to the Type tab and types their name, which renders in the Monsieur La Doulaise cursive font. Typed signatures show in that same cursive font in the responses view; drawn ones show as the captured image.
 - Field behavior on the document: text box renders in Inter, circle, check, and x are click-to-toggle marks, and signature opens the draw-or-type panel. Older forms built with the previous field model (labelled text, long, date, checkbox) still render in a list below the document for backward compatibility.
