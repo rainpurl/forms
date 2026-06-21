@@ -1301,6 +1301,67 @@ body{top:0!important}
 .zsel{justify-content:flex-start}
 /* poll cells outside a given day's hours */
 .poll-cell.poll-off{background:transparent;border-color:transparent;cursor:default;pointer-events:none;box-shadow:none}
+
+/* ===== mobile-friendly form controls (respondent side) ===== */
+.form-scope .mcell-lbl{display:none}
+@media(max-width:600px){
+  .form-scope .fcard{padding:18px 15px}
+  .form-scope .q{padding:16px 0}
+  .form-scope .qlabel{font-size:17px}
+  .form-scope .finput,.form-scope textarea,.form-scope select,.form-scope .input,.form-scope .select{font-size:16px}
+  .form-scope .opt{padding:13px 14px;gap:12px;margin:8px 0}
+  .form-scope .opt input{width:20px;height:20px;flex:none}
+  .form-scope .opt span{font-size:15px}
+  .form-scope .nps{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+  .form-scope .nps button{width:auto;height:46px;font-size:15px}
+  .form-scope input[type="range"]{width:100%;height:30px}
+  .form-scope .scale{font-size:13px}
+  .form-scope .stars{gap:12px}
+  .form-scope .stars .star{font-size:40px;padding:2px}
+  .form-scope .csrow{flex-wrap:wrap;gap:6px;margin:12px 0}
+  .form-scope .cslabel{flex-basis:100%;font-size:15px}
+  .form-scope .csinput{width:100%;flex:1}
+  .form-scope .rankrow{gap:10px;padding:11px 12px}
+  .form-scope .rbtns button{width:40px;height:40px;font-size:18px}
+  .form-scope .rgrip{font-size:18px}
+  .form-scope .fformrow .finput{width:100%}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff),
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) tbody{display:block;width:100%}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) thead{display:none}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) tr{display:block;border:1px solid var(--line-strong);border-radius:12px;padding:12px 13px;margin:0 0 12px}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) tbody tr:nth-child(even) td{background:none}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) th.mrow{display:block;text-align:left;font-weight:600;font-size:15px;padding:0 0 6px;border:0}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) td{display:block;text-align:left;padding:0;border:0;background:none}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) td .mcell{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;margin-top:7px;cursor:pointer;color:var(--ftext)}
+  .form-scope table.matrix:not(.sbs):not(.maxdiff) td.mna-cell{border-left:0}
+  .form-scope .mcell-lbl{display:inline;font-size:15px}
+  .form-scope .mcell input{width:20px;height:20px}
+  .form-scope .matrix-wrap,.form-scope .cj-scroll{-webkit-overflow-scrolling:touch}
+  .poll-rowhead,.poll-corner{position:sticky;left:0;background:var(--card);z-index:2}
+  .poll-cell{min-height:32px}
+  .form-scope .imgchoice-grid{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:400px){
+  .form-scope .imgchoice-grid{grid-template-columns:1fr!important}
+  .form-scope .nps{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ===== landing: competitive comparison table ===== */
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px;box-shadow:var(--bevel-inset);background:var(--card)}
+table.cmp{border-collapse:collapse;width:100%;min-width:680px;font-size:14.5px}
+.cmp th,.cmp td{padding:14px 12px;text-align:center;border-bottom:1px solid var(--line)}
+.cmp thead th{background:var(--bo);color:#fff;font-weight:700;font-size:13px;border-bottom:0}
+.cmp .cmp-tool{text-align:left;font-weight:600;white-space:nowrap;color:var(--ink)}
+.cmp thead th:first-child,.cmp tbody td:first-child{position:sticky;left:0;z-index:2}
+.cmp tbody td:first-child{background:var(--card)}
+.cmp thead th:first-child{background:var(--bo);z-index:3}
+.cmp tbody tr:last-child td{border-bottom:0}
+.cmp tr.cmp-us td{background:color-mix(in srgb,var(--bo) 13%,var(--card))}
+.cmp tr.cmp-us td:first-child{background:color-mix(in srgb,var(--bo) 13%,var(--card));color:var(--bo);font-weight:800}
+.cmp-yes{color:var(--good);font-weight:800;font-size:17px}
+.cmp-no{display:inline-block;width:14px;height:2px;border-radius:2px;background:var(--line-strong);opacity:.65}
+.cmp-foot{text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:14px}
+@media(max-width:560px){.cmp th,.cmp td{padding:11px 9px;font-size:12.5px}.cmp thead th{font-size:11.5px}}
 </style>
 </head>
 <body>
@@ -7075,7 +7136,8 @@ const QTYPES = {
       }, /*#__PURE__*/React.createElement("th", {
         className: "mrow"
       }, r), q.cols.map((c, ci) => /*#__PURE__*/React.createElement("td", {
-        key: ci
+        key: ci,
+        "data-c": c
       }, /*#__PURE__*/React.createElement("label", {
         className: "mcell"
       }, /*#__PURE__*/React.createElement("input", {
@@ -7083,8 +7145,11 @@ const QTYPES = {
         name: q.id + "-" + ri,
         checked: on(r, c),
         onChange: () => pick(r, c)
-      })))), q.naCol && /*#__PURE__*/React.createElement("td", {
-        className: "mna-cell"
+      }), /*#__PURE__*/React.createElement("span", {
+        className: "mcell-lbl"
+      }, c)))), q.naCol && /*#__PURE__*/React.createElement("td", {
+        className: "mna-cell",
+        "data-c": "N/A"
       }, /*#__PURE__*/React.createElement("label", {
         className: "mcell"
       }, /*#__PURE__*/React.createElement("input", {
@@ -7092,7 +7157,9 @@ const QTYPES = {
         name: q.id + "-" + ri,
         checked: on(r, "N/A"),
         onChange: () => pick(r, "N/A")
-      })))))))), error && /*#__PURE__*/React.createElement("div", {
+      }), /*#__PURE__*/React.createElement("span", {
+        className: "mcell-lbl"
+      }, "N/A")))))))), error && /*#__PURE__*/React.createElement("div", {
         className: "ferr"
       }, error));
     }
@@ -9611,6 +9678,30 @@ function LegalPage({
     className: "legal-wrap"
   }, kind === "privacy" ? /*#__PURE__*/React.createElement(PrivacyContent, null) : /*#__PURE__*/React.createElement(TermsContent, null)), /*#__PURE__*/React.createElement(SiteFooter, null));
 }
+const CMP_CAPS = ["Forms and surveys", "Scheduling", "E-signature", "Logic and branching", "Quizzes and scoring", "Payments"];
+const CMP_ROWS = [{
+  name: "zetetiq",
+  us: true,
+  has: [1, 1, 1, 1, 1, 1]
+}, {
+  name: "DocuSign",
+  has: [0, 0, 1, 0, 0, 1]
+}, {
+  name: "Calendly",
+  has: [0, 1, 0, 0, 0, 1]
+}, {
+  name: "Qualtrics",
+  has: [1, 0, 0, 1, 1, 0]
+}, {
+  name: "Jotform",
+  has: [1, 0, 1, 1, 0, 1]
+}, {
+  name: "Google Forms",
+  has: [1, 0, 0, 1, 1, 0]
+}, {
+  name: "Microsoft Forms",
+  has: [1, 0, 0, 1, 1, 0]
+}];
 function Landing({
   showLogin
 }) {
@@ -9841,6 +9932,36 @@ function Landing({
   }, s.title), /*#__PURE__*/React.createElement("div", {
     className: "lp-cd"
   }, s.desc))))), /*#__PURE__*/React.createElement("section", {
+    className: "lp-section",
+    id: "compare"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "lp-h2"
+  }, "One tool instead of six"), /*#__PURE__*/React.createElement("p", {
+    className: "lp-lead"
+  }, "zetetiq brings forms, scheduling, e-signature, and more into one place. Here is how it lines up against tools built for a single job."), /*#__PURE__*/React.createElement("div", {
+    className: "cmp-wrap"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "cmp"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    className: "cmp-tool"
+  }, "Tool"), CMP_CAPS.map((c, i) => /*#__PURE__*/React.createElement("th", {
+    key: i
+  }, c)))), /*#__PURE__*/React.createElement("tbody", null, CMP_ROWS.map((r, ri) => /*#__PURE__*/React.createElement("tr", {
+    key: ri,
+    className: r.us ? "cmp-us" : ""
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "cmp-tool"
+  }, r.name), r.has.map((h, ci) => /*#__PURE__*/React.createElement("td", {
+    key: ci
+  }, h ? /*#__PURE__*/React.createElement("span", {
+    className: "cmp-yes",
+    "aria-label": "Included"
+  }, "✓") : /*#__PURE__*/React.createElement("span", {
+    className: "cmp-no",
+    "aria-label": "Not included"
+  })))))))), /*#__PURE__*/React.createElement("p", {
+    className: "cmp-foot"
+  }, "Based on each product's core offering. Features and plans change over time.")), /*#__PURE__*/React.createElement("section", {
     className: "lp-section",
     id: "plans"
   }, /*#__PURE__*/React.createElement("h2", {

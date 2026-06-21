@@ -43,6 +43,14 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+A mobile pass on the form-filling experience, and a new comparison section on the landing page.
+
+1. The respondent side of every question is now easier to use on a phone. Highlights: matrix questions stack into one tidy card per statement with full width tappable options instead of a wide grid, the Net Promoter Score scale lays out as an even grid of large buttons, sliders and star ratings have bigger touch targets, constant sum and number rows give the input the full width, rank order arrows are larger, image choice drops to fewer columns, and the group availability grid keeps its time labels in view while you scroll sideways. Text fields also use a larger font on small screens so phones do not zoom in when you tap them.
+2. The landing page has a new comparison table just before the plans, showing how zetetiq covers forms, scheduling, e-signature, logic, quizzes, and payments in one place next to DocuSign, Calendly, Qualtrics, Jotform, Google Forms, and Microsoft Forms. The zetetiq row is highlighted, and the table scrolls sideways on a phone with the tool names pinned.
+
+This release is frontend only. Upload index.html and redeploy. The backend was not changed and no database migration is needed.
+
+## Previous release
 Builder fixes for clipped popups, an editable form address in the Share dialog, and a privacy rule for the group availability poll.
 
 1. Date pickers (including the poll start and end date) now open as a floating layer that is never clipped by the panel edge. The whole calendar is always visible, and it flips to stay on screen near an edge.
