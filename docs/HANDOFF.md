@@ -43,6 +43,14 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+Custom fonts and uploaded logos now carry through to the printable PDF.
+
+1. If a form uses a custom Google font, the response report and the per response PDF now embed that exact font instead of falling back to a standard family. The font is fetched by name; if a particular font cannot be found it still falls back to the closest base family, but common Google fonts (for example Poppins, Montserrat, Lato) now match the form.
+2. If a form has an uploaded header image, that image is used as the logo at the top of the PDF in place of the zetetiq mark. The mark is only shown when no image has been uploaded. The header image is set in the Theme tab (Upload image), and applying a brand kit that has a logo sets it as well. The logo is also a little larger now.
+
+Backend was not changed this release. Upload only index.html and redeploy. No database migration is needed.
+
+## Previous release
 A smoother landing carousel, recessed frames, sortable responses, brand kits in the Theme tab, exact PDF fonts, a richer group availability poll, and several interaction fixes.
 
 1. The landing page carousel now cross fades in place instead of changing height, so the page no longer jitters as it cycles through examples.

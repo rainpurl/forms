@@ -16534,11 +16534,44 @@ const PDF_FONT_FILES = {
     bold: null
   }
 };
-async function loadPdfFonts(doc, key) {
+function gfPascal(name) {
+  return String(name || "").trim().replace(/[^a-zA-Z0-9]+/g, " ").trim().split(/\s+/).map(w => w ? w.charAt(0).toUpperCase() + w.slice(1) : "").join("");
+}
+function gfId(name) {
+  return String(name || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+async function loadCustomPdfFont(doc, name) {
+  const id = gfId(name),
+    pascal = gfPascal(name);
+  if (!id || !pascal) return null;
+  const base = "https://cdn.jsdelivr.net/npm/@expo-google-fonts/" + id + "/";
+  const fam = pascal;
+  const regFile = fam + "-cfR.ttf";
+  doc.addFileToVFS(regFile, await fetchFontB64(base + pascal + "_400Regular.ttf"));
+  doc.addFont(regFile, fam, "normal");
+  try {
+    const bf = fam + "-cfB.ttf";
+    doc.addFileToVFS(bf, await fetchFontB64(base + pascal + "_700Bold.ttf"));
+    doc.addFont(bf, fam, "bold");
+  } catch (e) {
+    doc.addFont(regFile, fam, "bold");
+  }
+  return {
+    family: fam
+  };
+}
+async function loadPdfFonts(doc, key, customFont) {
   const fb = {
     serif: "times",
     mono: "courier"
   };
+  const cf = (customFont || "").trim();
+  if (cf) {
+    try {
+      const r = await loadCustomPdfFont(doc, cf);
+      if (r) return r;
+    } catch (e) {}
+  }
   const f = PDF_FONT_FILES[key];
   if (!f) return {
     family: fb[key] || "helvetica"
@@ -16604,8 +16637,8 @@ async function drawExportLogo(doc, form, W, M) {
   if (hdr) {
     try {
       const d = await imgDims(hdr);
-      const maxW = 120,
-        maxH = 46;
+      const maxW = 150,
+        maxH = 50;
       let lw = maxW,
         lh = lw * (d.h / d.w);
       if (lh > maxH) {
@@ -16655,7 +16688,7 @@ async function exportReport(form, rows) {
   const theme = form.theme || {};
   const [pr, pg, pb] = hexRgb(theme.primary || "#5C88CD");
   const [ar, ag, ab] = hexRgb(theme.accent || theme.primary || "#5C88CD");
-  const pf = await loadPdfFonts(doc, theme.font);
+  const pf = await loadPdfFonts(doc, theme.font, theme.customFont);
   const ff = pf.family;
   const ink = hexRgb(theme.secondary || "#2A2620"),
     soft = [120, 116, 140],
@@ -16845,7 +16878,7 @@ async function exportResponsePdf(form, r) {
   const M = 42;
   const theme = form.theme || {};
   const [pr, pg, pb] = hexRgb(theme.primary || "#5C88CD");
-  const pf = await loadPdfFonts(doc, theme.font);
+  const pf = await loadPdfFonts(doc, theme.font, theme.customFont);
   const ff = pf.family;
   const ink = hexRgb(theme.secondary || "#2A2620"),
     soft = [120, 116, 140];
