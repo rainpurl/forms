@@ -43,6 +43,36 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+- The top navigation bar is now a single recessed bar with no gray underline. The inset bevel gives it a carved look that matches the inputs and the plan bar. The builder top bar was updated the same way for consistency.
+- Plan bar: there is now an "Upgrade" button right next to the plan name for anyone who is not already on Premium or Enterprise (so Free, Education, and Pro all see it, including Education users who previously had no upgrade path). Clicking it opens a small picker. Free sees Pro and Premium, Education and Pro see Premium, and there is a line to email support@zetetiq.com about Enterprise. The picker uses the existing Stripe checkout. The separate upgrade buttons that used to sit on the right of the plan bar were folded into this picker; the right side now keeps the education or nonprofit apply link and Manage billing.
+
+## Recent changes
+- Admin console now shows a "Question type usage" panel above the applications list. It lists every question type used across all forms, with a bar and a count, sorted from most to least used. The labels match the builder names.
+- Admin console users table has an Actions column with a Delete button on each non-admin user. It asks for confirmation, then removes that user along with all of their forms, responses, and uploaded files. The admin account cannot be deleted.
+- Pricing: the second card is now titled "EDU/Non-profit" with no eyebrow badge, the description reads "Free for students, educators, and 501 (c) 3 non profits.", and it lists "Dedicated support" as a perk.
+- Removed the "free for early users" and "while zetetiq is getting started" wording from the landing page (the differentiator card, the subheading, and the closing call to action).
+
+### Support email (support@zetetiq.com) for free
+You can send and receive at support@zetetiq.com at no cost by combining two free services.
+
+Receiving (Cloudflare Email Routing, free):
+1. In the Cloudflare dashboard, open the zetetiq.com zone, go to Email, Email Routing, and enable it. Cloudflare adds the needed MX and TXT records automatically since the domain is already on Cloudflare.
+2. Under Routing rules, add a custom address support@zetetiq.com and set the destination to your real inbox (for example your Gmail). Confirm the verification email Cloudflare sends to that inbox.
+3. Optionally add a catch-all so anything @zetetiq.com forwards to you.
+Incoming mail to support@zetetiq.com now lands in your inbox. Cloudflare Email Routing only forwards, it does not send.
+
+Sending as support@zetetiq.com (Gmail "Send mail as", free):
+Cloudflare cannot send, so use a free SMTP relay. The simplest path reuses the Resend account already set up for this app:
+1. In Resend, add and verify zetetiq.com as a sending domain (add the DKIM and SPF records Resend shows to Cloudflare DNS).
+2. In Resend, create an SMTP credential. Resend SMTP host is smtp.resend.com, port 587 (STARTTLS), username "resend", password is the API key.
+3. In Gmail, Settings, Accounts and import, "Send mail as", Add another email address. Enter Name and support@zetetiq.com, untick "Treat as an alias" if you want replies to come from support@. For SMTP use the Resend host, port 587, username resend, password the API key. Gmail sends a confirmation to support@zetetiq.com, which arrives via the Cloudflare forwarding you set up, click the link.
+Now Gmail can compose and reply as support@zetetiq.com, and replies to received mail will go out from that address. A free alternative SMTP if you prefer not to use Resend is Brevo, which has a free tier with SMTP.
+
+Optional, transactional sender: once zetetiq.com is verified in Resend you can also change the MAIL_FROM environment variable to a zetetiq.com address (for example "zetetiq <support@zetetiq.com>") so the app's own emails come from the domain. Redeploy after changing it.
+
+The "Dedicated support" perk on the EDU/Non-profit plan is a promise to those users, so support@zetetiq.com is the address to publish for it.
+
+## Recent changes
 - Document e-sign placement is back in a large centered modal. The side panel has an upload and a "Place fields on the document" button; clicking it opens a wide modal with the document and the field palette, so there is room to drop fields precisely. Drag a field type onto the document, or click a type then click a spot. Placed fields can be dragged to move and dragged by the corner dot to resize, and default to a standard size per type.
 - Field types are now text box, circle, checkbox, and signature. The X option was removed and the old "Check" is labelled "Checkbox".
 - The signature box (draw or type) is a screen-centered modal, so clicking a signature field opens it in the middle of the viewport rather than wherever the field sits, which matters for long or multipage PDFs.

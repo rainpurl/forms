@@ -211,7 +211,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 
 /* ---- builder: properties panel + canvas layout ---- */
 .builder{display:flex;flex-direction:column;height:100vh;background:var(--paper)}
-.b-top{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.b-top{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--card);border-bottom:0;box-shadow:var(--bevel-inset)}
 .b-top .saved-note{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
 .b-tools{position:relative}
 .menu{position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.14);padding:6px;min-width:170px;z-index:50}
@@ -776,7 +776,7 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 /* cards + chrome surfaces: bevel replaces border */
 .card{border-color:transparent;box-shadow:var(--bevel-soft)}
 .qcard{border-color:transparent;box-shadow:var(--bevel-soft)}
-.nav{border-bottom-color:transparent;box-shadow:0 1px 0 var(--line-strong),0 3px 10px rgba(60,45,25,.05)}
+.nav{border-bottom-color:transparent;background:var(--card);box-shadow:var(--bevel-inset)}
 .table tr.clickable:hover td{background:var(--hover)}
 /* menus + modal: borderless elevation + cinematic entrance */
 .menu,.addq-menu,.addmenu{border-color:transparent}
@@ -1149,6 +1149,30 @@ body{top:0!important}
 .esign-efield{touch-action:none}
 .esign-rs{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;border-radius:50%;background:var(--bo);border:2px solid #fff;cursor:nwse-resize;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.35);touch-action:none}
 .esign-r-text .esign-input,.esign-r-long .esign-input,.esign-r-date .esign-input{min-width:0}
+
+/* admin: question type usage bars */
+.qt-usage{margin:4px 0 22px}
+.qt-list{display:flex;flex-direction:column;gap:7px}
+.qt-row{display:flex;align-items:center;gap:12px}
+.qt-name{flex:0 0 180px;font-size:13px;color:var(--ink)}
+.qt-bar-wrap{flex:1;height:14px;border-radius:7px;background:var(--card);box-shadow:inset 0 1px 2px rgba(0,0,0,.12);overflow:hidden}
+.qt-bar{height:100%;border-radius:7px;background:var(--bo);min-width:4px}
+.qt-count{flex:0 0 auto;min-width:34px;text-align:right;font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted)}
+@media (max-width:560px){.qt-name{flex-basis:118px}}
+
+/* plan upgrade button + tier picker */
+.plan-upbtn{margin-left:2px}
+.up-tiers{display:flex;flex-direction:column;gap:12px}
+.up-tier{background:var(--card);box-shadow:var(--bevel-inset);border-radius:12px;padding:14px 16px}
+.up-tier.featured{box-shadow:inset 0 0 0 2px var(--bo),var(--bevel-inset)}
+.up-tier-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.up-tier-name{font-family:var(--display);font-weight:700;font-size:18px}
+.up-tier-price{font-size:14px;color:var(--ink-soft)}
+.up-tier-desc{font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5}
+.up-tier .btn{width:100%}
+.up-ent{margin-top:14px;font-size:13px;color:var(--ink-soft);text-align:center}
+.up-link{color:var(--bo);font-weight:600;text-decoration:none}
+.up-link:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -1210,6 +1234,13 @@ const api = {
   }),
   adminApplications: () => req("/api/admin/applications"),
   adminSetPlan: payload => req("/api/admin/plan", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  }),
+  adminDeleteUser: payload => req("/api/admin/delete-user", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -8395,12 +8426,11 @@ const PLAN_TIERS = [{
   missing: ["CSV and PDF export", "Remove the zetetiq footer", "Custom CSS"]
 }, {
   id: "edu",
-  name: "Education and nonprofits",
+  name: "EDU/Non-profit",
   price: "Free",
   cadence: "",
-  tagline: "All of Pro, free for schools and nonprofits.",
-  badge: "For .edu and verified nonprofits",
-  features: ["Everything in Pro", "Automatic with a .edu sign in", "Others can apply from the dashboard"]
+  tagline: "Free for students, educators, and 501 (c) 3 non profits.",
+  features: ["Everything in Pro", "Dedicated support", "Automatic with a .edu sign in", "Others can apply from the dashboard"]
 }, {
   id: "pro",
   name: "Pro",
@@ -8674,6 +8704,8 @@ function PlanBar({
       toast("Could not open billing right now.");
     });
   };
+  const [upOpen, setUpOpen] = useState(false);
+  const canUpgrade = plan !== "premium" && plan !== "enterprise";
   return /*#__PURE__*/React.createElement("div", {
     className: "plan-bar"
   }, /*#__PURE__*/React.createElement("div", {
@@ -8682,7 +8714,10 @@ function PlanBar({
     className: "plan-pill plan-" + plan
   }, names[plan] || plan), count != null && /*#__PURE__*/React.createElement("span", {
     className: "plan-usage"
-  }, count, maxForms != null ? " of " + maxForms : "", " ", maxForms === 1 ? "form" : "forms", plan === "free" ? ", up to 100 responses each" : "")), /*#__PURE__*/React.createElement("div", {
+  }, count, maxForms != null ? " of " + maxForms : "", " ", maxForms === 1 ? "form" : "forms", plan === "free" ? ", up to 100 responses each" : ""), canUpgrade && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary plan-upbtn",
+    onClick: () => setUpOpen(true)
+  }, "Upgrade")), /*#__PURE__*/React.createElement("div", {
     className: "plan-bar-r"
   }, plan === "free" && (pending ? /*#__PURE__*/React.createElement("span", {
     className: "muted",
@@ -8692,23 +8727,56 @@ function PlanBar({
   }, "Education or nonprofit application under review") : /*#__PURE__*/React.createElement("button", {
     className: "btn sm ghost",
     onClick: onApply
-  }, "Apply for education or nonprofit")), plan === "free" && /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    disabled: busy === "pro",
-    onClick: () => checkout("pro")
-  }, busy === "pro" ? "Starting..." : "Upgrade to Pro"), plan === "free" && /*#__PURE__*/React.createElement("button", {
-    className: "btn sm primary",
-    disabled: busy === "premium",
-    onClick: () => checkout("premium")
-  }, busy === "premium" ? "Starting..." : "Upgrade to Premium"), plan === "pro" && /*#__PURE__*/React.createElement("button", {
-    className: "btn sm primary",
-    disabled: busy === "premium",
-    onClick: () => checkout("premium")
-  }, busy === "premium" ? "Starting..." : "Upgrade to Premium"), (plan === "pro" || plan === "premium") && billing.portal && /*#__PURE__*/React.createElement("button", {
+  }, "Apply for education or nonprofit")), (plan === "pro" || plan === "premium") && billing.portal && /*#__PURE__*/React.createElement("button", {
     className: "btn sm ghost",
     disabled: busy === "portal",
     onClick: portal
-  }, busy === "portal" ? "Opening..." : "Manage billing")));
+  }, busy === "portal" ? "Opening..." : "Manage billing")), upOpen && /*#__PURE__*/React.createElement(Modal, {
+    title: "Upgrade your plan",
+    onClose: () => setUpOpen(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pad-lg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 14
+    }
+  }, "Pick the plan that fits how you work. You can change or cancel anytime."), /*#__PURE__*/React.createElement("div", {
+    className: "up-tiers"
+  }, plan === "free" && /*#__PURE__*/React.createElement("div", {
+    className: "up-tier"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-h"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-name"
+  }, "Pro"), /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-price"
+  }, "$9 / month")), /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-desc"
+  }, "Up to 100 forms, 1,000 responses each, CSV and PDF export, and white-label forms."), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: busy === "pro",
+    onClick: () => checkout("pro")
+  }, busy === "pro" ? "Starting..." : "Choose Pro")), /*#__PURE__*/React.createElement("div", {
+    className: "up-tier featured"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-h"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-name"
+  }, "Premium"), /*#__PURE__*/React.createElement("span", {
+    className: "up-tier-price"
+  }, "$35 / month")), /*#__PURE__*/React.createElement("div", {
+    className: "up-tier-desc"
+  }, "Unlimited forms and responses, 1 GB uploads, custom CSS, and priority support."), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: busy === "premium",
+    onClick: () => checkout("premium")
+  }, busy === "premium" ? "Starting..." : "Choose Premium"))), /*#__PURE__*/React.createElement("div", {
+    className: "up-ent"
+  }, "Need teams or single sign on? ", /*#__PURE__*/React.createElement("a", {
+    className: "up-link",
+    href: "mailto:support@zetetiq.com"
+  }, "Contact us about Enterprise"), "."))));
 }
 function Landing({
   showLogin
@@ -8813,8 +8881,8 @@ function Landing({
     desc: "Helpful features without the hype. Plain labels and clean output."
   }, {
     icon: "target",
-    title: "Free for early users",
-    desc: "Full access while zetetiq is getting started."
+    title: "A real free plan",
+    desc: "Twenty-seven question types and your own branding at no cost."
   }];
   const steps = [{
     title: "Build",
@@ -8856,7 +8924,7 @@ function Landing({
     className: "lp-h1"
   }, "Build a form, theme it your way, and share a clean link."), /*#__PURE__*/React.createElement("p", {
     className: "lp-sub"
-  }, "A full survey and form builder. Twenty-seven question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users."), user ? /*#__PURE__*/React.createElement("div", {
+  }, "A full survey and form builder. Twenty-seven question types, logic, scheduling, e-sign, scoring, and your own branding."), user ? /*#__PURE__*/React.createElement("div", {
     className: "lp-cta-row"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary lg",
@@ -8976,7 +9044,7 @@ function Landing({
     className: "lp-h2"
   }, "Start building for free"), /*#__PURE__*/React.createElement("p", {
     className: "lp-lead"
-  }, "Full access while zetetiq is getting started."), user ? /*#__PURE__*/React.createElement("button", {
+  }, "A generous free plan, with paid tiers when you need more."), user ? /*#__PURE__*/React.createElement("button", {
     className: "btn primary lg",
     onClick: () => navigate("/dashboard")
   }, "Go to dashboard") : /*#__PURE__*/React.createElement("div", {
@@ -9374,7 +9442,8 @@ function BrandStudio({
 }
 function AdminConsole() {
   const {
-    navigate
+    navigate,
+    toast
   } = useApp();
   const [data, setData] = useState(null);
   const [expanded, setExpanded] = useState({});
@@ -9405,6 +9474,20 @@ function AdminConsole() {
     }) => {
       if (ok) load();
     });
+  };
+  const delUser = u => {
+    if (u.isAdmin) return;
+    if (!window.confirm("Delete " + (u.name || u.username) + " and all of their forms and responses? This cannot be undone.")) return;
+    api.adminDeleteUser({
+      uid: u.id
+    }).then(({
+      ok
+    }) => {
+      if (ok) {
+        toast("Account deleted.");
+        load();
+      } else toast("Could not delete that account.");
+    }).catch(() => toast("Could not delete that account."));
   };
   const t = data && data.totals;
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
@@ -9467,7 +9550,38 @@ function AdminConsole() {
     className: "av"
   }, t.storageAvailable ? fmtBytes(t.storageBytes) : "n/a"), /*#__PURE__*/React.createElement("div", {
     className: "al"
-  }, t.storageAvailable ? "Storage used of 10 GB" : "Storage (R2 off)"))), /*#__PURE__*/React.createElement(AdminApplications, null), /*#__PURE__*/React.createElement("div", {
+  }, t.storageAvailable ? "Storage used of 10 GB" : "Storage (R2 off)"))), data.questionTypes && data.questionTypes.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "qt-usage"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title",
+    style: {
+      marginBottom: 6
+    }
+  }, "Question type usage"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 12
+    }
+  }, "How many times each question type appears across all forms."), /*#__PURE__*/React.createElement("div", {
+    className: "qt-list"
+  }, data.questionTypes.map(q => {
+    const max = data.questionTypes[0].count || 1;
+    return /*#__PURE__*/React.createElement("div", {
+      key: q.type,
+      className: "qt-row"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qt-name"
+    }, QTYPES[q.type] && QTYPES[q.type].label || q.type), /*#__PURE__*/React.createElement("div", {
+      className: "qt-bar-wrap"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "qt-bar",
+      style: {
+        width: Math.max(4, Math.round(q.count / max * 100)) + "%"
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "qt-count"
+    }, q.count));
+  }))), /*#__PURE__*/React.createElement(AdminApplications, null), /*#__PURE__*/React.createElement("div", {
     className: "panel-title",
     style: {
       marginBottom: 6
@@ -9481,7 +9595,7 @@ function AdminConsole() {
     className: "muted"
   }, "No users yet.") : /*#__PURE__*/React.createElement("table", {
     className: "table admin-users"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "User"), /*#__PURE__*/React.createElement("th", null, "Forms"), /*#__PURE__*/React.createElement("th", null, "Responses"), /*#__PURE__*/React.createElement("th", null, "Storage"), /*#__PURE__*/React.createElement("th", null, "Joined"), /*#__PURE__*/React.createElement("th", null, "Last activity"), /*#__PURE__*/React.createElement("th", null, "Plan"))), /*#__PURE__*/React.createElement("tbody", null, data.users.map(u => /*#__PURE__*/React.createElement(React.Fragment, {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "User"), /*#__PURE__*/React.createElement("th", null, "Forms"), /*#__PURE__*/React.createElement("th", null, "Responses"), /*#__PURE__*/React.createElement("th", null, "Storage"), /*#__PURE__*/React.createElement("th", null, "Joined"), /*#__PURE__*/React.createElement("th", null, "Last activity"), /*#__PURE__*/React.createElement("th", null, "Plan"), /*#__PURE__*/React.createElement("th", null, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, data.users.map(u => /*#__PURE__*/React.createElement(React.Fragment, {
     key: u.id
   }, /*#__PURE__*/React.createElement("tr", {
     className: "clickable",
@@ -9519,10 +9633,15 @@ function AdminConsole() {
     value: "premium"
   }, "Premium"), /*#__PURE__*/React.createElement("option", {
     value: "enterprise"
-  }, "Enterprise")))), expanded[u.id] && /*#__PURE__*/React.createElement("tr", {
+  }, "Enterprise"))), /*#__PURE__*/React.createElement("td", {
+    onClick: e => e.stopPropagation()
+  }, !u.isAdmin && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm danger",
+    onClick: () => delUser(u)
+  }, "Delete"))), expanded[u.id] && /*#__PURE__*/React.createElement("tr", {
     className: "urow-detail"
   }, /*#__PURE__*/React.createElement("td", {
-    colSpan: 7
+    colSpan: 8
   }, u.forms.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "muted",
     style: {

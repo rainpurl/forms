@@ -103,6 +103,9 @@ async function route(seg, method, request, env, context) {
   if (path[0] === "admin" && path[1] === "plan" && path.length === 2 && method === "POST") {
     return adminSetPlan(request, env);
   }
+  if (path[0] === "admin" && path[1] === "delete-user" && path.length === 2 && method === "POST") {
+    return adminDeleteUser(request, env);
+  }
 
   if (path[0] === "brand-kits") {
     const user = await currentUser(request, env);
@@ -1292,6 +1295,38 @@ async function adminSetPlan(request, env){
   return json({ ok: true, plan });
 }
 
+async function adminDeleteUser(request, env){
+  const user = await currentUser(request, env);
+  if (!user || user.role !== "admin") return json({ error: "forbidden" }, 403);
+  const body = await readJson(request) || {};
+  const uid = String(body.uid || "");
+  if (!uid || uid === "admin") return json({ error: "bad_request" }, 400);
+  let target = null;
+  try { target = await env.DB.prepare("SELECT id, is_admin FROM users WHERE id = ?").bind(uid).first(); } catch (e) {}
+  if (!target) return json({ error: "not_found" }, 404);
+  if (target.is_admin) return json({ error: "forbidden" }, 403);
+  let formIds = [];
+  try { const fr = await env.DB.prepare("SELECT id FROM forms WHERE owner_id = ?").bind(uid).all(); formIds = (fr.results || []).map((r)=> r.id); } catch (e) {}
+  for (const fid of formIds){
+    try { await env.DB.prepare("DELETE FROM responses WHERE form_id = ?").bind(fid).run(); } catch (e) {}
+    try { await env.DB.prepare("DELETE FROM ai_summaries WHERE form_id = ?").bind(fid).run(); } catch (e) {}
+  }
+  try { await env.DB.prepare("DELETE FROM forms WHERE owner_id = ?").bind(uid).run(); } catch (e) {}
+  try { await env.DB.prepare("DELETE FROM users WHERE id = ?").bind(uid).run(); }
+  catch (e) { return json({ error: "not_available" }, 500); }
+  try {
+    if (env.FILES && formIds.length){
+      for (const fid of formIds){
+        for (const pre of [fid + "/", "uploads/" + fid + "/"]){
+          let cursor; let guard = 0;
+          do { const res = await env.FILES.list({ prefix: pre, limit: 1000, cursor }); for (const o of (res.objects || [])){ try { await env.FILES.delete(o.key); } catch (e2) {} } cursor = res.truncated ? res.cursor : undefined; guard++; } while (cursor && guard < 50);
+        }
+      }
+    }
+  } catch (e) {}
+  return json({ ok: true });
+}
+
 function validWindowTime(q, chosen){
   if (typeof chosen !== "string") return false;
   const d = new Date(chosen); if (isNaN(d)) return false;
@@ -1583,14 +1618,14 @@ async function adminOverview(request, env){
   const user = await currentUser(request, env);
   if (!user || user.role !== "admin") return json({ error: "forbidden" }, 403);
   const usersRes = await env.DB.prepare("SELECT id, username, name, email, is_admin, created_at FROM users").all();
-  const formsRes = await env.DB.prepare("SELECT id, owner_id, slug, title, is_open, created_at, updated_at FROM forms").all();
+  const formsRes = await env.DB.prepare("SELECT id, owner_id, slug, title, is_open, schema, created_at, updated_at FROM forms").all();
   const rcRes = await env.DB.prepare("SELECT form_id, COUNT(*) AS c, MAX(created_at) AS last FROM responses GROUP BY form_id").all();
   const rc = {}; (rcRes.results || []).forEach((r)=>{ rc[r.form_id] = { c: r.c || 0, last: r.last || null }; });
   const usage = await r2UsageByForm(env);
   let planMap = {}; try { const pr = await env.DB.prepare("SELECT id, plan FROM users").all(); (pr.results || []).forEach((r)=>{ planMap[r.id] = r.plan; }); } catch (e) {}
   const users = (usersRes.results || []).map((u)=>({ id: u.id, username: u.username, name: u.name, email: u.email, isAdmin: !!u.is_admin, plan: u.is_admin ? "enterprise" : effectivePlan(planMap[u.id], u.email), created_at: u.created_at, forms: [], formCount: 0, responseCount: 0, storageBytes: 0, lastResponseAt: null }));
   const byId = {}; users.forEach((u)=>{ byId[u.id] = u; });
-  let totalResponses = 0, openForms = 0;
+  let totalResponses = 0, openForms = 0; const qtypes = {};
   (formsRes.results || []).forEach((f)=>{
     const r = rc[f.id] || { c: 0, last: null };
     const sb = usage.map[f.id] || 0;
@@ -1598,11 +1633,14 @@ async function adminOverview(request, env){
     const fo = { id: f.id, slug: f.slug, title: f.title, isOpen: !!f.is_open, created_at: f.created_at, updated_at: f.updated_at, responses: r.c, lastResponseAt: r.last, storageBytes: sb };
     const owner = byId[f.owner_id];
     if (owner){ owner.forms.push(fo); owner.formCount++; owner.responseCount += r.c; owner.storageBytes += sb; if (r.last && (!owner.lastResponseAt || r.last > owner.lastResponseAt)) owner.lastResponseAt = r.last; }
+    try { const sc = safeParse(f.schema, null); const qs = (sc && Array.isArray(sc.questions)) ? sc.questions : []; qs.forEach((q)=>{ const tp = q && q.type; if (tp) qtypes[tp] = (qtypes[tp] || 0) + 1; }); } catch (e) {}
   });
   users.forEach((u)=> u.forms.sort((a, b)=> (b.responses - a.responses) || (String(b.updated_at) > String(a.updated_at) ? 1 : -1)));
   users.sort((a, b)=> (b.responseCount - a.responseCount) || (b.formCount - a.formCount));
-  const totals = { users: users.length, forms: (formsRes.results || []).length, responses: totalResponses, openForms, storageBytes: usage.total, storageAvailable: usage.available };
-  return json({ totals, users });
+  const questionTypes = Object.keys(qtypes).map((k)=>({ type: k, count: qtypes[k] })).sort((a, b)=> b.count - a.count);
+  const totalQuestions = questionTypes.reduce((acc, x)=> acc + x.count, 0);
+  const totals = { users: users.length, forms: (formsRes.results || []).length, responses: totalResponses, openForms, storageBytes: usage.total, storageAvailable: usage.available, questions: totalQuestions };
+  return json({ totals, users, questionTypes });
 }
 
 function json(obj, status = 200) {

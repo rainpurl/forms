@@ -217,7 +217,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 
 /* ---- builder: properties panel + canvas layout ---- */
 .builder{display:flex;flex-direction:column;height:100vh;background:var(--paper)}
-.b-top{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.b-top{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--card);border-bottom:0;box-shadow:var(--bevel-inset)}
 .b-top .saved-note{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
 .b-tools{position:relative}
 .menu{position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.14);padding:6px;min-width:170px;z-index:50}
@@ -782,7 +782,7 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 /* cards + chrome surfaces: bevel replaces border */
 .card{border-color:transparent;box-shadow:var(--bevel-soft)}
 .qcard{border-color:transparent;box-shadow:var(--bevel-soft)}
-.nav{border-bottom-color:transparent;box-shadow:0 1px 0 var(--line-strong),0 3px 10px rgba(60,45,25,.05)}
+.nav{border-bottom-color:transparent;background:var(--card);box-shadow:var(--bevel-inset)}
 .table tr.clickable:hover td{background:var(--hover)}
 /* menus + modal: borderless elevation + cinematic entrance */
 .menu,.addq-menu,.addmenu{border-color:transparent}
@@ -1155,6 +1155,30 @@ body{top:0!important}
 .esign-efield{touch-action:none}
 .esign-rs{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;border-radius:50%;background:var(--bo);border:2px solid #fff;cursor:nwse-resize;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.35);touch-action:none}
 .esign-r-text .esign-input,.esign-r-long .esign-input,.esign-r-date .esign-input{min-width:0}
+
+/* admin: question type usage bars */
+.qt-usage{margin:4px 0 22px}
+.qt-list{display:flex;flex-direction:column;gap:7px}
+.qt-row{display:flex;align-items:center;gap:12px}
+.qt-name{flex:0 0 180px;font-size:13px;color:var(--ink)}
+.qt-bar-wrap{flex:1;height:14px;border-radius:7px;background:var(--card);box-shadow:inset 0 1px 2px rgba(0,0,0,.12);overflow:hidden}
+.qt-bar{height:100%;border-radius:7px;background:var(--bo);min-width:4px}
+.qt-count{flex:0 0 auto;min-width:34px;text-align:right;font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted)}
+@media (max-width:560px){.qt-name{flex-basis:118px}}
+
+/* plan upgrade button + tier picker */
+.plan-upbtn{margin-left:2px}
+.up-tiers{display:flex;flex-direction:column;gap:12px}
+.up-tier{background:var(--card);box-shadow:var(--bevel-inset);border-radius:12px;padding:14px 16px}
+.up-tier.featured{box-shadow:inset 0 0 0 2px var(--bo),var(--bevel-inset)}
+.up-tier-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.up-tier-name{font-family:var(--display);font-weight:700;font-size:18px}
+.up-tier-price{font-size:14px;color:var(--ink-soft)}
+.up-tier-desc{font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5}
+.up-tier .btn{width:100%}
+.up-ent{margin-top:14px;font-size:13px;color:var(--ink-soft);text-align:center}
+.up-link{color:var(--bo);font-weight:600;text-decoration:none}
+.up-link:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -1183,6 +1207,7 @@ const api = {
   applyPlan: (payload) => req("/api/plan/apply", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   adminApplications: () => req("/api/admin/applications"),
   adminSetPlan: (payload) => req("/api/admin/plan", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
+  adminDeleteUser: (payload) => req("/api/admin/delete-user", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   checkout: (plan) => req("/api/billing/checkout", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ plan }) }),
   billingPortal: () => req("/api/billing/portal", { method:"POST" }),
   createForm: (payload) => req("/api/forms", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
@@ -3575,8 +3600,8 @@ const PLAN_TIERS = [
   { id:"free", name:"Free", price:"$0", cadence:"", tagline:"Everything you need to get started.",
     features:["All 27 question types","Up to 5 forms","100 responses per form","5 MB file uploads","Themes, templates and dark mode"],
     missing:["CSV and PDF export","Remove the zetetiq footer","Custom CSS"] },
-  { id:"edu", name:"Education and nonprofits", price:"Free", cadence:"", tagline:"All of Pro, free for schools and nonprofits.", badge:"For .edu and verified nonprofits",
-    features:["Everything in Pro","Automatic with a .edu sign in","Others can apply from the dashboard"] },
+  { id:"edu", name:"EDU/Non-profit", price:"Free", cadence:"", tagline:"Free for students, educators, and 501 (c) 3 non profits.",
+    features:["Everything in Pro","Dedicated support","Automatic with a .edu sign in","Others can apply from the dashboard"] },
   { id:"pro", name:"Pro", price:"$9", cadence:" / month", tagline:"For people who build forms often.",
     features:["Up to 100 forms","1,000 responses per form","10 MB file uploads","CSV and PDF export","Remove the zetetiq footer","White-label forms"] },
   { id:"premium", name:"Premium", price:"$35", cadence:" / month", tagline:"For power users.", featured:true,
@@ -3655,17 +3680,26 @@ function PlanBar({ user, forms, onApply }){
   const [busy, setBusy] = useState("");
   const checkout = (p)=>{ setBusy(p); api.checkout(p).then(({ ok, data })=>{ setBusy(""); if (ok && data && data.url){ window.location.href = data.url; return; } const e = data && data.error; try { if (data) console.warn("checkout failed:", e || "", (data && data.detail) || ""); } catch (_) {} toast(e === "billing_unconfigured" ? "Billing is not set up yet (Stripe secret key missing)." : e === "price_unconfigured" ? "Billing is not fully set up (price IDs missing)." : e === "unauthorized" ? "Please sign in again." : (data && data.detail) ? ("Stripe: " + String(data.detail).slice(0,120)) : "Could not start checkout. Please try again."); }).catch(()=>{ setBusy(""); toast("Could not start checkout."); }); };
   const portal = ()=>{ setBusy("portal"); api.billingPortal().then(({ ok, data })=>{ setBusy(""); if (ok && data && data.url) window.location.href = data.url; else toast("Could not open billing right now."); }).catch(()=>{ setBusy(""); toast("Could not open billing right now."); }); };
+  const [upOpen, setUpOpen] = useState(false);
+  const canUpgrade = plan !== "premium" && plan !== "enterprise";
   return (<div className="plan-bar">
-    <div className="plan-bar-l"><span className={"plan-pill plan-"+plan}>{names[plan]||plan}</span>{count!=null && <span className="plan-usage">{count}{maxForms!=null?(" of "+maxForms):""} {maxForms===1?"form":"forms"}{plan==="free"?", up to 100 responses each":""}</span>}</div>
+    <div className="plan-bar-l"><span className={"plan-pill plan-"+plan}>{names[plan]||plan}</span>{count!=null && <span className="plan-usage">{count}{maxForms!=null?(" of "+maxForms):""} {maxForms===1?"form":"forms"}{plan==="free"?", up to 100 responses each":""}</span>}{canUpgrade && <button className="btn sm primary plan-upbtn" onClick={()=>setUpOpen(true)}>Upgrade</button>}</div>
     <div className="plan-bar-r">
       {plan==="free" && (pending
         ? <span className="muted" style={{fontSize:13}}>Education or nonprofit application under review</span>
         : <button className="btn sm ghost" onClick={onApply}>Apply for education or nonprofit</button>)}
-      {plan==="free" && <button className="btn sm" disabled={busy==="pro"} onClick={()=>checkout("pro")}>{busy==="pro"?"Starting...":"Upgrade to Pro"}</button>}
-      {plan==="free" && <button className="btn sm primary" disabled={busy==="premium"} onClick={()=>checkout("premium")}>{busy==="premium"?"Starting...":"Upgrade to Premium"}</button>}
-      {plan==="pro" && <button className="btn sm primary" disabled={busy==="premium"} onClick={()=>checkout("premium")}>{busy==="premium"?"Starting...":"Upgrade to Premium"}</button>}
       {(plan==="pro"||plan==="premium") && billing.portal && <button className="btn sm ghost" disabled={busy==="portal"} onClick={portal}>{busy==="portal"?"Opening...":"Manage billing"}</button>}
     </div>
+    {upOpen && (<Modal title="Upgrade your plan" onClose={()=>setUpOpen(false)}>
+      <div className="pad-lg">
+        <div className="hint" style={{marginBottom:14}}>Pick the plan that fits how you work. You can change or cancel anytime.</div>
+        <div className="up-tiers">
+          {plan==="free" && (<div className="up-tier"><div className="up-tier-h"><span className="up-tier-name">Pro</span><span className="up-tier-price">$9 / month</span></div><div className="up-tier-desc">Up to 100 forms, 1,000 responses each, CSV and PDF export, and white-label forms.</div><button className="btn primary" disabled={busy==="pro"} onClick={()=>checkout("pro")}>{busy==="pro"?"Starting...":"Choose Pro"}</button></div>)}
+          <div className="up-tier featured"><div className="up-tier-h"><span className="up-tier-name">Premium</span><span className="up-tier-price">$35 / month</span></div><div className="up-tier-desc">Unlimited forms and responses, 1 GB uploads, custom CSS, and priority support.</div><button className="btn primary" disabled={busy==="premium"} onClick={()=>checkout("premium")}>{busy==="premium"?"Starting...":"Choose Premium"}</button></div>
+        </div>
+        <div className="up-ent">Need teams or single sign on? <a className="up-link" href="mailto:support@zetetiq.com">Contact us about Enterprise</a>.</div>
+      </div>
+    </Modal>)}
   </div>);
 }
 
@@ -3697,7 +3731,7 @@ function Landing({ showLogin }){
     { icon:"lock", title:"Private by default", desc:"No ads and no third-party tracking baked into your forms." },
     { icon:"globe", title:"Your data stays yours", desc:"Export every response anytime as clean CSV or a themed PDF." },
     { icon:"spark", title:"No buzzwords", desc:"Helpful features without the hype. Plain labels and clean output." },
-    { icon:"target", title:"Free for early users", desc:"Full access while zetetiq is getting started." },
+    { icon:"target", title:"A real free plan", desc:"Twenty-seven question types and your own branding at no cost." },
   ];
   const steps = [
     { title:"Build", desc:"Add questions, set logic, and watch a live preview as you go." },
@@ -3721,7 +3755,7 @@ function Landing({ showLogin }){
         <div className="lp-hero-text">
           <div className="lp-eyebrow">Experience management, simplified</div>
           <h1 className="lp-h1">Build a form, theme it your way, and share a clean link.</h1>
-          <p className="lp-sub">A full survey and form builder. Twenty-seven question types, logic, scheduling, e-sign, scoring, and your own branding. Free for early users.</p>
+          <p className="lp-sub">A full survey and form builder. Twenty-seven question types, logic, scheduling, e-sign, scoring, and your own branding.</p>
           {user ? (
             <div className="lp-cta-row"><button className="btn primary lg" onClick={()=>navigate("/dashboard")}>Go to dashboard</button></div>
           ) : (
@@ -3785,7 +3819,7 @@ function Landing({ showLogin }){
 
       <section className="lp-cta">
         <h2 className="lp-h2">Start building for free</h2>
-        <p className="lp-lead">Full access while zetetiq is getting started.</p>
+        <p className="lp-lead">A generous free plan, with paid tiers when you need more.</p>
         {user ? <button className="btn primary lg" onClick={()=>navigate("/dashboard")}>Go to dashboard</button>
               : <div className="lp-cta-row center"><button className="gbtn auto" onClick={google}><GoogleG/> Continue with Google</button></div>}
       </section>
@@ -3899,7 +3933,7 @@ function BrandStudio({ form, setTheme, setSettings }){
 }
 
 function AdminConsole(){
-  const { navigate } = useApp();
+  const { navigate, toast } = useApp();
   const [data, setData] = useState(null);
   const [expanded, setExpanded] = useState({});
   const [err, setErr] = useState(false);
@@ -3907,6 +3941,7 @@ function AdminConsole(){
   useEffect(()=>{ load(); }, [load]);
   const toggle = (id)=> setExpanded((e)=>{ const n = Object.assign({}, e); n[id] = !n[id]; return n; });
   const setPlan = (uid, plan)=>{ api.adminSetPlan({ uid, plan }).then(({ ok })=>{ if (ok) load(); }); };
+  const delUser = (u)=>{ if (u.isAdmin) return; if (!window.confirm("Delete " + (u.name || u.username) + " and all of their forms and responses? This cannot be undone.")) return; api.adminDeleteUser({ uid: u.id }).then(({ ok })=>{ if (ok){ toast("Account deleted."); load(); } else toast("Could not delete that account."); }).catch(()=>toast("Could not delete that account.")); };
   const t = data && data.totals;
   return (
     <div>
@@ -3927,12 +3962,27 @@ function AdminConsole(){
               <div className="astat"><div className="av">{t.openForms}</div><div className="al">Open forms</div></div>
               <div className="astat"><div className="av">{t.storageAvailable ? fmtBytes(t.storageBytes) : "n/a"}</div><div className="al">{t.storageAvailable ? "Storage used of 10 GB" : "Storage (R2 off)"}</div></div>
             </div>
+            {data.questionTypes && data.questionTypes.length > 0 && (
+              <div className="qt-usage">
+                <div className="panel-title" style={{marginBottom:6}}>Question type usage</div>
+                <div className="hint" style={{marginBottom:12}}>How many times each question type appears across all forms.</div>
+                <div className="qt-list">
+                  {data.questionTypes.map((q)=>{ const max = data.questionTypes[0].count || 1; return (
+                    <div key={q.type} className="qt-row">
+                      <div className="qt-name">{(QTYPES[q.type] && QTYPES[q.type].label) || q.type}</div>
+                      <div className="qt-bar-wrap"><div className="qt-bar" style={{width: Math.max(4, Math.round((q.count / max) * 100)) + "%"}}></div></div>
+                      <div className="qt-count">{q.count}</div>
+                    </div>
+                  ); })}
+                </div>
+              </div>
+            )}
             <AdminApplications />
             <div className="panel-title" style={{marginBottom:6}}>Users</div>
             <div className="hint" style={{marginBottom:12}}>Click a user to see their forms. Storage is the total size of files uploaded to that user's forms.</div>
             {data.users.length === 0 ? <div className="muted">No users yet.</div> : (
               <table className="table admin-users">
-                <thead><tr><th>User</th><th>Forms</th><th>Responses</th><th>Storage</th><th>Joined</th><th>Last activity</th><th>Plan</th></tr></thead>
+                <thead><tr><th>User</th><th>Forms</th><th>Responses</th><th>Storage</th><th>Joined</th><th>Last activity</th><th>Plan</th><th>Actions</th></tr></thead>
                 <tbody>
                   {data.users.map((u)=>(
                     <React.Fragment key={u.id}>
@@ -3946,10 +3996,10 @@ function AdminConsole(){
                         <td>{fmtBytes(u.storageBytes)}</td>
                         <td>{u.created_at ? fmtAgo(u.created_at) : "-"}</td>
                         <td>{u.lastResponseAt ? fmtAgo(u.lastResponseAt) : <span className="muted">no responses</span>}</td>
-                        <td onClick={(e)=>e.stopPropagation()}><Select className="select" value={u.plan||"free"} onChange={(e)=>setPlan(u.id, e.target.value)} disabled={u.isAdmin}><option value="free">Free</option><option value="edu">Education</option><option value="pro">Pro</option><option value="premium">Premium</option><option value="enterprise">Enterprise</option></Select></td>
+                        <td onClick={(e)=>e.stopPropagation()}><Select className="select" value={u.plan||"free"} onChange={(e)=>setPlan(u.id, e.target.value)} disabled={u.isAdmin}><option value="free">Free</option><option value="edu">Education</option><option value="pro">Pro</option><option value="premium">Premium</option><option value="enterprise">Enterprise</option></Select></td><td onClick={(e)=>e.stopPropagation()}>{!u.isAdmin && <button className="btn sm danger" onClick={()=>delUser(u)}>Delete</button>}</td>
                       </tr>
                       {expanded[u.id] && (
-                        <tr className="urow-detail"><td colSpan={7}>
+                        <tr className="urow-detail"><td colSpan={8}>
                           {u.forms.length === 0 ? <div className="muted" style={{fontSize:13}}>No forms.</div> : (
                             <div className="admin-forms">
                               {u.forms.map((f)=>(
