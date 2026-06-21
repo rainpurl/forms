@@ -929,15 +929,15 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 .lp-ico{box-shadow:var(--bevel-inset)}
 .lp-win{border-color:transparent;box-shadow:var(--bevel-raise),0 26px 64px -30px rgba(20,16,48,.5)}
 /* loading: zetetiq wordmark, same colour as the background, pressed in */
-.loadlogo{display:inline-flex;align-items:center;color:var(--paper)}
-.loadlogo .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.75)) drop-shadow(0 -1px 1px rgba(70,55,30,.4));animation:loadpulse 1.7s var(--ease) infinite}
-html[data-theme="dark"] .loadlogo{color:var(--paper)}
-html[data-theme="dark"] .loadlogo .logo svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.6)) drop-shadow(0 -1px 0 rgba(255,255,255,.08))}
+.loadlogo{display:inline-flex;align-items:center;color:#e7e1d6}
+.loadlogo .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.9));animation:loadpulse 1.7s var(--ease) infinite}
+html[data-theme="dark"] .loadlogo{color:#201c17}
+html[data-theme="dark"] .loadlogo .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.06))}
 @keyframes loadpulse{0%,100%{opacity:.5}50%{opacity:.92}}
 /* initial boot splash before the app mounts */
 .boot-splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--paper);z-index:9999}
-.boot-word{font-family:var(--display),system-ui,sans-serif;font-size:44px;font-weight:700;letter-spacing:-.01em;color:var(--paper);text-shadow:0 -1px 1px rgba(70,55,30,.32),0 1px 0 rgba(255,255,255,.7);animation:loadpulse 1.7s var(--ease) infinite}
-html[data-theme="dark"] .boot-word{text-shadow:0 -1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.6)}
+.boot-word{font-family:var(--display),system-ui,sans-serif;font-size:44px;font-weight:700;letter-spacing:-.01em;color:#e7e1d6;text-shadow:0 1px 0 rgba(255,255,255,.9);animation:loadpulse 1.7s var(--ease) infinite}
+html[data-theme="dark"] .boot-word{color:#201c17;text-shadow:0 1px 0 rgba(255,255,255,.06)}
 /* theme toggle while filling out a form */
 .form-theme-toggle{position:fixed;top:16px;right:16px;z-index:60}
 /* poll heatmap number legible on green tint in dark mode */
@@ -979,9 +979,9 @@ html[data-theme="dark"] .poll-heatcell{color:#E8F5EC}
 
 /* nav wordmark: recessed, single soft shadow (no doubled dots) */
 .nav .brand,.b-top .brand{color:#e4ded9}
-.nav .brand .logo svg,.b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,1)) drop-shadow(0 -1px 1px rgba(70,55,30,.42))}
+.nav .brand .logo svg,.b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.9))}
 html[data-theme="dark"] .nav .brand,html[data-theme="dark"] .b-top .brand{color:#100e0c}
-html[data-theme="dark"] .nav .brand .logo svg,html[data-theme="dark"] .b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.1)) drop-shadow(0 -1px 1px rgba(0,0,0,.6))}
+html[data-theme="dark"] .nav .brand .logo svg,html[data-theme="dark"] .b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.08))}
 
 /* calendar month/year drill-down */
 .cal-title-btn{appearance:none;border:0;background:none;font:inherit;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;padding:4px 12px;border-radius:8px;transition:background-color var(--t-fast) var(--ease)}
@@ -1129,6 +1129,12 @@ body{top:0!important}
 .sig-tab{border:0;background:transparent;color:var(--ink-soft);font-size:13px;font-weight:600;padding:7px 18px;border-radius:7px;cursor:pointer}
 .sig-tab.active{background:var(--card);color:var(--ink);box-shadow:var(--bevel-raise)}
 .sig-typed-preview{font-family:'Monsieur La Doulaise',cursive;font-size:46px;color:var(--ink);min-height:72px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--paper);box-shadow:var(--bevel-inset);margin-top:14px;padding:0 14px;overflow:hidden}
+
+.dash-head{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+.dash-head > h1{margin:0}
+.dash-head .plan-bar{margin-bottom:0;flex:0 1 auto}
+.lp-hero-text{position:relative;z-index:2}
+.lp-visual{position:relative;z-index:1}
 </style>
 </head>
 <body>
@@ -3487,7 +3493,7 @@ function PublicForm({ username, slug }){
     const btnUrl = set.endButtonUrl ? (/^https?:\/\//i.test(set.endButtonUrl) ? set.endButtonUrl : ("https://" + set.endButtonUrl)) : null;
     const bookedSched = !disq ? (((form.schema && form.schema.questions) || []).filter((q)=> q.type === "scheduling" && typeof doneAnswers[q.id] === "string" && doneAnswers[q.id])) : [];
     const review = (!disq && set.reviewAnswers) ? quizReview(form, doneAnswers) : [];
-    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}>{!embed && <FormThemeToggle/>}<div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}{review.length > 0 && <div className="quiz-review">{review.map((r)=>(<div key={r.id} className={"qr-item " + (r.isCorrect ? "qr-ok" : "qr-no")}><div className="qr-q">{(r.isCorrect ? "✓ " : "✗ ") + r.label}</div><div className="qr-line">Your answer: {r.given.length ? r.given.join(", ") : "(none)"}</div>{!r.isCorrect && <div className="qr-line">Correct: {r.correct.join(", ")}</div>}{r.explanation && <div className="qr-exp">{r.explanation}</div>}</div>))}</div>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
+    return (<div className={pageCls}><div className="form-page-inner"><div className="form-scope" style={scope}>{!embed && <FormThemeToggle/>}<div className="fcard" style={{textAlign:"center"}}>{set.headerImage && <img className="fheader-img" src={set.headerImage} alt="" />}{!disq && <div style={{fontSize:38,color:"var(--fa)"}}>✓</div>}<div className="ftitle" style={{marginTop:6}}>{disq ? (set.screenoutTitle || "Thanks for your time") : (pipeText(set.endTitle, doneAnswers, (form.schema && form.schema.questions) || []) || "Thank you")}</div><p className="fdesc">{disq ? (set.screenoutMessage || "Based on your answers, this survey is not a match. We appreciate your time.") : (pipeText(set.endMessage, doneAnswers, (form.schema && form.schema.questions) || []) || "Your response has been recorded.")}</p>{!disq && set.showScore && doneScore && <div className="fscore">You scored {doneScore.score} out of {doneScore.max}</div>}{!disq && set.endButtonLabel && btnUrl && <a className="fcta" href={btnUrl} target="_blank" rel="noopener">{set.endButtonLabel}</a>}{bookedSched.map((q)=>{ const startISO = doneAnswers[q.id]; const d = new Date(startISO); const vl = { zoom:"Zoom", meet:"Google Meet", teams:"Microsoft Teams", webex:"Webex" }; const when = isNaN(d) ? startISO : (d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " at " + d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" })); return (<div key={q.id} className="booking-card"><div className="booking-when">{when}</div><div className="booking-meta">{[q.meetingTitle || "Meeting", q.duration ? (q.duration + " min") : "", q.location || "", (q.video && q.video !== "none") ? (vl[q.video] + " link") : ""].filter(Boolean).join(" \u00b7 ")}</div><button type="button" className="booking-add" onClick={()=>downloadICS(q, startISO)}>Add to calendar</button></div>); })}{review.length > 0 && <div className="quiz-review">{review.map((r)=>(<div key={r.id} className={"qr-item " + (r.isCorrect ? "qr-ok" : "qr-no")}><div className="qr-q">{(r.isCorrect ? "✓ " : "✗ ") + r.label}</div><div className="qr-line">Your answer: {r.given.length ? r.given.join(", ") : "(none)"}</div>{!r.isCorrect && <div className="qr-line">Correct: {r.correct.join(", ")}</div>}{r.explanation && <div className="qr-exp">{r.explanation}</div>}</div>))}</div>}</div></div>{!set.hideBranding && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.com" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}</div></div>);
   }
   if (already && !done){
     const set2 = (lform.schema && lform.schema.settings) || {};
@@ -3512,7 +3518,7 @@ function PublicForm({ username, slug }){
     <div className={pageCls}><div className="form-page-inner">
       {!embed && <FormThemeToggle/>}
       <FormRenderer form={lform} ui={uiLabels} onSubmit={submit} submitting={submitting} bookings={st.bookings} optionCounts={st.optionCounts} poll={st.poll} busy={st.busy} />
-      {!(form.schema && form.schema.settings && form.schema.settings.hideBranding) && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}
+      {!(form.schema && form.schema.settings && form.schema.settings.hideBranding) && !embed && <div style={{textAlign:"center",marginTop:18}}><a className="builtby" href="https://zetetiq.com" target="_blank" rel="noopener">powered by <Logo size={13} /></a></div>}
     </div></div>
   );
 }
@@ -3762,7 +3768,7 @@ function Landing({ showLogin }){
         <div className="lp-foot-in">
           <Logo size={16} />
           <span className="lp-foot-tag">Human-centered Experience Management.</span>
-          <a className="lp-foot-link" href="https://zetetiq.pages.dev" target="_blank" rel="noopener">zetetiq.pages.dev</a>
+          <a className="lp-foot-link" href="https://zetetiq.com" target="_blank" rel="noopener">zetetiq.com</a>
           {!user && <button type="button" className="lp-foot-admin" onClick={()=>setOpen(true)}>Admin sign in</button>}
         </div>
         <div className="lp-foot-copy">© 2026 Zetetiq XM</div>
@@ -4056,10 +4062,10 @@ function Dashboard(){
     <div>
       <TopNav/>
       <div className="wrap page">
-        <div style={{marginBottom:18}}>
+        <div className="dash-head">
           <h1 style={{fontSize:26}}>{greetingFor(user)}</h1>
+          {user && <PlanBar user={user} forms={forms} onApply={()=>setApply(true)} />}
         </div>
-        {user && <PlanBar user={user} forms={forms} onApply={()=>setApply(true)} />}
         {apply && <ApplyModal onClose={()=>setApply(false)} />}
         <AiSummary fetcher={fetcher} />
         {forms === null ? <div style={{display:"flex",justifyContent:"center",padding:"56px 0"}}><LoadingLogo /></div>

@@ -31,6 +31,23 @@ The users table gained plan columns. On an existing database, run:
   ALTER TABLE users ADD COLUMN plan_request TEXT;
 A brand new database created from schema.sql already has them. Until the migration runs, non admin users fall back to free (the admin is unaffected). Set the ADMIN_EMAIL variable so application emails have a recipient; it falls back to the address parsed from MAIL_FROM.
 
+## Custom domain (zetetiq.com)
+The app reads the request origin for every redirect, so OAuth callbacks, Stripe return URLs, and share links all switch to whatever domain serves the page. Almost nothing in the code is hardcoded. Steps to move to zetetiq.com:
+
+1. Cloudflare Pages: open the Pages project, go to Custom domains, add zetetiq.com (and www.zetetiq.com if you want it). If the domain DNS is on Cloudflare it configures automatically. Both zetetiq.com and the old pages.dev address will serve the same app.
+2. Google Cloud (OAuth client): under Authorized JavaScript origins add https://zetetiq.com. Under Authorized redirect URIs add both https://zetetiq.com/api/auth/google/callback (sign in) and https://zetetiq.com/api/calendar/google/callback (calendar). Keep the pages.dev entries too so both domains keep working.
+3. Microsoft Azure (app registration): add the redirect URI https://zetetiq.com/api/calendar/outlook/callback. Keep the pages.dev one too.
+4. Stripe: the checkout success and cancel URLs and the billing portal return URL are built from the origin, so they switch to zetetiq.com automatically when checkout starts there. The webhook endpoint in the Stripe dashboard can stay on pages.dev (it still reaches the app) or you can add or switch it to https://zetetiq.com/api/billing/webhook.
+5. Code: the only hardcoded links were the footer "powered by" and the landing footer; both now point to https://zetetiq.com. Redeploy after uploading the new index.html. No environment variable or schema changes are needed.
+
+Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
+
+## Latest changes (also live)
+- The loading and boot wordmark no longer has the doubled look. It was a background-colored glyph with two offset shadows (light below and dark above), which read as two ghosts. It is now a faint visible glyph with a single soft highlight, so it reads as gently carved instead of doubled. The same single-shadow treatment was applied to the navbar and builder wordmark.
+- The current plan and limits bar now sits to the right of the good morning greeting instead of on its own row below it.
+- Footer links point to zetetiq.com (see the custom domain section above).
+- The homepage hero sits above the decorative mockup in the stacking order, in case that element was ever intercepting clicks on the sign in button.
+
 ## Latest changes (also live)
 - Document e-sign was rebuilt around an inline drag-and-drop editor. Add a document (image or PDF) and it shows in a large preview with a field palette right above it: text box, circle, check, x, and signature. Drag a field type onto the document, or click a type then click where it goes; drag a placed field to move it, and use the small red x to remove it. The old separate place-fields modal and the side list of fields are gone, and a new e-sign starts with no fields so you place exactly what you need.
 - Signing supports drawn or typed signatures. The person clicks a signature field, then either draws with a finger or mouse, or switches to the Type tab and types their name, which renders in the Monsieur La Doulaise cursive font. Typed signatures show in that same cursive font in the responses view; drawn ones show as the captured image.

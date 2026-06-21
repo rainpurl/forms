@@ -923,15 +923,15 @@ button,a.btn,.btn,.iconbtn,.themebtn,.gbtn,.input,.textarea,.select,.switch .tra
 .lp-ico{box-shadow:var(--bevel-inset)}
 .lp-win{border-color:transparent;box-shadow:var(--bevel-raise),0 26px 64px -30px rgba(20,16,48,.5)}
 /* loading: zetetiq wordmark, same colour as the background, pressed in */
-.loadlogo{display:inline-flex;align-items:center;color:var(--paper)}
-.loadlogo .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.75)) drop-shadow(0 -1px 1px rgba(70,55,30,.4));animation:loadpulse 1.7s var(--ease) infinite}
-html[data-theme="dark"] .loadlogo{color:var(--paper)}
-html[data-theme="dark"] .loadlogo .logo svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.6)) drop-shadow(0 -1px 0 rgba(255,255,255,.08))}
+.loadlogo{display:inline-flex;align-items:center;color:#e7e1d6}
+.loadlogo .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.9));animation:loadpulse 1.7s var(--ease) infinite}
+html[data-theme="dark"] .loadlogo{color:#201c17}
+html[data-theme="dark"] .loadlogo .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.06))}
 @keyframes loadpulse{0%,100%{opacity:.5}50%{opacity:.92}}
 /* initial boot splash before the app mounts */
 .boot-splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--paper);z-index:9999}
-.boot-word{font-family:var(--display),system-ui,sans-serif;font-size:44px;font-weight:700;letter-spacing:-.01em;color:var(--paper);text-shadow:0 -1px 1px rgba(70,55,30,.32),0 1px 0 rgba(255,255,255,.7);animation:loadpulse 1.7s var(--ease) infinite}
-html[data-theme="dark"] .boot-word{text-shadow:0 -1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.6)}
+.boot-word{font-family:var(--display),system-ui,sans-serif;font-size:44px;font-weight:700;letter-spacing:-.01em;color:#e7e1d6;text-shadow:0 1px 0 rgba(255,255,255,.9);animation:loadpulse 1.7s var(--ease) infinite}
+html[data-theme="dark"] .boot-word{color:#201c17;text-shadow:0 1px 0 rgba(255,255,255,.06)}
 /* theme toggle while filling out a form */
 .form-theme-toggle{position:fixed;top:16px;right:16px;z-index:60}
 /* poll heatmap number legible on green tint in dark mode */
@@ -973,9 +973,9 @@ html[data-theme="dark"] .poll-heatcell{color:#E8F5EC}
 
 /* nav wordmark: recessed, single soft shadow (no doubled dots) */
 .nav .brand,.b-top .brand{color:#e4ded9}
-.nav .brand .logo svg,.b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,1)) drop-shadow(0 -1px 1px rgba(70,55,30,.42))}
+.nav .brand .logo svg,.b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.9))}
 html[data-theme="dark"] .nav .brand,html[data-theme="dark"] .b-top .brand{color:#100e0c}
-html[data-theme="dark"] .nav .brand .logo svg,html[data-theme="dark"] .b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.1)) drop-shadow(0 -1px 1px rgba(0,0,0,.6))}
+html[data-theme="dark"] .nav .brand .logo svg,html[data-theme="dark"] .b-top .brand .logo svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.08))}
 
 /* calendar month/year drill-down */
 .cal-title-btn{appearance:none;border:0;background:none;font:inherit;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;padding:4px 12px;border-radius:8px;transition:background-color var(--t-fast) var(--ease)}
@@ -1123,6 +1123,12 @@ body{top:0!important}
 .sig-tab{border:0;background:transparent;color:var(--ink-soft);font-size:13px;font-weight:600;padding:7px 18px;border-radius:7px;cursor:pointer}
 .sig-tab.active{background:var(--card);color:var(--ink);box-shadow:var(--bevel-raise)}
 .sig-typed-preview{font-family:'Monsieur La Doulaise',cursive;font-size:46px;color:var(--ink);min-height:72px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--paper);box-shadow:var(--bevel-inset);margin-top:14px;padding:0 14px;overflow:hidden}
+
+.dash-head{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+.dash-head > h1{margin:0}
+.dash-head .plan-bar{margin-bottom:0;flex:0 1 auto}
+.lp-hero-text{position:relative;z-index:2}
+.lp-visual{position:relative;z-index:1}
 </style>
 </head>
 <body>
@@ -8071,7 +8077,7 @@ function PublicForm({
       }
     }, /*#__PURE__*/React.createElement("a", {
       className: "builtby",
-      href: "https://zetetiq.pages.dev",
+      href: "https://zetetiq.com",
       target: "_blank",
       rel: "noopener"
     }, "powered by ", /*#__PURE__*/React.createElement(Logo, {
@@ -8174,7 +8180,7 @@ function PublicForm({
     }
   }, /*#__PURE__*/React.createElement("a", {
     className: "builtby",
-    href: "https://zetetiq.pages.dev",
+    href: "https://zetetiq.com",
     target: "_blank",
     rel: "noopener"
   }, "powered by ", /*#__PURE__*/React.createElement(Logo, {
@@ -8844,10 +8850,10 @@ function Landing({
     className: "lp-foot-tag"
   }, "Human-centered Experience Management."), /*#__PURE__*/React.createElement("a", {
     className: "lp-foot-link",
-    href: "https://zetetiq.pages.dev",
+    href: "https://zetetiq.com",
     target: "_blank",
     rel: "noopener"
-  }, "zetetiq.pages.dev"), !user && /*#__PURE__*/React.createElement("button", {
+  }, "zetetiq.com"), !user && /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "lp-foot-admin",
     onClick: () => setOpen(true)
@@ -9769,18 +9775,16 @@ function Dashboard() {
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
     className: "wrap page"
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 18
-    }
+    className: "dash-head"
   }, /*#__PURE__*/React.createElement("h1", {
     style: {
       fontSize: 26
     }
-  }, greetingFor(user))), user && /*#__PURE__*/React.createElement(PlanBar, {
+  }, greetingFor(user)), user && /*#__PURE__*/React.createElement(PlanBar, {
     user: user,
     forms: forms,
     onApply: () => setApply(true)
-  }), apply && /*#__PURE__*/React.createElement(ApplyModal, {
+  })), apply && /*#__PURE__*/React.createElement(ApplyModal, {
     onClose: () => setApply(false)
   }), /*#__PURE__*/React.createElement(AiSummary, {
     fetcher: fetcher
