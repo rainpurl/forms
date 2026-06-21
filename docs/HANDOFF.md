@@ -43,6 +43,37 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+This release removes the SMS reminder path entirely (it was never wired) and adds team workspaces for the Enterprise plan.
+
+### Teams (Enterprise)
+Enterprise accounts can create a team, invite people by email, and share forms with everyone on the team.
+- Create a team from Account then Manage team (or visit /team). The creator becomes the owner.
+- Invite by email. If the person already has a zetetiq account they are added immediately; otherwise they join automatically the next time they sign in with that email address. Roles are owner, admin, and member. Owners and admins can invite, change roles, and remove people; any member can leave.
+- Share a form with the team using the Team toggle in the form's Settings (owner only). Shared forms appear under the team tab on the dashboard.
+- What team members can do with a shared form: see it on their dashboard, open it, edit and save it, and view its responses and analytics. Reserved to the form owner for now: deleting the form, deleting responses, duplicating, exporting, AI summaries, and file operations, plus sharing or unsharing.
+- Personal forms that are not shared stay private to you. The dashboard shows a Personal and team switcher when you belong to a team.
+
+Run these migrations on the D1 database, then redeploy:
+  CREATE TABLE IF NOT EXISTS orgs (id TEXT PRIMARY KEY, name TEXT, owner_id TEXT, created_at TEXT DEFAULT (datetime('now')));
+  CREATE TABLE IF NOT EXISTS org_members (org_id TEXT, user_id TEXT, role TEXT DEFAULT 'member', added_at TEXT DEFAULT (datetime('now')), PRIMARY KEY (org_id, user_id));
+  CREATE TABLE IF NOT EXISTS org_invites (id TEXT PRIMARY KEY, org_id TEXT, email TEXT, role TEXT DEFAULT 'member', created_at TEXT DEFAULT (datetime('now')));
+  ALTER TABLE forms ADD COLUMN org_id TEXT;
+The three CREATE TABLE statements are also in schema.sql. On an existing database you need all three new tables plus the one ALTER.
+
+Upload index.html and functions/api/[[path]].js, run the migrations, and redeploy.
+
+### SMS removed
+The SMS sender, the phone-number finder, the reminder SMS branch, and the form's SMS toggle are all gone. Reminders are email only and no SMS environment variables are used.
+
+### Still open (larger items, not done)
+True SAML or OIDC single sign-on (the Enterprise plan reserves an sso flag, but real identity-provider sign-on is a separate project; email-domain auto-join would be a lighter step toward it), respondent-facing payment collection, Apple/iCloud and Exchange calendar free/busy, and maintained-string localization.
+
+## Recent changes
+- Custom form link (slug). In form Settings there is now a "Link" field showing your username prefix and an editable slug, the part after /username/ in the form's web address. It accepts letters, numbers, and hyphens. Saving applies it; if the slug collides with another of your forms it gets a numeric suffix and the field updates to show the real one. Works on first publish and on later edits. The previous link stops working once changed.
+- Per-day availability hours for time-window scheduling. In the scheduler builder, the time window section has a "Set different hours for each day" toggle. With it on, each selected weekday gets its own From and To hours, so you can offer, say, Monday 9 to 5 and Saturday 8 to 12. With it off it behaves as before with one window for all days. The respondent's available slots and the server-side slot validation both honor the per-day hours.
+
+Both of these touched the backend, so index.html and functions/api/[[path]].js both need uploading and a redeploy. No database change (slug column already exists; the per-day hours live inside the form schema JSON).
+## Recent changes
 - Reverted the colored button experiment. The radial center-to-edge gradient looked wrong, so the blue primary and red danger buttons are back to the simple recessed look at rest (matching the white controls), lifting on hover and pressing on click.
 - Email is confirmed working end to end. The earlier bounces were stale, generated before the Cloudflare destination address finished verifying; a fresh send after verification settled delivers normally.
 

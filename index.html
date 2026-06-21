@@ -1176,6 +1176,32 @@ body{top:0!important}
 
 /* enterprise contact button on pricing card */
 .price-cta{display:inline-flex;width:100%;justify-content:center;margin-top:14px}
+
+/* scheduling: per-day availability hours */
+.dayhours{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.dayhours-row{display:flex;align-items:center;gap:8px}
+.dayhours-day{flex:0 0 40px;font-size:13px;color:var(--ink);font-weight:600}
+.dayhours-sep{color:var(--ink-soft);font-size:13px;flex:0 0 auto}
+.dayhours-row .select{flex:1;min-width:0}
+
+/* e-sign palette taps on touch */
+.esign-pal-btn{touch-action:manipulation}
+
+/* teams / workspace switcher */
+.ws-switch{display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ws-tab{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:7px 13px;border-radius:9px;border:1px solid transparent;background:var(--card);color:var(--ink-soft);box-shadow:var(--bevel-inset);cursor:pointer}
+.ws-tab.on{color:var(--ink);background:var(--hover)}
+.team-grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:680px}
+.tcard{border:1px solid transparent;background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--bevel-inset)}
+.troster{display:flex;flex-direction:column;gap:0;margin-top:8px}
+.trow{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:0}
+.trow-main{flex:1;min-width:0}
+.trow-name{font-weight:600;font-size:14px}
+.trow-sub{font-size:12px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.trole{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
+.zsel.sm{font-size:12px;padding:5px 9px}
 </style>
 </head>
 <body>
@@ -1227,6 +1253,54 @@ const api = {
     method: "POST"
   }),
   listForms: () => req("/api/forms"),
+  org: () => req("/api/org"),
+  orgCreate: name => req("/api/org", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name
+    })
+  }),
+  orgInvite: (email, role) => req("/api/org/invite", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email,
+      role
+    })
+  }),
+  orgInviteCancel: email => req("/api/org/invite/cancel", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email
+    })
+  }),
+  orgMemberRemove: userId => req("/api/org/member/remove", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      userId
+    })
+  }),
+  orgMemberRole: (userId, role) => req("/api/org/member/role", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      userId,
+      role
+    })
+  }),
   adminOverview: () => req("/api/admin/overview"),
   applyPlan: payload => req("/api/plan/apply", {
     method: "POST",
@@ -2620,6 +2694,7 @@ function windowSlots(q, busy) {
   const wds = Array.isArray(q.weekdays) && q.weekdays.length ? q.weekdays : [0, 1, 2, 3, 4, 5, 6];
   const sh = q.startHour == null ? 9 : q.startHour;
   const eh = q.endHour == null ? 17 : q.endHour;
+  const perDay = !!(q.perDayHours && q.dayHours);
   const step = Math.max(5, q.slotMinutes || 60);
   const dur = q.duration || step;
   const cap = q.meetingType === "group" ? q.capacity || 1 : 1;
@@ -2627,7 +2702,14 @@ function windowSlots(q, busy) {
   let guard = 0;
   for (let d = new Date(start); d <= end && guard < 4000; d.setDate(d.getDate() + 1)) {
     if (wds.indexOf(d.getDay()) < 0) continue;
-    for (let mins = sh * 60; mins + step <= eh * 60 + 0.5; mins += step) {
+    let dsh = sh,
+      deh = eh;
+    if (perDay && q.dayHours[d.getDay()]) {
+      const dh = q.dayHours[d.getDay()];
+      if (dh.s != null) dsh = dh.s;
+      if (dh.e != null) deh = dh.e;
+    }
+    for (let mins = dsh * 60; mins + step <= deh * 60 + 0.5; mins += step) {
       guard++;
       const slot = new Date(d);
       slot.setHours(0, mins, 0, 0);
@@ -3554,6 +3636,65 @@ function SchedulingControls({
       })
     }, d);
   })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.perDayHours,
+    onChange: c => update({
+      perDayHours: c
+    }),
+    label: "Set different hours for each day"
+  })), q.perDayHours ? /*#__PURE__*/React.createElement("div", {
+    className: "dayhours"
+  }, (q.weekdays && q.weekdays.length ? q.weekdays : [1, 2, 3, 4, 5]).slice().sort((a, b) => a - b).map(i => {
+    const dh = q.dayHours && q.dayHours[i] || {
+      s: q.startHour == null ? 9 : q.startHour,
+      e: q.endHour == null ? 17 : q.endHour
+    };
+    const setDH = patch => update({
+      dayHours: {
+        ...(q.dayHours || {}),
+        [i]: {
+          ...dh,
+          ...patch
+        }
+      }
+    });
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      className: "dayhours-row"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "dayhours-day"
+    }, ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]), /*#__PURE__*/React.createElement(Select, {
+      className: "select",
+      value: String(dh.s),
+      onChange: e => setDH({
+        s: parseInt(e.target.value, 10)
+      })
+    }, Array.from({
+      length: 24
+    }).map((_, h) => /*#__PURE__*/React.createElement("option", {
+      key: h,
+      value: h
+    }, hourLabel(h)))), /*#__PURE__*/React.createElement("span", {
+      className: "dayhours-sep"
+    }, "to"), /*#__PURE__*/React.createElement(Select, {
+      className: "select",
+      value: String(dh.e),
+      onChange: e => setDH({
+        e: parseInt(e.target.value, 10)
+      })
+    }, Array.from({
+      length: 24
+    }).map((_, k) => {
+      const h = k + 1;
+      return /*#__PURE__*/React.createElement("option", {
+        key: h,
+        value: h
+      }, hourLabel(h));
+    })));
+  })) : /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 10,
@@ -4100,7 +4241,7 @@ function DocumentControls({
     style: {
       marginBottom: 10
     }
-  }, "Drag a field type onto the document, or click a type then click where it goes. Drag a placed field to move it, drag its corner dot to resize, or use the red dot to remove it."), /*#__PURE__*/React.createElement("div", {
+  }, "Drag a field type onto the document, or click a type then click where it goes. Drag a placed field to move it, drag its corner dot to resize, or use the red dot to remove it. On a touch screen, tap a type then tap the document to place it."), /*#__PURE__*/React.createElement("div", {
     className: "esign-palette"
   }, ESIGN_TYPES.map(t => /*#__PURE__*/React.createElement("button", {
     key: t.kind,
@@ -5956,6 +6097,8 @@ const QTYPES = {
       availMode: "slots",
       windowStart: "",
       windowEnd: "",
+      perDayHours: false,
+      dayHours: {},
       freePick: false,
       ifNeeded: false,
       hideResponses: false
@@ -8097,6 +8240,11 @@ function PublicForm({
         try {
           loadGoogleFont(data.form.theme && data.form.theme.customFont);
         } catch (e) {}
+        if (data.form.slug && data.form.slug !== slug) {
+          try {
+            window.history.replaceState({}, "", "/" + (username === "admin" ? "" : username + "/") + data.form.slug);
+          } catch (e) {}
+        }
       }
     });
     return () => {
@@ -8333,7 +8481,7 @@ function PublicForm({
         setDone(true);
       } else {
         const code = data && data.error;
-        const msg = code === "form_closed" ? "This form just closed." : code === "response_limit" ? "This form is no longer accepting responses." : code === "slot_full" ? "That time was just booked. Please choose another." : code === "slot_too_soon" || code === "slot_past" ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : code === "name_locked" ? "That name is protected. Enter the matching password to update your response." : "Something went wrong. Please try again.";
+        const msg = code === "form_closed" ? "This form just closed." : code === "response_limit" ? "This form is no longer accepting responses." : code === "slot_full" ? "That time was just booked. Please choose another." : code === "slot_too_soon" || code === "slot_past" ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : code === "slot_busy" ? "That time was just blocked on the host calendar. Please choose another." : code === "name_locked" ? "That name is protected. Enter the matching password to update your response." : "Something went wrong. Please try again.";
         window.alert(msg);
       }
     });
@@ -9777,7 +9925,8 @@ function AccountMenu({
   const {
     user,
     setUser,
-    toast
+    toast,
+    navigate
   } = useApp();
   const [val, setVal] = useState(user.username || "");
   const [saving, setSaving] = useState(false);
@@ -9883,7 +10032,19 @@ function AccountMenu({
     className: "acct-lbl"
   }, "Calendar"), /*#__PURE__*/React.createElement(CalendarConnect, null), /*#__PURE__*/React.createElement("div", {
     className: "acct-hint"
-  }, "Busy times from a connected calendar are blocked automatically on time window scheduling.")), /*#__PURE__*/React.createElement("div", {
+  }, "Busy times from a connected calendar are blocked automatically on time window scheduling.")), user.limits && user.limits.team && /*#__PURE__*/React.createElement("div", {
+    className: "acct-sec"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "acct-lbl"
+  }, "Team"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => {
+      onClose();
+      navigate("/team");
+    }
+  }, "Manage team"), /*#__PURE__*/React.createElement("div", {
+    className: "acct-hint"
+  }, "Invite teammates and manage shared forms.")), /*#__PURE__*/React.createElement("div", {
     className: "acct-sec"
   }, /*#__PURE__*/React.createElement("label", {
     className: "acct-lbl"
@@ -10035,10 +10196,15 @@ function Dashboard() {
   const [forms, setForms] = useState(null);
   const [creating, setCreating] = useState(false);
   const [apply, setApply] = useState(false);
+  const hasTeam = !!(user && user.org);
+  const [ws, setWs] = useState("personal");
   const createFromTemplate = t => {
     if (creating) return;
     setCreating(true);
-    api.createForm(t.build()).then(({
+    const extra = ws === "team" && user && user.org ? {
+      org_id: user.org.id
+    } : {};
+    api.createForm(Object.assign(t.build(), extra)).then(({
       ok,
       data
     }) => {
@@ -10071,41 +10237,292 @@ function Dashboard() {
     onClose: () => setApply(false)
   }), /*#__PURE__*/React.createElement(AiSummary, {
     fetcher: fetcher
-  }), forms === null ? /*#__PURE__*/React.createElement("div", {
+  }), hasTeam && /*#__PURE__*/React.createElement("div", {
+    className: "ws-switch"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "ws-tab" + (ws === "personal" ? " on" : ""),
+    onClick: () => setWs("personal")
+  }, "Your forms"), /*#__PURE__*/React.createElement("button", {
+    className: "ws-tab" + (ws === "team" ? " on" : ""),
+    onClick: () => setWs("team")
+  }, user.org.name), ws === "team" && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm primary",
+    style: {
+      marginLeft: "auto"
+    },
+    onClick: () => navigate("/builder/new?org=" + encodeURIComponent(user.org.id))
+  }, "+ New team form")), forms === null ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "center",
       padding: "56px 0"
     }
-  }, /*#__PURE__*/React.createElement(LoadingLogo, null)) : forms.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "muted",
-    style: {
-      marginBottom: 6
-    }
-  }, "You have no forms yet. Start from a template below, or use New form in the top bar to build one from scratch.") : /*#__PURE__*/React.createElement("div", {
-    className: "form-grid"
-  }, forms.map(f => /*#__PURE__*/React.createElement("button", {
-    key: f.id,
-    className: "form-card",
-    onClick: () => navigate("/dashboard/" + f.id)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "fc-top"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "badge " + (f.is_open ? "open" : "closed")
-  }, f.is_open ? "Open" : "Closed"), f.kind && /*#__PURE__*/React.createElement("span", {
-    className: "kind-badge"
-  }, f.kind === "schedule" ? "Scheduler" : f.kind === "esign" ? "E-sign" : ""), /*#__PURE__*/React.createElement("span", {
-    className: "fc-count"
-  }, f.responses, " ", f.responses === 1 ? "response" : "responses")), /*#__PURE__*/React.createElement("div", {
-    className: "fc-title"
-  }, f.title || "Untitled form"), /*#__PURE__*/React.createElement("div", {
-    className: "fc-meta"
-  }, f.username === "admin" ? "/" + f.slug : "/" + f.username + "/" + f.slug), /*#__PURE__*/React.createElement("div", {
-    className: "fc-foot"
-  }, f.last_response ? "Last response " + fmtAgo(f.last_response) : "No responses yet")))), forms !== null && forms.length < 10 && /*#__PURE__*/React.createElement(TemplateGrid, {
+  }, /*#__PURE__*/React.createElement(LoadingLogo, null)) : (() => {
+    const shown = hasTeam ? forms.filter(f => ws === "team" ? !!f.org_id : !f.org_id) : forms;
+    return shown.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      className: "muted",
+      style: {
+        marginBottom: 6
+      }
+    }, ws === "team" ? "No team forms yet. Use New team form to create one, or open a form and turn on Share with your team in its settings." : "You have no forms yet. Start from a template below, or use New form in the top bar to build one from scratch.") : /*#__PURE__*/React.createElement("div", {
+      className: "form-grid"
+    }, shown.map(f => /*#__PURE__*/React.createElement("button", {
+      key: f.id,
+      className: "form-card",
+      onClick: () => navigate("/dashboard/" + f.id)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "fc-top"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "badge " + (f.is_open ? "open" : "closed")
+    }, f.is_open ? "Open" : "Closed"), f.shared && /*#__PURE__*/React.createElement("span", {
+      className: "kind-badge"
+    }, "Team"), f.kind && /*#__PURE__*/React.createElement("span", {
+      className: "kind-badge"
+    }, f.kind === "schedule" ? "Scheduler" : f.kind === "esign" ? "E-sign" : ""), /*#__PURE__*/React.createElement("span", {
+      className: "fc-count"
+    }, f.responses, " ", f.responses === 1 ? "response" : "responses")), /*#__PURE__*/React.createElement("div", {
+      className: "fc-title"
+    }, f.title || "Untitled form"), /*#__PURE__*/React.createElement("div", {
+      className: "fc-meta"
+    }, f.username === "admin" ? "/" + f.slug : "/" + f.username + "/" + f.slug), /*#__PURE__*/React.createElement("div", {
+      className: "fc-foot"
+    }, f.shared && !f.mine ? "Shared by @" + f.username : f.last_response ? "Last response " + fmtAgo(f.last_response) : "No responses yet"))));
+  })(), forms !== null && forms.length < 10 && /*#__PURE__*/React.createElement(TemplateGrid, {
     onPick: createFromTemplate,
     creating: creating
   })));
+}
+function TeamPanel() {
+  const {
+    user,
+    navigate,
+    toast
+  } = useApp();
+  const [data, setData] = useState(null);
+  const [name, setName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("member");
+  const [busy, setBusy] = useState(false);
+  const load = () => api.org().then(({
+    data
+  }) => setData(data || {
+    org: null
+  }));
+  useEffect(() => {
+    load();
+  }, []);
+  const canTeam = !!(user && user.limits && user.limits.team);
+  const create = () => {
+    if (busy) return;
+    setBusy(true);
+    api.orgCreate(name || "My team").then(({
+      ok,
+      data
+    }) => {
+      setBusy(false);
+      if (ok) {
+        toast("Team created");
+        load();
+      } else toast(data && data.error === "plan_required" ? "Teams are part of the Enterprise plan." : "Could not create the team");
+    });
+  };
+  const invite = () => {
+    const e = inviteEmail.trim();
+    if (!e) return;
+    setBusy(true);
+    api.orgInvite(e, inviteRole).then(({
+      ok,
+      data
+    }) => {
+      setBusy(false);
+      if (ok) {
+        toast(data && data.joined ? "Added to the team" : "Invite sent");
+        setInviteEmail("");
+        load();
+      } else toast({
+        bad_email: "Enter a valid email address.",
+        already_member: "That person is already on the team."
+      }[data && data.error] || "Could not invite");
+    });
+  };
+  const cancelInvite = em => api.orgInviteCancel(em).then(() => load());
+  const removeMember = (uid, self) => {
+    if (!window.confirm(self ? "Leave this team?" : "Remove this member from the team?")) return;
+    api.orgMemberRemove(uid).then(() => {
+      if (self) {
+        navigate("/dashboard");
+      } else load();
+    });
+  };
+  const setRole = (uid, role) => api.orgMemberRole(uid, role).then(() => load());
+  const isAdmin = !!(data && data.org && (data.org.role === "owner" || data.org.role === "admin"));
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TopNav, null), /*#__PURE__*/React.createElement("div", {
+    className: "wrap page"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dash-head"
+  }, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontSize: 26
+    }
+  }, "Team")), !canTeam ? /*#__PURE__*/React.createElement("div", {
+    className: "plan-lock-block"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Teams ", /*#__PURE__*/React.createElement("span", {
+    className: "plan-pill plan-premium"
+  }, "Enterprise")), /*#__PURE__*/React.createElement("div", {
+    className: "hint"
+  }, "Shared team workspaces are part of the Enterprise plan. Members share access to the team forms and their responses. Contact us to enable it for your account."), /*#__PURE__*/React.createElement("a", {
+    className: "btn sm",
+    style: {
+      marginTop: 10,
+      display: "inline-block"
+    },
+    href: "mailto:support@zetetiq.com?subject=Enterprise%20plan%20enquiry"
+  }, "Contact us")) : data === null ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center",
+      padding: "56px 0"
+    }
+  }, /*#__PURE__*/React.createElement(LoadingLogo, null)) : !data.org ? /*#__PURE__*/React.createElement("div", {
+    className: "tcard",
+    style: {
+      maxWidth: 560
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title"
+  }, "Create your team"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 12
+    }
+  }, "Give your team a name. You can invite people by email afterward, and any form you share will be visible to everyone on the team."), /*#__PURE__*/React.createElement(Field, {
+    label: "Team name"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: name,
+    onChange: e => setName(e.target.value),
+    placeholder: "Acme Inc"
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: busy,
+    onClick: create
+  }, "Create team")) : /*#__PURE__*/React.createElement("div", {
+    className: "team-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tcard"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "between",
+    style: {
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title",
+    style: {
+      margin: 0
+    }
+  }, data.org.name), /*#__PURE__*/React.createElement("span", {
+    className: "plan-pill plan-premium"
+  }, data.org.role)), /*#__PURE__*/React.createElement("div", {
+    className: "troster"
+  }, (data.members || []).map(m => /*#__PURE__*/React.createElement("div", {
+    key: m.id,
+    className: "trow"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trow-main"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trow-name"
+  }, m.name || m.username || m.email, m.id === user.uid ? " (you)" : ""), /*#__PURE__*/React.createElement("div", {
+    className: "trow-sub"
+  }, m.email || "@" + m.username)), /*#__PURE__*/React.createElement("div", {
+    className: "trow-act"
+  }, m.role === "owner" ? /*#__PURE__*/React.createElement("span", {
+    className: "trole"
+  }, "Owner") : isAdmin ? /*#__PURE__*/React.createElement(Select, {
+    className: "select sm",
+    value: m.role,
+    onChange: e => setRole(m.id, e.target.value),
+    style: {
+      width: 118
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "member"
+  }, "Member"), /*#__PURE__*/React.createElement("option", {
+    value: "admin"
+  }, "Admin")) : /*#__PURE__*/React.createElement("span", {
+    className: "trole"
+  }, m.role), isAdmin && m.role !== "owner" ? /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => removeMember(m.id, false)
+  }, "Remove") : m.id === user.uid && m.role !== "owner" ? /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => removeMember(m.id, true)
+  }, "Leave") : null))))), isAdmin && /*#__PURE__*/React.createElement("div", {
+    className: "tcard"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-title"
+  }, "Invite people"), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 12
+    }
+  }, "They join when they sign in with this email address. If they already have an account, they are added right away."), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      alignItems: "flex-end"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Email"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "email",
+    value: inviteEmail,
+    onChange: e => setInviteEmail(e.target.value),
+    placeholder: "name@company.com"
+  }))), /*#__PURE__*/React.createElement(Select, {
+    className: "select",
+    value: inviteRole,
+    onChange: e => setInviteRole(e.target.value),
+    style: {
+      width: 130
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "member"
+  }, "Member"), /*#__PURE__*/React.createElement("option", {
+    value: "admin"
+  }, "Admin")), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: busy || !inviteEmail.trim(),
+    onClick: invite
+  }, "Invite")), (data.invites || []).length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "acct-lbl",
+    style: {
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Pending invites"), data.invites.map(iv => /*#__PURE__*/React.createElement("div", {
+    key: iv.email,
+    className: "trow"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trow-main"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trow-name"
+  }, iv.email), /*#__PURE__*/React.createElement("div", {
+    className: "trow-sub"
+  }, iv.role)), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => cancelInvite(iv.email)
+  }, "Cancel"))))))));
 }
 
 /* ----------------------------- builder ----------------------------- */
@@ -12777,7 +13194,53 @@ function SettingsPanel({
       ...f,
       description: e.target.value
     }))
-  })), /*#__PURE__*/React.createElement("div", {
+  })), user && user.org && user.limits && user.limits.team && form.mine !== false && /*#__PURE__*/React.createElement(Field, {
+    label: "Team"
+  }, /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!form.org_id,
+    onChange: c => setForm(f => ({
+      ...f,
+      org_id: c ? user.org.id : null
+    })),
+    label: "Share with " + user.org.name
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 4
+    }
+  }, "Shared forms appear in the team workspace and any teammate can open and edit them. Save to apply.")), /*#__PURE__*/React.createElement(Field, {
+    label: "Link"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mono",
+    style: {
+      fontSize: 13,
+      color: "var(--ink-soft)",
+      whiteSpace: "nowrap"
+    }
+  }, user && user.username && user.username !== "admin" ? user.username + "/" : "/"), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    style: {
+      flex: 1
+    },
+    value: form.slug || "",
+    placeholder: "my-form",
+    onChange: e => setForm(f => ({
+      ...f,
+      slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+/, "")
+    }))
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: -2,
+      marginBottom: 6
+    }
+  }, "The end of your form's web address. Letters, numbers, and hyphens. Saving updates the link, and the previous link stops working."), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Behavior"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!form.schema.settings.randomizeQuestions,
@@ -13841,7 +14304,16 @@ function Builder({
       return null;
     }
   })();
-  const [form, setForm] = useState(isNew ? blankForm(newKind) : null);
+  const newOrg = isNew ? (() => {
+    try {
+      return new URLSearchParams(window.location.search).get("org") || null;
+    } catch (e) {
+      return null;
+    }
+  })() : null;
+  const [form, setForm] = useState(isNew ? Object.assign(blankForm(newKind), newOrg ? {
+    org_id: newOrg
+  } : {}) : null);
   const [id, setId] = useState(isNew ? null : formId);
   const [sel, setSel] = useState(null);
   const [mode, setMode] = useState("edit");
@@ -14025,7 +14497,7 @@ function Builder({
     if (!D) return;
     const py = e.touches ? e.touches[0].clientY : e.clientY;
     const el = cardRefs.current[D.id];
-    if (el) el.style.transform = "translateY(" + (py - D.grabDy - D.fromTop) + "px)";
+    if (el) el.style.transform = "translateY(" + (py - D.grabDy - D.fromTop) + "px) scale(1.02)";
     const dc = py - D.grabDy + D.height / 2;
     let above = 0;
     for (let i = 0; i < D.centers.length; i++) {
@@ -14042,22 +14514,42 @@ function Builder({
     window.removeEventListener("pointermove", onDragMove);
     window.removeEventListener("pointerup", onDragUp);
     if (!D) return;
+    const dragEl = cardRefs.current[D.id];
+    const firstTop = dragEl ? dragEl.getBoundingClientRect().top : 0;
     D.list.forEach(q => {
+      if (q.id === D.id) return;
       const el = cardRefs.current[q.id];
       if (el) {
         el.style.transition = "none";
         el.style.transform = "";
       }
     });
+    if (dragEl) {
+      dragEl.style.transition = "none";
+      dragEl.style.transform = "";
+    }
     suppressFlip.current = true;
     dragSess.current = null;
     setDragId(null);
     reorder(D.fromIdx, D.dropTo);
     requestAnimationFrame(() => {
       D.list.forEach(q => {
+        if (q.id === D.id) return;
         const el = cardRefs.current[q.id];
         if (el) el.style.transition = "";
       });
+      if (dragEl) {
+        const dy = firstTop - dragEl.getBoundingClientRect().top;
+        dragEl.style.transition = "none";
+        dragEl.style.transform = "translateY(" + dy + "px) scale(1.02)";
+        requestAnimationFrame(() => {
+          dragEl.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms ease";
+          dragEl.style.transform = "";
+        });
+        setTimeout(() => {
+          if (dragEl) dragEl.style.transition = "";
+        }, 260);
+      }
     });
   };
   const beginDrag = (e, index) => {
@@ -14109,7 +14601,13 @@ function Builder({
       title: form.title,
       description: form.description,
       theme: form.theme,
-      schema: form.schema
+      schema: form.schema,
+      ...(form.slug ? {
+        slug: form.slug
+      } : {}),
+      ...(typeof form.org_id !== "undefined" ? {
+        org_id: form.org_id
+      } : {})
     };
     const stamp = () => setSavedAt(new Date().toLocaleTimeString(undefined, {
       hour: "numeric",
@@ -14134,10 +14632,15 @@ function Builder({
       });
     } else {
       api.updateForm(id, payload).then(({
-        ok
+        ok,
+        data
       }) => {
         setSaving(false);
         if (ok) {
+          if (data && data.slug && data.slug !== form.slug) setForm(f => ({
+            ...f,
+            slug: data.slug
+          }));
           stamp();
           toast("Saved");
         } else toast("Save failed");
@@ -17117,7 +17620,7 @@ function App() {
     })));
   } else {
     const seg = path.split("/").filter(Boolean);
-    const reserved = new Set(["dashboard", "builder", "login", "admin", "api", "assets", "favicon.ico", "robots.txt"]);
+    const reserved = new Set(["dashboard", "builder", "login", "admin", "team", "api", "assets", "favicon.ico", "robots.txt"]);
     if (seg.length === 1 && !reserved.has(seg[0])) view = /*#__PURE__*/React.createElement(PublicForm, {
       username: "admin",
       slug: seg[0]
@@ -17128,7 +17631,7 @@ function App() {
       showLogin: true
     });else if (!user) view = /*#__PURE__*/React.createElement(Landing, {
       showLogin: true
-    });else if (seg[0] === "dashboard" && seg.length === 1) view = /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "admin" && seg.length === 1) view = user.role === "admin" ? /*#__PURE__*/React.createElement(AdminConsole, null) : /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "dashboard" && seg.length === 2) view = /*#__PURE__*/React.createElement(FormDashboard, {
+    });else if (seg[0] === "dashboard" && seg.length === 1) view = /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "team" && seg.length === 1) view = /*#__PURE__*/React.createElement(TeamPanel, null);else if (seg[0] === "admin" && seg.length === 1) view = user.role === "admin" ? /*#__PURE__*/React.createElement(AdminConsole, null) : /*#__PURE__*/React.createElement(Dashboard, null);else if (seg[0] === "dashboard" && seg.length === 2) view = /*#__PURE__*/React.createElement(FormDashboard, {
       id: seg[1]
     });else if (seg[0] === "builder" && seg.length === 2) view = /*#__PURE__*/React.createElement(Builder, {
       formId: seg[1]

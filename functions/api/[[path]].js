@@ -36,6 +36,12 @@ async function route(seg, method, request, env, context) {
   if (p === "me/username" && method === "POST") return updateUsername(request, env);
   if (p === "plan/apply" && method === "POST") return applyPlan(request, env);
   if (p === "summary" && method === "GET") return dashSummary(request, env);
+  if (p === "org" && method === "GET") return orgGet(request, env);
+  if (p === "org" && method === "POST") return orgCreate(request, env);
+  if (p === "org/invite" && method === "POST") return orgInvite(request, env);
+  if (p === "org/invite/cancel" && method === "POST") return orgInviteCancel(request, env);
+  if (p === "org/member/remove" && method === "POST") return orgMemberRemove(request, env);
+  if (p === "org/member/role" && method === "POST") return orgMemberRole(request, env);
 
   // ---- public (no auth) ----
   // GET /api/public/:username/:slug
@@ -164,13 +170,17 @@ async function me(request, env) {
   try { const cr = await env.DB.prepare("SELECT calendar FROM users WHERE id = ?").bind(user.uid).first(); const conn = (cr && cr.calendar) ? safeParse(cr.calendar, null) : null; if (conn){ if (conn.google && conn.google.refresh_token) calendars.google = { connected: true, email: conn.google.email || null }; if (conn.outlook && conn.outlook.refresh_token) calendars.outlook = { connected: true, email: conn.outlook.email || null }; } } catch (e) {}
     let billing = { active: false, portal: false, plan: null, status: null };
   try { const br = await env.DB.prepare("SELECT billing FROM users WHERE id = ?").bind(user.uid).first(); const b = (br && br.billing) ? safeParse(br.billing, null) : null; if (b){ billing = { active: (b.status === "active" || b.status === "trialing"), portal: !!b.customer, plan: b.plan || null, status: b.status || null }; } } catch (e) {}
-  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendars, billing }) });
+  try { await processInvites(env, { uid: user.uid, email: row && row.email }); } catch (e) {}
+  let org = null; try { org = await getUserOrg(env, user.uid); } catch (e) {}
+  return json({ user: Object.assign({}, publicUser(user), { plan, limits: planLimits(plan), planRequest: (pr && pr.status === "pending") ? pr : null, calendars, billing, org }) });
 }
 
 async function currentUser(request, env) {
   const token = readCookie(request, "session");
   if (!token) return null;
-  return verifyToken(secret(env), token);
+  const u = await verifyToken(secret(env), token);
+  if (u && u.uid && u.uid !== "admin") { try { u.orgIds = await getUserOrgIds(env, u.uid); } catch (e) { u.orgIds = []; } }
+  return u;
 }
 
 function publicUser(p) {
@@ -564,16 +574,122 @@ async function billingWebhook(request, env){
 /* forms CRUD                                                          */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* Teams / organizations (enterprise shared workspaces)                */
+/* ------------------------------------------------------------------ */
+async function getUserOrgIds(env, uid){
+  try { const r = await env.DB.prepare("SELECT org_id FROM org_members WHERE user_id = ?").bind(uid).all(); return (r.results || []).map((x)=> x.org_id); } catch (e) { return []; }
+}
+async function getUserOrg(env, uid){
+  try {
+    const m = await env.DB.prepare("SELECT m.org_id AS id, m.role AS role, o.name AS name, o.owner_id AS ownerId FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? ORDER BY (m.role = 'owner') DESC, m.added_at ASC LIMIT 1").bind(uid).first();
+    return m ? { id: m.id, name: m.name, role: m.role, isOwner: m.ownerId === uid } : null;
+  } catch (e) { return null; }
+}
+async function processInvites(env, user){
+  if (!user || !user.email) return;
+  try {
+    const inv = await env.DB.prepare("SELECT id, org_id, role FROM org_invites WHERE lower(email) = lower(?)").bind(user.email).all();
+    for (const i of (inv.results || [])){
+      await env.DB.prepare("INSERT OR IGNORE INTO org_members (org_id, user_id, role) VALUES (?, ?, ?)").bind(i.org_id, user.uid, i.role || "member").run();
+      await env.DB.prepare("DELETE FROM org_invites WHERE id = ?").bind(i.id).run();
+    }
+  } catch (e) {}
+}
+function canForm(own, user){
+  if (!own) return false;
+  if (own.owner_id === user.uid) return true;
+  if (own.org_id && user && Array.isArray(user.orgIds) && user.orgIds.indexOf(own.org_id) >= 0) return true;
+  return false;
+}
+function orgAdminGuard(org){ return !!(org && (org.role === "owner" || org.role === "admin")); }
+
+async function orgGet(request, env){
+  const user = await currentUser(request, env); if (!user) return json({ error: "unauthorized" }, 401);
+  const org = await getUserOrg(env, user.uid);
+  if (!org) return json({ org: null });
+  let members = [], invites = [];
+  try { const mr = await env.DB.prepare("SELECT m.user_id AS id, m.role AS role, u.name AS name, u.username AS username, u.email AS email FROM org_members m JOIN users u ON u.id = m.user_id WHERE m.org_id = ? ORDER BY (m.role='owner') DESC, m.added_at ASC").bind(org.id).all(); members = mr.results || []; } catch (e) {}
+  if (orgAdminGuard(org)){ try { const ir = await env.DB.prepare("SELECT email, role FROM org_invites WHERE org_id = ? ORDER BY created_at ASC").bind(org.id).all(); invites = ir.results || []; } catch (e) {} }
+  return json({ org: { id: org.id, name: org.name, role: org.role, isOwner: org.isOwner }, members, invites });
+}
+async function orgCreate(request, env){
+  const user = await currentUser(request, env); if (!user) return json({ error: "unauthorized" }, 401);
+  const plan = await getUserPlan(env, user.uid); if (!planLimits(plan).team && user.uid !== "admin") return json({ error: "plan_required" }, 403);
+  const existing = await getUserOrg(env, user.uid); if (existing) return json({ error: "exists", org: existing }, 409);
+  const body = await readJson(request) || {};
+  const name = ((body.name || "My team").toString().slice(0, 120).trim()) || "My team";
+  const id = crypto.randomUUID();
+  try {
+    await env.DB.prepare("INSERT INTO orgs (id, name, owner_id) VALUES (?, ?, ?)").bind(id, name, user.uid).run();
+    await env.DB.prepare("INSERT OR IGNORE INTO org_members (org_id, user_id, role) VALUES (?, ?, 'owner')").bind(id, user.uid).run();
+  } catch (e) { return json({ error: "create_failed" }, 500); }
+  return json({ ok: true, org: { id, name, role: "owner", isOwner: true } });
+}
+async function orgInvite(request, env){
+  const user = await currentUser(request, env); if (!user) return json({ error: "unauthorized" }, 401);
+  const org = await getUserOrg(env, user.uid); if (!orgAdminGuard(org)) return json({ error: "forbidden" }, 403);
+  const body = await readJson(request) || {};
+  const email = (body.email || "").toString().trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "bad_email" }, 400);
+  const role = (body.role === "admin") ? "admin" : "member";
+  try { const ex = await env.DB.prepare("SELECT 1 FROM org_members m JOIN users u ON u.id = m.user_id WHERE m.org_id = ? AND lower(u.email) = ?").bind(org.id, email).first(); if (ex) return json({ error: "already_member" }, 409); } catch (e) {}
+  try {
+    const u = await env.DB.prepare("SELECT id FROM users WHERE lower(email) = ?").bind(email).first();
+    if (u){ await env.DB.prepare("INSERT OR IGNORE INTO org_members (org_id, user_id, role) VALUES (?, ?, ?)").bind(org.id, u.id, role).run(); return json({ ok: true, joined: true }); }
+    await env.DB.prepare("DELETE FROM org_invites WHERE org_id = ? AND lower(email) = ?").bind(org.id, email).run();
+    await env.DB.prepare("INSERT INTO org_invites (id, org_id, email, role) VALUES (?, ?, ?, ?)").bind(crypto.randomUUID(), org.id, email, role).run();
+  } catch (e) { return json({ error: "invite_failed" }, 500); }
+  try { if (env.RESEND_API_KEY) await mailSend(env, { to: email, subject: "You have been added to a team on zetetiq", html: "<p>" + htmlEscape(user.name || "A teammate") + " added you to their team on zetetiq. Sign in with this email address to see the shared forms.</p>" }); } catch (e) {}
+  return json({ ok: true, invited: true });
+}
+async function orgInviteCancel(request, env){
+  const user = await currentUser(request, env); if (!user) return json({ error: "unauthorized" }, 401);
+  const org = await getUserOrg(env, user.uid); if (!orgAdminGuard(org)) return json({ error: "forbidden" }, 403);
+  const body = await readJson(request) || {};
+  const email = (body.email || "").toString().trim().toLowerCase();
+  try { await env.DB.prepare("DELETE FROM org_invites WHERE org_id = ? AND lower(email) = ?").bind(org.id, email).run(); } catch (e) {}
+  return json({ ok: true });
+}
+async function orgMemberRemove(request, env){
+  const user = await currentUser(request, env); if (!user) return json({ error: "unauthorized" }, 401);
+  const org = await getUserOrg(env, user.uid); if (!org) return json({ error: "forbidden" }, 403);
+  const body = await readJson(request) || {};
+  const target = (body.userId || "").toString();
+  const isSelf = target === user.uid;
+  if (!isSelf && !orgAdminGuard(org)) return json({ error: "forbidden" }, 403);
+  try {
+    const tm = await env.DB.prepare("SELECT role FROM org_members WHERE org_id = ? AND user_id = ?").bind(org.id, target).first();
+    if (tm && tm.role === "owner") return json({ error: "cannot_remove_owner" }, 400);
+    await env.DB.prepare("DELETE FROM org_members WHERE org_id = ? AND user_id = ?").bind(org.id, target).run();
+  } catch (e) {}
+  return json({ ok: true });
+}
+async function orgMemberRole(request, env){
+  const user = await currentUser(request, env); if (!user) return json({ error: "unauthorized" }, 401);
+  const org = await getUserOrg(env, user.uid); if (!orgAdminGuard(org)) return json({ error: "forbidden" }, 403);
+  const body = await readJson(request) || {};
+  const target = (body.userId || "").toString();
+  const role = (body.role === "admin") ? "admin" : "member";
+  try {
+    const tm = await env.DB.prepare("SELECT role FROM org_members WHERE org_id = ? AND user_id = ?").bind(org.id, target).first();
+    if (tm && tm.role === "owner") return json({ error: "cannot_change_owner" }, 400);
+    await env.DB.prepare("UPDATE org_members SET role = ? WHERE org_id = ? AND user_id = ?").bind(role, org.id, target).run();
+  } catch (e) {}
+  return json({ ok: true });
+}
+
 async function listForms(user, env) {
-  const { results } = await env.DB.prepare(
-    `SELECT f.id, f.slug, f.title, f.is_open, f.created_at, u.username,
+  const orgIds = Array.isArray(user.orgIds) ? user.orgIds : [];
+  const cols = `f.id, f.slug, f.title, f.is_open, f.created_at, f.org_id, f.owner_id, u.username,
             json_extract(f.theme,'$.font') AS font, json_extract(f.theme,'$.customFont') AS customFont, json_extract(f.schema,'$.settings.kind') AS kind,
             (SELECT COUNT(*) FROM responses r WHERE r.form_id = f.id) AS responses,
-            (SELECT MAX(r.created_at) FROM responses r WHERE r.form_id = f.id) AS last_response
-     FROM forms f JOIN users u ON u.id = f.owner_id
-     WHERE f.owner_id = ?
-     ORDER BY last_response DESC, f.created_at DESC`
-  ).bind(user.uid).all();
+            (SELECT MAX(r.created_at) FROM responses r WHERE r.form_id = f.id) AS last_response`;
+  let q, binds;
+  if (orgIds.length){ const ph = orgIds.map(()=> "?").join(","); q = `SELECT ${cols} FROM forms f JOIN users u ON u.id = f.owner_id WHERE f.owner_id = ? OR f.org_id IN (${ph}) ORDER BY last_response DESC, f.created_at DESC`; binds = [user.uid].concat(orgIds); }
+  else { q = `SELECT ${cols} FROM forms f JOIN users u ON u.id = f.owner_id WHERE f.owner_id = ? ORDER BY last_response DESC, f.created_at DESC`; binds = [user.uid]; }
+  const { results } = await env.DB.prepare(q).bind(...binds).all();
+  (results || []).forEach((row)=>{ row.shared = !!row.org_id; row.mine = row.owner_id === user.uid; });
   return json({ forms: results || [] });
 }
 
@@ -582,15 +698,19 @@ async function createForm(user, request, env) {
   if (_lim.maxForms !== Infinity) { const cnt = await env.DB.prepare("SELECT COUNT(*) AS c FROM forms WHERE owner_id = ?").bind(user.uid).first(); if (((cnt && cnt.c) || 0) >= _lim.maxForms) return json({ error: "plan_limit", limit: "forms", max: _lim.maxForms, plan: _plan }, 403); }
   const body = await readJson(request) || {};
   const title = (body.title || "Untitled form").toString().slice(0, 200);
-  const slug = await uniqueSlug(env, user.uid, title);
+  const slug = (typeof body.slug === "string" && body.slug.trim())
+    ? await uniqueSlugFrom(env, user.uid, slugify(body.slug), null)
+    : await uniqueSlug(env, user.uid, title);
   const id = crypto.randomUUID();
   const theme = JSON.stringify(body.theme || defaultTheme());
   const schema = JSON.stringify(body.schema || { questions: [], settings: { randomizeQuestions: false } });
 
+  let orgId = null;
+  if (typeof body.org_id === "string" && body.org_id){ const ids = Array.isArray(user.orgIds) ? user.orgIds : await getUserOrgIds(env, user.uid); if (ids.indexOf(body.org_id) >= 0) orgId = body.org_id; }
   await env.DB.prepare(
-    `INSERT INTO forms (id, owner_id, slug, title, description, theme, schema, is_open)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 1)`
-  ).bind(id, user.uid, slug, title, body.description || "", theme, schema).run();
+    `INSERT INTO forms (id, owner_id, slug, title, description, theme, schema, is_open, org_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`
+  ).bind(id, user.uid, slug, title, body.description || "", theme, schema, orgId).run();
 
   return json({ id, slug });
 }
@@ -599,13 +719,13 @@ async function getForm(user, id, env) {
   const row = await env.DB.prepare(
     `SELECT f.*, u.username FROM forms f JOIN users u ON u.id = f.owner_id WHERE f.id = ?`
   ).bind(id).first();
-  if (!row || row.owner_id !== user.uid) return json({ error: "not_found" }, 404);
-  return json({ form: hydrateForm(row) });
+  if (!canForm(row, user)) return json({ error: "not_found" }, 404);
+  return json({ form: Object.assign(hydrateForm(row), { org_id: row.org_id || null, mine: row.owner_id === user.uid }) });
 }
 
 async function updateForm(user, id, request, env) {
-  const own = await env.DB.prepare("SELECT owner_id FROM forms WHERE id = ?").bind(id).first();
-  if (!own || own.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  const own = await env.DB.prepare("SELECT owner_id, org_id FROM forms WHERE id = ?").bind(id).first();
+  if (!canForm(own, user)) return json({ error: "not_found" }, 404);
 
   const body = await readJson(request) || {};
   const sets = [];
@@ -615,12 +735,32 @@ async function updateForm(user, id, request, env) {
   if (body.theme) { sets.push("theme = ?"); vals.push(JSON.stringify(body.theme)); }
   if (body.schema) { sets.push("schema = ?"); vals.push(JSON.stringify(body.schema)); }
   if (typeof body.is_open === "boolean") { sets.push("is_open = ?"); vals.push(body.is_open ? 1 : 0); }
+  let newSlug = null;
+  if (typeof body.slug === "string" && body.slug.trim()) {
+    const cur = await env.DB.prepare("SELECT slug, schema FROM forms WHERE id = ?").bind(id).first();
+    newSlug = await uniqueSlugFrom(env, own.owner_id, slugify(body.slug), id);
+    sets.push("slug = ?"); vals.push(newSlug);
+    if (cur && cur.slug && cur.slug !== newSlug) {
+      let schemaObj = body.schema ? body.schema : safeParse(cur.schema, {});
+      schemaObj = schemaObj || {}; schemaObj.settings = schemaObj.settings || {};
+      const prev = Array.isArray(schemaObj.settings.prevSlugs) ? schemaObj.settings.prevSlugs.slice() : [];
+      if (prev.indexOf(cur.slug) < 0) prev.unshift(cur.slug);
+      schemaObj.settings.prevSlugs = prev.filter((x)=> x !== newSlug).slice(0, 10);
+      const si = sets.indexOf("schema = ?");
+      if (si >= 0) vals[si] = JSON.stringify(schemaObj);
+      else { sets.push("schema = ?"); vals.push(JSON.stringify(schemaObj)); }
+    }
+  }
+  if (typeof body.org_id !== "undefined" && own.owner_id === user.uid){
+    if (body.org_id === null || body.org_id === ""){ sets.push("org_id = ?"); vals.push(null); }
+    else if (typeof body.org_id === "string"){ const ids = Array.isArray(user.orgIds) ? user.orgIds : await getUserOrgIds(env, user.uid); if (ids.indexOf(body.org_id) >= 0){ sets.push("org_id = ?"); vals.push(body.org_id); } }
+  }
   sets.push("updated_at = datetime('now')");
 
   if (sets.length === 1) return json({ ok: true }); // nothing but timestamp
   vals.push(id);
   await env.DB.prepare(`UPDATE forms SET ${sets.join(", ")} WHERE id = ?`).bind(...vals).run();
-  return json({ ok: true });
+  return json({ ok: true, slug: newSlug });
 }
 
 async function deleteForm(user, id, env) {
@@ -706,11 +846,22 @@ async function deleteBrandKit(user, id, env) {
 }
 
 async function publicForm(username, slug, env) {
-  const row = await env.DB.prepare(
-    `SELECT f.id, f.owner_id, f.title, f.description, f.theme, f.schema, f.is_open, u.username, u.name
+  let row = await env.DB.prepare(
+    `SELECT f.id, f.owner_id, f.slug, f.title, f.description, f.theme, f.schema, f.is_open, u.username, u.name
      FROM forms f JOIN users u ON u.id = f.owner_id
      WHERE lower(u.username) = lower(?) AND f.slug = ?`
   ).bind(String(username||"").trim(), slug).first();
+  if (!row) {
+    const u = await env.DB.prepare("SELECT id, name, username FROM users WHERE lower(username) = lower(?)").bind(String(username||"").trim()).first();
+    if (u) {
+      const fr = await env.DB.prepare("SELECT id, owner_id, slug, title, description, theme, schema, is_open FROM forms WHERE owner_id = ?").bind(u.id).all();
+      for (const f of (fr.results || [])) {
+        const sc = safeParse(f.schema, null);
+        const prev = (sc && sc.settings && Array.isArray(sc.settings.prevSlugs)) ? sc.settings.prevSlugs : [];
+        if (prev.indexOf(slug) >= 0) { row = Object.assign({}, f, { username: u.username, name: u.name }); break; }
+      }
+    }
+  }
   if (!row) return json({ error: "not_found" }, 404);
 
   const schema = safeParse(row.schema, { questions: [], settings: {} });
@@ -749,6 +900,7 @@ async function publicForm(username, slug, env) {
   return json({
     form: {
       id: row.id,
+      slug: row.slug,
       title: row.title,
       description: row.description,
       theme: safeParse(row.theme, defaultTheme()),
@@ -842,6 +994,13 @@ async function submitResponse(formId, request, env, context) {
           }
           const used = bookedCounts[q.id + "\u0001" + chosen] || 0;
           if (used >= cap) return json({ error: "slot_full", question: q.id }, 409);
+        }
+        if (!isNaN(start) && q.calendars && (q.calendars.google || q.calendars.outlook || q.calendars.office365)) {
+          try {
+            const durMs = (q.duration || q.slotMinutes || 30) * 60000;
+            const ownerBusy = await getOwnerBusy(env, form.owner_id, new Date(start).toISOString(), new Date(start + durMs).toISOString());
+            if (Array.isArray(ownerBusy) && ownerBusy.some((b)=>{ const bs = new Date(b.start).getTime(), be = new Date(b.end).getTime(); return !isNaN(bs) && !isNaN(be) && start < be && (start + durMs) > bs; })) return json({ error: "slot_busy", question: q.id }, 409);
+          } catch (e) {}
         }
       }
     }
@@ -1013,8 +1172,8 @@ async function fireWebhook(url, formId, data, meta, questions){
 /* ------------------------------------------------------------------ */
 
 async function listResponses(user, id, env) {
-  const form = await env.DB.prepare("SELECT owner_id FROM forms WHERE id = ?").bind(id).first();
-  if (!form || form.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  const form = await env.DB.prepare("SELECT owner_id, org_id FROM forms WHERE id = ?").bind(id).first();
+  if (!canForm(form, user)) return json({ error: "not_found" }, 404);
 
   const { results } = await env.DB.prepare(
     "SELECT id, data, meta, created_at FROM responses WHERE form_id = ? ORDER BY created_at DESC LIMIT 1000"
@@ -1030,8 +1189,8 @@ async function listResponses(user, id, env) {
 }
 
 async function analytics(user, id, env) {
-  const form = await env.DB.prepare("SELECT owner_id FROM forms WHERE id = ?").bind(id).first();
-  if (!form || form.owner_id !== user.uid) return json({ error: "not_found" }, 404);
+  const form = await env.DB.prepare("SELECT owner_id, org_id FROM forms WHERE id = ?").bind(id).first();
+  if (!canForm(form, user)) return json({ error: "not_found" }, 404);
 
   const total = await env.DB.prepare("SELECT COUNT(*) AS c FROM responses WHERE form_id = ?").bind(id).first();
   const byDay = await env.DB.prepare(
@@ -1336,8 +1495,9 @@ function validWindowTime(q, chosen){
   const wds = (Array.isArray(q.weekdays) && q.weekdays.length) ? q.weekdays : [0,1,2,3,4,5,6];
   const wd = new Date(ymd + "T00:00:00Z").getUTCDay();
   if (wds.indexOf(wd) < 0) return false;
-  const sh = q.startHour == null ? 9 : q.startHour;
-  const eh = q.endHour == null ? 17 : q.endHour;
+  let sh = q.startHour == null ? 9 : q.startHour;
+  let eh = q.endHour == null ? 17 : q.endHour;
+  if (q.perDayHours && q.dayHours && q.dayHours[wd]){ const dh = q.dayHours[wd]; if (dh.s != null) sh = dh.s; if (dh.e != null) eh = dh.e; }
   const hh = parseInt(chosen.slice(11,13), 10), mm = parseInt(chosen.slice(14,16), 10);
   if (isNaN(hh) || isNaN(mm)) return false;
   const mins = hh*60 + mm;
@@ -1366,6 +1526,21 @@ async function uniqueSlug(env, ownerId, title) {
     if (!hit) return slug;
     n += 1;
     slug = `${base}-${n}`;
+  }
+}
+
+async function uniqueSlugFrom(env, ownerId, base, exceptId) {
+  base = slugify(base);
+  let slug = base;
+  let n = 1;
+  while (true) {
+    const hit = exceptId
+      ? await env.DB.prepare("SELECT 1 FROM forms WHERE owner_id = ? AND slug = ? AND id != ?").bind(ownerId, slug, exceptId).first()
+      : await env.DB.prepare("SELECT 1 FROM forms WHERE owner_id = ? AND slug = ?").bind(ownerId, slug).first();
+    if (!hit) return slug;
+    n += 1;
+    slug = `${base}-${n}`;
+    if (n > 300) return `${base}-${Date.now()}`;
   }
 }
 

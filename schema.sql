@@ -67,3 +67,31 @@ CREATE TABLE IF NOT EXISTS brand_kits (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_brand_owner ON brand_kits (owner_id);
+
+-- Teams / organizations (enterprise shared workspaces).
+CREATE TABLE IF NOT EXISTS orgs (
+  id          TEXT PRIMARY KEY,
+  name        TEXT,
+  owner_id    TEXT,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS org_members (
+  org_id      TEXT,
+  user_id     TEXT,
+  role        TEXT DEFAULT 'member',   -- owner | admin | member
+  added_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (org_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_org_members_user ON org_members (user_id);
+CREATE TABLE IF NOT EXISTS org_invites (
+  id          TEXT PRIMARY KEY,
+  org_id      TEXT,
+  email       TEXT,
+  role        TEXT DEFAULT 'member',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_org_invites_email ON org_invites (email);
+
+-- Forms can belong to a team (shared with all members). NULL = personal.
+-- Migration on existing databases:
+--   ALTER TABLE forms ADD COLUMN org_id TEXT;

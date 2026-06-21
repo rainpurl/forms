@@ -1182,6 +1182,32 @@ body{top:0!important}
 
 /* enterprise contact button on pricing card */
 .price-cta{display:inline-flex;width:100%;justify-content:center;margin-top:14px}
+
+/* scheduling: per-day availability hours */
+.dayhours{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.dayhours-row{display:flex;align-items:center;gap:8px}
+.dayhours-day{flex:0 0 40px;font-size:13px;color:var(--ink);font-weight:600}
+.dayhours-sep{color:var(--ink-soft);font-size:13px;flex:0 0 auto}
+.dayhours-row .select{flex:1;min-width:0}
+
+/* e-sign palette taps on touch */
+.esign-pal-btn{touch-action:manipulation}
+
+/* teams / workspace switcher */
+.ws-switch{display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ws-tab{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:7px 13px;border-radius:9px;border:1px solid transparent;background:var(--card);color:var(--ink-soft);box-shadow:var(--bevel-inset);cursor:pointer}
+.ws-tab.on{color:var(--ink);background:var(--hover)}
+.team-grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:680px}
+.tcard{border:1px solid transparent;background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--bevel-inset)}
+.troster{display:flex;flex-direction:column;gap:0;margin-top:8px}
+.trow{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:0}
+.trow-main{flex:1;min-width:0}
+.trow-name{font-weight:600;font-size:14px}
+.trow-sub{font-size:12px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.trole{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
+.zsel.sm{font-size:12px;padding:5px 9px}
 </style>
 </head>
 <body>
@@ -1206,6 +1232,12 @@ const api = {
   loginAdmin: (password) => req("/api/auth/admin", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ password }) }),
   logout: () => req("/api/auth/logout", { method:"POST" }),
   listForms: () => req("/api/forms"),
+  org: () => req("/api/org"),
+  orgCreate: (name) => req("/api/org", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ name }) }),
+  orgInvite: (email, role) => req("/api/org/invite", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ email, role }) }),
+  orgInviteCancel: (email) => req("/api/org/invite/cancel", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ email }) }),
+  orgMemberRemove: (userId) => req("/api/org/member/remove", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ userId }) }),
+  orgMemberRole: (userId, role) => req("/api/org/member/role", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ userId, role }) }),
   adminOverview: () => req("/api/admin/overview"),
   applyPlan: (payload) => req("/api/plan/apply", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) }),
   adminApplications: () => req("/api/admin/applications"),
@@ -1657,6 +1689,7 @@ function windowSlots(q, busy){
   const wds = (Array.isArray(q.weekdays) && q.weekdays.length) ? q.weekdays : [0,1,2,3,4,5,6];
   const sh = q.startHour == null ? 9 : q.startHour;
   const eh = q.endHour == null ? 17 : q.endHour;
+  const perDay = !!(q.perDayHours && q.dayHours);
   const step = Math.max(5, q.slotMinutes || 60);
   const dur = q.duration || step;
   const cap = q.meetingType === "group" ? (q.capacity || 1) : 1;
@@ -1664,7 +1697,9 @@ function windowSlots(q, busy){
   let guard = 0;
   for (let d = new Date(start); d <= end && guard < 4000; d.setDate(d.getDate()+1)){
     if (wds.indexOf(d.getDay()) < 0) continue;
-    for (let mins = sh*60; mins + step <= eh*60 + 0.5; mins += step){
+    let dsh = sh, deh = eh;
+    if (perDay && q.dayHours[d.getDay()]){ const dh = q.dayHours[d.getDay()]; if (dh.s != null) dsh = dh.s; if (dh.e != null) deh = dh.e; }
+    for (let mins = dsh*60; mins + step <= deh*60 + 0.5; mins += step){
       guard++;
       const slot = new Date(d); slot.setHours(0, mins, 0, 0);
       const ts = slot.getTime();
@@ -1939,10 +1974,12 @@ function SchedulingControls({ q, update }){
         </div>
         <div className="label" style={{marginTop:8,marginBottom:5}}>Days of the week</div>
         <div className="wd-row">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d,i)=>{ const cur = (q.weekdays && q.weekdays.length) ? q.weekdays : [1,2,3,4,5]; const on = cur.indexOf(i) >= 0; return (<button type="button" key={i} className={"wd-chip" + (on ? " on" : "")} onClick={()=>update({ weekdays: on ? cur.filter((x)=>x!==i) : cur.concat([i]).sort((a,b)=>a-b) })}>{d}</button>); })}</div>
-        <div className="row" style={{gap:10,marginTop:8}}>
+        <div style={{marginTop:8}}><Toggle checked={!!q.perDayHours} onChange={(c)=>update({ perDayHours:c })} label="Set different hours for each day" /></div>
+        {q.perDayHours ? (<div className="dayhours">{((q.weekdays && q.weekdays.length) ? q.weekdays : [1,2,3,4,5]).slice().sort((a,b)=>a-b).map((i)=>{ const dh = (q.dayHours && q.dayHours[i]) || { s:(q.startHour==null?9:q.startHour), e:(q.endHour==null?17:q.endHour) }; const setDH = (patch)=>update({ dayHours: { ...(q.dayHours||{}), [i]: { ...dh, ...patch } } }); return (<div key={i} className="dayhours-row"><span className="dayhours-day">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][i]}</span><Select className="select" value={String(dh.s)} onChange={(e)=>setDH({ s:parseInt(e.target.value,10) })}>{Array.from({length:24}).map((_,h)=>(<option key={h} value={h}>{hourLabel(h)}</option>))}</Select><span className="dayhours-sep">to</span><Select className="select" value={String(dh.e)} onChange={(e)=>setDH({ e:parseInt(e.target.value,10) })}>{Array.from({length:24}).map((_,k)=>{ const h = k + 1; return (<option key={h} value={h}>{hourLabel(h)}</option>); })}</Select></div>); })}</div>)
+        : (<div className="row" style={{gap:10,marginTop:8}}>
           <Field label="From" style={{flex:1}}><Select className="select" value={String(q.startHour==null?9:q.startHour)} onChange={(e)=>update({startHour:parseInt(e.target.value,10)})}>{Array.from({length:24}).map((_,h)=>(<option key={h} value={h}>{hourLabel(h)}</option>))}</Select></Field>
           <Field label="To" style={{flex:1}}><Select className="select" value={String(q.endHour==null?17:q.endHour)} onChange={(e)=>update({endHour:parseInt(e.target.value,10)})}>{Array.from({length:24}).map((_,i)=>{ const h = i + 1; return (<option key={h} value={h}>{hourLabel(h)}</option>); })}</Select></Field>
-        </div>
+        </div>)}
         <Field label="Slot length (minutes)" style={{marginTop:8}}><input className="input" type="number" min="5" step="5" value={q.slotMinutes||60} onChange={(e)=>update({slotMinutes:Math.max(5,parseInt(e.target.value||"60",10))})} /></Field>
       </div>) : (<>
       <div className="row" style={{gap:8,marginTop:10}}>
@@ -2039,7 +2076,7 @@ function DocumentControls({ q, update }){
       {placeOpen && q.document && (
         <Modal title="Place fields on the document" wide onClose={()=>{ setPlaceOpen(false); setArmed(null); }}>
           <div className="pad-lg esign-modal">
-            <div className="hint" style={{marginBottom:10}}>Drag a field type onto the document, or click a type then click where it goes. Drag a placed field to move it, drag its corner dot to resize, or use the red dot to remove it.</div>
+            <div className="hint" style={{marginBottom:10}}>Drag a field type onto the document, or click a type then click where it goes. Drag a placed field to move it, drag its corner dot to resize, or use the red dot to remove it. On a touch screen, tap a type then tap the document to place it.</div>
             <div className="esign-palette">{ESIGN_TYPES.map((t)=>(<button key={t.kind} type="button" className={"esign-pal-btn" + (armed === t.kind ? " armed" : "")} draggable onDragStart={(e)=>{ try { e.dataTransfer.setData("esign-kind", t.kind); e.dataTransfer.effectAllowed = "copy"; } catch (er) {} }} onClick={()=>setArmed(armed === t.kind ? null : t.kind)}><span className="esign-pal-ico">{t.ico}</span>{t.label}</button>))}</div>
             {q.documentKind === "image"
               ? <div className={"esign-doc esign-edit" + (armed ? " armed" : "")} onDragOver={(e)=>e.preventDefault()} onDrop={(e)=>handleDrop(e, e.currentTarget, 0)} onClick={(e)=>handleClick(e, e.currentTarget, 0)}><img src={q.document} alt="" />{fields.filter((f)=> typeof f.x === "number").map(marker)}</div>
@@ -2657,7 +2694,7 @@ const QTYPES = {
     label: "Meeting signup",
     hint: "Let people book one of your time slots",
     isInput: true,
-    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[], meetingType:"one_on_one", capacity:1, hosts:[], calendars:{ google:false, outlook:false, office365:false, icloud:false, exchange:false }, bufferBefore:0, bufferAfter:0, dailyCap:0, minNotice:0, timezoneAuto:true, reminders:[{ id: uid(), channel:"email", value:24, unit:"hours" }], followup:{ enabled:false, message:"", link:"" }, video:"none", mode:"booking", pollMode:"dates", dates:[], weekdays:[1,2,3,4,5], dateOnly:false, startHour:9, endHour:17, slotMinutes:60, availMode:"slots", windowStart:"", windowEnd:"", freePick:false, ifNeeded:false, hideResponses:false }),
+    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[], meetingType:"one_on_one", capacity:1, hosts:[], calendars:{ google:false, outlook:false, office365:false, icloud:false, exchange:false }, bufferBefore:0, bufferAfter:0, dailyCap:0, minNotice:0, timezoneAuto:true, reminders:[{ id: uid(), channel:"email", value:24, unit:"hours" }], followup:{ enabled:false, message:"", link:"" }, video:"none", mode:"booking", pollMode:"dates", dates:[], weekdays:[1,2,3,4,5], dateOnly:false, startHour:9, endHour:17, slotMinutes:60, availMode:"slots", windowStart:"", windowEnd:"", perDayHours:false, dayHours:{}, freePick:false, ifNeeded:false, hideResponses:false }),
     summary: (q) => ((q.mode || "booking") === "poll") ? ("Group poll \u00b7 " + (((q.pollMode||"dates")==="weekdays") ? (((q.weekdays||[]).length) + " weekdays") : (((q.dates||[]).length) + " dates"))) : (({ one_on_one:"One on one", group:"Group", collective:"Collective", round_robin:"Round robin" }[q.meetingType || "one_on_one"]) + " \u00b7 " + ((q.slots && q.slots.length) || 0) + " time slots"),
     validate: (q, v) => { if ((q.mode || "booking") === "poll"){ if (!q.required) return null; const av = (v && Array.isArray(v.available)) ? v.available : []; if (!((v && v.name) || "").trim()) return "Please enter your name."; if (!av.length) return "Please mark when you are available."; return null; } return (q.required && !v) ? "Please choose a time." : null; },
     Renderer: SchedulingRenderer,
@@ -3517,7 +3554,7 @@ function PublicForm({ username, slug }){
     api.publicForm(username, slug).then(({ok,data})=>{
       if (!m) return;
       if (!ok || !data || data.error || !data.form) setSt({ loading:false, notFound:true });
-      else { setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings, optionCounts:data.optionCounts, poll:data.poll, busy:data.busy }); try { loadGoogleFont(data.form.theme && data.form.theme.customFont); } catch (e) {} }
+      else { setSt({ loading:false, form:data.form, availability:data.availability, bookings:data.bookings, optionCounts:data.optionCounts, poll:data.poll, busy:data.busy }); try { loadGoogleFont(data.form.theme && data.form.theme.customFont); } catch (e) {} if (data.form.slug && data.form.slug !== slug){ try { window.history.replaceState({}, "", "/" + (username === "admin" ? "" : username + "/") + data.form.slug); } catch (e) {} } }
     });
     return ()=>{ m = false; };
   },[username, slug]);
@@ -3565,7 +3602,7 @@ function PublicForm({ username, slug }){
         try { if (window.localStorage && form.id) window.localStorage.removeItem("zq-draft-" + form.id); } catch (e) {}
         setDoneAnswers(answers); if (data.score != null) setDoneScore({ score: data.score, max: data.maxScore }); setDisq(!!extra.disqualified); setDone(true);
       }
-      else { const code = data && data.error; const msg = code === "form_closed" ? "This form just closed." : code === "response_limit" ? "This form is no longer accepting responses." : code === "slot_full" ? "That time was just booked. Please choose another." : (code === "slot_too_soon" || code === "slot_past") ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : code === "name_locked" ? "That name is protected. Enter the matching password to update your response." : "Something went wrong. Please try again."; window.alert(msg); }
+      else { const code = data && data.error; const msg = code === "form_closed" ? "This form just closed." : code === "response_limit" ? "This form is no longer accepting responses." : code === "slot_full" ? "That time was just booked. Please choose another." : (code === "slot_too_soon" || code === "slot_past") ? "That time is no longer available. Please choose another." : code === "slot_invalid" ? "Please choose a valid time." : code === "slot_busy" ? "That time was just blocked on the host calendar. Please choose another." : code === "name_locked" ? "That name is protected. Enter the matching password to update your response." : "Something went wrong. Please try again."; window.alert(msg); }
     });
   };
   return (
@@ -4070,7 +4107,7 @@ function CalendarConnect(){
 }
 
 function AccountMenu({ onClose }){
-  const { user, setUser, toast } = useApp();
+  const { user, setUser, toast, navigate } = useApp();
   const [val, setVal] = useState(user.username || "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
@@ -4099,6 +4136,11 @@ function AccountMenu({ onClose }){
       <CalendarConnect />
       <div className="acct-hint">Busy times from a connected calendar are blocked automatically on time window scheduling.</div>
     </div>
+    {user.limits && user.limits.team && (<div className="acct-sec">
+      <label className="acct-lbl">Team</label>
+      <button className="btn sm ghost" onClick={()=>{ onClose(); navigate("/team"); }}>Manage team</button>
+      <div className="acct-hint">Invite teammates and manage shared forms.</div>
+    </div>)}
     <div className="acct-sec">
       <label className="acct-lbl">Support</label>
       <a className="btn sm ghost" href="mailto:support@zetetiq.com">Contact support</a>
@@ -4141,7 +4183,9 @@ function Dashboard(){
   const [forms, setForms] = useState(null);
   const [creating, setCreating] = useState(false);
   const [apply, setApply] = useState(false);
-  const createFromTemplate = (t)=>{ if (creating) return; setCreating(true); api.createForm(t.build()).then(({ ok, data })=>{ setCreating(false); if (ok && data && data.id) navigate("/builder/" + data.id); else if (data && data.error === "plan_limit") toast("You have reached the free plan limit of " + (data.max||5) + " forms. Upgrade to create more."); else toast("Could not create from template"); }).catch(()=>{ setCreating(false); toast("Could not create from template"); }); };
+  const hasTeam = !!(user && user.org);
+  const [ws, setWs] = useState("personal");
+  const createFromTemplate = (t)=>{ if (creating) return; setCreating(true); const extra = (ws === "team" && user && user.org) ? { org_id: user.org.id } : {}; api.createForm(Object.assign(t.build(), extra)).then(({ ok, data })=>{ setCreating(false); if (ok && data && data.id) navigate("/builder/" + data.id); else if (data && data.error === "plan_limit") toast("You have reached the free plan limit of " + (data.max||5) + " forms. Upgrade to create more."); else toast("Could not create from template"); }).catch(()=>{ setCreating(false); toast("Could not create from template"); }); };
   const fetcher = useCallback((r)=>api.dashSummary(r),[]);
   useEffect(()=>{ api.listForms().then(({data})=> setForms((data && data.forms) || [])); },[]);
   return (
@@ -4154,25 +4198,88 @@ function Dashboard(){
         </div>
         {apply && <ApplyModal onClose={()=>setApply(false)} />}
         <AiSummary fetcher={fetcher} />
+        {hasTeam && (<div className="ws-switch">
+          <button className={"ws-tab" + (ws === "personal" ? " on" : "")} onClick={()=>setWs("personal")}>Your forms</button>
+          <button className={"ws-tab" + (ws === "team" ? " on" : "")} onClick={()=>setWs("team")}>{user.org.name}</button>
+          {ws === "team" && <button className="btn sm primary" style={{marginLeft:"auto"}} onClick={()=>navigate("/builder/new?org=" + encodeURIComponent(user.org.id))}>+ New team form</button>}
+        </div>)}
         {forms === null ? <div style={{display:"flex",justifyContent:"center",padding:"56px 0"}}><LoadingLogo /></div>
-          : forms.length === 0 ? (
-            <div className="muted" style={{marginBottom:6}}>You have no forms yet. Start from a template below, or use New form in the top bar to build one from scratch.</div>
+          : (()=>{ const shown = hasTeam ? forms.filter((f)=> ws === "team" ? !!f.org_id : !f.org_id) : forms; return shown.length === 0 ? (
+            <div className="muted" style={{marginBottom:6}}>{ws === "team" ? "No team forms yet. Use New team form to create one, or open a form and turn on Share with your team in its settings." : "You have no forms yet. Start from a template below, or use New form in the top bar to build one from scratch."}</div>
           ) : (
             <div className="form-grid">
-              {forms.map(f=>(
+              {shown.map(f=>(
                 <button key={f.id} className="form-card" onClick={()=>navigate("/dashboard/"+f.id)}>
-                  <div className="fc-top"><span className={"badge "+(f.is_open?"open":"closed")}>{f.is_open?"Open":"Closed"}</span>{f.kind && <span className="kind-badge">{f.kind==="schedule"?"Scheduler":f.kind==="esign"?"E-sign":""}</span>}<span className="fc-count">{f.responses} {f.responses===1?"response":"responses"}</span></div>
+                  <div className="fc-top"><span className={"badge "+(f.is_open?"open":"closed")}>{f.is_open?"Open":"Closed"}</span>{f.shared && <span className="kind-badge">Team</span>}{f.kind && <span className="kind-badge">{f.kind==="schedule"?"Scheduler":f.kind==="esign"?"E-sign":""}</span>}<span className="fc-count">{f.responses} {f.responses===1?"response":"responses"}</span></div>
                   <div className="fc-title">{f.title || "Untitled form"}</div>
                   <div className="fc-meta">{f.username === "admin" ? "/"+f.slug : "/"+f.username+"/"+f.slug}</div>
-                  <div className="fc-foot">{f.last_response ? ("Last response " + fmtAgo(f.last_response)) : "No responses yet"}</div>
+                  <div className="fc-foot">{f.shared && !f.mine ? ("Shared by @" + f.username) : (f.last_response ? ("Last response " + fmtAgo(f.last_response)) : "No responses yet")}</div>
                 </button>
               ))}
             </div>
-          )}
+          ); })()}
         {forms !== null && forms.length < 10 && <TemplateGrid onPick={createFromTemplate} creating={creating} />}
       </div>
     </div>
   );
+}
+
+function TeamPanel(){
+  const { user, navigate, toast } = useApp();
+  const [data, setData] = useState(null);
+  const [name, setName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("member");
+  const [busy, setBusy] = useState(false);
+  const load = ()=> api.org().then(({data})=> setData(data || { org:null }));
+  useEffect(()=>{ load(); },[]);
+  const canTeam = !!(user && user.limits && user.limits.team);
+  const create = ()=>{ if (busy) return; setBusy(true); api.orgCreate(name || "My team").then(({ok,data})=>{ setBusy(false); if (ok){ toast("Team created"); load(); } else toast(data && data.error === "plan_required" ? "Teams are part of the Enterprise plan." : "Could not create the team"); }); };
+  const invite = ()=>{ const e = inviteEmail.trim(); if (!e) return; setBusy(true); api.orgInvite(e, inviteRole).then(({ok,data})=>{ setBusy(false); if (ok){ toast(data && data.joined ? "Added to the team" : "Invite sent"); setInviteEmail(""); load(); } else toast(({ bad_email:"Enter a valid email address.", already_member:"That person is already on the team." })[data && data.error] || "Could not invite"); }); };
+  const cancelInvite = (em)=> api.orgInviteCancel(em).then(()=>load());
+  const removeMember = (uid, self)=>{ if (!window.confirm(self ? "Leave this team?" : "Remove this member from the team?")) return; api.orgMemberRemove(uid).then(()=>{ if (self){ navigate("/dashboard"); } else load(); }); };
+  const setRole = (uid, role)=> api.orgMemberRole(uid, role).then(()=>load());
+  const isAdmin = !!(data && data.org && (data.org.role === "owner" || data.org.role === "admin"));
+  return (<div><TopNav/><div className="wrap page">
+    <div className="dash-head"><h1 style={{fontSize:26}}>Team</h1></div>
+    {!canTeam ? (
+      <div className="plan-lock-block"><div className="label">Teams <span className="plan-pill plan-premium">Enterprise</span></div><div className="hint">Shared team workspaces are part of the Enterprise plan. Members share access to the team forms and their responses. Contact us to enable it for your account.</div><a className="btn sm" style={{marginTop:10,display:"inline-block"}} href="mailto:support@zetetiq.com?subject=Enterprise%20plan%20enquiry">Contact us</a></div>
+    ) : data === null ? <div style={{display:"flex",justifyContent:"center",padding:"56px 0"}}><LoadingLogo /></div>
+    : !data.org ? (
+      <div className="tcard" style={{maxWidth:560}}><div className="panel-title">Create your team</div><div className="hint" style={{marginBottom:12}}>Give your team a name. You can invite people by email afterward, and any form you share will be visible to everyone on the team.</div><Field label="Team name"><input className="input" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Acme Inc" /></Field><button className="btn primary" disabled={busy} onClick={create}>Create team</button></div>
+    ) : (
+      <div className="team-grid">
+        <div className="tcard">
+          <div className="between" style={{marginBottom:4}}><div className="panel-title" style={{margin:0}}>{data.org.name}</div><span className="plan-pill plan-premium">{data.org.role}</span></div>
+          <div className="troster">
+            {(data.members||[]).map((m)=>(<div key={m.id} className="trow">
+              <div className="trow-main"><div className="trow-name">{(m.name || m.username || m.email)}{m.id === user.uid ? " (you)" : ""}</div><div className="trow-sub">{m.email || ("@"+m.username)}</div></div>
+              <div className="trow-act">
+                {m.role === "owner" ? <span className="trole">Owner</span>
+                  : isAdmin ? <Select className="select sm" value={m.role} onChange={(e)=>setRole(m.id, e.target.value)} style={{width:118}}><option value="member">Member</option><option value="admin">Admin</option></Select>
+                  : <span className="trole">{m.role}</span>}
+                {(isAdmin && m.role !== "owner") ? <button className="btn sm ghost" onClick={()=>removeMember(m.id, false)}>Remove</button>
+                  : (m.id === user.uid && m.role !== "owner") ? <button className="btn sm ghost" onClick={()=>removeMember(m.id, true)}>Leave</button> : null}
+              </div>
+            </div>))}
+          </div>
+        </div>
+        {isAdmin && (<div className="tcard">
+          <div className="panel-title">Invite people</div>
+          <div className="hint" style={{marginBottom:12}}>They join when they sign in with this email address. If they already have an account, they are added right away.</div>
+          <div className="row" style={{gap:8,alignItems:"flex-end"}}>
+            <div style={{flex:1}}><Field label="Email"><input className="input" type="email" value={inviteEmail} onChange={(e)=>setInviteEmail(e.target.value)} placeholder="name@company.com" /></Field></div>
+            <Select className="select" value={inviteRole} onChange={(e)=>setInviteRole(e.target.value)} style={{width:130}}><option value="member">Member</option><option value="admin">Admin</option></Select>
+            <button className="btn primary" disabled={busy || !inviteEmail.trim()} onClick={invite}>Invite</button>
+          </div>
+          {(data.invites||[]).length > 0 && (<div style={{marginTop:16}}>
+            <label className="acct-lbl" style={{display:"block",marginBottom:6}}>Pending invites</label>
+            {data.invites.map((iv)=>(<div key={iv.email} className="trow"><div className="trow-main"><div className="trow-name">{iv.email}</div><div className="trow-sub">{iv.role}</div></div><button className="btn sm ghost" onClick={()=>cancelInvite(iv.email)}>Cancel</button></div>))}
+          </div>)}
+        </div>)}
+      </div>
+    )}
+  </div></div>);
 }
 
 /* ----------------------------- builder ----------------------------- */
@@ -4931,6 +5038,9 @@ function SettingsPanel({ form, setForm, setSettings, id, del }){
       <div className="panel-title">Form settings</div>
       <Field label="Form title"><input className="input" value={form.title} onChange={(e)=>setForm((f)=>({ ...f, title:e.target.value }))} /></Field>
       <Field label="Description"><textarea className="textarea" value={form.description} onChange={(e)=>setForm((f)=>({ ...f, description:e.target.value }))} /></Field>
+      {user && user.org && user.limits && user.limits.team && (form.mine !== false) && (<Field label="Team"><Toggle checked={!!form.org_id} onChange={(c)=>setForm((f)=>({ ...f, org_id: c ? user.org.id : null }))} label={"Share with " + user.org.name} /><div className="hint" style={{marginTop:4}}>Shared forms appear in the team workspace and any teammate can open and edit them. Save to apply.</div></Field>)}
+      <Field label="Link"><div className="row" style={{gap:6,alignItems:"center"}}><span className="mono" style={{fontSize:13,color:"var(--ink-soft)",whiteSpace:"nowrap"}}>{(user && user.username && user.username !== "admin") ? (user.username + "/") : "/"}</span><input className="input" style={{flex:1}} value={form.slug || ""} placeholder="my-form" onChange={(e)=>setForm((f)=>({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+/, "") }))} /></div></Field>
+      <div className="hint" style={{marginTop:-2,marginBottom:6}}>The end of your form's web address. Letters, numbers, and hyphens. Saving updates the link, and the previous link stops working.</div>
       <div className="panel-section">Behavior</div>
       <Toggle checked={!!form.schema.settings.randomizeQuestions} onChange={(c)=>setSettings({randomizeQuestions:c})} label="Randomize question order" />
       <Toggle checked={!!form.schema.settings.randomizeBlocks} onChange={(c)=>setSettings({randomizeBlocks:c})} label="Randomize section order" />
@@ -5182,7 +5292,8 @@ function Builder({ formId }){
   const { navigate, toast, user, theme, toggleTheme } = useApp();
   const isNew = formId === "new";
   const newKind = (()=>{ if (formId !== "new") return null; try { return new URLSearchParams(window.location.search).get("kind"); } catch (e) { return null; } })();
-  const [form, setForm] = useState(isNew ? blankForm(newKind) : null);
+  const newOrg = isNew ? (()=>{ try { return new URLSearchParams(window.location.search).get("org") || null; } catch (e) { return null; } })() : null;
+  const [form, setForm] = useState(isNew ? Object.assign(blankForm(newKind), newOrg ? { org_id: newOrg } : {}) : null);
   const [id, setId] = useState(isNew ? null : formId);
   const [sel, setSel] = useState(null);
   const [mode, setMode] = useState("edit");
@@ -5257,7 +5368,7 @@ function Builder({ formId }){
   const onDragMove = (e)=>{
     const D = dragSess.current; if (!D) return;
     const py = e.touches ? e.touches[0].clientY : e.clientY;
-    const el = cardRefs.current[D.id]; if (el) el.style.transform = "translateY(" + (py - D.grabDy - D.fromTop) + "px)";
+    const el = cardRefs.current[D.id]; if (el) el.style.transform = "translateY(" + (py - D.grabDy - D.fromTop) + "px) scale(1.02)";
     const dc = py - D.grabDy + D.height / 2;
     let above = 0; for (let i = 0; i < D.centers.length; i++){ if (i === D.fromIdx) continue; if (D.centers[i] < dc) above++; }
     if (above !== D.dropTo){ D.dropTo = above; applyShifts(D, above); }
@@ -5266,10 +5377,22 @@ function Builder({ formId }){
     const D = dragSess.current;
     window.removeEventListener("pointermove", onDragMove); window.removeEventListener("pointerup", onDragUp);
     if (!D) return;
-    D.list.forEach((q)=>{ const el = cardRefs.current[q.id]; if (el){ el.style.transition = "none"; el.style.transform = ""; } });
+    const dragEl = cardRefs.current[D.id];
+    const firstTop = dragEl ? dragEl.getBoundingClientRect().top : 0;
+    D.list.forEach((q)=>{ if (q.id === D.id) return; const el = cardRefs.current[q.id]; if (el){ el.style.transition = "none"; el.style.transform = ""; } });
+    if (dragEl){ dragEl.style.transition = "none"; dragEl.style.transform = ""; }
     suppressFlip.current = true; dragSess.current = null; setDragId(null);
     reorder(D.fromIdx, D.dropTo);
-    requestAnimationFrame(()=>{ D.list.forEach((q)=>{ const el = cardRefs.current[q.id]; if (el) el.style.transition = ""; }); });
+    requestAnimationFrame(()=>{
+      D.list.forEach((q)=>{ if (q.id === D.id) return; const el = cardRefs.current[q.id]; if (el) el.style.transition = ""; });
+      if (dragEl){
+        const dy = firstTop - dragEl.getBoundingClientRect().top;
+        dragEl.style.transition = "none";
+        dragEl.style.transform = "translateY(" + dy + "px) scale(1.02)";
+        requestAnimationFrame(()=>{ dragEl.style.transition = "transform 200ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms ease"; dragEl.style.transform = ""; });
+        setTimeout(()=>{ if (dragEl) dragEl.style.transition = ""; }, 260);
+      }
+    });
   };
   const beginDrag = (e, index)=>{
     if (e.button != null && e.button !== 0) return;
@@ -5288,12 +5411,12 @@ function Builder({ formId }){
 
   const save = ()=>{
     setSaving(true);
-    const payload = { title: form.title, description: form.description, theme: form.theme, schema: form.schema };
+    const payload = { title: form.title, description: form.description, theme: form.theme, schema: form.schema, ...(form.slug ? { slug: form.slug } : {}), ...(typeof form.org_id !== "undefined" ? { org_id: form.org_id } : {}) };
     const stamp = ()=> setSavedAt(new Date().toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" }));
     if (!id){
       api.createForm(payload).then(({ ok, data })=>{ setSaving(false); if (ok && data && data.id){ setId(data.id); if (data.slug) setForm((f)=>({ ...f, slug: data.slug })); window.history.replaceState({}, "", "/builder/" + data.id); stamp(); toast("Published"); } else if (data && data.error === "plan_limit") toast("You have reached your plan limit of " + (data.max||5) + " forms. Upgrade to create more."); else toast("Save failed"); });
     } else {
-      api.updateForm(id, payload).then(({ ok })=>{ setSaving(false); if (ok){ stamp(); toast("Saved"); } else toast("Save failed"); });
+      api.updateForm(id, payload).then(({ ok, data })=>{ setSaving(false); if (ok){ if (data && data.slug && data.slug !== form.slug) setForm((f)=>({ ...f, slug: data.slug })); stamp(); toast("Saved"); } else toast("Save failed"); });
     }
   };
 
@@ -6222,13 +6345,14 @@ function App(){
     view = <div className="center-screen"><div style={{color:"var(--bo)"}}><Logo size={34} /></div></div>;
   } else {
     const seg = path.split("/").filter(Boolean);
-    const reserved = new Set(["dashboard","builder","login","admin","api","assets","favicon.ico","robots.txt"]);
+    const reserved = new Set(["dashboard","builder","login","admin","team","api","assets","favicon.ico","robots.txt"]);
     if (seg.length === 1 && !reserved.has(seg[0])) view = <PublicForm username="admin" slug={seg[0]} />;
     else if (seg.length === 2 && !reserved.has(seg[0])) view = <PublicForm username={seg[0]} slug={seg[1]} />;
     else if (seg.length === 0) view = user ? <Dashboard/> : <Landing/>;
     else if (seg[0] === "login") view = <Landing showLogin />;
     else if (!user) view = <Landing showLogin />;
     else if (seg[0] === "dashboard" && seg.length === 1) view = <Dashboard/>;
+    else if (seg[0] === "team" && seg.length === 1) view = <TeamPanel/>;
     else if (seg[0] === "admin" && seg.length === 1) view = (user.role === "admin") ? <AdminConsole/> : <Dashboard/>;
     else if (seg[0] === "dashboard" && seg.length === 2) view = <FormDashboard id={seg[1]} />;
     else if (seg[0] === "builder" && seg.length === 2) view = <Builder formId={seg[1]} />;
