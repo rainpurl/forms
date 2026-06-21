@@ -399,7 +399,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .himg-upload{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--line-strong);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;color:var(--ink-soft);background:var(--card);transition:border-color .12s,color .12s}
 .himg-upload:hover{border-color:var(--bo);color:var(--ink)}
 .himg-preview{display:flex;align-items:center;gap:10px}
-.himg-preview img{width:120px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.himg-preview img{width:120px;height:60px;object-fit:cover;border-radius:8px;border:1px solid transparent;box-shadow:var(--bevel-inset)}
 .form-scope .fcta{display:inline-block;background:var(--fa);color:#f5f2f0;border:0;padding:11px 22px;border-radius:10px;font-weight:600;text-decoration:none;cursor:pointer;transition:filter .12s}
 .form-scope .fcta:hover{filter:brightness(1.06)}
 
@@ -477,10 +477,10 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .slot-btn.sel{background:var(--fa);color:#f5f2f0;border-color:var(--fa)}
 .slot-btn:disabled{opacity:.5;cursor:not-allowed}
 .slot-full{display:block;font-size:9px;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
-.doc-view{display:block;margin-bottom:6px}
+.doc-view{display:block;margin-bottom:6px;border:none!important;box-shadow:var(--bevel-inset);border-radius:10px;overflow:hidden}
 .doc-fields{margin-top:14px;display:flex;flex-direction:column;gap:14px}
 .himg-preview{display:flex;align-items:center;gap:10px;margin-top:4px}
-.himg-preview img{max-height:40px;border:1px solid var(--line);border-radius:6px}
+.himg-preview img{max-height:40px;border:1px solid transparent;box-shadow:var(--bevel-inset);border-radius:6px}
 .slot-edit{margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .slot-edit-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
 .slot-edit-when{flex:1;font-size:13px}
@@ -1115,7 +1115,7 @@ body{top:0!important}
 .esign-pal-btn:active{cursor:grabbing}
 .esign-pal-btn.armed{background:var(--bo);color:#f5f2f0;border-color:transparent}
 .esign-pal-ico{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
-.esign-doc{position:relative;display:inline-block;max-width:100%;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;line-height:0;background:#fff}
+.esign-doc{position:relative;display:inline-block;max-width:100%;border:1px solid transparent;box-shadow:var(--bevel-inset);border-radius:10px;overflow:hidden;line-height:0;background:#fff}
 .esign-doc img{max-width:100%;display:block}
 .esign-doc.armed{cursor:crosshair}
 .esign-edit .pdf-page{position:relative}
@@ -1237,9 +1237,9 @@ body{top:0!important}
 .price-was{text-decoration:line-through;color:var(--ink-soft);margin-right:8px;font-weight:600}
 .price-lifetime{text-align:center;margin-top:24px}
 /* hero carousel */
-.lp-carousel-body{min-height:312px}
-.lp-slide{animation:lpFade .5s ease both}
-@keyframes lpFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.lp-carousel-body{position:relative;height:320px;padding:0;overflow:hidden}
+.lp-slide{position:absolute;inset:0;padding:22px;opacity:0;transition:opacity .55s ease;pointer-events:none}
+.lp-slide.on{opacity:1;pointer-events:auto}
 .lp-mock-rank{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .lp-rankrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:13px}
 .lp-ranknum{width:20px;height:20px;border-radius:50%;background:var(--bo);color:#f5f2f0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
@@ -1288,6 +1288,25 @@ body{top:0!important}
 
 .zeffy-embed{width:100%;min-height:640px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .zeffy-q .embed-empty{margin-top:4px}
+
+/* analytics frames recessed, not raised */
+.analytics-tab .card{box-shadow:var(--bevel-inset);border-color:transparent}
+.analytics-tab .himg-preview img,.analytics-tab img.an-img{border:1px solid transparent;box-shadow:var(--bevel-inset)}
+/* form theme applies to signature and other form-side primary buttons */
+.form-scope .btn.primary{background:var(--fa);border-color:var(--fa);color:#f5f2f0}
+.form-scope .btn.primary:hover{filter:brightness(1.05)}
+.form-scope .overlay .input,.form-scope .overlay textarea{font-family:inherit}
+/* sortable response table headers */
+.table th.th-sort{cursor:pointer;user-select:none;white-space:nowrap}
+.table th.th-sort:hover{color:var(--ink)}
+
+/* hover feedback must not shift geometry (was causing edge flicker on button borders) */
+.btn:hover,.btn.primary:hover,.btn.danger:hover,.btn.ghost:hover,.iconbtn:hover,.gbtn:hover,.addq-item:hover,.addmenu button:hover,.addq-menu button:hover,.chip-tog:hover:not(.on),.cal-nav:hover,.cal-mo:hover,.cpick-trigger:hover{transform:none}
+.form-scope .opt:hover,.form-scope .submit:hover,.form-scope .fcta:hover,.form-scope .nps button:hover,.form-scope .slot-btn:hover,.form-scope .slot-btn:hover:not(.sel),.form-scope .fbtn-ghost:hover{transform:none}
+/* dropdowns no longer reserve space for a toggle icon */
+.zsel{justify-content:flex-start}
+/* poll cells outside a given day's hours */
+.poll-cell.poll-off{background:transparent;border-color:transparent;cursor:default;pointer-events:none;box-shadow:none}
 </style>
 </head>
 <body>
@@ -1640,20 +1659,37 @@ function SignatureModal({ onClose, onSave }){
     </div>
   </Modal>);
 }
+function pollColHours(q, weekday){
+  if (q.perDayHours && q.dayHours && q.dayHours[weekday]){
+    const d = q.dayHours[weekday]; let sh = (d.s == null) ? 9 : d.s, eh = (d.e == null) ? 17 : d.e; if (eh <= sh) eh = sh + 1; return { sh, eh };
+  }
+  let sh = (q.startHour == null) ? 9 : q.startHour, eh = (q.endHour == null) ? 17 : q.endHour; if (eh <= sh) eh = sh + 1; return { sh, eh };
+}
+function pollDates(q){
+  if ((q.pollMode || "dates") === "range"){
+    const out = []; const s = q.rangeStart, e = q.rangeEnd;
+    if (s && e){ let d = new Date(s + "T00:00"); const end = new Date(e + "T00:00"); let guard = 0; while (!isNaN(d) && !isNaN(end) && d <= end && guard < 31){ out.push(zYmd(d)); d.setDate(d.getDate() + 1); guard++; } }
+    return out;
+  }
+  return (Array.isArray(q.dates) ? q.dates : []).slice().sort();
+}
 function pollLayout(q){
   const dateOnly = !!q.dateOnly;
+  const mode = q.pollMode || "dates";
+  const step = Math.max(5, q.slotMinutes || 60);
   const cols = [];
-  if ((q.pollMode || "dates") === "weekdays"){
+  if (mode === "weekdays"){
     const names = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    (q.weekdays || []).slice().sort((a,b)=>a-b).forEach((d)=>{ if (names[d]) cols.push({ key:"d"+d, label:names[d] }); });
+    (q.weekdays || []).slice().sort((a,b)=>a-b).forEach((d)=>{ if (names[d]){ const h = pollColHours(q, d); cols.push({ key:"d"+d, label:names[d], sh:h.sh, eh:h.eh }); } });
   } else {
-    (q.dates || []).slice().sort().forEach((d)=>{ const dd = new Date(d + "T00:00"); cols.push({ key:d, label: isNaN(dd) ? d : dd.toLocaleDateString(undefined, { month:"short", day:"numeric" }) }); });
+    pollDates(q).forEach((d)=>{ const dd = new Date(d + "T00:00"); const wd = isNaN(dd) ? 0 : dd.getDay(); const h = pollColHours(q, wd); cols.push({ key:d, label: isNaN(dd) ? d : dd.toLocaleDateString(undefined, { month:"short", day:"numeric" }), sh:h.sh, eh:h.eh }); });
   }
   const rows = [];
-  if (!dateOnly){
-    let sh = (q.startHour == null) ? 9 : q.startHour; let eh = (q.endHour == null) ? 17 : q.endHour; const step = q.slotMinutes || 60;
-    if (eh <= sh) eh = sh + 1;
-    for (let mn = sh*60; mn < eh*60; mn += step){ const hh = Math.floor(mn/60), mm = mn%60; const t = String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0"); const ap = hh < 12 ? "am" : "pm"; const h12 = (hh % 12) || 12; const lbl = h12 + (mm ? (":" + String(mm).padStart(2,"0")) : "") + ap; rows.push({ time:t, label:lbl }); }
+  if (!dateOnly && cols.length){
+    let minSh = Math.min.apply(null, cols.map((c)=>c.sh));
+    let maxEh = Math.max.apply(null, cols.map((c)=>c.eh));
+    if (maxEh <= minSh) maxEh = minSh + 1;
+    for (let mn = minSh*60; mn < maxEh*60; mn += step){ const hh = Math.floor(mn/60), mm = mn%60; const t = String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0"); const ap = hh < 12 ? "am" : "pm"; const h12 = (hh % 12) || 12; const lbl = h12 + (mm ? (":" + String(mm).padStart(2,"0")) : "") + ap; rows.push({ time:t, label:lbl, minutes:mn }); }
   }
   return { cols, rows, dateOnly };
 }
@@ -1662,7 +1698,7 @@ function buildPollMatrix(q, rows){
   const lay = pollLayout(q);
   const parts = (rows || []).map((r)=> r.data && r.data[q.id]).filter((p)=> p && typeof p === "object").map((p)=>({ name: String(p.name || "Someone"), a: Array.isArray(p.available) ? p.available : [], m: Array.isArray(p.maybe) ? p.maybe : [] }));
   const slots = [];
-  lay.cols.forEach((c)=>{ if (lay.dateOnly){ slots.push({ key: slotKey(c.key, null, true), label: c.label }); } else { lay.rows.forEach((rw)=>{ slots.push({ key: slotKey(c.key, rw, false), label: c.label + " " + rw.label }); }); } });
+  lay.cols.forEach((c)=>{ if (lay.dateOnly){ slots.push({ key: slotKey(c.key, null, true), label: c.label }); } else { lay.rows.forEach((rw)=>{ if (rw.minutes < c.sh*60 || rw.minutes >= c.eh*60) return; slots.push({ key: slotKey(c.key, rw, false), label: c.label + " " + rw.label }); }); } });
   const cell = (v)=>{ const t = String(v == null ? "" : v); return /[",\r\n]/.test(t) ? ('"' + t.replace(/"/g, '""') + '"') : t; };
   const header = ["Slot"].concat(parts.map((p)=>p.name)).concat(["Available"]);
   const lines = [header.map(cell).join(",")];
@@ -1699,7 +1735,7 @@ function PollRenderer({ q, value, onChange, error, poll, formId, preview }){
   const colTemplate = "68px repeat(" + lay.cols.length + ", minmax(34px, 1fr))";
   const gridBody = (heat)=> (lay.dateOnly
     ? [<div key="rh" className="poll-rowhead"></div>].concat(lay.cols.map((c)=>{ const k = slotKey(c.key, null, true); if (heat){ const n = heatCount(k); const op = heatDenom ? Math.min(1, n/heatDenom) : 0; return (<div key={k} className="poll-cell poll-heatcell" title={heatTitle(k)} style={{background: n ? ("rgba(47,158,99," + (0.18 + op*0.72) + ")") : "transparent"}}>{n || ""}</div>); } const st = cellState(k); return (<div key={k} className={"poll-cell poll-" + st} onPointerDown={()=>start(k)} onPointerOver={()=>enter(k)} data-key={k}></div>); }))
-    : [].concat.apply([], lay.rows.map((r)=> [<div key={"rh"+r.time} className="poll-rowhead">{r.label}</div>].concat(lay.cols.map((c)=>{ const k = slotKey(c.key, r, false); if (heat){ const n = heatCount(k); const op = heatDenom ? Math.min(1, n/heatDenom) : 0; return (<div key={k} className="poll-cell poll-heatcell" title={heatTitle(k)} style={{background: n ? ("rgba(47,158,99," + (0.18 + op*0.72) + ")") : "transparent"}}>{n || ""}</div>); } const st = cellState(k); return (<div key={k} className={"poll-cell poll-" + st} onPointerDown={()=>start(k)} onPointerOver={()=>enter(k)} data-key={k}></div>); }))))
+    : [].concat.apply([], lay.rows.map((r)=> [<div key={"rh"+r.time} className="poll-rowhead">{r.label}</div>].concat(lay.cols.map((c)=>{ if (r.minutes < c.sh*60 || r.minutes >= c.eh*60) return (<div key={c.key + "-x-" + r.time} className="poll-cell poll-off"></div>); const k = slotKey(c.key, r, false); if (heat){ const n = heatCount(k); const op = heatDenom ? Math.min(1, n/heatDenom) : 0; return (<div key={k} className="poll-cell poll-heatcell" title={heatTitle(k)} style={{background: n ? ("rgba(47,158,99," + (0.18 + op*0.72) + ")") : "transparent"}}>{n || ""}</div>); } const st = cellState(k); return (<div key={k} className={"poll-cell poll-" + st} onPointerDown={()=>start(k)} onPointerOver={()=>enter(k)} data-key={k}></div>); }))))
   );
   return (<div className="q">
     <QLabel q={q} />
@@ -1738,22 +1774,38 @@ function PollConfig({ q, update }){
   const rmDate = (d)=> update({ dates: dates.filter((x)=>x!==d) });
   const toggleWk = (d)=> update({ weekdays: wk.indexOf(d) >= 0 ? wk.filter((x)=>x!==d) : wk.concat([d]).sort((a,b)=>a-b) });
   const WN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const datesArr = pollDates(q);
+  const dayList = (pollMode === "weekdays") ? wk.slice().sort((a,b)=>a-b) : Array.from(new Set(datesArr.map((d)=>{ const dd = new Date(d + "T00:00"); return isNaN(dd) ? -1 : dd.getDay(); }).filter((x)=>x>=0))).sort((a,b)=>a-b);
+  const slotPreset = ([15,30,60].indexOf(q.slotMinutes || 60) >= 0) ? String(q.slotMinutes || 60) : "custom";
+  const hourOpts = Array.from({length:24}).map((_,h)=>(<option key={h} value={h}>{hourLabel(h)}</option>));
+  const endOpts = Array.from({length:24}).map((_,i)=>{ const h = i + 1; return (<option key={h} value={h}>{hourLabel(h)}</option>); });
   return (<div>
     <div className="panel-section">What to poll</div>
     <div className="seg">
       <button type="button" className={"seg-btn" + (pollMode === "dates" ? " on" : "")} onClick={()=>update({ pollMode:"dates" })}>Specific dates</button>
+      <button type="button" className={"seg-btn" + (pollMode === "range" ? " on" : "")} onClick={()=>update({ pollMode:"range" })}>Date range</button>
       <button type="button" className={"seg-btn" + (pollMode === "weekdays" ? " on" : "")} onClick={()=>update({ pollMode:"weekdays" })}>Days of the week</button>
     </div>
     {pollMode === "dates" ? (<div style={{marginTop:8}}>
       <div className="row" style={{gap:8}}><DateField className="input" value={nd} onChange={(e)=>setNd(e.target.value)} /><button className="btn sm primary" onClick={addDate} disabled={!nd}>Add date</button></div>
       <div className="row" style={{gap:6,flexWrap:"wrap",marginTop:8}}>{dates.length === 0 ? <span className="muted" style={{fontSize:13}}>No dates yet.</span> : dates.map((d)=>(<span key={d} className="cal-chip on">{d}<button className="iconbtn" style={{marginLeft:4,padding:"0 4px",minWidth:0}} title="Remove" onClick={()=>rmDate(d)}>×</button></span>))}</div>
+    </div>) : pollMode === "range" ? (<div style={{marginTop:8}}>
+      <div className="row" style={{gap:10}}>
+        <Field label="Start date" style={{flex:1}}><DateField className="input" value={q.rangeStart || ""} onChange={(e)=>update({ rangeStart: e.target.value })} /></Field>
+        <Field label="End date" style={{flex:1}}><DateField className="input" value={q.rangeEnd || ""} onChange={(e)=>update({ rangeEnd: e.target.value })} /></Field>
+      </div>
+      <div className="hint" style={{marginTop:6}}>{datesArr.length ? (datesArr.length + (datesArr.length === 1 ? " day" : " days") + " in this range." + (datesArr.length >= 31 ? " Ranges are capped at 31 days." : "")) : "Pick a start and end date."}</div>
     </div>) : (<div className="row" style={{gap:6,flexWrap:"wrap",marginTop:8}}>{WN.map((n,i)=>(<button key={i} type="button" className={"btn sm" + (wk.indexOf(i) >= 0 ? " primary" : " ghost")} onClick={()=>toggleWk(i)}>{n}</button>))}</div>)}
     <div className="panel-section">Time window</div>
     <Toggle checked={!!q.dateOnly} onChange={(c)=>update({ dateOnly:c })} label="Poll days only (no hourly grid)" />
-    {!q.dateOnly && (<div className="row" style={{gap:10,marginTop:8}}>
-      <Field label="From hour" style={{flex:1}}><input className="input" type="number" min="0" max="23" value={q.startHour == null ? 9 : q.startHour} onChange={(e)=>update({ startHour: Math.max(0, Math.min(23, parseInt(e.target.value || "0", 10))) })} /></Field>
-      <Field label="To hour" style={{flex:1}}><input className="input" type="number" min="1" max="24" value={q.endHour == null ? 17 : q.endHour} onChange={(e)=>update({ endHour: Math.max(1, Math.min(24, parseInt(e.target.value || "17", 10))) })} /></Field>
-      <Field label="Slot" style={{flex:1}}><Select className="select" value={q.slotMinutes || 60} onChange={(e)=>update({ slotMinutes: parseInt(e.target.value, 10) })}><option value="60">1 hour</option><option value="30">30 min</option></Select></Field>
+    {!q.dateOnly && (<div style={{marginTop:8}}>
+      <Toggle checked={!!q.perDayHours} onChange={(c)=>update({ perDayHours:c })} label="Set different hours per day" />
+      {!q.perDayHours ? (<div className="row" style={{gap:10,marginTop:8}}>
+        <Field label="From" style={{flex:1}}><Select className="select" value={String(q.startHour == null ? 9 : q.startHour)} onChange={(e)=>update({ startHour: parseInt(e.target.value, 10) })}>{hourOpts}</Select></Field>
+        <Field label="To" style={{flex:1}}><Select className="select" value={String(q.endHour == null ? 17 : q.endHour)} onChange={(e)=>update({ endHour: parseInt(e.target.value, 10) })}>{endOpts}</Select></Field>
+      </div>) : (dayList.length === 0 ? <div className="hint" style={{marginTop:8}}>Add days or dates above to set their hours.</div> : <div className="dayhours" style={{marginTop:8}}>{dayList.map((i)=>{ const dh = (q.dayHours && q.dayHours[i]) || { s:(q.startHour == null ? 9 : q.startHour), e:(q.endHour == null ? 17 : q.endHour) }; const setDH = (patch)=>update({ dayHours: { ...(q.dayHours || {}), [i]: { ...dh, ...patch } } }); return (<div key={i} className="dayhours-row"><span className="dayhours-day">{WN[i]}</span><Select className="select" value={String(dh.s)} onChange={(e)=>setDH({ s: parseInt(e.target.value, 10) })}>{hourOpts}</Select><span className="dayhours-sep">to</span><Select className="select" value={String(dh.e)} onChange={(e)=>setDH({ e: parseInt(e.target.value, 10) })}>{endOpts}</Select></div>); })}</div>)}
+      <Field label="Slot length" style={{marginTop:8}}><Select className="select" value={slotPreset} onChange={(e)=>{ const v = e.target.value; if (v === "custom") update({ slotMinutes: ([15,30,60].indexOf(q.slotMinutes || 60) >= 0 ? 45 : (q.slotMinutes || 45)) }); else update({ slotMinutes: parseInt(v, 10) }); }}><option value="60">1 hour</option><option value="30">30 min</option><option value="15">15 min</option><option value="custom">Custom</option></Select></Field>
+      {slotPreset === "custom" && <Field label="Custom slot length (minutes)" style={{marginTop:8}}><input className="input" type="number" min="5" step="5" value={q.slotMinutes || 45} onChange={(e)=>update({ slotMinutes: Math.max(5, parseInt(e.target.value || "45", 10)) })} /></Field>}
     </div>)}
     <div className="panel-section">Poll options</div>
     <Toggle checked={!!q.ifNeeded} onChange={(c)=>update({ ifNeeded:c })} label="Allow 'if needed' time slots" />
@@ -2805,8 +2857,8 @@ const QTYPES = {
     label: "Meeting signup",
     hint: "Let people book one of your time slots",
     isInput: true,
-    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[], meetingType:"one_on_one", capacity:1, hosts:[], calendars:{ google:false, outlook:false, office365:false, icloud:false, exchange:false }, bufferBefore:0, bufferAfter:0, dailyCap:0, minNotice:0, timezoneAuto:true, reminders:[{ id: uid(), channel:"email", value:24, unit:"hours" }], followup:{ enabled:false, message:"", link:"" }, video:"none", mode:"booking", pollMode:"dates", dates:[], weekdays:[1,2,3,4,5], dateOnly:false, startHour:9, endHour:17, slotMinutes:60, availMode:"slots", windowStart:"", windowEnd:"", perDayHours:false, dayHours:{}, freePick:false, ifNeeded:false, hideResponses:false }),
-    summary: (q) => ((q.mode || "booking") === "poll") ? ("Group poll \u00b7 " + (((q.pollMode||"dates")==="weekdays") ? (((q.weekdays||[]).length) + " weekdays") : (((q.dates||[]).length) + " dates"))) : (({ one_on_one:"One on one", group:"Group", collective:"Collective", round_robin:"Round robin" }[q.meetingType || "one_on_one"]) + " \u00b7 " + ((q.slots && q.slots.length) || 0) + " time slots"),
+    make: () => ({ type:"scheduling", id: uid(), label:"Pick a meeting time", required:false, request:false, meetingTitle:"Meeting", duration:30, location:"", slots:[], meetingType:"one_on_one", capacity:1, hosts:[], calendars:{ google:false, outlook:false, office365:false, icloud:false, exchange:false }, bufferBefore:0, bufferAfter:0, dailyCap:0, minNotice:0, timezoneAuto:true, reminders:[{ id: uid(), channel:"email", value:24, unit:"hours" }], followup:{ enabled:false, message:"", link:"" }, video:"none", mode:"booking", pollMode:"dates", dates:[], weekdays:[1,2,3,4,5], dateOnly:false, startHour:9, endHour:17, slotMinutes:60, availMode:"slots", windowStart:"", windowEnd:"", perDayHours:false, dayHours:{}, rangeStart:"", rangeEnd:"", freePick:false, ifNeeded:false, hideResponses:false }),
+    summary: (q) => ((q.mode || "booking") === "poll") ? ("Group availability poll \u00b7 " + (((q.pollMode||"dates")==="weekdays") ? (((q.weekdays||[]).length) + " weekdays") : (((q.dates||[]).length) + " dates"))) : (({ one_on_one:"One on one", group:"Group", collective:"Collective", round_robin:"Round robin" }[q.meetingType || "one_on_one"]) + " \u00b7 " + ((q.slots && q.slots.length) || 0) + " time slots"),
     validate: (q, v) => { if ((q.mode || "booking") === "poll"){ if (!q.required) return null; const av = (v && Array.isArray(v.available)) ? v.available : []; if (!((v && v.name) || "").trim()) return "Please enter your name."; if (!av.length) return "Please mark when you are available."; return null; } return (q.required && !v) ? "Please choose a time." : null; },
     Renderer: SchedulingRenderer,
   },
@@ -3927,11 +3979,13 @@ function HeroCarousel(){
     <div className="lp-win">
       <div className="lp-win-bar"><span></span><span></span><span></span></div>
       <div className="lp-win-body lp-carousel-body">
-        <div className="lp-slide" key={i}>
-          <div className="lp-mock-title">{s.title}</div>
-          {s.body}
+        {slides.map((sl, d)=>(
+        <div className={"lp-slide" + (d === i ? " on" : "")} key={d} aria-hidden={d === i ? undefined : "true"}>
+          <div className="lp-mock-title">{sl.title}</div>
+          {sl.body}
           <div className="lp-mock-btn">Submit</div>
         </div>
+        ))}
       </div>
       <div className="lp-dots">{slides.map((_, d)=>(<span key={d} className={"lp-dot" + (d === i ? " on" : "")} onClick={()=>setI(d)}></span>))}</div>
     </div>
@@ -4614,7 +4668,7 @@ function Select({ value, onChange, className, style, disabled, children, ...rest
   const pick = (v)=>{ setOpen(false); if (onChange) onChange({ target: { value: v } }); };
   return (<div className={"zsel-wrap" + (disabled ? " zsel-disabled" : "")} ref={ref} style={style}>
     <button type="button" className={(className || "") + " zsel"} disabled={disabled} aria-haspopup="listbox" aria-expanded={open} onClick={()=> !disabled && setOpen((o)=>!o)}>
-      <span className="zsel-label">{lbl}</span><span className="zsel-arrow" aria-hidden="true">▾</span>
+      <span className="zsel-label">{lbl}</span>
     </button>
     {open && <div className="zsel-menu" role="listbox">{opts.map((o,i)=>(<button type="button" key={i} role="option" aria-selected={String(o.value) === String(value)} disabled={o.disabled} className={"zsel-opt" + (String(o.value) === String(value) ? " sel" : "")} onClick={()=> !o.disabled && pick(o.value)}>{o.label}</button>))}</div>}
   </div>);
@@ -4696,7 +4750,7 @@ function ColorPick({ label, value, onChange }){
   return (<div><div className="label">{label}</div>
     <div className="cpick-wrap" ref={ref}>
       <button type="button" className="cpick-trigger" onClick={()=>setOpen((o)=>!o)} title="Pick a colour">
-        <span className="cpick-sw" style={{background:v}}></span><span className="mono cpick-val">{v}</span><span className="zsel-arrow" aria-hidden="true">▾</span>
+        <span className="cpick-sw" style={{background:v}}></span><span className="mono cpick-val">{v}</span>
       </button>
       {open && <div className="cpick-pop">
         <div className="cpick-grid">{COLOR_SWATCHES.map((c)=>(<button type="button" key={c} className={"cpick-chip" + (String(v).toLowerCase() === c.toLowerCase() ? " sel" : "")} style={{background:c}} title={c} onClick={()=>onChange(c)}></button>))}</div>
@@ -5273,6 +5327,9 @@ function ThemePanel({ form, setTheme, setSettings }){
   const { toast, user } = useApp();
   const proFeat = !(user && user.limits && user.limits.proFeatures === false);
   const headerImage = form.schema.settings.headerImage;
+  const [kits, setKits] = useState(null);
+  useEffect(()=>{ api.listBrandKits().then(({ ok, data })=> setKits(ok && data && data.kits ? data.kits : [])).catch(()=> setKits([])); }, []);
+  const applyKit = (k)=>{ setTheme({ primary:k.primary, secondary:k.secondary, accent:k.accent, font:k.font || "sans", customFont:k.customFont || "" }); if (k.logo) setSettings({ headerImage:k.logo }); if (k.customFont) loadGoogleFont(k.customFont); };
   return (
     <div>
       <div className="panel-title">Theme</div>
@@ -5285,6 +5342,16 @@ function ThemePanel({ form, setTheme, setSettings }){
             ))}
           </div>
         </div>
+        {kits && kits.length > 0 && (
+        <div>
+          <div className="label">Brand kits</div>
+          <div className="theme-presets">
+            {kits.map((k)=>(
+              <button key={k.id} type="button" className="preset" onClick={()=>applyKit(k)} title={k.name}><span className="sw" style={{background:k.primary}}></span>{k.name}</button>
+            ))}
+          </div>
+        </div>
+        )}
         <ColorPick label="Primary" value={form.theme.primary} onChange={(v)=>setTheme({primary:v})} />
         <ColorPick label="Secondary" value={form.theme.secondary} onChange={(v)=>setTheme({secondary:v})} />
         <ColorPick label="Accent" value={form.theme.accent} onChange={(v)=>setTheme({accent:v})} />
@@ -6130,14 +6197,16 @@ async function fetchFontB64(url){
   return await new Promise((res, rej)=>{ const fr = new FileReader(); fr.onload = ()=>res(String(fr.result).split(",")[1]); fr.onerror = ()=>rej(new Error("font_read")); fr.readAsDataURL(blob); });
 }
 const PDF_FONT_FILES = {
-  sans: { family:"Figtree", reg:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/figtree/Figtree_400Regular.ttf", bold:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/figtree/Figtree_700Bold.ttf" },
+  sans: { family:"Inter", reg:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter/Inter_400Regular.ttf", bold:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter/Inter_700Bold.ttf" },
+  serif: { family:"IBMPlexSerif", reg:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-serif/IBMPlexSerif_400Regular.ttf", bold:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-serif/IBMPlexSerif_700Bold.ttf" },
+  mono: { family:"IBMPlexMono", reg:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_400Regular.ttf", bold:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_700Bold.ttf" },
   slab: { family:"RobotoSlab", reg:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/roboto-slab/RobotoSlab_400Regular.ttf", bold:"https://cdn.jsdelivr.net/npm/@expo-google-fonts/roboto-slab/RobotoSlab_700Bold.ttf" },
   zetetiq: { family:"MozillaText", reg:"https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/mozillatext/MozillaText%5Bwght%5D.ttf", bold:null },
 };
 async function loadPdfFonts(doc, key){
-  const builtin = { serif:"times", mono:"courier" };
-  if (builtin[key]) return { family: builtin[key] };
-  const f = PDF_FONT_FILES[key] || PDF_FONT_FILES.sans;
+  const fb = { serif:"times", mono:"courier" };
+  const f = PDF_FONT_FILES[key];
+  if (!f) return { family: fb[key] || "helvetica" };
   try {
     const regFile = f.family + "-R.ttf";
     doc.addFileToVFS(regFile, await fetchFontB64(f.reg));
@@ -6146,7 +6215,7 @@ async function loadPdfFonts(doc, key){
     if (f.bold){ try { boldFile = f.family + "-B.ttf"; doc.addFileToVFS(boldFile, await fetchFontB64(f.bold)); } catch (e) { boldFile = regFile; } }
     doc.addFont(boldFile, f.family, "bold");
     return { family: f.family };
-  } catch (e){ return { family: "helvetica" }; }
+  } catch (e){ return { family: fb[key] || "helvetica" }; }
 }
 
 function imgDims(src){
@@ -6369,6 +6438,8 @@ function ExportButtons({ id, form, rows }){
 }
 
 function ResponsesTab({ id, form, setForm }){
+  const [sortKey, setSortKey] = useState("created_at");
+  const [sortDir, setSortDir] = useState("desc");
   const { toast } = useApp();
   const [rows, setRows] = useState(null);
   const [open, setOpen] = useState(null);
@@ -6390,12 +6461,17 @@ function ResponsesTab({ id, form, setForm }){
   const cell = (v)=>{ if (v===null||v===undefined) return ""; if (Array.isArray(v)) return v.join(", "); if (v && typeof v==="object" && (Array.isArray(v.available)||Array.isArray(v.maybe))) return fmtPollAnswer(v); if (typeof v==="object") return Object.keys(v).map(k=>k+": "+(Array.isArray(v[k])?v[k].join("/"):v[k])).join(" | "); return String(v); };
   const rowText = (r)=>{ const parts = []; const d = r.data || {}; Object.keys(d).forEach((k)=>{ parts.push(cell(d[k])); }); const mm = r.meta || {}; parts.push(mm.city || "", mm.country || "", mm.browser || "", mm.os || ""); return parts.join(" ").toLowerCase(); };
   const filtered = (rows || []).filter((r)=>{ const mm = r.meta || {}; if (statusF === "completed" && mm.disqualified) return false; if (statusF === "screenout" && !mm.disqualified) return false; if (experiment && variantF !== "all" && mm.variant !== variantF) return false; const qq = query.trim().toLowerCase(); if (qq && rowText(r).indexOf(qq) === -1) return false; return true; });
+  const sortVal = (r, key)=>{ const mm = r.meta || {}; if (key === "created_at") return r.created_at || ""; if (key === "__loc") return [mm.city, mm.country].filter(Boolean).join(", "); if (key === "__dev") return [mm.browser, mm.os].filter(Boolean).join(" / "); return cell(r.data[key]) || ""; };
+  const cmp = (a, b)=>{ const x = sortVal(a, sortKey), y = sortVal(b, sortKey); let c; if (sortKey === "created_at") c = String(x).localeCompare(String(y)); else c = String(x).localeCompare(String(y), undefined, { numeric:true, sensitivity:"base" }); return sortDir === "asc" ? c : -c; };
+  const toggleSort = (key)=>{ if (sortKey === key) setSortDir((d)=> d === "asc" ? "desc" : "asc"); else { setSortKey(key); setSortDir(key === "created_at" ? "desc" : "asc"); } };
+  const caret = (key)=> sortKey === key ? (sortDir === "asc" ? " ▲" : " ▼") : "";
+  const sorted = filtered.slice().sort(cmp);
   if (rows === null) return <div className="muted">Loading...</div>;
   if (rows.length === 0) return <div className="card empty"><p>No responses yet.</p></div>;
   return (
     <div>
       {pollQ && (<div className="card pad-lg" style={{marginBottom:14}}>
-        <div className="label" style={{marginBottom:8}}>Group poll</div>
+        <div className="label" style={{marginBottom:8}}>Group availability poll</div>
         {pollQ.finalSlot ? (<div className="row" style={{gap:10,alignItems:"center",marginBottom:8}}><span className="badge open">Confirmed</span><strong>{fmtPollSlot(pollQ.finalSlot, pollQ)}</strong><button className="btn sm ghost" onClick={()=>setFinal(null)}>Clear</button></div>) : <div className="hint" style={{marginBottom:8}}>Pick the time that works for the most people. It will show on the form for everyone.</div>}
         <div className="finalize-list">{topSlots.length === 0 ? <span className="muted" style={{fontSize:13}}>No availability submitted yet.</span> : topSlots.map((sl)=>(<div key={sl.key} className="finalize-row"><span className="fl-when">{fmtPollSlot(sl.key, pollQ)}</span><span className="fl-count">{sl.n} free</span>{pollQ.finalSlot === sl.key ? <span className="badge open">Final</span> : <button className="btn sm" onClick={()=>setFinal(sl.key)}>Set as final</button>}</div>))}</div>
       </div>)}
@@ -6407,9 +6483,9 @@ function ResponsesTab({ id, form, setForm }){
       <div className="between" style={{marginBottom:12}}><span className="muted">{filtered.length === rows.length ? (rows.length + " response" + (rows.length===1?"":"s")) : (filtered.length + " of " + rows.length + " shown")}</span><span style={{display:"flex",gap:8,flexWrap:"wrap"}}><ExportButtons id={id} form={form} rows={rows} />{pollQ && <button className="btn sm" onClick={downloadPollCsv}>Availability grid CSV</button>}<button className="btn sm danger" onClick={clearAll}>Clear all</button></span></div>
       <div className="card" style={{overflowX:"auto"}}>
         <table className="table">
-          <thead><tr><th>Submitted</th><th className="hide-sm">Location</th><th className="hide-sm">Device</th>{previewCols.map(c=>(<th key={c}>{labels[c]}</th>))}<th></th></tr></thead>
+          <thead><tr><th className="th-sort" onClick={()=>toggleSort("created_at")}>Submitted{caret("created_at")}</th><th className="hide-sm th-sort" onClick={()=>toggleSort("__loc")}>Location{caret("__loc")}</th><th className="hide-sm th-sort" onClick={()=>toggleSort("__dev")}>Device{caret("__dev")}</th>{previewCols.map(c=>(<th key={c} className="th-sort" onClick={()=>toggleSort(c)}>{labels[c]}{caret(c)}</th>))}<th></th></tr></thead>
           <tbody>
-            {filtered.map(r=>(
+            {sorted.map(r=>(
               <tr key={r.id} className="clickable" onClick={()=>setOpen(r)}>
                 <td style={{fontSize:13}}>{fmtDate(r.created_at)}{r.meta && r.meta.payment && <span className={"pay-chip " + (r.meta.payment.status === "paid" ? "paid" : "due")}>{r.meta.payment.status === "paid" ? "Paid" : "Unpaid"}</span>}</td>
                 <td className="hide-sm" style={{fontSize:13}}>{[r.meta.city, r.meta.country].filter(Boolean).join(", ") || "-"}</td>
@@ -6643,7 +6719,7 @@ function AnalyticsTab({ id, form }){
   if (!a || rows === null) return <div className="muted">Loading...</div>;
   const inputQs = (form.schema.questions || []).filter((q)=> QTYPES[q.type] && QTYPES[q.type].isInput);
   return (
-    <div style={{display:"grid",gridTemplateColumns:"1fr",gap:18,maxWidth:680}}>
+    <div className="analytics-tab" style={{display:"grid",gridTemplateColumns:"1fr",gap:18,maxWidth:680}}>
       <ExportButtons id={id} form={form} rows={rows} />
       {(()=>{ const sc = rows.filter((r)=> r.meta && typeof r.meta.score === "number"); if (!sc.length) return null; const avg = sc.reduce((a,r)=> a + r.meta.score, 0) / sc.length; const mx = sc.reduce((a,r)=> Math.max(a, r.meta.maxScore || 0), 0); const best = sc.reduce((a,r)=> Math.max(a, r.meta.score), -Infinity); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>Quiz scores</div><div className="statgrid"><div><div className="bignum">{Math.round(avg * 100) / 100}{mx ? (" / " + mx) : ""}</div><div className="hint">Average</div></div><div><div className="bignum">{best}</div><div className="hint">Highest</div></div><div><div className="bignum">{sc.length}</div><div className="hint">Scored</div></div></div></div>); })()}
       {(()=>{ const st = (form.schema && form.schema.settings) || {}; if (!st.experiment) return null; const c = {}; rows.forEach((r)=>{ const v = (r.meta && r.meta.variant) || "Unassigned"; c[v] = (c[v] || 0) + 1; }); const entries = Object.entries(c).sort((a,b)=> a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0)); const mx = Math.max(1, ...entries.map((e)=>e[1])); return (<div className="card pad-lg"><div className="label" style={{marginBottom:10}}>A/B variants</div>{entries.map(([k,n],i)=>(<div className="bar-row" key={i}><span className="k">{k === "Unassigned" ? k : ("Variant " + k)}</span><span className="track2"><span className="fill" style={{width:((n / mx) * 100) + "%"}}></span></span><span className="v">{n}</span></div>))}<div className="hint" style={{marginTop:8}}>How responses split across variants.</div></div>); })()}

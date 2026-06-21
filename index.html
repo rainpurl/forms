@@ -393,7 +393,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .himg-upload{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--line-strong);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;color:var(--ink-soft);background:var(--card);transition:border-color .12s,color .12s}
 .himg-upload:hover{border-color:var(--bo);color:var(--ink)}
 .himg-preview{display:flex;align-items:center;gap:10px}
-.himg-preview img{width:120px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.himg-preview img{width:120px;height:60px;object-fit:cover;border-radius:8px;border:1px solid transparent;box-shadow:var(--bevel-inset)}
 .form-scope .fcta{display:inline-block;background:var(--fa);color:#f5f2f0;border:0;padding:11px 22px;border-radius:10px;font-weight:600;text-decoration:none;cursor:pointer;transition:filter .12s}
 .form-scope .fcta:hover{filter:brightness(1.06)}
 
@@ -471,10 +471,10 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .slot-btn.sel{background:var(--fa);color:#f5f2f0;border-color:var(--fa)}
 .slot-btn:disabled{opacity:.5;cursor:not-allowed}
 .slot-full{display:block;font-size:9px;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
-.doc-view{display:block;margin-bottom:6px}
+.doc-view{display:block;margin-bottom:6px;border:none!important;box-shadow:var(--bevel-inset);border-radius:10px;overflow:hidden}
 .doc-fields{margin-top:14px;display:flex;flex-direction:column;gap:14px}
 .himg-preview{display:flex;align-items:center;gap:10px;margin-top:4px}
-.himg-preview img{max-height:40px;border:1px solid var(--line);border-radius:6px}
+.himg-preview img{max-height:40px;border:1px solid transparent;box-shadow:var(--bevel-inset);border-radius:6px}
 .slot-edit{margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .slot-edit-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
 .slot-edit-when{flex:1;font-size:13px}
@@ -1109,7 +1109,7 @@ body{top:0!important}
 .esign-pal-btn:active{cursor:grabbing}
 .esign-pal-btn.armed{background:var(--bo);color:#f5f2f0;border-color:transparent}
 .esign-pal-ico{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
-.esign-doc{position:relative;display:inline-block;max-width:100%;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;line-height:0;background:#fff}
+.esign-doc{position:relative;display:inline-block;max-width:100%;border:1px solid transparent;box-shadow:var(--bevel-inset);border-radius:10px;overflow:hidden;line-height:0;background:#fff}
 .esign-doc img{max-width:100%;display:block}
 .esign-doc.armed{cursor:crosshair}
 .esign-edit .pdf-page{position:relative}
@@ -1231,9 +1231,9 @@ body{top:0!important}
 .price-was{text-decoration:line-through;color:var(--ink-soft);margin-right:8px;font-weight:600}
 .price-lifetime{text-align:center;margin-top:24px}
 /* hero carousel */
-.lp-carousel-body{min-height:312px}
-.lp-slide{animation:lpFade .5s ease both}
-@keyframes lpFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.lp-carousel-body{position:relative;height:320px;padding:0;overflow:hidden}
+.lp-slide{position:absolute;inset:0;padding:22px;opacity:0;transition:opacity .55s ease;pointer-events:none}
+.lp-slide.on{opacity:1;pointer-events:auto}
 .lp-mock-rank{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .lp-rankrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:13px}
 .lp-ranknum{width:20px;height:20px;border-radius:50%;background:var(--bo);color:#f5f2f0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
@@ -1282,15 +1282,36 @@ body{top:0!important}
 
 .zeffy-embed{width:100%;min-height:640px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .zeffy-q .embed-empty{margin-top:4px}
+
+/* analytics frames recessed, not raised */
+.analytics-tab .card{box-shadow:var(--bevel-inset);border-color:transparent}
+.analytics-tab .himg-preview img,.analytics-tab img.an-img{border:1px solid transparent;box-shadow:var(--bevel-inset)}
+/* form theme applies to signature and other form-side primary buttons */
+.form-scope .btn.primary{background:var(--fa);border-color:var(--fa);color:#f5f2f0}
+.form-scope .btn.primary:hover{filter:brightness(1.05)}
+.form-scope .overlay .input,.form-scope .overlay textarea{font-family:inherit}
+/* sortable response table headers */
+.table th.th-sort{cursor:pointer;user-select:none;white-space:nowrap}
+.table th.th-sort:hover{color:var(--ink)}
+
+/* hover feedback must not shift geometry (was causing edge flicker on button borders) */
+.btn:hover,.btn.primary:hover,.btn.danger:hover,.btn.ghost:hover,.iconbtn:hover,.gbtn:hover,.addq-item:hover,.addmenu button:hover,.addq-menu button:hover,.chip-tog:hover:not(.on),.cal-nav:hover,.cal-mo:hover,.cpick-trigger:hover{transform:none}
+.form-scope .opt:hover,.form-scope .submit:hover,.form-scope .fcta:hover,.form-scope .nps button:hover,.form-scope .slot-btn:hover,.form-scope .slot-btn:hover:not(.sel),.form-scope .fbtn-ghost:hover{transform:none}
+/* dropdowns no longer reserve space for a toggle icon */
+.zsel{justify-content:flex-start}
+/* poll cells outside a given day's hours */
+.poll-cell.poll-off{background:transparent;border-color:transparent;cursor:default;pointer-events:none;box-shadow:none}
 </style>
 </head>
 <body>
 <div id="root"><div class="boot-splash" aria-hidden="true"><span class="boot-word">zetetiq</span></div></div>
 
+
 <script>window.addEventListener('error',function(e){var r=document.getElementById('root');if(!r||(r.childNodes.length&&!r.querySelector('.boot-splash')))return;r.innerHTML='<pre>'+(e.message||'Error')+'</pre>';},true);</script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
-<script>function boot(){const {
+<script>function boot(){
+const {
   useState,
   useEffect,
   useLayoutEffect,
@@ -2200,36 +2221,84 @@ function SignatureModal({
     onClick: save
   }, "Add signature"))));
 }
+function pollColHours(q, weekday) {
+  if (q.perDayHours && q.dayHours && q.dayHours[weekday]) {
+    const d = q.dayHours[weekday];
+    let sh = d.s == null ? 9 : d.s,
+      eh = d.e == null ? 17 : d.e;
+    if (eh <= sh) eh = sh + 1;
+    return {
+      sh,
+      eh
+    };
+  }
+  let sh = q.startHour == null ? 9 : q.startHour,
+    eh = q.endHour == null ? 17 : q.endHour;
+  if (eh <= sh) eh = sh + 1;
+  return {
+    sh,
+    eh
+  };
+}
+function pollDates(q) {
+  if ((q.pollMode || "dates") === "range") {
+    const out = [];
+    const s = q.rangeStart,
+      e = q.rangeEnd;
+    if (s && e) {
+      let d = new Date(s + "T00:00");
+      const end = new Date(e + "T00:00");
+      let guard = 0;
+      while (!isNaN(d) && !isNaN(end) && d <= end && guard < 31) {
+        out.push(zYmd(d));
+        d.setDate(d.getDate() + 1);
+        guard++;
+      }
+    }
+    return out;
+  }
+  return (Array.isArray(q.dates) ? q.dates : []).slice().sort();
+}
 function pollLayout(q) {
   const dateOnly = !!q.dateOnly;
+  const mode = q.pollMode || "dates";
+  const step = Math.max(5, q.slotMinutes || 60);
   const cols = [];
-  if ((q.pollMode || "dates") === "weekdays") {
+  if (mode === "weekdays") {
     const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     (q.weekdays || []).slice().sort((a, b) => a - b).forEach(d => {
-      if (names[d]) cols.push({
-        key: "d" + d,
-        label: names[d]
-      });
+      if (names[d]) {
+        const h = pollColHours(q, d);
+        cols.push({
+          key: "d" + d,
+          label: names[d],
+          sh: h.sh,
+          eh: h.eh
+        });
+      }
     });
   } else {
-    (q.dates || []).slice().sort().forEach(d => {
+    pollDates(q).forEach(d => {
       const dd = new Date(d + "T00:00");
+      const wd = isNaN(dd) ? 0 : dd.getDay();
+      const h = pollColHours(q, wd);
       cols.push({
         key: d,
         label: isNaN(dd) ? d : dd.toLocaleDateString(undefined, {
           month: "short",
           day: "numeric"
-        })
+        }),
+        sh: h.sh,
+        eh: h.eh
       });
     });
   }
   const rows = [];
-  if (!dateOnly) {
-    let sh = q.startHour == null ? 9 : q.startHour;
-    let eh = q.endHour == null ? 17 : q.endHour;
-    const step = q.slotMinutes || 60;
-    if (eh <= sh) eh = sh + 1;
-    for (let mn = sh * 60; mn < eh * 60; mn += step) {
+  if (!dateOnly && cols.length) {
+    let minSh = Math.min.apply(null, cols.map(c => c.sh));
+    let maxEh = Math.max.apply(null, cols.map(c => c.eh));
+    if (maxEh <= minSh) maxEh = minSh + 1;
+    for (let mn = minSh * 60; mn < maxEh * 60; mn += step) {
       const hh = Math.floor(mn / 60),
         mm = mn % 60;
       const t = String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
@@ -2238,7 +2307,8 @@ function pollLayout(q) {
       const lbl = h12 + (mm ? ":" + String(mm).padStart(2, "0") : "") + ap;
       rows.push({
         time: t,
-        label: lbl
+        label: lbl,
+        minutes: mn
       });
     }
   }
@@ -2267,6 +2337,7 @@ function buildPollMatrix(q, rows) {
       });
     } else {
       lay.rows.forEach(rw => {
+        if (rw.minutes < c.sh * 60 || rw.minutes >= c.eh * 60) return;
         slots.push({
           key: slotKey(c.key, rw, false),
           label: c.label + " " + rw.label
@@ -2463,6 +2534,10 @@ function PollRenderer({
     key: "rh" + r.time,
     className: "poll-rowhead"
   }, r.label)].concat(lay.cols.map(c => {
+    if (r.minutes < c.sh * 60 || r.minutes >= c.eh * 60) return /*#__PURE__*/React.createElement("div", {
+      key: c.key + "-x-" + r.time,
+      className: "poll-cell poll-off"
+    });
     const k = slotKey(c.key, r, false);
     if (heat) {
       const n = heatCount(k);
@@ -2629,6 +2704,27 @@ function PollConfig({
     weekdays: wk.indexOf(d) >= 0 ? wk.filter(x => x !== d) : wk.concat([d]).sort((a, b) => a - b)
   });
   const WN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const datesArr = pollDates(q);
+  const dayList = pollMode === "weekdays" ? wk.slice().sort((a, b) => a - b) : Array.from(new Set(datesArr.map(d => {
+    const dd = new Date(d + "T00:00");
+    return isNaN(dd) ? -1 : dd.getDay();
+  }).filter(x => x >= 0))).sort((a, b) => a - b);
+  const slotPreset = [15, 30, 60].indexOf(q.slotMinutes || 60) >= 0 ? String(q.slotMinutes || 60) : "custom";
+  const hourOpts = Array.from({
+    length: 24
+  }).map((_, h) => /*#__PURE__*/React.createElement("option", {
+    key: h,
+    value: h
+  }, hourLabel(h)));
+  const endOpts = Array.from({
+    length: 24
+  }).map((_, i) => {
+    const h = i + 1;
+    return /*#__PURE__*/React.createElement("option", {
+      key: h,
+      value: h
+    }, hourLabel(h));
+  });
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "What to poll"), /*#__PURE__*/React.createElement("div", {
@@ -2640,6 +2736,12 @@ function PollConfig({
       pollMode: "dates"
     })
   }, "Specific dates"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "seg-btn" + (pollMode === "range" ? " on" : ""),
+    onClick: () => update({
+      pollMode: "range"
+    })
+  }, "Date range"), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "seg-btn" + (pollMode === "weekdays" ? " on" : ""),
     onClick: () => update({
@@ -2686,7 +2788,43 @@ function PollConfig({
     },
     title: "Remove",
     onClick: () => rmDate(d)
-  }, "×"))))) : /*#__PURE__*/React.createElement("div", {
+  }, "×"))))) : pollMode === "range" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Start date",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(DateField, {
+    className: "input",
+    value: q.rangeStart || "",
+    onChange: e => update({
+      rangeStart: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "End date",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(DateField, {
+    className: "input",
+    value: q.rangeEnd || "",
+    onChange: e => update({
+      rangeEnd: e.target.value
+    })
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 6
+    }
+  }, datesArr.length ? datesArr.length + (datesArr.length === 1 ? " day" : " days") + " in this range." + (datesArr.length >= 31 ? " Ranges are capped at 31 days." : "") : "Pick a start and end date.")) : /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 6,
@@ -2707,55 +2845,126 @@ function PollConfig({
     }),
     label: "Poll days only (no hourly grid)"
   }), !q.dateOnly && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement(Toggle, {
+    checked: !!q.perDayHours,
+    onChange: c => update({
+      perDayHours: c
+    }),
+    label: "Set different hours per day"
+  }), !q.perDayHours ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 10,
       marginTop: 8
     }
   }, /*#__PURE__*/React.createElement(Field, {
-    label: "From hour",
-    style: {
-      flex: 1
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
-    type: "number",
-    min: "0",
-    max: "23",
-    value: q.startHour == null ? 9 : q.startHour,
-    onChange: e => update({
-      startHour: Math.max(0, Math.min(23, parseInt(e.target.value || "0", 10)))
-    })
-  })), /*#__PURE__*/React.createElement(Field, {
-    label: "To hour",
-    style: {
-      flex: 1
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "input",
-    type: "number",
-    min: "1",
-    max: "24",
-    value: q.endHour == null ? 17 : q.endHour,
-    onChange: e => update({
-      endHour: Math.max(1, Math.min(24, parseInt(e.target.value || "17", 10)))
-    })
-  })), /*#__PURE__*/React.createElement(Field, {
-    label: "Slot",
+    label: "From",
     style: {
       flex: 1
     }
   }, /*#__PURE__*/React.createElement(Select, {
     className: "select",
-    value: q.slotMinutes || 60,
+    value: String(q.startHour == null ? 9 : q.startHour),
     onChange: e => update({
-      slotMinutes: parseInt(e.target.value, 10)
+      startHour: parseInt(e.target.value, 10)
     })
+  }, hourOpts)), /*#__PURE__*/React.createElement(Field, {
+    label: "To",
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(Select, {
+    className: "select",
+    value: String(q.endHour == null ? 17 : q.endHour),
+    onChange: e => update({
+      endHour: parseInt(e.target.value, 10)
+    })
+  }, endOpts))) : dayList.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginTop: 8
+    }
+  }, "Add days or dates above to set their hours.") : /*#__PURE__*/React.createElement("div", {
+    className: "dayhours",
+    style: {
+      marginTop: 8
+    }
+  }, dayList.map(i => {
+    const dh = q.dayHours && q.dayHours[i] || {
+      s: q.startHour == null ? 9 : q.startHour,
+      e: q.endHour == null ? 17 : q.endHour
+    };
+    const setDH = patch => update({
+      dayHours: {
+        ...(q.dayHours || {}),
+        [i]: {
+          ...dh,
+          ...patch
+        }
+      }
+    });
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      className: "dayhours-row"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "dayhours-day"
+    }, WN[i]), /*#__PURE__*/React.createElement(Select, {
+      className: "select",
+      value: String(dh.s),
+      onChange: e => setDH({
+        s: parseInt(e.target.value, 10)
+      })
+    }, hourOpts), /*#__PURE__*/React.createElement("span", {
+      className: "dayhours-sep"
+    }, "to"), /*#__PURE__*/React.createElement(Select, {
+      className: "select",
+      value: String(dh.e),
+      onChange: e => setDH({
+        e: parseInt(e.target.value, 10)
+      })
+    }, endOpts));
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Slot length",
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement(Select, {
+    className: "select",
+    value: slotPreset,
+    onChange: e => {
+      const v = e.target.value;
+      if (v === "custom") update({
+        slotMinutes: [15, 30, 60].indexOf(q.slotMinutes || 60) >= 0 ? 45 : q.slotMinutes || 45
+      });else update({
+        slotMinutes: parseInt(v, 10)
+      });
+    }
   }, /*#__PURE__*/React.createElement("option", {
     value: "60"
   }, "1 hour"), /*#__PURE__*/React.createElement("option", {
     value: "30"
-  }, "30 min")))), /*#__PURE__*/React.createElement("div", {
+  }, "30 min"), /*#__PURE__*/React.createElement("option", {
+    value: "15"
+  }, "15 min"), /*#__PURE__*/React.createElement("option", {
+    value: "custom"
+  }, "Custom"))), slotPreset === "custom" && /*#__PURE__*/React.createElement(Field, {
+    label: "Custom slot length (minutes)",
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    min: "5",
+    step: "5",
+    value: q.slotMinutes || 45,
+    onChange: e => update({
+      slotMinutes: Math.max(5, parseInt(e.target.value || "45", 10))
+    })
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "panel-section"
   }, "Poll options"), /*#__PURE__*/React.createElement(Toggle, {
     checked: !!q.ifNeeded,
@@ -6258,11 +6467,13 @@ const QTYPES = {
       windowEnd: "",
       perDayHours: false,
       dayHours: {},
+      rangeStart: "",
+      rangeEnd: "",
       freePick: false,
       ifNeeded: false,
       hideResponses: false
     }),
-    summary: q => (q.mode || "booking") === "poll" ? "Group poll \u00b7 " + ((q.pollMode || "dates") === "weekdays" ? (q.weekdays || []).length + " weekdays" : (q.dates || []).length + " dates") : {
+    summary: q => (q.mode || "booking") === "poll" ? "Group availability poll \u00b7 " + ((q.pollMode || "dates") === "weekdays" ? (q.weekdays || []).length + " weekdays" : (q.dates || []).length + " dates") : {
       one_on_one: "One on one",
       group: "Group",
       collective: "Collective",
@@ -9283,14 +9494,15 @@ function HeroCarousel() {
     className: "lp-win-bar"
   }, /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null)), /*#__PURE__*/React.createElement("div", {
     className: "lp-win-body lp-carousel-body"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lp-slide",
-    key: i
+  }, slides.map((sl, d) => /*#__PURE__*/React.createElement("div", {
+    className: "lp-slide" + (d === i ? " on" : ""),
+    key: d,
+    "aria-hidden": d === i ? undefined : "true"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-mock-title"
-  }, s.title), s.body, /*#__PURE__*/React.createElement("div", {
+  }, sl.title), sl.body, /*#__PURE__*/React.createElement("div", {
     className: "lp-mock-btn"
-  }, "Submit"))), /*#__PURE__*/React.createElement("div", {
+  }, "Submit")))), /*#__PURE__*/React.createElement("div", {
     className: "lp-dots"
   }, slides.map((_, d) => /*#__PURE__*/React.createElement("span", {
     key: d,
@@ -11109,10 +11321,7 @@ function Select({
     onClick: () => !disabled && setOpen(o => !o)
   }, /*#__PURE__*/React.createElement("span", {
     className: "zsel-label"
-  }, lbl), /*#__PURE__*/React.createElement("span", {
-    className: "zsel-arrow",
-    "aria-hidden": "true"
-  }, "▾")), open && /*#__PURE__*/React.createElement("div", {
+  }, lbl)), open && /*#__PURE__*/React.createElement("div", {
     className: "zsel-menu",
     role: "listbox"
   }, opts.map((o, i) => /*#__PURE__*/React.createElement("button", {
@@ -11579,10 +11788,7 @@ function ColorPick({
     }
   }), /*#__PURE__*/React.createElement("span", {
     className: "mono cpick-val"
-  }, v), /*#__PURE__*/React.createElement("span", {
-    className: "zsel-arrow",
-    "aria-hidden": "true"
-  }, "▾")), open && /*#__PURE__*/React.createElement("div", {
+  }, v)), open && /*#__PURE__*/React.createElement("div", {
     className: "cpick-pop"
   }, /*#__PURE__*/React.createElement("div", {
     className: "cpick-grid"
@@ -13366,6 +13572,26 @@ function ThemePanel({
   } = useApp();
   const proFeat = !(user && user.limits && user.limits.proFeatures === false);
   const headerImage = form.schema.settings.headerImage;
+  const [kits, setKits] = useState(null);
+  useEffect(() => {
+    api.listBrandKits().then(({
+      ok,
+      data
+    }) => setKits(ok && data && data.kits ? data.kits : [])).catch(() => setKits([]));
+  }, []);
+  const applyKit = k => {
+    setTheme({
+      primary: k.primary,
+      secondary: k.secondary,
+      accent: k.accent,
+      font: k.font || "sans",
+      customFont: k.customFont || ""
+    });
+    if (k.logo) setSettings({
+      headerImage: k.logo
+    });
+    if (k.customFont) loadGoogleFont(k.customFont);
+  };
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "panel-title"
   }, "Theme"), /*#__PURE__*/React.createElement("div", {
@@ -13394,7 +13620,22 @@ function ThemePanel({
     style: {
       background: p.primary
     }
-  }), p.name)))), /*#__PURE__*/React.createElement(ColorPick, {
+  }), p.name)))), kits && kits.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "label"
+  }, "Brand kits"), /*#__PURE__*/React.createElement("div", {
+    className: "theme-presets"
+  }, kits.map(k => /*#__PURE__*/React.createElement("button", {
+    key: k.id,
+    type: "button",
+    className: "preset",
+    onClick: () => applyKit(k),
+    title: k.name
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sw",
+    style: {
+      background: k.primary
+    }
+  }), k.name)))), /*#__PURE__*/React.createElement(ColorPick, {
     label: "Primary",
     value: form.theme.primary,
     onChange: v => setTheme({
@@ -16268,9 +16509,19 @@ async function fetchFontB64(url) {
 }
 const PDF_FONT_FILES = {
   sans: {
-    family: "Figtree",
-    reg: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/figtree/Figtree_400Regular.ttf",
-    bold: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/figtree/Figtree_700Bold.ttf"
+    family: "Inter",
+    reg: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter/Inter_400Regular.ttf",
+    bold: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter/Inter_700Bold.ttf"
+  },
+  serif: {
+    family: "IBMPlexSerif",
+    reg: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-serif/IBMPlexSerif_400Regular.ttf",
+    bold: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-serif/IBMPlexSerif_700Bold.ttf"
+  },
+  mono: {
+    family: "IBMPlexMono",
+    reg: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_400Regular.ttf",
+    bold: "https://cdn.jsdelivr.net/npm/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_700Bold.ttf"
   },
   slab: {
     family: "RobotoSlab",
@@ -16284,14 +16535,14 @@ const PDF_FONT_FILES = {
   }
 };
 async function loadPdfFonts(doc, key) {
-  const builtin = {
+  const fb = {
     serif: "times",
     mono: "courier"
   };
-  if (builtin[key]) return {
-    family: builtin[key]
+  const f = PDF_FONT_FILES[key];
+  if (!f) return {
+    family: fb[key] || "helvetica"
   };
-  const f = PDF_FONT_FILES[key] || PDF_FONT_FILES.sans;
   try {
     const regFile = f.family + "-R.ttf";
     doc.addFileToVFS(regFile, await fetchFontB64(f.reg));
@@ -16311,7 +16562,7 @@ async function loadPdfFonts(doc, key) {
     };
   } catch (e) {
     return {
-      family: "helvetica"
+      family: fb[key] || "helvetica"
     };
   }
 }
@@ -16806,6 +17057,8 @@ function ResponsesTab({
   form,
   setForm
 }) {
+  const [sortKey, setSortKey] = useState("created_at");
+  const [sortDir, setSortDir] = useState("desc");
   const {
     toast
   } = useApp();
@@ -16935,6 +17188,31 @@ function ResponsesTab({
     if (qq && rowText(r).indexOf(qq) === -1) return false;
     return true;
   });
+  const sortVal = (r, key) => {
+    const mm = r.meta || {};
+    if (key === "created_at") return r.created_at || "";
+    if (key === "__loc") return [mm.city, mm.country].filter(Boolean).join(", ");
+    if (key === "__dev") return [mm.browser, mm.os].filter(Boolean).join(" / ");
+    return cell(r.data[key]) || "";
+  };
+  const cmp = (a, b) => {
+    const x = sortVal(a, sortKey),
+      y = sortVal(b, sortKey);
+    let c;
+    if (sortKey === "created_at") c = String(x).localeCompare(String(y));else c = String(x).localeCompare(String(y), undefined, {
+      numeric: true,
+      sensitivity: "base"
+    });
+    return sortDir === "asc" ? c : -c;
+  };
+  const toggleSort = key => {
+    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");else {
+      setSortKey(key);
+      setSortDir(key === "created_at" ? "desc" : "asc");
+    }
+  };
+  const caret = key => sortKey === key ? sortDir === "asc" ? " ▲" : " ▼" : "";
+  const sorted = filtered.slice().sort(cmp);
   if (rows === null) return /*#__PURE__*/React.createElement("div", {
     className: "muted"
   }, "Loading...");
@@ -16951,7 +17229,7 @@ function ResponsesTab({
     style: {
       marginBottom: 8
     }
-  }, "Group poll"), pollQ.finalSlot ? /*#__PURE__*/React.createElement("div", {
+  }, "Group availability poll"), pollQ.finalSlot ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 10,
@@ -17062,13 +17340,20 @@ function ResponsesTab({
     }
   }, /*#__PURE__*/React.createElement("table", {
     className: "table"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Submitted"), /*#__PURE__*/React.createElement("th", {
-    className: "hide-sm"
-  }, "Location"), /*#__PURE__*/React.createElement("th", {
-    className: "hide-sm"
-  }, "Device"), previewCols.map(c => /*#__PURE__*/React.createElement("th", {
-    key: c
-  }, labels[c])), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, filtered.map(r => /*#__PURE__*/React.createElement("tr", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    className: "th-sort",
+    onClick: () => toggleSort("created_at")
+  }, "Submitted", caret("created_at")), /*#__PURE__*/React.createElement("th", {
+    className: "hide-sm th-sort",
+    onClick: () => toggleSort("__loc")
+  }, "Location", caret("__loc")), /*#__PURE__*/React.createElement("th", {
+    className: "hide-sm th-sort",
+    onClick: () => toggleSort("__dev")
+  }, "Device", caret("__dev")), previewCols.map(c => /*#__PURE__*/React.createElement("th", {
+    key: c,
+    className: "th-sort",
+    onClick: () => toggleSort(c)
+  }, labels[c], caret(c))), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, sorted.map(r => /*#__PURE__*/React.createElement("tr", {
     key: r.id,
     className: "clickable",
     onClick: () => setOpen(r)
@@ -17904,6 +18189,7 @@ function AnalyticsTab({
   }, "Loading...");
   const inputQs = (form.schema.questions || []).filter(q => QTYPES[q.type] && QTYPES[q.type].isInput);
   return /*#__PURE__*/React.createElement("div", {
+    className: "analytics-tab",
     style: {
       display: "grid",
       gridTemplateColumns: "1fr",

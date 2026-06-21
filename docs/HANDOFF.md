@@ -43,6 +43,26 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+A smoother landing carousel, recessed frames, sortable responses, brand kits in the Theme tab, exact PDF fonts, a richer group availability poll, and several interaction fixes.
+
+1. The landing page carousel now cross fades in place instead of changing height, so the page no longer jitters as it cycles through examples.
+2. When a respondent adds a signature, the draw or type box opens as a popup centered on their screen, so there is no scrolling to find it on a long or multi page document. The box now also uses the form's own color and font.
+3. Frames on the analytics tab, and any image or document previews, are recessed into the page rather than raised. The document preview shown on a form no longer has a grey outline border; it is recessed as well.
+4. The form's color and font, when set, now apply to everything the respondent sees, including the signature box.
+5. In the responses table you can click any column header to sort by that column, A to Z or Z to A. The default is still by submission time, newest first.
+6. A brand kit saved in Brand studio now also appears at the bottom of the Theme tab. Applying a kit, from either Brand studio or the Theme tab, updates the live preview right away, not only the saved form.
+7. PDF exports now match the form's font: Inter for Sans and IBM Plex Serif for Serif. A custom Google font still falls back to that base family in the printable report.
+8. The scheduling feature's poll mode is now called "Group availability poll" everywhere it is named.
+9. The poll's time window uses US times from dropdowns, for example 9 AM to 5 PM, instead of typed 24 hour numbers.
+10. The poll can use different hours for each day. Turn on "Set different hours per day" and choose a start and end time per day; the grid greys out the hours that do not apply to a given day.
+11. The poll's slot length offers 1 hour, 30 minutes, 15 minutes, or a custom number of minutes.
+12. When setting up a poll there is a third option, Date range, alongside Specific dates and Days of the week. A range is capped at 31 days.
+13. Buttons no longer shift position when the cursor sits on their edge, which removes the flicker some buttons showed on hover.
+14. Dropdown menus no longer show a small chevron icon.
+
+Backend was not changed this release. Upload only index.html and redeploy. No database migration is needed. Note: a custom Google font in a form still falls back to a standard family in the printable PDF.
+
+## Previous release
 Privacy and terms pages, a cleaner footer, a nonprofit tier, and Zeffy donation embeds.
 
 1. There are now Privacy policy and Terms of service pages at /privacy and /terms. They are written in plain language and cover what is collected, how it is used, who it is shared with, payments through Stripe and Zeffy, cookies, retention, security, your choices, and Texas governing law. Both pages are linked in the footer.
@@ -56,7 +76,7 @@ Privacy and terms pages, a cleaner footer, a nonprofit tier, and Zeffy donation 
 
 Backend changed this release. Upload both index.html and functions/api/[[path]].js, then redeploy. No database migration is needed. To grant the nonprofit features, open the admin console, set the user's plan to Nonprofit, and that account will then see the Donations (Zeffy) question type.
 
-## Previous release
+## Earlier release
 Drag animation fix, landing page refresh, and form dashboard cleanup.
 
 1. Question reordering now animates. The dragged card lifts and follows your cursor, and the other cards slide out of the way and settle smoothly. The previous version attached its tracking to the small drag handle, so movement could stall once the cursor left the handle; it now tracks across the whole page.
