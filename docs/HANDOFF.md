@@ -43,6 +43,10 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+- Reverted the colored button experiment. The radial center-to-edge gradient looked wrong, so the blue primary and red danger buttons are back to the simple recessed look at rest (matching the white controls), lifting on hover and pressing on click.
+- Email is confirmed working end to end. The earlier bounces were stale, generated before the Cloudflare destination address finished verifying; a fresh send after verification settled delivers normally.
+
+## Recent changes
 - Colored buttons (the blue primary and red danger) no longer use the inset recessed look. At rest they now have a radial gradient: the full color sits in the center and fades into the surface color by the edges, with a soft raised bevel so they still read as buttons. On hover they fill to the solid darker color and lift; on click they press in. Text stays light over the colored core. The gradient stops (color holds to about 42 percent, fades to the surface by the edge) are easy to retune in the ".btn.primary" and ".btn.danger" rules if the fade should be stronger or weaker.
 
 ## Recent changes
@@ -79,6 +83,18 @@ Now Gmail can compose and reply as support@zetetiq.com, and replies to received 
 Optional, transactional sender: once zetetiq.com is verified in Resend you can also change the MAIL_FROM environment variable to a zetetiq.com address (for example "zetetiq <support@zetetiq.com>") so the app's own emails come from the domain. Redeploy after changing it.
 
 The "Dedicated support" perk on the EDU/Non-profit plan is a promise to those users, so support@zetetiq.com is the address to publish for it.
+
+## Troubleshooting: "550 5.1.1 Address does not exist" when emailing support@zetetiq.com
+
+This bounce comes from Cloudflare's mail server (route1.mx.cloudflare.net), which means DNS and MX are pointed at Cloudflare correctly and the problem is only that Email Routing has no active route for support@zetetiq.com right now. Sending from support@ is unaffected. Fix it in the Cloudflare dashboard, zetetiq.com zone, Email, Email Routing:
+
+1. Confirm Email Routing status shows Enabled (not a setup banner).
+2. Open the Destination addresses tab. The Gmail you forward to must show Verified. If it shows Pending, resend the verification and click the link in that Gmail. Cloudflare will not deliver to an unverified destination.
+3. Open the Routing rules tab, Custom addresses. There must be a row for support@zetetiq.com with action Send to your verified Gmail and the toggle on. If it is missing, create it. If it exists but is off, enable it. If its destination is unverified, do step 2 first.
+4. Most robust safety net: enable the Catch-all address (Routing rules, Catch-all) pointed at the same verified Gmail, so any address at zetetiq.com forwards even without a specific custom row.
+5. Wait a minute for the change to take effect, then send a fresh test to support@zetetiq.com.
+
+Likely cause here: the support@ custom address was removed or disabled, or the earlier Gmail confirmation arrived via a catch-all that was later turned off. Recreating or enabling the support@ rule (or the catch-all) resolves it.
 
 ## Recent changes
 - Document e-sign placement is back in a large centered modal. The side panel has an upload and a "Place fields on the document" button; clicking it opens a wide modal with the document and the field palette, so there is room to drop fields precisely. Drag a field type onto the document, or click a type then click a spot. Placed fields can be dragged to move and dragged by the corner dot to resize, and default to a standard size per type.
