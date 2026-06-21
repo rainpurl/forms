@@ -229,7 +229,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .b-rail button{width:38px;height:38px;border:0;background:none;border-radius:9px;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center}
 .b-rail button:hover{background:var(--hover);color:var(--ink)}
 .b-rail button.active{background:rgba(92,136,205,.16);color:var(--bo)}
-.b-panel{width:320px;flex:none;background:var(--card);border-right:0;box-shadow:1px 0 0 var(--line-strong);overflow:auto;padding:18px}
+.b-panel{width:352px;flex:none;background:var(--card);border-right:0;box-shadow:1px 0 0 var(--line-strong);overflow:auto;padding:18px}
 .panel-title{font-family:var(--display);font-size:18px;margin-bottom:14px}
 .panel-section{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin:16px 0 9px;padding-top:13px;border-top:1px solid var(--line)}
 .panel-section:first-of-type{border-top:0;padding-top:0;margin-top:4px}
@@ -284,7 +284,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .b-preview{flex:1;overflow:auto;background:var(--paper)}
 @media(max-width:860px){
   .b-rail{display:none}
-  .b-panel{width:250px;padding:14px}
+  .b-panel{width:288px;padding:14px}
   .addq-menu{grid-template-columns:1fr;width:240px}
 }
 
@@ -1731,7 +1731,7 @@ function PollRenderer({ q, value, onChange, error, poll, formId, preview }){
   const heatDenom = useSub ? activePeople.length : total;
   const heatCount = (k)=>{ if (useSub) return activePeople.filter((p)=> (p.available || []).indexOf(k) >= 0).length; return (poll && poll.counts && poll.counts[k]) || 0; };
   const heatTitle = (k)=>{ const src = useSub ? activePeople : people; if (src){ const names = src.filter((p)=> (p.available || []).indexOf(k) >= 0).map((p)=> p.name || "Someone"); return names.length ? names.join(", ") : "No one yet"; } return ((poll && poll.counts && poll.counts[k]) || 0) + " available"; };
-  const loadMine = ()=>{ if (!formId || !String(val.name || "").trim()){ try { window.alert("Enter your name first."); } catch (e) {} return; } api.pollLoad(formId, q.id, val.name, val.password || "").then(({ ok, data })=>{ if (!ok || !data) return; if (data.locked){ try { window.alert("That name is protected. Enter the matching password to load it."); } catch (e) {} return; } if (data.found){ onChange({ ...(value || {}), available: data.available || [], maybe: data.maybe || [] }); } else { try { window.alert("No saved availability found for that name."); } catch (e) {} } }); };
+  const loadMine = ()=>{ if (!formId || !String(val.name || "").trim()){ try { window.alert("Enter your name first."); } catch (e) {} return; } if (!String(val.password || "").trim()){ try { window.alert("Enter the password you set when you saved your availability. A password is required to load a saved entry."); } catch (e) {} return; } api.pollLoad(formId, q.id, val.name, val.password || "").then(({ ok, data })=>{ if (!ok || !data) return; if (data.locked){ try { window.alert("That name and password do not match a saved entry. Loading an availability needs the password that was set when it was saved."); } catch (e) {} return; } if (data.found){ onChange({ ...(value || {}), available: data.available || [], maybe: data.maybe || [] }); } else { try { window.alert("No saved availability found for that name."); } catch (e) {} } }); };
   const colTemplate = "68px repeat(" + lay.cols.length + ", minmax(34px, 1fr))";
   const gridBody = (heat)=> (lay.dateOnly
     ? [<div key="rh" className="poll-rowhead"></div>].concat(lay.cols.map((c)=>{ const k = slotKey(c.key, null, true); if (heat){ const n = heatCount(k); const op = heatDenom ? Math.min(1, n/heatDenom) : 0; return (<div key={k} className="poll-cell poll-heatcell" title={heatTitle(k)} style={{background: n ? ("rgba(47,158,99," + (0.18 + op*0.72) + ")") : "transparent"}}>{n || ""}</div>); } const st = cellState(k); return (<div key={k} className={"poll-cell poll-" + st} onPointerDown={()=>start(k)} onPointerOver={()=>enter(k)} data-key={k}></div>); }))
@@ -1741,7 +1741,7 @@ function PollRenderer({ q, value, onChange, error, poll, formId, preview }){
     <QLabel q={q} />
     {q.meetingTitle && <div className="mt-card"><div className="mt-title">{q.meetingTitle}</div></div>}
     {q.finalSlot && <div className="poll-final"><span className="badge open">Confirmed</span> <strong>{fmtPollSlot(q.finalSlot, q)}</strong></div>}
-    <div className="poll-name"><input className="finput" placeholder="Your name" value={val.name || ""} onChange={(e)=>setName(e.target.value)} /><input className="finput" type="password" placeholder="Password (optional)" value={val.password || ""} onChange={(e)=>onChange({ ...(value || {}), name: val.name || "", available: avail, maybe: maybe, password: e.target.value })} />{formId && !preview && <button type="button" className="btn sm ghost" onClick={loadMine}>Load mine</button>}</div>
+    <div className="poll-name"><input className="finput" placeholder="Your name" value={val.name || ""} onChange={(e)=>setName(e.target.value)} /><input className="finput" type="password" placeholder="Password (set one to edit later)" value={val.password || ""} onChange={(e)=>onChange({ ...(value || {}), name: val.name || "", available: avail, maybe: maybe, password: e.target.value })} />{formId && !preview && <button type="button" className="btn sm ghost" onClick={loadMine}>Load mine</button>}</div>
     {tz && <div className="hint" style={{margin:"2px 0 8px"}}>Times shown in your time zone ({tz}).</div>}
     {q.ifNeeded && <div className="poll-modes"><button type="button" className={"btn sm" + (paintMode === "yes" ? " primary" : " ghost")} onClick={()=>setPaintMode("yes")}>Available</button><button type="button" className={"btn sm" + (paintMode === "maybe" ? " primary" : " ghost")} onClick={()=>setPaintMode("maybe")}>If needed</button></div>}
     {lay.cols.length === 0 ? <div className="muted" style={{fontSize:13}}>No dates set up for this poll yet.</div> : (<>
@@ -4710,13 +4710,15 @@ function DateCalendar({ value, min, max, onPick }){
     </>)}
   </div>);
 }
+function calcPop(ref, w, h, align){ const el = ref && ref.current; if (!el) return null; const r = el.getBoundingClientRect(); const vw = window.innerWidth, vh = window.innerHeight; let left = (align === "right") ? (r.right - w) : r.left; let top = r.bottom + 6; if (left + w > vw - 8) left = vw - 8 - w; if (left < 8) left = 8; if (top + h > vh - 8) top = Math.max(8, r.top - h - 6); return { position:"fixed", top: top, left: left, right:"auto" }; }
 function DateField({ value, onChange, min, max, className, style, title, disabled, placeholder }){
-  const [open,setOpen]=useState(false); const ref=useRef(null);
-  useEffect(()=>{ if(!open) return; const h=(e)=>{ if(ref.current&&!ref.current.contains(e.target)) setOpen(false); }; const k=(e)=>{ if(e.key==="Escape") setOpen(false); }; document.addEventListener("pointerdown",h); document.addEventListener("keydown",k); return ()=>{ document.removeEventListener("pointerdown",h); document.removeEventListener("keydown",k); }; },[open]);
+  const [open,setOpen]=useState(false); const ref=useRef(null); const [pos,setPos]=useState(null);
+  const place=()=>setPos(calcPop(ref, 256, 472));
+  useEffect(()=>{ if(!open) return; place(); const h=(e)=>{ if(ref.current&&!ref.current.contains(e.target)) setOpen(false); }; const k=(e)=>{ if(e.key==="Escape") setOpen(false); }; const rp=()=>place(); document.addEventListener("pointerdown",h); document.addEventListener("keydown",k); window.addEventListener("scroll",rp,true); window.addEventListener("resize",rp); return ()=>{ document.removeEventListener("pointerdown",h); document.removeEventListener("keydown",k); window.removeEventListener("scroll",rp,true); window.removeEventListener("resize",rp); }; },[open]);
   const lbl = value ? zFmtDate(value) : (placeholder || "Pick a date");
   return (<div className="zsel-wrap" ref={ref} style={style}>
-    <button type="button" className={(className||"")+" zsel zdate"+(value?"":" zsel-ph")} disabled={disabled} title={title} aria-haspopup="dialog" aria-expanded={open} onClick={()=> !disabled && setOpen((o)=>!o)}><span className="zsel-label">{lbl}</span><span className="zdate-ico" aria-hidden="true"><ZCalIcon/></span></button>
-    {open && <div className="cal-pop"><DateCalendar value={value||""} min={min} max={max} onPick={(ds)=>{ setOpen(false); if(onChange) onChange({ target:{ value:ds } }); }} />{value && <button type="button" className="cal-clear" onClick={()=>{ setOpen(false); if(onChange) onChange({ target:{ value:"" } }); }}>Clear</button>}</div>}
+    <button type="button" className={(className||"")+" zsel zdate"+(value?"":" zsel-ph")} disabled={disabled} title={title} aria-haspopup="dialog" aria-expanded={open} onClick={()=>{ if(disabled) return; if(open){ setOpen(false); } else { setPos(calcPop(ref,256,472)); setOpen(true); } }}><span className="zsel-label">{lbl}</span><span className="zdate-ico" aria-hidden="true"><ZCalIcon/></span></button>
+    {open && <div className="cal-pop" style={pos || {position:"fixed",left:-9999,top:-9999}}><DateCalendar value={value||""} min={min} max={max} onPick={(ds)=>{ setOpen(false); if(onChange) onChange({ target:{ value:ds } }); }} />{value && <button type="button" className="cal-clear" onClick={()=>{ setOpen(false); if(onChange) onChange({ target:{ value:"" } }); }}>Clear</button>}</div>}
   </div>);
 }
 function TimeField({ value, onChange }){
@@ -4732,14 +4734,15 @@ function TimeField({ value, onChange }){
   </div>);
 }
 function DateTimeField({ value, onChange, className, style }){
-  const [open,setOpen]=useState(false); const ref=useRef(null);
-  useEffect(()=>{ if(!open) return; const h=(e)=>{ if(ref.current&&!ref.current.contains(e.target)) setOpen(false); }; const k=(e)=>{ if(e.key==="Escape") setOpen(false); }; document.addEventListener("pointerdown",h); document.addEventListener("keydown",k); return ()=>{ document.removeEventListener("pointerdown",h); document.removeEventListener("keydown",k); }; },[open]);
+  const [open,setOpen]=useState(false); const ref=useRef(null); const [pos,setPos]=useState(null);
+  const place=()=>setPos(calcPop(ref, 256, 540));
+  useEffect(()=>{ if(!open) return; place(); const h=(e)=>{ if(ref.current&&!ref.current.contains(e.target)) setOpen(false); }; const k=(e)=>{ if(e.key==="Escape") setOpen(false); }; const rp=()=>place(); document.addEventListener("pointerdown",h); document.addEventListener("keydown",k); window.addEventListener("scroll",rp,true); window.addEventListener("resize",rp); return ()=>{ document.removeEventListener("pointerdown",h); document.removeEventListener("keydown",k); window.removeEventListener("scroll",rp,true); window.removeEventListener("resize",rp); }; },[open]);
   const datePart = value ? value.slice(0,10) : ""; const timePart = (value && value.length>=16) ? value.slice(11,16) : "";
   const emit=(dp,tp)=>{ if(!dp){ if(onChange) onChange({ target:{ value:"" } }); return; } if(onChange) onChange({ target:{ value: dp+"T"+(tp||"09:00") } }); };
   const lbl = value ? (zFmtDate(datePart)+(timePart?(", "+zFmtTime(timePart)):"")) : "Pick date and time";
   return (<div className="zsel-wrap" ref={ref} style={style}>
-    <button type="button" className={(className||"")+" zsel zdate"+(value?"":" zsel-ph")} aria-haspopup="dialog" aria-expanded={open} onClick={()=>setOpen((o)=>!o)}><span className="zsel-label">{lbl}</span><span className="zdate-ico" aria-hidden="true"><ZCalIcon/></span></button>
-    {open && <div className="cal-pop"><DateCalendar value={datePart} onPick={(ds)=>emit(ds,timePart)} /><div className="cal-timerow"><span className="cal-tlabel">Time</span><TimeField value={timePart||"09:00"} onChange={(e)=>emit(datePart||zToday(),e.target.value)} /></div>{value && <button type="button" className="cal-clear" onClick={()=>{ setOpen(false); emit("",""); }}>Clear</button>}</div>}
+    <button type="button" className={(className||"")+" zsel zdate"+(value?"":" zsel-ph")} aria-haspopup="dialog" aria-expanded={open} onClick={()=>{ if(open){ setOpen(false); } else { setPos(calcPop(ref,256,540)); setOpen(true); } }}><span className="zsel-label">{lbl}</span><span className="zdate-ico" aria-hidden="true"><ZCalIcon/></span></button>
+    {open && <div className="cal-pop" style={pos || {position:"fixed",left:-9999,top:-9999}}><DateCalendar value={datePart} onPick={(ds)=>emit(ds,timePart)} /><div className="cal-timerow"><span className="cal-tlabel">Time</span><TimeField value={timePart||"09:00"} onChange={(e)=>emit(datePart||zToday(),e.target.value)} /></div>{value && <button type="button" className="cal-clear" onClick={()=>{ setOpen(false); emit("",""); }}>Clear</button>}</div>}
   </div>);
 }
 function ColorPick({ label, value, onChange }){
@@ -4821,6 +4824,11 @@ function NpsPrev({ q }){
 
 function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, onDown, dnd, cardRef }){
   const [menu, setMenu] = useState(false);
+  const menuRef = useRef(null);
+  const [menuPos, setMenuPos] = useState(null);
+  const placeMenu = ()=>setMenuPos(calcPop(menuRef, 196, 210, "right"));
+  const openMenu = ()=>{ if (menu){ setMenu(false); } else { setMenuPos(calcPop(menuRef, 196, 210, "right")); setMenu(true); } };
+  useEffect(()=>{ if(!menu) return; const close=(e)=>{ if(menuRef.current && !menuRef.current.contains(e.target)) setMenu(false); }; const rp=()=>placeMenu(); document.addEventListener("pointerdown",close); window.addEventListener("scroll",rp,true); window.addEventListener("resize",rp); return ()=>{ document.removeEventListener("pointerdown",close); window.removeEventListener("scroll",rp,true); window.removeEventListener("resize",rp); }; },[menu]);
   const handle = { onPointerDown: (e)=>dnd.beginDrag(e, index) };
   if (q.type === "block"){
     return (
@@ -4854,9 +4862,9 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
           <span className="qcc-num">Q{index + 1}</span>
           <span className="qcc-type mono">Hidden field</span>
           <span className="grow"></span>
-          <div className="qcc-menu" onClick={(e)=>e.stopPropagation()}>
-            <button className="iconbtn" title="More" onClick={()=>setMenu((m)=>!m)}>···</button>
-            {menu && (<div className="menu" style={{right:0,left:"auto"}}><button onClick={()=>{ onDup(); setMenu(false); }}>Duplicate</button><button className="danger-text" onClick={()=>{ onDel(); setMenu(false); }}>Move to trash</button></div>)}
+          <div className="qcc-menu" ref={menuRef} onClick={(e)=>e.stopPropagation()}>
+            <button className="iconbtn" title="More" onClick={openMenu}>···</button>
+            {menu && (<div className="menu" style={menuPos ? {position:"fixed",top:menuPos.top,left:menuPos.left,right:"auto"} : {position:"fixed",left:-9999,top:-9999}}><button onClick={()=>{ onDup(); setMenu(false); }}>Duplicate</button><button className="danger-text" onClick={()=>{ onDel(); setMenu(false); }}>Move to trash</button></div>)}
           </div>
         </div>
         <div className="wq-body"><div className="hint">Captures <b>{q.key || "field"}</b> {q.source === "fixed" ? "as a fixed value" : "from the URL"}, hidden from respondents. Edit it in the left panel.</div></div>
@@ -4871,10 +4879,10 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         <span className="qcc-type mono">{QTYPES[q.type].label}</span>
         {q.logic && q.logic.q && <span className="qcc-type mono" style={{color:"var(--bo)"}}>conditional</span>}
         <span className="grow"></span>
-        <div className="qcc-menu" onClick={(e)=>e.stopPropagation()}>
-          <button className="iconbtn" title="More" onClick={()=>setMenu((m)=>!m)}>···</button>
+        <div className="qcc-menu" ref={menuRef} onClick={(e)=>e.stopPropagation()}>
+          <button className="iconbtn" title="More" onClick={openMenu}>···</button>
           {menu && (
-            <div className="menu" style={{right:0,left:"auto"}}>
+            <div className="menu" style={menuPos ? {position:"fixed",top:menuPos.top,left:menuPos.left,right:"auto"} : {position:"fixed",left:-9999,top:-9999}}>
               <button onClick={()=>{ onUp(); setMenu(false); }}>Move up</button>
               <button onClick={()=>{ onDown(); setMenu(false); }}>Move down</button>
               <button onClick={()=>{ onDup(); setMenu(false); }}>Duplicate</button>
@@ -5845,9 +5853,8 @@ function Builder({ formId }){
 
   const openShare = () => {
     if (!id){ toast("Publish your form first to share it."); return; }
-    const slug = form.slug; if (!slug){ toast("Reopen this form from your dashboard to share it."); return; }
-    const uname = form.username || (user && user.username) || "admin";
-    setShare(window.location.origin + "/" + (uname === "admin" ? "" : uname + "/") + slug);
+    if (!form.slug){ toast("Reopen this form from your dashboard to share it."); return; }
+    setShare(true);
   };
 
   return (
@@ -5878,7 +5885,7 @@ function Builder({ formId }){
         </div>
       </div>
 
-      {share && <ShareModal link={share} title={form.title} onClose={()=>setShare(null)} />}
+      {share && <ShareModal id={id} form={form} setForm={setForm} onClose={()=>setShare(null)} />}
 
       {preview ? (
         <div className="b-preview"><div style={{maxWidth:680, margin:"26px auto", padding:"0 18px"}}><FormRenderer form={form} preview /></div></div>
@@ -6338,18 +6345,35 @@ function answerText(v){
   return String(v);
 }
 
-function ShareModal({ link, title, onClose }){
+function ShareModal({ id, form, setForm, onClose }){
   const { toast } = useApp();
-  const embed = '<iframe src="' + link + '" width="100%" height="800" style="border:0;max-width:680px" title="' + String(title || "Form").replace(/"/g, "&quot;") + '"></iframe>';
+  const base = (form.username === "admin") ? (window.location.origin + "/") : (window.location.origin + "/" + form.username + "/");
+  const link = base + form.slug;
+  const embed = '<iframe src="' + link + '" width="100%" height="800" style="border:0;max-width:680px" title="' + String(form.title || "Form").replace(/"/g, "&quot;") + '"></iframe>';
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(form.slug);
+  const [saving, setSaving] = useState(false);
+  useEffect(()=>{ setVal(form.slug); }, [form.slug]);
   const copy = (text, what)=>{ try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text); } catch (e) {} toast(what + " copied"); };
+  const save = ()=>{ const next = (val || "").trim(); if (!next || next === form.slug){ setEditing(false); setVal(form.slug); return; } setSaving(true); api.updateForm(id, { slug: next }).then(({ ok, data })=>{ setSaving(false); if (ok && data && data.slug){ setForm((f)=>({ ...f, slug: data.slug })); setEditing(false); toast("Link updated"); } else { toast("Could not update the link. That address may be taken."); } }); };
   return (
     <Modal title="Share this form" onClose={onClose}>
       <div className="pad-lg">
         <div className="label">Public link</div>
-        <div className="row" style={{gap:8,marginBottom:18}}>
-          <input className="input mono" readOnly value={link} onFocus={(e)=>e.target.select()} style={{fontSize:13}} />
-          <button className="btn" onClick={()=>copy(link, "Link")}>Copy</button>
-        </div>
+        {editing ? (
+          <div className="row" style={{gap:8,marginBottom:6,flexWrap:"wrap"}}>
+            <div className="copyfield dash-link" style={{flex:1,minWidth:200}}><span className="dash-link-base">{base}</span><input className="dash-link-input" autoFocus value={val} onChange={(e)=>setVal(e.target.value)} onKeyDown={(e)=>{ if (e.key === "Enter") save(); else if (e.key === "Escape"){ setEditing(false); setVal(form.slug); } }} /></div>
+            <button className="btn primary" disabled={saving} onClick={save}>{saving ? "Saving..." : "Save"}</button>
+            <button className="btn" disabled={saving} onClick={()=>{ setEditing(false); setVal(form.slug); }}>Cancel</button>
+          </div>
+        ) : (
+          <div className="row" style={{gap:8,marginBottom:6}}>
+            <input className="input mono" readOnly value={link} onFocus={(e)=>e.target.select()} style={{fontSize:13}} />
+            <button className="btn" onClick={()=>setEditing(true)}>Edit</button>
+            <button className="btn" onClick={()=>copy(link, "Link")}>Copy</button>
+          </div>
+        )}
+        <div className="hint" style={{marginBottom:18}}>The part after the slash is the form address. Change it to anything that is not already taken.</div>
         <div className="label">Embed code</div>
         <textarea className="textarea mono" readOnly value={embed} onFocus={(e)=>e.target.select()} style={{fontSize:12,height:88}} />
         <div className="row" style={{justifyContent:"flex-end",marginTop:8}}>

@@ -43,6 +43,17 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+Builder fixes for clipped popups, an editable form address in the Share dialog, and a privacy rule for the group availability poll.
+
+1. Date pickers (including the poll start and end date) now open as a floating layer that is never clipped by the panel edge. The whole calendar is always visible, and it flips to stay on screen near an edge.
+2. The question card "..." menu (Move up, Move down, Duplicate, Move to trash) also opens as a floating layer, so the last item is no longer cut off.
+3. The builder side panel is a little wider so its controls feel less cramped.
+4. The Share dialog now lets you edit the form address. Click Share, then Edit next to the public link, change the part after the slash, and Save. If that address is already taken the change is rejected.
+5. Group availability poll now requires a password to load a saved availability. A person can only reload an entry by entering the password that was set when it was saved, so one respondent cannot open another person's availability. Entries saved without a password cannot be reloaded by anyone, so set a password when saving if you want to edit later.
+
+This release changed the backend. Upload both index.html and functions/api/[[path]].js, then redeploy. No database migration is needed.
+
+## Previous release
 Custom fonts and uploaded logos now carry through to the printable PDF.
 
 1. If a form uses a custom Google font, the response report and the per response PDF now embed that exact font instead of falling back to a standard family. The font is fetched by name; if a particular font cannot be found it still falls back to the closest base family, but common Google fonts (for example Poppins, Montserrat, Lato) now match the form.

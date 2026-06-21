@@ -1245,7 +1245,7 @@ async function pollLoad(formId, request, env){
     const dd = safeParse(row.data, {}); const a = dd[qid];
     if (a && typeof a === "object" && String(a.name || "").trim().toLowerCase() === nm){
       const exPw = String(a.pw || "");
-      if (exPw && exPw !== pwHash) return json({ found: true, locked: true });
+      if (!exPw || exPw !== pwHash) return json({ found: true, locked: true });
       return json({ found: true, available: Array.isArray(a.available) ? a.available : [], maybe: Array.isArray(a.maybe) ? a.maybe : [] });
     }
   }

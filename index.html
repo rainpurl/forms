@@ -223,7 +223,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .b-rail button{width:38px;height:38px;border:0;background:none;border-radius:9px;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center}
 .b-rail button:hover{background:var(--hover);color:var(--ink)}
 .b-rail button.active{background:rgba(92,136,205,.16);color:var(--bo)}
-.b-panel{width:320px;flex:none;background:var(--card);border-right:0;box-shadow:1px 0 0 var(--line-strong);overflow:auto;padding:18px}
+.b-panel{width:352px;flex:none;background:var(--card);border-right:0;box-shadow:1px 0 0 var(--line-strong);overflow:auto;padding:18px}
 .panel-title{font-family:var(--display);font-size:18px;margin-bottom:14px}
 .panel-section{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;margin:16px 0 9px;padding-top:13px;border-top:1px solid var(--line)}
 .panel-section:first-of-type{border-top:0;padding-top:0;margin-top:4px}
@@ -278,7 +278,7 @@ html[data-theme="dark"] .form-scope .fbtn-ghost:hover{background:var(--hover)}
 .b-preview{flex:1;overflow:auto;background:var(--paper)}
 @media(max-width:860px){
   .b-rail{display:none}
-  .b-panel{width:250px;padding:14px}
+  .b-panel{width:288px;padding:14px}
   .addq-menu{grid-template-columns:1fr;width:240px}
 }
 
@@ -2480,6 +2480,12 @@ function PollRenderer({
       } catch (e) {}
       return;
     }
+    if (!String(val.password || "").trim()) {
+      try {
+        window.alert("Enter the password you set when you saved your availability. A password is required to load a saved entry.");
+      } catch (e) {}
+      return;
+    }
     api.pollLoad(formId, q.id, val.name, val.password || "").then(({
       ok,
       data
@@ -2487,7 +2493,7 @@ function PollRenderer({
       if (!ok || !data) return;
       if (data.locked) {
         try {
-          window.alert("That name is protected. Enter the matching password to load it.");
+          window.alert("That name and password do not match a saved entry. Loading an availability needs the password that was set when it was saved.");
         } catch (e) {}
         return;
       }
@@ -2582,7 +2588,7 @@ function PollRenderer({
   }), /*#__PURE__*/React.createElement("input", {
     className: "finput",
     type: "password",
-    placeholder: "Password (optional)",
+    placeholder: "Password (set one to edit later)",
     value: val.password || "",
     onChange: e => onChange({
       ...(value || {}),
@@ -11552,6 +11558,24 @@ function DateCalendar({
     }
   }, yy)))));
 }
+function calcPop(ref, w, h, align) {
+  const el = ref && ref.current;
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  const vw = window.innerWidth,
+    vh = window.innerHeight;
+  let left = align === "right" ? r.right - w : r.left;
+  let top = r.bottom + 6;
+  if (left + w > vw - 8) left = vw - 8 - w;
+  if (left < 8) left = 8;
+  if (top + h > vh - 8) top = Math.max(8, r.top - h - 6);
+  return {
+    position: "fixed",
+    top: top,
+    left: left,
+    right: "auto"
+  };
+}
 function DateField({
   value,
   onChange,
@@ -11565,19 +11589,27 @@ function DateField({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const [pos, setPos] = useState(null);
+  const place = () => setPos(calcPop(ref, 256, 472));
   useEffect(() => {
     if (!open) return;
+    place();
     const h = e => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     const k = e => {
       if (e.key === "Escape") setOpen(false);
     };
+    const rp = () => place();
     document.addEventListener("pointerdown", h);
     document.addEventListener("keydown", k);
+    window.addEventListener("scroll", rp, true);
+    window.addEventListener("resize", rp);
     return () => {
       document.removeEventListener("pointerdown", h);
       document.removeEventListener("keydown", k);
+      window.removeEventListener("scroll", rp, true);
+      window.removeEventListener("resize", rp);
     };
   }, [open]);
   const lbl = value ? zFmtDate(value) : placeholder || "Pick a date";
@@ -11592,14 +11624,27 @@ function DateField({
     title: title,
     "aria-haspopup": "dialog",
     "aria-expanded": open,
-    onClick: () => !disabled && setOpen(o => !o)
+    onClick: () => {
+      if (disabled) return;
+      if (open) {
+        setOpen(false);
+      } else {
+        setPos(calcPop(ref, 256, 472));
+        setOpen(true);
+      }
+    }
   }, /*#__PURE__*/React.createElement("span", {
     className: "zsel-label"
   }, lbl), /*#__PURE__*/React.createElement("span", {
     className: "zdate-ico",
     "aria-hidden": "true"
   }, /*#__PURE__*/React.createElement(ZCalIcon, null))), open && /*#__PURE__*/React.createElement("div", {
-    className: "cal-pop"
+    className: "cal-pop",
+    style: pos || {
+      position: "fixed",
+      left: -9999,
+      top: -9999
+    }
   }, /*#__PURE__*/React.createElement(DateCalendar, {
     value: value || "",
     min: min,
@@ -11686,19 +11731,27 @@ function DateTimeField({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const [pos, setPos] = useState(null);
+  const place = () => setPos(calcPop(ref, 256, 540));
   useEffect(() => {
     if (!open) return;
+    place();
     const h = e => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     const k = e => {
       if (e.key === "Escape") setOpen(false);
     };
+    const rp = () => place();
     document.addEventListener("pointerdown", h);
     document.addEventListener("keydown", k);
+    window.addEventListener("scroll", rp, true);
+    window.addEventListener("resize", rp);
     return () => {
       document.removeEventListener("pointerdown", h);
       document.removeEventListener("keydown", k);
+      window.removeEventListener("scroll", rp, true);
+      window.removeEventListener("resize", rp);
     };
   }, [open]);
   const datePart = value ? value.slice(0, 10) : "";
@@ -11728,14 +11781,26 @@ function DateTimeField({
     className: (className || "") + " zsel zdate" + (value ? "" : " zsel-ph"),
     "aria-haspopup": "dialog",
     "aria-expanded": open,
-    onClick: () => setOpen(o => !o)
+    onClick: () => {
+      if (open) {
+        setOpen(false);
+      } else {
+        setPos(calcPop(ref, 256, 540));
+        setOpen(true);
+      }
+    }
   }, /*#__PURE__*/React.createElement("span", {
     className: "zsel-label"
   }, lbl), /*#__PURE__*/React.createElement("span", {
     className: "zdate-ico",
     "aria-hidden": "true"
   }, /*#__PURE__*/React.createElement(ZCalIcon, null))), open && /*#__PURE__*/React.createElement("div", {
-    className: "cal-pop"
+    className: "cal-pop",
+    style: pos || {
+      position: "fixed",
+      left: -9999,
+      top: -9999
+    }
   }, /*#__PURE__*/React.createElement(DateCalendar, {
     value: datePart,
     onPick: ds => emit(ds, timePart)
@@ -12102,6 +12167,32 @@ function CanvasCard({
   cardRef
 }) {
   const [menu, setMenu] = useState(false);
+  const menuRef = useRef(null);
+  const [menuPos, setMenuPos] = useState(null);
+  const placeMenu = () => setMenuPos(calcPop(menuRef, 196, 210, "right"));
+  const openMenu = () => {
+    if (menu) {
+      setMenu(false);
+    } else {
+      setMenuPos(calcPop(menuRef, 196, 210, "right"));
+      setMenu(true);
+    }
+  };
+  useEffect(() => {
+    if (!menu) return;
+    const close = e => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenu(false);
+    };
+    const rp = () => placeMenu();
+    document.addEventListener("pointerdown", close);
+    window.addEventListener("scroll", rp, true);
+    window.addEventListener("resize", rp);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      window.removeEventListener("scroll", rp, true);
+      window.removeEventListener("resize", rp);
+    };
+  }, [menu]);
   const handle = {
     onPointerDown: e => dnd.beginDrag(e, index)
   };
@@ -12186,16 +12277,23 @@ function CanvasCard({
       className: "grow"
     }), /*#__PURE__*/React.createElement("div", {
       className: "qcc-menu",
+      ref: menuRef,
       onClick: e => e.stopPropagation()
     }, /*#__PURE__*/React.createElement("button", {
       className: "iconbtn",
       title: "More",
-      onClick: () => setMenu(m => !m)
+      onClick: openMenu
     }, "···"), menu && /*#__PURE__*/React.createElement("div", {
       className: "menu",
-      style: {
-        right: 0,
-        left: "auto"
+      style: menuPos ? {
+        position: "fixed",
+        top: menuPos.top,
+        left: menuPos.left,
+        right: "auto"
+      } : {
+        position: "fixed",
+        left: -9999,
+        top: -9999
       }
     }, /*#__PURE__*/React.createElement("button", {
       onClick: () => {
@@ -12237,16 +12335,23 @@ function CanvasCard({
     className: "grow"
   }), /*#__PURE__*/React.createElement("div", {
     className: "qcc-menu",
+    ref: menuRef,
     onClick: e => e.stopPropagation()
   }, /*#__PURE__*/React.createElement("button", {
     className: "iconbtn",
     title: "More",
-    onClick: () => setMenu(m => !m)
+    onClick: openMenu
   }, "···"), menu && /*#__PURE__*/React.createElement("div", {
     className: "menu",
-    style: {
-      right: 0,
-      left: "auto"
+    style: menuPos ? {
+      position: "fixed",
+      top: menuPos.top,
+      left: menuPos.left,
+      right: "auto"
+    } : {
+      position: "fixed",
+      left: -9999,
+      top: -9999
     }
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -15489,13 +15594,11 @@ function Builder({
       toast("Publish your form first to share it.");
       return;
     }
-    const slug = form.slug;
-    if (!slug) {
+    if (!form.slug) {
       toast("Reopen this form from your dashboard to share it.");
       return;
     }
-    const uname = form.username || user && user.username || "admin";
-    setShare(window.location.origin + "/" + (uname === "admin" ? "" : uname + "/") + slug);
+    setShare(true);
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "builder"
@@ -15576,8 +15679,9 @@ function Builder({
     disabled: saving,
     onClick: save
   }, saving ? "Saving..." : "Publish"))), share && /*#__PURE__*/React.createElement(ShareModal, {
-    link: share,
-    title: form.title,
+    id: id,
+    form: form,
+    setForm: setForm,
     onClose: () => setShare(null)
   }), preview ? /*#__PURE__*/React.createElement("div", {
     className: "b-preview"
@@ -16799,19 +16903,55 @@ function answerText(v) {
   return String(v);
 }
 function ShareModal({
-  link,
-  title,
+  id,
+  form,
+  setForm,
   onClose
 }) {
   const {
     toast
   } = useApp();
-  const embed = '<iframe src="' + link + '" width="100%" height="800" style="border:0;max-width:680px" title="' + String(title || "Form").replace(/"/g, "&quot;") + '"></iframe>';
+  const base = form.username === "admin" ? window.location.origin + "/" : window.location.origin + "/" + form.username + "/";
+  const link = base + form.slug;
+  const embed = '<iframe src="' + link + '" width="100%" height="800" style="border:0;max-width:680px" title="' + String(form.title || "Form").replace(/"/g, "&quot;") + '"></iframe>';
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(form.slug);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    setVal(form.slug);
+  }, [form.slug]);
   const copy = (text, what) => {
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
     } catch (e) {}
     toast(what + " copied");
+  };
+  const save = () => {
+    const next = (val || "").trim();
+    if (!next || next === form.slug) {
+      setEditing(false);
+      setVal(form.slug);
+      return;
+    }
+    setSaving(true);
+    api.updateForm(id, {
+      slug: next
+    }).then(({
+      ok,
+      data
+    }) => {
+      setSaving(false);
+      if (ok && data && data.slug) {
+        setForm(f => ({
+          ...f,
+          slug: data.slug
+        }));
+        setEditing(false);
+        toast("Link updated");
+      } else {
+        toast("Could not update the link. That address may be taken.");
+      }
+    });
   };
   return /*#__PURE__*/React.createElement(Modal, {
     title: "Share this form",
@@ -16820,11 +16960,48 @@ function ShareModal({
     className: "pad-lg"
   }, /*#__PURE__*/React.createElement("div", {
     className: "label"
-  }, "Public link"), /*#__PURE__*/React.createElement("div", {
+  }, "Public link"), editing ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 8,
-      marginBottom: 18
+      marginBottom: 6,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "copyfield dash-link",
+    style: {
+      flex: 1,
+      minWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dash-link-base"
+  }, base), /*#__PURE__*/React.createElement("input", {
+    className: "dash-link-input",
+    autoFocus: true,
+    value: val,
+    onChange: e => setVal(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter") save();else if (e.key === "Escape") {
+        setEditing(false);
+        setVal(form.slug);
+      }
+    }
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: saving,
+    onClick: save
+  }, saving ? "Saving..." : "Save"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    disabled: saving,
+    onClick: () => {
+      setEditing(false);
+      setVal(form.slug);
+    }
+  }, "Cancel")) : /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      marginBottom: 6
     }
   }, /*#__PURE__*/React.createElement("input", {
     className: "input mono",
@@ -16836,8 +17013,16 @@ function ShareModal({
     }
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn",
+    onClick: () => setEditing(true)
+  }, "Edit"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
     onClick: () => copy(link, "Link")
   }, "Copy")), /*#__PURE__*/React.createElement("div", {
+    className: "hint",
+    style: {
+      marginBottom: 18
+    }
+  }, "The part after the slash is the form address. Change it to anything that is not already taken."), /*#__PURE__*/React.createElement("div", {
     className: "label"
   }, "Embed code"), /*#__PURE__*/React.createElement("textarea", {
     className: "textarea mono",
