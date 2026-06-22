@@ -12288,21 +12288,43 @@ function CanvasCard({
   cardRef
 }) {
   const [menu, setMenu] = useState(false);
-  const menuRef = useRef(null);
+  const menuBtnRef = useRef(null);
+  const menuPanelRef = useRef(null);
   const [menuPos, setMenuPos] = useState(null);
-  const placeMenu = () => setMenuPos(calcPop(menuRef, 196, 210, "right"));
+  const placeMenu = () => {
+    const el = menuBtnRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const w = 196,
+      h = 220,
+      vw = window.innerWidth,
+      vh = window.innerHeight;
+    let left = r.right - w;
+    if (left + w > vw - 8) left = vw - 8 - w;
+    if (left < 8) left = 8;
+    let top = r.bottom + 6;
+    if (top + h > vh - 8) top = Math.max(8, r.top - h - 6);
+    setMenuPos({
+      top: top,
+      left: left
+    });
+  };
   const openMenu = () => {
     if (menu) {
       setMenu(false);
-    } else {
-      setMenuPos(calcPop(menuRef, 196, 210, "right"));
-      setMenu(true);
+      return;
     }
+    placeMenu();
+    setMenu(true);
   };
   useEffect(() => {
     if (!menu) return;
+    placeMenu();
     const close = e => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenu(false);
+      const t = e.target;
+      if (menuBtnRef.current && menuBtnRef.current.contains(t)) return;
+      if (menuPanelRef.current && menuPanelRef.current.contains(t)) return;
+      setMenu(false);
     };
     const rp = () => placeMenu();
     document.addEventListener("pointerdown", close);
@@ -12398,24 +12420,23 @@ function CanvasCard({
       className: "grow"
     }), /*#__PURE__*/React.createElement("div", {
       className: "qcc-menu",
-      ref: menuRef,
       onClick: e => e.stopPropagation()
     }, /*#__PURE__*/React.createElement("button", {
       className: "iconbtn",
       title: "More",
+      ref: menuBtnRef,
+      onPointerDown: e => e.stopPropagation(),
       onClick: openMenu
-    }, "···"), menu && /*#__PURE__*/React.createElement("div", {
+    }, "···"), menu && menuPos && ReactDOM.createPortal(/*#__PURE__*/React.createElement("div", {
       className: "menu",
-      style: menuPos ? {
+      ref: menuPanelRef,
+      style: {
         position: "fixed",
         top: menuPos.top,
         left: menuPos.left,
         right: "auto"
-      } : {
-        position: "fixed",
-        left: -9999,
-        top: -9999
-      }
+      },
+      onClick: e => e.stopPropagation()
     }, /*#__PURE__*/React.createElement("button", {
       onClick: () => {
         onDup();
@@ -12427,7 +12448,7 @@ function CanvasCard({
         onDel();
         setMenu(false);
       }
-    }, "Move to trash")))), /*#__PURE__*/React.createElement("div", {
+    }, "Move to trash")), document.body))), /*#__PURE__*/React.createElement("div", {
       className: "wq-body"
     }, /*#__PURE__*/React.createElement("div", {
       className: "hint"
@@ -12456,24 +12477,23 @@ function CanvasCard({
     className: "grow"
   }), /*#__PURE__*/React.createElement("div", {
     className: "qcc-menu",
-    ref: menuRef,
     onClick: e => e.stopPropagation()
   }, /*#__PURE__*/React.createElement("button", {
     className: "iconbtn",
     title: "More",
+    ref: menuBtnRef,
+    onPointerDown: e => e.stopPropagation(),
     onClick: openMenu
-  }, "···"), menu && /*#__PURE__*/React.createElement("div", {
+  }, "···"), menu && menuPos && ReactDOM.createPortal(/*#__PURE__*/React.createElement("div", {
     className: "menu",
-    style: menuPos ? {
+    ref: menuPanelRef,
+    style: {
       position: "fixed",
       top: menuPos.top,
       left: menuPos.left,
       right: "auto"
-    } : {
-      position: "fixed",
-      left: -9999,
-      top: -9999
-    }
+    },
+    onClick: e => e.stopPropagation()
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       onUp();
@@ -12495,7 +12515,7 @@ function CanvasCard({
       onDel();
       setMenu(false);
     }
-  }, "Move to trash")))), q.type === "text_graphic" || q.type === "payment" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+  }, "Move to trash")), document.body))), q.type === "text_graphic" || q.type === "payment" ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     className: "wq-title",
     placeholder: "Heading",
     value: q.heading || "",

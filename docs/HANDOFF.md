@@ -43,6 +43,13 @@ The app reads the request origin for every redirect, so OAuth callbacks, Stripe 
 Sign in works the same from the navbar and the homepage buttons (identical handler, both go to /api/auth/google/start). If the homepage button does not complete on the live site, it is the Google redirect URI for the new domain, so confirm the auth callback above is registered.
 
 ## Latest changes (also live)
+Fixed the question "..." menu in the builder.
+
+The three dots menu on each question card was not opening after the recent popup work. It now opens reliably: the menu is rendered as a floating layer on top of everything, anchored to the button, so no panel edge, scroll area, or card animation can hide it, and pressing the button no longer starts a drag by accident.
+
+This release is frontend only. Upload index.html and redeploy. The backend was not changed and no database migration is needed.
+
+## Previous release
 A mobile pass on the form-filling experience, and a new comparison section on the landing page.
 
 1. The respondent side of every question is now easier to use on a phone. Highlights: matrix questions stack into one tidy card per statement with full width tappable options instead of a wide grid, the Net Promoter Score scale lays out as an even grid of large buttons, sliders and star ratings have bigger touch targets, constant sum and number rows give the input the full width, rank order arrows are larger, image choice drops to fewer columns, and the group availability grid keeps its time labels in view while you scroll sideways. Text fields also use a larger font on small screens so phones do not zoom in when you tap them.

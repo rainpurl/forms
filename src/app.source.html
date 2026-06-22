@@ -4919,11 +4919,12 @@ function NpsPrev({ q }){
 
 function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, onDown, dnd, cardRef }){
   const [menu, setMenu] = useState(false);
-  const menuRef = useRef(null);
+  const menuBtnRef = useRef(null);
+  const menuPanelRef = useRef(null);
   const [menuPos, setMenuPos] = useState(null);
-  const placeMenu = ()=>setMenuPos(calcPop(menuRef, 196, 210, "right"));
-  const openMenu = ()=>{ if (menu){ setMenu(false); } else { setMenuPos(calcPop(menuRef, 196, 210, "right")); setMenu(true); } };
-  useEffect(()=>{ if(!menu) return; const close=(e)=>{ if(menuRef.current && !menuRef.current.contains(e.target)) setMenu(false); }; const rp=()=>placeMenu(); document.addEventListener("pointerdown",close); window.addEventListener("scroll",rp,true); window.addEventListener("resize",rp); return ()=>{ document.removeEventListener("pointerdown",close); window.removeEventListener("scroll",rp,true); window.removeEventListener("resize",rp); }; },[menu]);
+  const placeMenu = ()=>{ const el = menuBtnRef.current; if (!el) return; const r = el.getBoundingClientRect(); const w = 196, h = 220, vw = window.innerWidth, vh = window.innerHeight; let left = r.right - w; if (left + w > vw - 8) left = vw - 8 - w; if (left < 8) left = 8; let top = r.bottom + 6; if (top + h > vh - 8) top = Math.max(8, r.top - h - 6); setMenuPos({ top: top, left: left }); };
+  const openMenu = ()=>{ if (menu){ setMenu(false); return; } placeMenu(); setMenu(true); };
+  useEffect(()=>{ if (!menu) return; placeMenu(); const close=(e)=>{ const t = e.target; if (menuBtnRef.current && menuBtnRef.current.contains(t)) return; if (menuPanelRef.current && menuPanelRef.current.contains(t)) return; setMenu(false); }; const rp=()=>placeMenu(); document.addEventListener("pointerdown", close); window.addEventListener("scroll", rp, true); window.addEventListener("resize", rp); return ()=>{ document.removeEventListener("pointerdown", close); window.removeEventListener("scroll", rp, true); window.removeEventListener("resize", rp); }; }, [menu]);
   const handle = { onPointerDown: (e)=>dnd.beginDrag(e, index) };
   if (q.type === "block"){
     return (
@@ -4957,9 +4958,9 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
           <span className="qcc-num">Q{index + 1}</span>
           <span className="qcc-type mono">Hidden field</span>
           <span className="grow"></span>
-          <div className="qcc-menu" ref={menuRef} onClick={(e)=>e.stopPropagation()}>
-            <button className="iconbtn" title="More" onClick={openMenu}>···</button>
-            {menu && (<div className="menu" style={menuPos ? {position:"fixed",top:menuPos.top,left:menuPos.left,right:"auto"} : {position:"fixed",left:-9999,top:-9999}}><button onClick={()=>{ onDup(); setMenu(false); }}>Duplicate</button><button className="danger-text" onClick={()=>{ onDel(); setMenu(false); }}>Move to trash</button></div>)}
+          <div className="qcc-menu" onClick={(e)=>e.stopPropagation()}>
+            <button className="iconbtn" title="More" ref={menuBtnRef} onPointerDown={(e)=>e.stopPropagation()} onClick={openMenu}>···</button>
+            {menu && menuPos && ReactDOM.createPortal(<div className="menu" ref={menuPanelRef} style={{position:"fixed",top:menuPos.top,left:menuPos.left,right:"auto"}} onClick={(e)=>e.stopPropagation()}><button onClick={()=>{ onDup(); setMenu(false); }}>Duplicate</button><button className="danger-text" onClick={()=>{ onDel(); setMenu(false); }}>Move to trash</button></div>, document.body)}
           </div>
         </div>
         <div className="wq-body"><div className="hint">Captures <b>{q.key || "field"}</b> {q.source === "fixed" ? "as a fixed value" : "from the URL"}, hidden from respondents. Edit it in the left panel.</div></div>
@@ -4974,16 +4975,15 @@ function CanvasCard({ q, index, selected, onSelect, update, onDup, onDel, onUp, 
         <span className="qcc-type mono">{QTYPES[q.type].label}</span>
         {q.logic && q.logic.q && <span className="qcc-type mono" style={{color:"var(--bo)"}}>conditional</span>}
         <span className="grow"></span>
-        <div className="qcc-menu" ref={menuRef} onClick={(e)=>e.stopPropagation()}>
-          <button className="iconbtn" title="More" onClick={openMenu}>···</button>
-          {menu && (
-            <div className="menu" style={menuPos ? {position:"fixed",top:menuPos.top,left:menuPos.left,right:"auto"} : {position:"fixed",left:-9999,top:-9999}}>
+        <div className="qcc-menu" onClick={(e)=>e.stopPropagation()}>
+          <button className="iconbtn" title="More" ref={menuBtnRef} onPointerDown={(e)=>e.stopPropagation()} onClick={openMenu}>···</button>
+          {menu && menuPos && ReactDOM.createPortal(
+            <div className="menu" ref={menuPanelRef} style={{position:"fixed",top:menuPos.top,left:menuPos.left,right:"auto"}} onClick={(e)=>e.stopPropagation()}>
               <button onClick={()=>{ onUp(); setMenu(false); }}>Move up</button>
               <button onClick={()=>{ onDown(); setMenu(false); }}>Move down</button>
               <button onClick={()=>{ onDup(); setMenu(false); }}>Duplicate</button>
               <button className="danger-text" onClick={()=>{ onDel(); setMenu(false); }}>Move to trash</button>
-            </div>
-          )}
+            </div>, document.body)}
         </div>
       </div>
       {(q.type === "text_graphic" || q.type === "payment") ? (
